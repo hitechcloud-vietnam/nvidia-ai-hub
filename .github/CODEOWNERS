@@ -1,0 +1,27 @@
+# Default ownership
+* @hitechcloud-vietnam
+
+# Backend and services
+/daemon/ @hitechcloud-vietnam
+/requirements.txt @hitechcloud-vietnam
+
+# Frontend
+/frontend/ @hitechcloud-vietnam
+
+# Registry recipes and runtime assets
+/registry/ @hitechcloud-vietnam
+/scripts/ @hitechcloud-vietnam
+/install.sh @hitechcloud-vietnam
+/install.ps1 @hitechcloud-vietnam
+/run.sh @hitechcloud-vietnam
+/run.ps1 @hitechcloud-vietnam
+/check.sh @hitechcloud-vietnam
+/check.ps1 @hitechcloud-vietnam
+/uninstall.sh @hitechcloud-vietnam
+/uninstall.ps1 @hitechcloud-vietnam
+
+# Governance and repository policy
+/.github/ @hitechcloud-vietnam
+/*.md @hitechcloud-vietnam
+/NOTICE @hitechcloud-vietnam
+/LICENSE @hitechcloud-vietnam

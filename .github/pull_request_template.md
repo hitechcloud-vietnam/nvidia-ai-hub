@@ -37,6 +37,15 @@ List the checks performed:
 
 Provide commands, screenshots, or notes as needed.
 
+## Coverage and Verification Notes
+
+- Describe what was validated for the changed area and what was intentionally not validated.
+- If no automated coverage exists, summarize the manual regression checks that were performed.
+- For frontend changes, mention build, lint, and UI verification status.
+- For backend changes, mention startup, API, recipe loading, and platform-specific checks as applicable.
+- For installer, script, or registry changes, mention the operating system, shell, and recipe/runtime smoke tests used.
+- If any residual reviewer risk remains, call it out explicitly.
+
 ## Security, Licensing, and Provenance
 
 Confirm all applicable items:
@@ -64,3 +73,10 @@ Add screenshots, terminal output, or API examples when helpful.
 ## Reviewer Notes
 
 Call out anything that needs extra reviewer attention.
+
+## PR Instructions
+
+- Keep the pull request focused and scoped to a single concern when possible.
+- Summarize the user-facing, operational, and documentation impact clearly.
+- Link the related issue, request, or work item when available.
+- Highlight breaking changes, security implications, licensing implications, and follow-up work explicitly.
