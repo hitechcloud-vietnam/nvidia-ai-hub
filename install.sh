@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="https://github.com/WaxacaBytes/spark-ai-hub.git"
+REPO="https://github.com/hitechcloud-vietnam/spark-ai-hub.git"
 INSTALL_DIR="$HOME/spark-ai-hub"
 PORT=9000
 

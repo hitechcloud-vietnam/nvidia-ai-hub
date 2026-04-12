@@ -57,6 +57,8 @@ From repository root:
 
 ```bash
 .venv/bin/python -m uvicorn daemon.main:app --reload --host 127.0.0.1 --port 9000
+
+uvicorn daemon.main:app --host 0.0.0.0 --port 9000
 ```
 
 On PowerShell:
