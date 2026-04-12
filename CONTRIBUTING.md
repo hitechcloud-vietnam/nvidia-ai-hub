@@ -44,10 +44,10 @@ If a contribution introduces external code, assets, models, or copied configurat
 daemon/            FastAPI backend
 frontend/          React + Vite frontend
 registry/recipes/  App recipe registry
-scripts/           Shared shell and PowerShell helpers
-install.*          Installation entrypoints
-run.*              Local run entrypoints
-check.*            Environment validation entrypoints
+scripts/           Shared shell helpers
+install.sh         Installation entrypoint
+run.sh             Local run entrypoint
+check.sh           Environment validation entrypoint
 ```
 
 ## Local Development
@@ -70,26 +70,6 @@ Start the application:
 
 ```bash
 ./run.sh
-```
-
-## Windows PowerShell workflow
-
-Create local configuration:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Run environment checks:
-
-```powershell
-.\check.ps1
-```
-
-Start the application:
-
-```powershell
-.\run.ps1
 ```
 
 ## Frontend Development
@@ -124,24 +104,10 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-On Windows:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
 Run the API directly:
 
 ```bash
 .venv/bin/python -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
-```
-
-On Windows:
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
 ```
 
 ## Configuration
@@ -176,9 +142,8 @@ Do not commit secrets or machine-specific credentials.
 - Preserve the existing Vite + ESLint setup.
 - Run `npm run build` and `npm run lint` before submitting frontend changes.
 
-### PowerShell and Shell Scripts
+### Shell Scripts
 
-- Keep Windows and shell workflows aligned where practical.
 - Preserve existing parameter names and user-facing behavior.
 - Avoid breaking unattended installer flows.
 
@@ -205,12 +170,6 @@ Example validation approach:
 
 ```bash
 .venv/bin/python -c "from daemon.services.registry_service import load_recipes; print(len(load_recipes()))"
-```
-
-On Windows:
-
-```powershell
-.\.venv\Scripts\python.exe -c "from daemon.services.registry_service import load_recipes; print(len(load_recipes()))"
 ```
 
 ## Documentation Contributions

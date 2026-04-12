@@ -37,7 +37,7 @@ Note any possible impact on:
 - installation flow
 - existing recipes
 - API compatibility
-- Windows or shell scripts
+- shell scripts
 - Docker runtime behavior
 - licensing or third-party dependencies
 

@@ -66,44 +66,6 @@ Install on a custom host and port:
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --host 127.0.0.1 --port 9010
 ```
 
-### Windows install
-
-From a local clone in PowerShell:
-
-```powershell
-.\install.ps1
-```
-
-Install without starting the server:
-
-```powershell
-.\install.ps1 -NoStart
-```
-
-Install on a custom port:
-
-```powershell
-.\install.ps1 -Port 9010
-```
-
-Install on a custom host and port:
-
-```powershell
-.\install.ps1 -ListenHost 127.0.0.1 -Port 9010
-```
-
-Check the environment on Windows:
-
-```powershell
-.\check.ps1
-```
-
-Run the app on Windows:
-
-```powershell
-.\run.ps1
-```
-
 After installation, open:
 
 - `http://localhost:9000`
@@ -130,9 +92,9 @@ It will:
 
 Because the backend serves the built frontend from `frontend/dist`, the UI is available immediately after install.
 
-If `--no-start` or `-NoStart` is used, the installer completes all setup steps but skips launching the API server.
+If `--no-start` is used, the installer completes all setup steps but skips launching the API server.
 
-If `--port`, `--host`, `-Port`, or `-ListenHost` is used during install, the chosen values are written into the shared root `.env` file.
+If `--port` or `--host` is used during install, the chosen values are written into the shared root `.env` file.
 
 ## Features
 
@@ -198,19 +160,7 @@ Before starting, you can validate the machine state with:
 ./check.sh
 ```
 
-On Windows PowerShell:
-
-```powershell
-.\check.ps1
-```
-
 `run.sh` now checks whether `frontend/dist` is missing or outdated. If needed, it rebuilds the UI automatically before starting the backend.
-
-On Windows PowerShell, use:
-
-```powershell
-.\run.ps1
-```
 
 You can also start on a custom port for a single run:
 
@@ -218,18 +168,10 @@ You can also start on a custom port for a single run:
 ./run.sh --port 9010
 ```
 
-```powershell
-.\run.ps1 -Port 9010
-```
-
 You can also override host and port for a single run:
 
 ```bash
 ./run.sh --host 127.0.0.1 --port 9010
-```
-
-```powershell
-.\run.ps1 -ListenHost 127.0.0.1 -Port 9010
 ```
 
 If the frontend must be rebuilt, ensure the machine has:
@@ -242,29 +184,6 @@ If the frontend must be rebuilt, ensure the machine has:
 - UI: `http://localhost:9000`
 - API root: `http://localhost:9000`
 
-## Windows notes
-
-`install.ps1` is intended for Windows 11 or Windows Server environments with:
-
-- `winget` available
-- Docker Desktop support
-- PowerShell 7 or Windows PowerShell 5.1+
-
-The script will attempt to install:
-
-- Git
-- Python 3
-- Node.js LTS
-- Docker Desktop
-
-It then creates `.venv`, installs backend/frontend dependencies, builds `frontend/dist`, and optionally starts the API server.
-
-If Docker Desktop is installed but not running yet, the installer warns and continues. The UI can still start, but recipe lifecycle operations will need Docker to be running.
-
-`check.ps1` and `run.ps1` provide Windows equivalents for environment validation and local startup.
-
-`uninstall.ps1` provides a Windows-native cleanup flow.
-
 ## Shared configuration
 
 The repository now includes a shared root `.env` local file format, with `.env.example` checked in as the template, used by:
@@ -273,9 +192,6 @@ The repository now includes a shared root `.env` local file format, with `.env.e
 - `install.sh`
 - `run.sh`
 - `check.sh`
-- `install.ps1`
-- `run.ps1`
-- `check.ps1`
 
 Default values include:
 
@@ -292,13 +208,7 @@ To create a local configuration manually:
 cp .env.example .env
 ```
 
-or in PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-`install.sh` and `install.ps1` create `.env` from `.env.example` automatically when needed.
+`install.sh` creates `.env` from `.env.example` automatically when needed.
 
 Update `.env` if you want to keep a custom default host, port, or path layout across runs.
 
@@ -332,11 +242,7 @@ This means the checked-in or generated UI bundle is missing or stale, and the cu
 
 ### `check.sh` reports Docker daemon is not reachable
 
-Start Docker Desktop or the Docker service, then re-run `./check.sh`. Spark AI Hub can start without Docker only in a limited UI/API state.
-
-### `install.ps1` cannot install dependencies automatically
-
-This usually means `winget` is unavailable or blocked by policy. Install Git, Python 3, Node.js 22+, and Docker Desktop manually, then run `install.ps1` again.
+Start the Docker service, then re-run `./check.sh`. Spark AI Hub can start without Docker only in a limited UI/API state.
 
 ## Uninstall
 
@@ -344,20 +250,10 @@ This usually means `winget` is unavailable or blocked by policy. Install Git, Py
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/uninstall.sh | bash
 ```
 
-On Windows PowerShell:
-
-```powershell
-.\uninstall.ps1
-```
-
 Preserve local runtime data during uninstall:
 
 ```bash
 ./uninstall.sh --keep-data
-```
-
-```powershell
-.\uninstall.ps1 -KeepData
 ```
 
 The uninstaller now removes, in order:

@@ -70,22 +70,10 @@ Consider running:
 ./check.sh
 ```
 
-On Windows:
-
-```powershell
-.\check.ps1
-```
-
 For backend startup validation:
 
 ```bash
 .venv/bin/python -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
-```
-
-On Windows:
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
 ```
 
 For frontend validation:
