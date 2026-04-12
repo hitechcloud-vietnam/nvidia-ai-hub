@@ -2,7 +2,7 @@
 
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
-![Spark AI Hub](Spark AI Hub.png)
+![Spark AI Hub](SparkDeck.png)
 
 ## Overview
 
