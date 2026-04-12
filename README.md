@@ -89,7 +89,7 @@ Install on a custom port:
 Install on a custom host and port:
 
 ```powershell
-.\install.ps1 -Host 127.0.0.1 -Port 9010
+.\install.ps1 -ListenHost 127.0.0.1 -Port 9010
 ```
 
 Check the environment on Windows:
@@ -132,7 +132,7 @@ Because the backend serves the built frontend from `frontend/dist`, the UI is av
 
 If `--no-start` or `-NoStart` is used, the installer completes all setup steps but skips launching the API server.
 
-If `--port`, `--host`, `-Port`, or `-Host` is used during install, the chosen values are written into the shared root `.env` file.
+If `--port`, `--host`, `-Port`, or `-ListenHost` is used during install, the chosen values are written into the shared root `.env` file.
 
 ## Features
 
@@ -229,7 +229,7 @@ You can also override host and port for a single run:
 ```
 
 ```powershell
-.\run.ps1 -Host 127.0.0.1 -Port 9010
+.\run.ps1 -ListenHost 127.0.0.1 -Port 9010
 ```
 
 If the frontend must be rebuilt, ensure the machine has:

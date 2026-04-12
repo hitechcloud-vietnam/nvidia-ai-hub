@@ -1,7 +1,6 @@
 [CmdletBinding()]
 param(
     [int]$Port,
-    [Alias('Host')]
     [string]$ListenHost
 )
 
@@ -20,11 +19,11 @@ if ($PSBoundParameters.ContainsKey('Port')) {
 }
 
 if ($PSBoundParameters.ContainsKey('ListenHost')) {
-    if (-not (Test-SparkValidHost -Host $ListenHost)) {
+    if (-not (Test-SparkValidHost -ListenHost $ListenHost)) {
         throw 'Host must not be empty.'
     }
 
-    Set-SparkHost -Host $ListenHost
+    Set-SparkHost -ListenHost $ListenHost
 }
 
 function Write-Section {

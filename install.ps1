@@ -2,7 +2,6 @@
 param(
     [switch]$NoStart,
     [int]$Port,
-    [Alias('Host')]
     [string]$ListenHost
 )
 
@@ -187,7 +186,7 @@ if ($PSBoundParameters.ContainsKey('Port')) {
 }
 
 if ($PSBoundParameters.ContainsKey('ListenHost')) {
-    if (-not (Test-SparkValidHost -Host $ListenHost)) {
+    if (-not (Test-SparkValidHost -ListenHost $ListenHost)) {
         throw 'Host must not be empty.'
     }
 
@@ -230,7 +229,7 @@ Write-Section 'Backend API and frontend UI are ready.'
 if ($NoStart) {
     Write-Section 'NoStart was specified, so the server was not started.'
     Write-Section 'Run .\check.ps1 to verify the environment before launch.'
-    Write-Section "Start later with: .\run.ps1 -Port $($script:SparkPort) -Host $($script:SparkHost)"
+    Write-Section "Start later with: .\run.ps1 -Port $($script:SparkPort) -ListenHost $($script:SparkHost)"
     Write-Host ''
     exit 0
 }

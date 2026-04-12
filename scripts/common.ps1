@@ -48,8 +48,8 @@ function Test-SparkValidPort {
 }
 
 function Test-SparkValidHost {
-    param([string]$Host)
-    return -not [string]::IsNullOrWhiteSpace($Host)
+    param([string]$ListenHost)
+    return -not [string]::IsNullOrWhiteSpace($ListenHost)
 }
 
 function Set-SparkPort {
@@ -64,14 +64,14 @@ function Set-SparkPort {
 }
 
 function Set-SparkHost {
-    param([string]$Host)
+    param([string]$ListenHost)
 
-    if (-not (Test-SparkValidHost -Host $Host)) {
+    if (-not (Test-SparkValidHost -ListenHost $ListenHost)) {
         throw 'Host must not be empty.'
     }
 
-    Set-Item -Path 'Env:SPARK_AI_HUB_HOST' -Value $Host
-    $script:SparkHost = $Host
+    Set-Item -Path 'Env:SPARK_AI_HUB_HOST' -Value $ListenHost
+    $script:SparkHost = $ListenHost
 }
 
 function Set-SparkEnvValue {
