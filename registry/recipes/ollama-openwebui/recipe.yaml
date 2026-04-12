@@ -1,0 +1,32 @@
+name: "Open WebUI + Ollama"
+slug: ollama-openwebui
+version: "1.0.0"
+description: "ChatGPT-like interface for local LLMs with model management, conversation history, and RAG plugins."
+author: "Ollama / Open WebUI"
+source: "official"
+website: "https://openwebui.com/"
+upstream: "https://github.com/open-webui/open-webui"
+category: llm
+tags:
+  - chat
+  - llm
+  - ollama
+  - rag
+icon: "\U0001F4AC"
+logo: "/logos/openwebui.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 8
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8080
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: true
+status: official
+depends_on:
+  - ollama-runtime

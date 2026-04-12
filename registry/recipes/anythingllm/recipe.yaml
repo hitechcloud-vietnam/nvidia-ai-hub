@@ -1,0 +1,30 @@
+name: "AnythingLLM"
+slug: anythingllm
+version: "1.0.0"
+description: "All-in-one AI desktop app with RAG, agents, and multi-LLM support. Connect to Ollama, OpenAI, or any local model. Built-in document chat."
+author: "Mintplex Labs"
+source: "official"
+website: "https://anythingllm.com"
+upstream: "https://github.com/Mintplex-Labs/anything-llm"
+category: llm
+tags:
+  - rag
+  - agents
+  - chat
+  - documents
+icon: "\U0001F4DA"
+logo: "/logos/anythingllm.png"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 5
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3001
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 2
+  gpu: false
+status: official

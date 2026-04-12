@@ -1,0 +1,12 @@
+services:
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: spark-ai-hub-flowise
+    ports:
+      - "3002:3000"
+    volumes:
+      - flowise-data:/root/.flowise
+    restart: unless-stopped
+
+volumes:
+  flowise-data:

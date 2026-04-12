@@ -1,0 +1,34 @@
+name: "Onyx"
+slug: onyx
+version: "1.0.0"
+description: "Open-source enterprise search and AI assistant that connects chat to your docs, apps, and people so teams can search company knowledge, ask questions across shared content, and work from one web app."
+author: "Onyx"
+source: "official"
+website: "https://onyx.app/"
+upstream: "https://github.com/onyx-dot-app/onyx"
+category: llm
+tags:
+  - enterprise-search
+  - rag
+  - chat
+  - knowledge-base
+  - assistants
+icon: "🔎"
+logo: "/logos/onyx.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3003
+  path: "/"
+  health_path: "/api/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: official
+depends_on:
+  - ollama-runtime

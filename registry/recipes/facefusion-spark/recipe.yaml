@@ -1,0 +1,31 @@
+name: "FaceFusion"
+slug: facefusion-spark
+version: "1.0.0"
+description: "Perform face swaps, lip-sync, and face enhancement across images and videos with FaceFusion, an industry-leading face manipulation platform built for practical restoration and editing workflows."
+author: "FaceFusion"
+source: "spark-ai-hub"
+website: "https://github.com/facefusion/facefusion"
+upstream: "https://github.com/WaxacaBytes/facefusion-spark"
+fork: "https://github.com/facefusion/facefusion"
+category: image-gen
+tags:
+  - face-swap
+  - face-enhancement
+  - onnxruntime
+  - video
+icon: "\U0001F3AD"
+logo: "/logos/facefusion.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 32
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7860
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: official

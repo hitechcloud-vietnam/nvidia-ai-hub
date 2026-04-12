@@ -1,0 +1,15 @@
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: spark-ai-hub-anythingllm
+    ports:
+      - "3001:3001"
+    volumes:
+      - anythingllm-data:/app/server/storage
+    environment:
+      - STORAGE_DIR=/app/server/storage
+      - OLLAMA_BASE_PATH=http://172.17.0.1:11435
+    restart: unless-stopped
+
+volumes:
+  anythingllm-data:

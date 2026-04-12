@@ -1,0 +1,32 @@
+name: "Hunyuan3D 2.1"
+slug: hunyuan3d-spark
+version: "1.0.0"
+description: "Turn images into high-fidelity 3D assets with production-ready PBR materials using Hunyuan3D 2.1, then export textured meshes as GLB models for downstream 3D workflows."
+author: "Tencent"
+source: "spark-ai-hub"
+website: "https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1"
+upstream: "https://github.com/WaxacaBytes/hunyuan3d-spark"
+fork: "https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1"
+category: 3d-gen
+tags:
+  - 3d
+  - mesh
+  - image-to-3d
+  - hunyuan
+  - texture
+icon: "\U0001F48E"
+logo: "/logos/hunyuan3d.png"
+requirements:
+  min_memory_gb: 29
+  recommended_memory_gb: 64
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7861
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: official

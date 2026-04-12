@@ -1,0 +1,38 @@
+services:
+  vllm:
+    image: nvcr.io/nvidia/vllm:26.03-py3
+    container_name: spark-ai-hub-vllm-nemotron3-super-120b-nvfp4
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - vllm
+      - serve
+      - nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4
+      - --port
+      - "8000"
+      - --max-model-len
+      - "32768"
+      - --enable-prefix-caching
+      - --trust-remote-code
+      - --kv-cache-dtype
+      - fp8_e4m3
+      - --gpu-memory-utilization
+      - "0.88"
+      - --enforce-eager
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:

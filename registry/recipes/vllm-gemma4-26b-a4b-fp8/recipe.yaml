@@ -1,0 +1,44 @@
+name: "Gemma 4 26B-A4B FP8"
+slug: vllm-gemma4-26b-a4b-fp8
+version: "1.0.0"
+description: "Google Gemma 4 26B-A4B Instruct served with vLLM FP8 quantization. This recipe follows protoLabsAI's published FP8 usage path for DGX Spark instead of loading the community checkpoint directly."
+author: "Google"
+source: "our-vllm"
+website: "https://ai.google.dev/gemma/docs/core"
+upstream: "https://huggingface.co/google/gemma-4-26B-A4B-it"
+category: llm
+tags:
+  - llm
+  - multimodal
+  - vision
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - gemma
+  - google
+  - moe
+  - fp8
+logo: "/logos/google.png"
+requirements:
+  min_memory_gb: 30
+  recommended_memory_gb: 42
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: community-verified
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-03"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "google/gemma-4-26B-A4B-it"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"google/gemma-4-26B-A4B-it\", \"messages\": [{\"role\": \"user\", \"content\": \"Solve 17 x 23 step by step.\"}]}'"

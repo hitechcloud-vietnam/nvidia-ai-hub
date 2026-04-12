@@ -1,0 +1,12 @@
+services:
+  langflow:
+    image: langflowai/langflow:latest
+    container_name: spark-ai-hub-langflow
+    ports:
+      - "7860:7860"
+    volumes:
+      - langflow-data:/app/langflow
+    restart: unless-stopped
+
+volumes:
+  langflow-data:

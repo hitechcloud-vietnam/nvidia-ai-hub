@@ -1,0 +1,42 @@
+services:
+  vllm:
+    image: nvcr.io/nvidia/vllm:26.03-py3
+    container_name: spark-ai-hub-vllm-nemotron-cascade2-30b-a3b
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - vllm
+      - serve
+      - nvidia/Nemotron-Cascade-2-30B-A3B
+      - --port
+      - "8000"
+      - --max-model-len
+      - "131072"
+      - --reasoning-parser
+      - deepseek_r1
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - hermes
+      - --enable-prefix-caching
+      - --trust-remote-code
+      - --kv-cache-dtype
+      - fp8_e4m3
+      - --gpu-memory-utilization
+      - "0.70"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:

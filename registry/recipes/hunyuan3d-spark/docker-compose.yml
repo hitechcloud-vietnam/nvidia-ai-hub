@@ -1,0 +1,24 @@
+services:
+  hunyuan3d:
+    image: abelpc/hunyuan3d-spark:latest
+    container_name: spark-ai-hub-hunyuan3d
+    ports:
+      - "7861:7860"
+    volumes:
+      - hunyuan3d-cache:/root/.cache/huggingface
+      - hunyuan3d-output:/workspace/Hunyuan3D-2.1/output
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  hunyuan3d-cache:
+  hunyuan3d-output:

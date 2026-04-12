@@ -1,0 +1,19 @@
+services:
+  localai:
+    image: localai/localai:latest-nvidia-l4t-arm64-cuda-13
+    container_name: spark-ai-hub-localai
+    ports:
+      - "8081:8080"
+    volumes:
+      - localai-models:/build/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  localai-models:

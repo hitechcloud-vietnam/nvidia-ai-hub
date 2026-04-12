@@ -1,0 +1,23 @@
+services:
+  voicebox:
+    image: ghcr.io/waxacabytes/voicebox-spark-ai-hub:latest
+    container_name: spark-ai-hub-voicebox
+    ports:
+      - "7867:17493"
+    environment:
+      VOICEBOX_MODELS_DIR: "/models"
+    volumes:
+      - voicebox-data:/data
+      - voicebox-models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  voicebox-data:
+  voicebox-models:

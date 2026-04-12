@@ -1,0 +1,41 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.17.1-aarch64-cu130
+    container_name: spark-ai-hub-vllm-seed-oss-36b
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - --model
+      - ByteDance-Seed/Seed-OSS-36B-Instruct
+      - --port
+      - "8000"
+      - --max-model-len
+      - "200000"
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - seed_oss
+      - --reasoning-parser
+      - seed_oss
+      - --enable-prefix-caching
+      - --trust-remote-code
+      - --kv-cache-dtype
+      - fp8_e4m3
+      - --kv-cache-memory-bytes
+      - "25G"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:

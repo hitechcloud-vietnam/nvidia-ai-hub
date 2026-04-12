@@ -1,0 +1,36 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: spark-ai-hub-ollama-runtime
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama-runtime-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  ollama-runtime-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-ollama-runtime-ui
+    ports:
+      - "3014:3014"
+    environment:
+      PORT: "3014"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      STARTER_MODEL: "qwen3.5:4b"
+      STARTER_DISPLAY_NAME: "Qwen 3.5 4B"
+      SHARED_ENDPOINT: "http://host.docker.internal:11435"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama-runtime-data:

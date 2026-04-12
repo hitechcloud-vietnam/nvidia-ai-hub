@@ -1,0 +1,38 @@
+name: "Qwen Image Multiple Angles 3D Camera"
+slug: qwen-image-perspective
+version: "1.0.0"
+description: "Reframe an image from new viewpoints with 3D camera controls for azimuth, elevation, and distance, powered by a multi-angle LoRA that supports 96 precise camera poses."
+author: "multimodalart"
+source: "spark-ai-hub"
+website: "https://huggingface.co/fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA"
+upstream: "https://github.com/WaxacaBytes/qwen-image-perspective-spark-ai-hub"
+fork: "https://huggingface.co/spaces/multimodalart/qwen-image-multiple-angles-3d-camera"
+category: image-gen
+categories:
+  - image-gen
+  - multi-modal
+tags:
+  - qwen
+  - image-edit
+  - 3d-camera
+  - multiple-angles
+  - camera-angle
+  - perspective
+  - lora
+  - gradio
+icon: "\U0001F3A5"
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 48
+  recommended_memory_gb: 80
+  disk_gb: 90
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7863
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental

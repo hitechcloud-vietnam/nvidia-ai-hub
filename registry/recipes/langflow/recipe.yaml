@@ -1,0 +1,30 @@
+name: "Langflow"
+slug: langflow
+version: "1.0.0"
+description: "Visual IDE for building multi-agent and RAG applications. Python-powered flow editor with 100+ integrations and one-click deployment."
+author: "Langflow AI"
+source: "official"
+website: "https://langflow.org"
+upstream: "https://github.com/langflow-ai/langflow"
+category: multi-modal
+tags:
+  - workflow
+  - agents
+  - rag
+  - visual-ide
+icon: "\U0001F300"
+logo: "/logos/langflow.png"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 8
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7860
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: false
+status: official

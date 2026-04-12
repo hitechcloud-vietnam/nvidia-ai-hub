@@ -1,0 +1,27 @@
+services:
+  firered-image-edit:
+    image: ghcr.io/waxacabytes/firered-image-edit-spark-ai-hub:latest
+    container_name: spark-ai-hub-firered-image-edit
+    ports:
+      - "7865:7860"
+    environment:
+      PORT: "7860"
+      OUTPUT_DIR: "/data/output"
+      HF_HOME: "/root/.cache/huggingface"
+      PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+    volumes:
+      - firered-image-edit-cache:/root/.cache/huggingface
+      - firered-image-edit-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  firered-image-edit-cache:
+  firered-image-edit-output:

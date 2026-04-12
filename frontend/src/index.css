@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/* ─── Dark Theme (default) ─── */
+:root {
+  --bg: #0D0D1A;
+  --surface-low: #111122;
+  --surface: #161625;
+  --surface-high: #1E1E30;
+  --surface-highest: #26263A;
+  --surface-bright: #2E2E44;
+  --text: #F0ECF6;
+  --text-muted: #A8A6B2;
+  --text-dim: #6E6C7A;
+  --primary: #76E22A;
+  --primary-container: #5BBD10;
+  --primary-dim: #66CC1A;
+  --primary-on: #0A2000;
+  --secondary: #6C5CE7;
+  --secondary-container: #5A4BD6;
+  --tertiary: #00CEC9;
+  --outline: #3A3A50;
+  --outline-dim: rgba(255, 255, 255, 0.06);
+  --error: #FF6B6B;
+  --error-surface: rgba(255, 107, 107, 0.1);
+  --warning: #FBBF24;
+  --success: #34D399;
+  --glass-bg: rgba(22, 22, 37, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --card-shadow: 0 0 0 transparent;
+  --card-hover-shadow: 0 8px 32px rgba(118, 226, 42, 0.08);
+  --hero-gradient: linear-gradient(135deg, #6C5CE7 0%, #0D0D1A 50%, #76E22A 100%);
+  --hero-overlay-left: linear-gradient(to right, rgba(13,13,26,0.95) 0%, rgba(13,13,26,0.6) 40%, transparent 70%);
+  --hero-overlay-bottom: linear-gradient(to top, rgba(13,13,26,0.4) 0%, transparent 30%);
+  --sidebar-bg: #0F0F1E;
+  --sidebar-active: rgba(118, 226, 42, 0.12);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --glow-running: 0 0 12px rgba(118, 226, 42, 0.25);
+  --glow-starting: 0 0 12px rgba(251, 191, 36, 0.25);
+}
+
+/* ─── Light Theme ─── */
+[data-theme="light"] {
+  --bg: #F5F6FA;
+  --surface-low: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-high: #F0F1F5;
+  --surface-highest: #E4E5EB;
+  --surface-bright: #FFFFFF;
+  --text: #1A1A2E;
+  --text-muted: #5A5A6E;
+  --text-dim: #8A8A9A;
+  --primary: #4CAF00;
+  --primary-container: #5BBD10;
+  --primary-dim: #3D9200;
+  --primary-on: #FFFFFF;
+  --secondary: #6C5CE7;
+  --secondary-container: #8B7CF0;
+  --tertiary: #00A8A3;
+  --outline: #D8D8E0;
+  --outline-dim: rgba(0, 0, 0, 0.06);
+  --error: #DC3545;
+  --error-surface: rgba(220, 53, 69, 0.08);
+  --warning: #D97706;
+  --success: #059669;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --card-hover-shadow: 0 12px 40px rgba(76, 175, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --hero-gradient: linear-gradient(135deg, #6C5CE7 0%, #FFFFFF 50%, #4CAF00 100%);
+  --hero-overlay-left: linear-gradient(to right, rgba(245,246,250,0.95) 0%, rgba(245,246,250,0.6) 40%, transparent 70%);
+  --hero-overlay-bottom: linear-gradient(to top, rgba(245,246,250,0.3) 0%, transparent 30%);
+  --sidebar-bg: #FFFFFF;
+  --sidebar-active: rgba(76, 175, 0, 0.1);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+  --glow-running: 0 0 8px rgba(76, 175, 0, 0.2);
+  --glow-starting: 0 0 8px rgba(217, 119, 6, 0.2);
+}
+
+/* ─── Tailwind Theme Tokens ─── */
+@theme {
+  --color-bg: var(--bg);
+  --color-surface-low: var(--surface-low);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-surface-highest: var(--surface-highest);
+  --color-surface-bright: var(--surface-bright);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-primary-dim: var(--primary-dim);
+  --color-primary-on: var(--primary-on);
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-outline: var(--outline);
+  --color-outline-dim: var(--outline-dim);
+  --color-error: var(--error);
+  --color-error-surface: var(--error-surface);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-active: var(--sidebar-active);
+}
+
+/* ─── Base ─── */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ─── Glass morphism utility ─── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+}
+
+/* ─── Animations ─── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: var(--glow-running); }
+  50% { box-shadow: 0 0 20px rgba(118, 226, 42, 0.4); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.35s ease-out;
+}
+
+.animate-pulseGlow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* ─── Card hover ─── */
+.card-hover {
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* ─── Primary gradient button ─── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  color: var(--primary-on);
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 20px rgba(118, 226, 42, 0.3);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}
+.btn-primary:disabled:active {
+  transform: none;
+}
+
+/* ─── Secondary button ─── */
+.btn-secondary {
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+}
+
+/* ─── Terminal/log styling ─── */
+.log-terminal {
+  background: #08080F;
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+[data-theme="light"] .log-terminal {
+  background: #1A1A2E;
+}
+
+/* ─── Circular Gauge ─── */
+.gauge-ring {
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+/* ─── Sidebar ─── */
+.sidebar-link {
+  transition: all 0.2s ease;
+}
+.sidebar-link:hover {
+  background: var(--sidebar-active);
+}
+.sidebar-link.active {
+  background: var(--sidebar-active);
+  color: var(--primary);
+}
+
+/* ─── Font utilities ─── */
+.font-display {
+  font-family: 'Sora', system-ui, sans-serif;
+}
+.font-label {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}

@@ -1,0 +1,260 @@
+services:
+  api_server:
+    image: onyxdotapp/onyx-backend:${IMAGE_TAG:-latest}
+    container_name: spark-ai-hub-onyx-api-server
+    command: >
+      /bin/sh -c "alembic upgrade head &&
+      echo \"Starting Onyx Api Server\" &&
+      uvicorn onyx.main:app --host 0.0.0.0 --port 8080"
+    env_file:
+      - .env
+    depends_on:
+      relational_db:
+        condition: service_started
+      index:
+        condition: service_started
+      opensearch:
+        condition: service_started
+      cache:
+        condition: service_started
+      inference_model_server:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      AUTH_TYPE: ${AUTH_TYPE:-basic}
+      FILE_STORE_BACKEND: ${FILE_STORE_BACKEND:-s3}
+      POSTGRES_HOST: ${POSTGRES_HOST:-relational_db}
+      VESPA_HOST: ${VESPA_HOST:-index}
+      OPENSEARCH_HOST: ${OPENSEARCH_HOST:-opensearch}
+      OPENSEARCH_ADMIN_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-StrongPassword123!}
+      ENABLE_OPENSEARCH_INDEXING_FOR_ONYX: ${OPENSEARCH_FOR_ONYX_ENABLED:-true}
+      REDIS_HOST: ${REDIS_HOST:-cache}
+      MODEL_SERVER_HOST: ${MODEL_SERVER_HOST:-inference_model_server}
+      CODE_INTERPRETER_BASE_URL: http://code-interpreter:8000
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
+      S3_AWS_ACCESS_KEY_ID: ${S3_AWS_ACCESS_KEY_ID:-minioadmin}
+      S3_AWS_SECRET_ACCESS_KEY: ${S3_AWS_SECRET_ACCESS_KEY:-minioadmin}
+      PERSISTENT_DOCUMENT_STORAGE_PATH: /app/file-system
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - onyx-api-server-logs:/var/log/onyx
+      - onyx-file-system:/app/file-system
+    restart: unless-stopped
+
+  background:
+    image: onyxdotapp/onyx-backend:${IMAGE_TAG:-latest}
+    container_name: spark-ai-hub-onyx-background
+    command: >
+      /bin/sh -c "/app/scripts/supervisord_entrypoint.sh"
+    env_file:
+      - .env
+    depends_on:
+      relational_db:
+        condition: service_started
+      index:
+        condition: service_started
+      opensearch:
+        condition: service_started
+      cache:
+        condition: service_started
+      inference_model_server:
+        condition: service_started
+      indexing_model_server:
+        condition: service_started
+    environment:
+      FILE_STORE_BACKEND: ${FILE_STORE_BACKEND:-s3}
+      POSTGRES_HOST: ${POSTGRES_HOST:-relational_db}
+      VESPA_HOST: ${VESPA_HOST:-index}
+      OPENSEARCH_HOST: ${OPENSEARCH_HOST:-opensearch}
+      OPENSEARCH_ADMIN_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-StrongPassword123!}
+      ENABLE_OPENSEARCH_INDEXING_FOR_ONYX: ${OPENSEARCH_FOR_ONYX_ENABLED:-true}
+      REDIS_HOST: ${REDIS_HOST:-cache}
+      MODEL_SERVER_HOST: ${MODEL_SERVER_HOST:-inference_model_server}
+      INDEXING_MODEL_SERVER_HOST: ${INDEXING_MODEL_SERVER_HOST:-indexing_model_server}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
+      S3_AWS_ACCESS_KEY_ID: ${S3_AWS_ACCESS_KEY_ID:-minioadmin}
+      S3_AWS_SECRET_ACCESS_KEY: ${S3_AWS_SECRET_ACCESS_KEY:-minioadmin}
+      API_SERVER_PROTOCOL: http
+      API_SERVER_HOST: api_server
+      PERSISTENT_DOCUMENT_STORAGE_PATH: /app/file-system
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - onyx-background-logs:/var/log/onyx
+      - onyx-file-system:/app/file-system
+    restart: unless-stopped
+
+  web_server:
+    image: onyxdotapp/onyx-web-server:${IMAGE_TAG:-latest}
+    container_name: spark-ai-hub-onyx-web-server
+    env_file:
+      - .env
+    depends_on:
+      - api_server
+    environment:
+      INTERNAL_URL: ${INTERNAL_URL:-http://api_server:8080}
+    restart: unless-stopped
+
+  inference_model_server:
+    image: onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}
+    container_name: spark-ai-hub-onyx-inference-model-server
+    command: >
+      /bin/sh -c "exec uvicorn model_server.main:app --host 0.0.0.0 --port 9000"
+    env_file:
+      - .env
+    volumes:
+      - onyx-model-cache:/app/.cache/huggingface/
+      - onyx-inference-model-server-logs:/var/log/onyx
+    restart: unless-stopped
+
+  indexing_model_server:
+    image: onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}
+    container_name: spark-ai-hub-onyx-indexing-model-server
+    command: >
+      /bin/sh -c "exec uvicorn model_server.main:app --host 0.0.0.0 --port 9000"
+    env_file:
+      - .env
+    environment:
+      INDEXING_ONLY: "True"
+    volumes:
+      - onyx-indexing-model-cache:/app/.cache/huggingface/
+      - onyx-indexing-model-server-logs:/var/log/onyx
+    restart: unless-stopped
+
+  relational_db:
+    image: postgres:15.2-alpine
+    container_name: spark-ai-hub-onyx-postgres
+    shm_size: 1g
+    command: -c 'max_connections=250'
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - onyx-db-volume:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  index:
+    image: vespaengine/vespa:8.609.39
+    container_name: spark-ai-hub-onyx-index
+    env_file:
+      - .env
+    environment:
+      VESPA_SKIP_UPGRADE_CHECK: "true"
+    volumes:
+      - onyx-vespa-volume:/opt/vespa/var
+    restart: unless-stopped
+
+  opensearch:
+    image: opensearchproject/opensearch:3.4.0
+    container_name: spark-ai-hub-onyx-opensearch
+    environment:
+      discovery.type: single-node
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-StrongPassword123!}
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms2g -Xmx2g
+    volumes:
+      - onyx-opensearch-data:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25.5-alpine
+    container_name: spark-ai-hub-onyx-nginx
+    depends_on:
+      - api_server
+      - web_server
+    ports:
+      - "3003:80"
+    volumes:
+      - onyx-nginx-conf:/etc/nginx/conf.d
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat >/etc/nginx/conf.d/default.conf <<'EOF'
+        server {
+          listen 80;
+          client_max_body_size 250M;
+          location /api/ {
+            proxy_pass http://api_server:8080/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $$host;
+            proxy_set_header X-Real-IP $$remote_addr;
+            proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $$scheme;
+            proxy_read_timeout 300s;
+          }
+          location / {
+            proxy_pass http://web_server:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Host $$host;
+            proxy_set_header X-Real-IP $$remote_addr;
+            proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $$scheme;
+            proxy_read_timeout 300s;
+          }
+        }
+        EOF
+        nginx -g 'daemon off;'
+    restart: unless-stopped
+
+  cache:
+    image: redis:7.4-alpine
+    container_name: spark-ai-hub-onyx-cache
+    command: redis-server --save "" --appendonly no
+    tmpfs:
+      - /data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z-cpuv1
+    container_name: spark-ai-hub-onyx-minio
+    profiles: ["s3-filestore"]
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_DEFAULT_BUCKETS: ${S3_FILE_STORE_BUCKET_NAME:-onyx-file-store-bucket}
+    command: server /data --console-address ":9001"
+    volumes:
+      - onyx-minio-data:/data
+    restart: unless-stopped
+
+  code-interpreter:
+    image: onyxdotapp/code-interpreter:latest
+    container_name: spark-ai-hub-onyx-code-interpreter
+    command: ["bash", "./entrypoint.sh", "code-interpreter-api"]
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  onyx-db-volume:
+  onyx-vespa-volume:
+  onyx-minio-data:
+  onyx-model-cache:
+  onyx-indexing-model-cache:
+  onyx-api-server-logs:
+  onyx-background-logs:
+  onyx-inference-model-server-logs:
+  onyx-indexing-model-server-logs:
+  onyx-file-system:
+  onyx-opensearch-data:
+  onyx-nginx-conf:

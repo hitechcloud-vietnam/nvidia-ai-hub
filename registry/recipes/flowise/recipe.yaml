@@ -1,0 +1,30 @@
+name: "Flowise"
+slug: flowise
+version: "1.0.0"
+description: "Drag-and-drop LLM workflow builder. Create chatbots, RAG pipelines, and AI agents with a visual node editor. No code required."
+author: "FlowiseAI"
+source: "official"
+website: "https://flowiseai.com/"
+upstream: "https://github.com/FlowiseAI/Flowise"
+category: multi-modal
+tags:
+  - workflow
+  - no-code
+  - agents
+  - chatbot
+icon: "\U0001F33A"
+logo: "/logos/flowise.png"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 5
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3002
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 2
+  gpu: false
+status: official

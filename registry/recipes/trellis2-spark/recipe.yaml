@@ -1,0 +1,33 @@
+name: "TRELLIS.2"
+slug: trellis2-spark
+version: "2.0.0"
+description: "Generate high-fidelity 3D assets from images with TRELLIS.2, including complex topologies, sharp features, and full PBR materials for detailed textured output."
+author: "Microsoft"
+source: "spark-ai-hub"
+website: "https://github.com/microsoft/TRELLIS.2"
+upstream: "https://github.com/microsoft/TRELLIS.2"
+category: 3d-gen
+categories:
+  - 3d-gen
+tags:
+  - 3d
+  - generation
+  - trellis
+  - microsoft
+icon: "🧊"
+logo: "/logos/trellis2.png"
+requirements:
+  min_memory_gb: 32
+  recommended_memory_gb: 80
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 12156
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: official
+requires_hf_token: true

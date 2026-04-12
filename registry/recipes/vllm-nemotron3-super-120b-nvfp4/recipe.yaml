@@ -1,0 +1,40 @@
+name: "Nemotron-3 Super 120B-A12B NVFP4"
+slug: vllm-nemotron3-super-120b-nvfp4
+version: "1.0.0"
+description: "NVIDIA Nemotron-3 Super 120B-A12B (MoE, 12B active), NVFP4 quantized. Flagship reasoning and coding model optimized for DGX Spark."
+author: "NVIDIA"
+source: "official"
+website: "https://build.nvidia.com/spark/vllm"
+upstream: "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+category: llm
+tags:
+  - llm
+  - moe
+  - reasoning
+  - coding
+  - vllm
+  - nvfp4
+  - nvidia-official
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 70
+  recommended_memory_gb: 90
+  disk_gb: 80
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 15
+  gpu: true
+status: community-verified
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-02"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"

@@ -1,0 +1,29 @@
+services:
+  foundation-1:
+    image: ghcr.io/waxacabytes/foundation1-spark-ai-hub:latest
+    container_name: spark-ai-hub-foundation-1
+    ports:
+      - "7866:7860"
+    environment:
+      PORT: "7860"
+      FOUNDATION_MODELS_ROOT: "/models"
+      FOUNDATION_OUTPUT_DIR: "/outputs"
+      HF_HOME: "/root/.cache/huggingface"
+      GRADIO_TEMP_DIR: "/outputs/gradio"
+    volumes:
+      - foundation-1-models:/models
+      - foundation-1-hf-home:/root/.cache/huggingface
+      - foundation-1-outputs:/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  foundation-1-models:
+  foundation-1-hf-home:
+  foundation-1-outputs:

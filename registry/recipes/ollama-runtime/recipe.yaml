@@ -1,0 +1,37 @@
+name: "Ollama Runtime"
+slug: ollama-runtime
+version: "1.0.0"
+description: "Run a local Ollama server with a ready-to-use starter model, then use it across compatible apps like Open WebUI and Onyx."
+author: "Spark AI Hub"
+source: "spark-ai-hub"
+website: "https://ollama.com/"
+upstream: "https://github.com/ollama/ollama"
+category: llm
+tags:
+  - ollama
+  - local-llm
+  - model-runtime
+  - model-management
+  - starter-model
+icon: ""
+logo: "/logos/ollama-official.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 16
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3014
+  path: "/"
+  health_path: "/api/health"
+docker:
+  build: true
+  build_time_minutes: 4
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:11435"
+  model_id: "qwen3.5:4b"
+  api_key: "not required"
+  curl_example: "curl http://<SPARK_IP>:11435/api/tags"
+status: experimental

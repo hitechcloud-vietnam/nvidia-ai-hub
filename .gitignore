@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Data
+data/
+
+# Build output
+frontend/dist/
+
+# Local dev workspaces
+comfyui-src/
+
+# Generated recipe runtime env files
+registry/recipes/*/.env
+
+# OS
+.DS_Store

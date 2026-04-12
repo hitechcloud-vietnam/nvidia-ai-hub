@@ -1,0 +1,21 @@
+services:
+  facefusion:
+    image: abelpc/facefusion-spark:latest
+    container_name: spark-ai-hub-facefusion
+    ports:
+      - "7860:7860"
+    volumes:
+      - facefusion-models:/app/facefusion/.assets/models
+      - facefusion-output:/app/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  facefusion-models:
+  facefusion-output:

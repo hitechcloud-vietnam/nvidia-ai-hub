@@ -1,0 +1,34 @@
+name: "Qwen Image 2512"
+slug: qwen-image-2512
+version: "1.0.0"
+description: "Generate images from text prompts with Qwen-Image-2512, the updated Qwen text-to-image model with stronger human realism and finer natural detail, plus controls for aspect ratio, seed, and sampling."
+author: "Qwen"
+source: "spark-ai-hub"
+website: "https://huggingface.co/Qwen/Qwen-Image-2512"
+upstream: "https://github.com/WaxacaBytes/qwen-image-2512-spark-ai-hub"
+fork: "https://huggingface.co/Qwen/Qwen-Image-2512"
+category: image-gen
+categories:
+  - image-gen
+tags:
+  - qwen
+  - text-to-image
+  - diffusion
+  - gradio
+  - image
+icon: "\U0001F5BC\uFE0F"
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 40
+  recommended_memory_gb: 72
+  disk_gb: 80
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7862
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental

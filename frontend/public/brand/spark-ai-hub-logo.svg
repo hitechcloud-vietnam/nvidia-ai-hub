@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#152608"/>
+      <stop offset="100%" stop-color="#0A1404"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#B4FF52"/>
+      <stop offset="45%" stop-color="#76E22A"/>
+      <stop offset="100%" stop-color="#3DA500"/>
+    </linearGradient>
+    <linearGradient id="boltShine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+
+  <!-- Abstract Lightning bolt (concept #1, scaled from 200x200 to 512x512) -->
+  <g filter="url(#glow)" transform="translate(56, 26) scale(2.4)">
+    <path d="M120 20L50 110H100L80 180L150 90H100L120 20Z" fill="url(#bolt)"/>
+  </g>
+
+  <!-- Shine overlay on upper-left face -->
+  <g transform="translate(56, 26) scale(2.4)">
+    <path d="M120 20L50 110H100L85 140L130 55Z" fill="url(#boltShine)"/>
+  </g>
+</svg>

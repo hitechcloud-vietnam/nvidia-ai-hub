@@ -1,0 +1,40 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: spark-ai-hub-ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:cuda
+    container_name: spark-ai-hub-openwebui
+    ports:
+      - "8080:8080"
+    volumes:
+      - openwebui-data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URLS=http://host.docker.internal:11435;http://ollama:11434;http://172.17.0.1:11434
+      - OPENAI_API_BASE_URLS=http://172.17.0.1:9001/v1;http://172.17.0.1:1234/v1
+      - OPENAI_API_KEYS=not-needed;not-needed
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
+  openwebui-data:

@@ -1,0 +1,38 @@
+name: "Seed-OSS-36B Instruct"
+slug: vllm-seed-oss-36b
+version: "1.0.0"
+description: "ByteDance Seed-OSS-36B Instruct, dense 36B model with 512K context. Strong reasoning and tool calling."
+author: "ByteDance"
+source: "official"
+website: "https://huggingface.co/ByteDance-Seed/Seed-OSS-36B-Instruct"
+upstream: "https://huggingface.co/ByteDance-Seed/Seed-OSS-36B-Instruct"
+category: llm
+tags:
+  - llm
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+logo: "/logos/bytedance.png"
+requirements:
+  min_memory_gb: 70
+  recommended_memory_gb: 80
+  disk_gb: 75
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: community-verified
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-01"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "ByteDance-Seed/Seed-OSS-36B-Instruct"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"ByteDance-Seed/Seed-OSS-36B-Instruct\", \"messages\": [{\"role\": \"user\", \"content\": \"Solve 17 x 23 step by step.\"}]}'"

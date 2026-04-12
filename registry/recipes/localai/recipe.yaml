@@ -1,0 +1,31 @@
+name: "LocalAI"
+slug: localai
+version: "1.0.0"
+description: "Drop-in OpenAI API replacement. Run LLMs, generate images, audio, and more — all via REST API. CUDA 13 ARM64 build for DGX Spark."
+author: "mudler"
+source: "official"
+website: "https://localai.io/"
+upstream: "https://github.com/mudler/LocalAI"
+category: multi-modal
+tags:
+  - api
+  - openai-compatible
+  - tts
+  - image
+  - llm
+icon: "\U0001F916"
+logo: "/logos/localai.png"
+requirements:
+  min_memory_gb: 20
+  recommended_memory_gb: 40
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8081
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: true
+status: official

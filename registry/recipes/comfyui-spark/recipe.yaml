@@ -1,0 +1,35 @@
+name: "ComfyUI"
+slug: comfyui-spark
+version: "1.0.0"
+description: "Create and run node-based workflows for image, video, 3D, and audio generation with ComfyUI, with full visual control to branch, remix, and reuse complex generative pipelines."
+author: "ComfyAnonymous"
+source: "spark-ai-hub"
+website: "https://www.comfy.org/"
+upstream: "https://github.com/WaxacaBytes/comfyui-spark"
+fork: "https://github.com/Comfy-Org/ComfyUI"
+category: image-gen
+categories:
+  - image-gen
+  - video-gen
+  - 3d-gen
+tags:
+  - stable-diffusion
+  - flux
+  - comfyui
+  - image
+icon: "\U0001F3A8"
+logo: "/logos/comfyui.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 40
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8188
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: true
+status: official

@@ -1,0 +1,26 @@
+services:
+  qwen-image-perspective:
+    image: ghcr.io/waxacabytes/qwen-image-perspective-spark-ai-hub:latest
+    container_name: spark-ai-hub-qwen-image-perspective
+    ports:
+      - "7863:7860"
+    environment:
+      PORT: "7860"
+      OUTPUT_DIR: "/data/output"
+      HF_HOME: "/root/.cache/huggingface"
+      PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+    volumes:
+      - qwen-image-perspective-cache:/root/.cache/huggingface
+      - qwen-image-perspective-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  qwen-image-perspective-cache:
+  qwen-image-perspective-output:

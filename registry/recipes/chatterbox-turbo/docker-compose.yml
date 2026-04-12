@@ -1,0 +1,25 @@
+services:
+  chatterbox-turbo:
+    image: ghcr.io/waxacabytes/chatterbox-turbo-spark-ai-hub:latest
+    container_name: spark-ai-hub-chatterbox-turbo
+    ports:
+      - "7864:7860"
+    environment:
+      PORT: "7860"
+      HF_HOME: "/root/.cache/huggingface"
+      GRADIO_TEMP_DIR: "/outputs/gradio"
+    volumes:
+      - chatterbox-turbo-hf-home:/root/.cache/huggingface
+      - chatterbox-turbo-outputs:/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  chatterbox-turbo-hf-home:
+  chatterbox-turbo-outputs:

@@ -1,0 +1,23 @@
+services:
+  comfyui:
+    image: abelpc/comfyui-spark:latest
+    container_name: spark-ai-hub-comfyui
+    ports:
+      - "8188:8188"
+    volumes:
+      - comfyui-models:/app/ComfyUI/models
+      - comfyui-output:/app/ComfyUI/output
+      - comfyui-input:/app/ComfyUI/input
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  comfyui-models:
+  comfyui-output:
+  comfyui-input:
