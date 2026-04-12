@@ -26,6 +26,12 @@ Install without starting the server:
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --no-start
 ```
 
+Install on a custom port:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --port 9010
+```
+
 ### Windows install
 
 From a local clone in PowerShell:
@@ -38,6 +44,12 @@ Install without starting the server:
 
 ```powershell
 .\install.ps1 -NoStart
+```
+
+Install on a custom port:
+
+```powershell
+.\install.ps1 -Port 9010
 ```
 
 Check the environment on Windows:
@@ -79,6 +91,8 @@ It will:
 Because the backend serves the built frontend from `frontend/dist`, the UI is available immediately after install.
 
 If `--no-start` or `-NoStart` is used, the installer completes all setup steps but skips launching the API server.
+
+If `--port` or `-Port` is used during install, the chosen port is written into the shared root `.env` file.
 
 ## Features
 
@@ -158,6 +172,16 @@ On Windows PowerShell, use:
 .\run.ps1
 ```
 
+You can also start on a custom port for a single run:
+
+```bash
+./run.sh --port 9010
+```
+
+```powershell
+.\run.ps1 -Port 9010
+```
+
 If the frontend must be rebuilt, ensure the machine has:
 
 - `node` >= 22
@@ -188,6 +212,31 @@ It then creates `.venv`, installs backend/frontend dependencies, builds `fronten
 If Docker Desktop is installed but not running yet, the installer warns and continues. The UI can still start, but recipe lifecycle operations will need Docker to be running.
 
 `check.ps1` and `run.ps1` provide Windows equivalents for environment validation and local startup.
+
+`uninstall.ps1` provides a Windows-native cleanup flow.
+
+## Shared configuration
+
+The repository now includes a shared root `.env` file used by:
+
+- `daemon/config.py`
+- `install.sh`
+- `run.sh`
+- `check.sh`
+- `install.ps1`
+- `run.ps1`
+- `check.ps1`
+
+Default values include:
+
+- `SPARK_AI_HUB_HOST`
+- `SPARK_AI_HUB_PORT`
+- `SPARK_AI_HUB_NODE_MAJOR`
+- `SPARK_AI_HUB_REGISTRY_PATH`
+- `SPARK_AI_HUB_DATA_DIR`
+- `SPARK_AI_HUB_DB_PATH`
+
+Update `.env` if you want to keep a custom default port or path layout across runs.
 
 ## Troubleshooting
 
@@ -229,6 +278,12 @@ This usually means `winget` is unavailable or blocked by policy. Install Git, Py
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/uninstall.sh | bash
+```
+
+On Windows PowerShell:
+
+```powershell
+.\uninstall.ps1
 ```
 
 The uninstaller now removes, in order:

@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$NoStart
+    [switch]$NoStart,
+    [int]$Port
 )
 
 Set-StrictMode -Version Latest
@@ -171,6 +172,15 @@ else {
 }
 
 Set-Location $InstallDir
+. (Join-Path $InstallDir 'scripts\common.ps1')
+
+if ($PSBoundParameters.ContainsKey('Port')) {
+    if (-not (Test-SparkValidPort -Port $Port)) {
+        throw 'Port must be between 1 and 65535.'
+    }
+
+    Set-SparkEnvValue -Key 'SPARK_AI_HUB_PORT' -Value ([string]$Port)
+}
 
 if (-not (Test-Path '.venv')) {
     Write-Section 'Creating virtual environment...'
@@ -207,13 +217,14 @@ Write-Section 'Backend API and frontend UI are ready.'
 
 if ($NoStart) {
     Write-Section 'NoStart was specified, so the server was not started.'
-        Write-Section 'Run .\check.ps1 to verify the environment before launch.'
-    Write-Section 'Start later with: .venv\Scripts\python.exe -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000'
+    Write-Section 'Run .\check.ps1 to verify the environment before launch.'
+    Write-Section "Start later with: .\run.ps1 -Port $($script:SparkPort)"
     Write-Host ''
     exit 0
 }
 
-    Write-Section "Starting Spark AI Hub on port $($script:SparkPort)..."
-    Write-Section "Open http://localhost:$($script:SparkPort) in your browser"
+Write-Section "Starting Spark AI Hub on port $($script:SparkPort)..."
+Write-Section "Open http://localhost:$($script:SparkPort) in your browser"
 Write-Host ''
-    & $venvPython -m uvicorn daemon.main:app --host 0.0.0.0 --port $script:SparkPort
+$env:SPARK_AI_HUB_PORT = [string]$script:SparkPort
+& $venvPython -m uvicorn daemon.main:app --host $script:SparkHost --port $script:SparkPort

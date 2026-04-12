@@ -1,11 +1,21 @@
 [CmdletBinding()]
-param()
+param(
+    [int]$Port
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 Set-Location $PSScriptRoot
 . (Join-Path $PSScriptRoot 'scripts\common.ps1')
+
+if ($PSBoundParameters.ContainsKey('Port')) {
+    if (-not (Test-SparkValidPort -Port $Port)) {
+        throw 'Port must be between 1 and 65535.'
+    }
+
+    Set-SparkPort -Port $Port
+}
 
 function Write-Section {
     param([string]$Message)
@@ -55,4 +65,5 @@ else {
 
 Write-Section "Starting Spark AI Hub on port $($script:SparkPort)..."
 Write-Section "Open http://localhost:$($script:SparkPort) in your browser"
-& $venvPython -m uvicorn daemon.main:app --host 0.0.0.0 --port $script:SparkPort
+$env:SPARK_AI_HUB_PORT = [string]$script:SparkPort
+& $venvPython -m uvicorn daemon.main:app --host $script:SparkHost --port $script:SparkPort

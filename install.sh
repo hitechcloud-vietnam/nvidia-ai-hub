@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")"
-source ./scripts/common.sh
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
+if [ -f ./scripts/common.sh ]; then
+    # shellcheck source=/dev/null
+    source ./scripts/common.sh
+fi
 
 REPO="https://github.com/hitechcloud-vietnam/spark-ai-hub.git"
 INSTALL_DIR="$HOME/spark-ai-hub"
-PORT="$SPARK_AI_HUB_PORT"
-NODE_MAJOR="$SPARK_AI_HUB_NODE_MAJOR"
+PORT="${SPARK_AI_HUB_PORT:-9000}"
+HOST="${SPARK_AI_HUB_HOST:-0.0.0.0}"
+NODE_MAJOR="${SPARK_AI_HUB_NODE_MAJOR:-22}"
 START_AFTER_INSTALL=true
+PORT_OVERRIDE=""
 
 echo ""
 echo "  Spark AI Hub Installer"
@@ -40,8 +47,23 @@ Usage: install.sh [--no-start]
 
 Options:
     --no-start   Install/update dependencies and build the frontend, but do not start the server
+    --port PORT  Install/update using a specific port
     -h, --help   Show this help message
 EOF
+}
+
+validate_port() {
+    if command -v spark_validate_port >/dev/null 2>&1; then
+        spark_validate_port "$1"
+        return
+    fi
+
+    case "$1" in
+        ''|*[!0-9]*)
+            return 1
+            ;;
+    esac
+    [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
 }
 
 ensure_nodejs() {
@@ -72,6 +94,21 @@ while [ "$#" -gt 0 ]; do
     case "$1" in
         --no-start)
             START_AFTER_INSTALL=false
+            ;;
+        --port)
+            shift
+            if [ "$#" -eq 0 ] || ! validate_port "$1"; then
+                echo "[spark-ai-hub] --port requires a value between 1 and 65535." >&2
+                exit 1
+            fi
+            PORT_OVERRIDE="$1"
+            ;;
+        --port=*)
+            PORT_OVERRIDE="${1#*=}"
+            if ! validate_port "$PORT_OVERRIDE"; then
+                echo "[spark-ai-hub] --port requires a value between 1 and 65535." >&2
+                exit 1
+            fi
             ;;
         -h|--help)
             usage
@@ -145,6 +182,19 @@ fi
 
 cd "$INSTALL_DIR"
 
+if [ -f ./scripts/common.sh ]; then
+    # shellcheck source=/dev/null
+    source ./scripts/common.sh
+fi
+
+if [ -n "$PORT_OVERRIDE" ] && command -v spark_write_env_value >/dev/null 2>&1; then
+    spark_write_env_value "SPARK_AI_HUB_PORT" "$PORT_OVERRIDE"
+fi
+
+PORT="${PORT_OVERRIDE:-${SPARK_AI_HUB_PORT:-$PORT}}"
+HOST="${SPARK_AI_HUB_HOST:-$HOST}"
+NODE_MAJOR="${SPARK_AI_HUB_NODE_MAJOR:-$NODE_MAJOR}"
+
 # ---------- python venv + deps ----------
 
 if [ ! -d ".venv" ]; then
@@ -191,4 +241,4 @@ echo "[spark-ai-hub] Starting Spark AI Hub on port $PORT..."
 echo "[spark-ai-hub] Open http://localhost:$PORT in your browser"
 echo ""
 
-exec uvicorn daemon.main:app --host 0.0.0.0 --port "$PORT"
+SPARK_AI_HUB_PORT="$PORT" exec uvicorn daemon.main:app --host "$HOST" --port "$PORT"
