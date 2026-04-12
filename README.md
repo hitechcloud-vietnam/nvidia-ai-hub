@@ -1,6 +1,8 @@
 # Spark AI Hub
 
 [![Contributing](https://img.shields.io/badge/Contributing-Guide-2ea44f?style=flat-square)](./CONTRIBUTING.md)
+[![Security](https://img.shields.io/badge/Security-Policy-blue?style=flat-square)](./SECURITY.md)
+[![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
@@ -19,6 +21,11 @@ The project includes:
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, development setup, recipe guidance, and pull request expectations.
+
+## Security and Conduct
+
+- Security policy: [`SECURITY.md`](./SECURITY.md)
+- Community and collaboration rules: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 
 ## Quick install
 

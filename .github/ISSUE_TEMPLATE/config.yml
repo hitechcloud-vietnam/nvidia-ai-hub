@@ -3,3 +3,9 @@ contact_links:
   - name: Contribution Guide
     url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/CONTRIBUTING.md
     about: Review repository contribution standards, validation expectations, and recipe guidance before opening an issue.
+  - name: Security Policy
+    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/SECURITY.md
+    about: Review the private vulnerability disclosure process before reporting a security issue.
+  - name: Code of Conduct
+    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/CODE_OF_CONDUCT.md
+    about: Review expected collaboration and review behavior for repository discussions and pull requests.
