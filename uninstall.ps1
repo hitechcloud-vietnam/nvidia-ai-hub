@@ -1,10 +1,13 @@
 [CmdletBinding()]
-param()
+param(
+    [switch]$KeepData
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $InstallDir = Join-Path $HOME 'spark-ai-hub'
+$preservedDataTemp = $null
 
 function Write-Section {
     param([string]$Message)
@@ -82,7 +85,17 @@ if (Test-Command 'docker') {
 
 if (Test-Path $InstallDir) {
     Remove-PathIfExists -Path (Join-Path $InstallDir '.venv') -Label 'backend virtual environment'
-    Remove-PathIfExists -Path (Join-Path $InstallDir 'data') -Label 'backend runtime data'
+
+    if ($KeepData -and (Test-Path (Join-Path $InstallDir 'data'))) {
+        $preservedDataTemp = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
+        New-Item -ItemType Directory -Path $preservedDataTemp -Force | Out-Null
+        Write-Section 'Preserving backend runtime data...'
+        Move-Item -Path (Join-Path $InstallDir 'data') -Destination (Join-Path $preservedDataTemp 'data')
+    }
+    else {
+        Remove-PathIfExists -Path (Join-Path $InstallDir 'data') -Label 'backend runtime data'
+    }
+
     Remove-PathIfExists -Path (Join-Path $InstallDir 'frontend\node_modules') -Label 'frontend node_modules cache'
     Remove-PathIfExists -Path (Join-Path $InstallDir 'frontend\dist') -Label 'frontend build output'
 
@@ -109,6 +122,13 @@ else {
 }
 
 Remove-PathIfExists -Path $InstallDir -Label $InstallDir
+
+if ($KeepData -and $null -ne $preservedDataTemp -and (Test-Path (Join-Path $preservedDataTemp 'data'))) {
+    New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+    Move-Item -Path (Join-Path $preservedDataTemp 'data') -Destination (Join-Path $InstallDir 'data')
+    Remove-Item -Path $preservedDataTemp -Recurse -Force
+    Write-Section "Preserved data restored to $(Join-Path $InstallDir 'data')"
+}
 
 Write-Host ''
 Write-Section 'Uninstall complete.'

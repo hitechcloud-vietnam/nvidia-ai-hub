@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
-    [int]$Port
+    [int]$Port,
+    [Alias('Host')]
+    [string]$ListenHost
 )
 
 Set-StrictMode -Version Latest
@@ -15,6 +17,14 @@ if ($PSBoundParameters.ContainsKey('Port')) {
     }
 
     Set-SparkPort -Port $Port
+}
+
+if ($PSBoundParameters.ContainsKey('ListenHost')) {
+    if (-not (Test-SparkValidHost -Host $ListenHost)) {
+        throw 'Host must not be empty.'
+    }
+
+    Set-SparkHost -Host $ListenHost
 }
 
 function Write-Section {
@@ -66,4 +76,5 @@ else {
 Write-Section "Starting Spark AI Hub on port $($script:SparkPort)..."
 Write-Section "Open http://localhost:$($script:SparkPort) in your browser"
 $env:SPARK_AI_HUB_PORT = [string]$script:SparkPort
+Set-Item -Path 'Env:SPARK_AI_HUB_HOST' -Value $script:SparkHost
 & $venvPython -m uvicorn daemon.main:app --host $script:SparkHost --port $script:SparkPort

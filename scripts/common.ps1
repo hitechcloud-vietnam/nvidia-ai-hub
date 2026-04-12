@@ -29,9 +29,27 @@ function Initialize-SparkConfig {
     $script:SparkDistIndex = Join-Path $script:SparkFrontendDir 'dist\index.html'
 }
 
+function Ensure-SparkEnvFile {
+    param([string]$Root = $script:SparkRoot)
+
+    $envFile = Join-Path $Root '.env'
+    $exampleFile = Join-Path $Root '.env.example'
+
+    if (-not (Test-Path $envFile) -and (Test-Path $exampleFile)) {
+        Copy-Item -Path $exampleFile -Destination $envFile
+    }
+
+    Initialize-SparkConfig -Root $Root
+}
+
 function Test-SparkValidPort {
     param([int]$Port)
     return $Port -ge 1 -and $Port -le 65535
+}
+
+function Test-SparkValidHost {
+    param([string]$Host)
+    return -not [string]::IsNullOrWhiteSpace($Host)
 }
 
 function Set-SparkPort {
@@ -41,8 +59,19 @@ function Set-SparkPort {
         throw 'Port must be between 1 and 65535.'
     }
 
-    $env:SPARK_AI_HUB_PORT = [string]$Port
+    Set-Item -Path 'Env:SPARK_AI_HUB_PORT' -Value ([string]$Port)
     $script:SparkPort = $Port
+}
+
+function Set-SparkHost {
+    param([string]$Host)
+
+    if (-not (Test-SparkValidHost -Host $Host)) {
+        throw 'Host must not be empty.'
+    }
+
+    Set-Item -Path 'Env:SPARK_AI_HUB_HOST' -Value $Host
+    $script:SparkHost = $Host
 }
 
 function Set-SparkEnvValue {
@@ -52,7 +81,7 @@ function Set-SparkEnvValue {
     )
 
     if (-not (Test-Path $script:SparkEnvFile)) {
-        New-Item -ItemType File -Path $script:SparkEnvFile -Force | Out-Null
+        Ensure-SparkEnvFile -Root $script:SparkRoot
     }
 
     $lines = @()
@@ -74,7 +103,7 @@ function Set-SparkEnvValue {
     }
 
     Set-Content -Path $script:SparkEnvFile -Value $lines
-    $env:$Key = $Value
+    Set-Item -Path "Env:$Key" -Value $Value
     Initialize-SparkConfig -Root $script:SparkRoot
 }
 

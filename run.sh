@@ -4,13 +4,15 @@ cd "$(dirname "$0")"
 source ./scripts/common.sh
 
 PORT_OVERRIDE=""
+HOST_OVERRIDE=""
 
 usage() {
     cat <<'EOF'
-Usage: run.sh [--port PORT]
+Usage: run.sh [--port PORT] [--host HOST]
 
 Options:
   --port PORT  Run Spark AI Hub on a specific port for this session
+    --host HOST  Run Spark AI Hub on a specific host for this session
   -h, --help   Show this help message
 EOF
 }
@@ -32,6 +34,21 @@ while [ "$#" -gt 0 ]; do
                 exit 1
             fi
             ;;
+        --host)
+            shift
+            if [ "$#" -eq 0 ] || ! spark_validate_host "$1"; then
+                echo "[spark-ai-hub] --host requires a non-empty value." >&2
+                exit 1
+            fi
+            HOST_OVERRIDE="$1"
+            ;;
+        --host=*)
+            HOST_OVERRIDE="${1#*=}"
+            if ! spark_validate_host "$HOST_OVERRIDE"; then
+                echo "[spark-ai-hub] --host requires a non-empty value." >&2
+                exit 1
+            fi
+            ;;
         -h|--help)
             usage
             exit 0
@@ -46,6 +63,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 PORT="${PORT_OVERRIDE:-$SPARK_AI_HUB_PORT}"
+HOST="${HOST_OVERRIDE:-$SPARK_AI_HUB_HOST}"
 
 if [ ! -d ".venv" ]; then
     echo "[spark-ai-hub] Creating virtual environment..."
@@ -80,4 +98,4 @@ else
 fi
 
 echo "[spark-ai-hub] Starting Spark AI Hub on port $PORT..."
-SPARK_AI_HUB_PORT="$PORT" exec uvicorn daemon.main:app --host "$SPARK_AI_HUB_HOST" --port "$PORT"
+SPARK_AI_HUB_PORT="$PORT" SPARK_AI_HUB_HOST="$HOST" exec uvicorn daemon.main:app --host "$HOST" --port "$PORT"

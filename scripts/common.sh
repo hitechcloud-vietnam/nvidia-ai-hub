@@ -21,6 +21,18 @@ spark_load_env() {
     SPARK_AI_HUB_DIST_INDEX="$SPARK_AI_HUB_FRONTEND_DIR/dist/index.html"
 }
 
+spark_ensure_env_file() {
+    local root="${1:-${SPARK_AI_HUB_ROOT:-$PWD}}"
+    local env_file="$root/.env"
+    local env_example="$root/.env.example"
+
+    if [ ! -f "$env_file" ] && [ -f "$env_example" ]; then
+        cp "$env_example" "$env_file"
+    fi
+
+    spark_load_env "$root"
+}
+
 spark_validate_port() {
     case "$1" in
         ''|*[!0-9]*)
@@ -31,6 +43,10 @@ spark_validate_port() {
     [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
 }
 
+spark_validate_host() {
+    [ -n "${1:-}" ]
+}
+
 spark_write_env_value() {
     local key="$1"
     local value="$2"
@@ -38,6 +54,7 @@ spark_write_env_value() {
     local temp_file
 
     mkdir -p "$(dirname "$env_file")"
+    spark_ensure_env_file "${SPARK_AI_HUB_ROOT:-$PWD}"
     touch "$env_file"
     temp_file="$(mktemp)"
 

@@ -16,6 +16,7 @@ HOST="${SPARK_AI_HUB_HOST:-0.0.0.0}"
 NODE_MAJOR="${SPARK_AI_HUB_NODE_MAJOR:-22}"
 START_AFTER_INSTALL=true
 PORT_OVERRIDE=""
+HOST_OVERRIDE=""
 
 echo ""
 echo "  Spark AI Hub Installer"
@@ -48,6 +49,7 @@ Usage: install.sh [--no-start]
 Options:
     --no-start   Install/update dependencies and build the frontend, but do not start the server
     --port PORT  Install/update using a specific port
+    --host HOST  Install/update using a specific host
     -h, --help   Show this help message
 EOF
 }
@@ -64,6 +66,15 @@ validate_port() {
             ;;
     esac
     [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
+}
+
+validate_host() {
+    if command -v spark_validate_host >/dev/null 2>&1; then
+        spark_validate_host "$1"
+        return
+    fi
+
+    [ -n "${1:-}" ]
 }
 
 ensure_nodejs() {
@@ -107,6 +118,21 @@ while [ "$#" -gt 0 ]; do
             PORT_OVERRIDE="${1#*=}"
             if ! validate_port "$PORT_OVERRIDE"; then
                 echo "[spark-ai-hub] --port requires a value between 1 and 65535." >&2
+                exit 1
+            fi
+            ;;
+        --host)
+            shift
+            if [ "$#" -eq 0 ] || ! validate_host "$1"; then
+                echo "[spark-ai-hub] --host requires a non-empty value." >&2
+                exit 1
+            fi
+            HOST_OVERRIDE="$1"
+            ;;
+        --host=*)
+            HOST_OVERRIDE="${1#*=}"
+            if ! validate_host "$HOST_OVERRIDE"; then
+                echo "[spark-ai-hub] --host requires a non-empty value." >&2
                 exit 1
             fi
             ;;
@@ -187,12 +213,20 @@ if [ -f ./scripts/common.sh ]; then
     source ./scripts/common.sh
 fi
 
+if command -v spark_ensure_env_file >/dev/null 2>&1; then
+    spark_ensure_env_file "$PWD"
+fi
+
 if [ -n "$PORT_OVERRIDE" ] && command -v spark_write_env_value >/dev/null 2>&1; then
     spark_write_env_value "SPARK_AI_HUB_PORT" "$PORT_OVERRIDE"
 fi
 
+if [ -n "$HOST_OVERRIDE" ] && command -v spark_write_env_value >/dev/null 2>&1; then
+    spark_write_env_value "SPARK_AI_HUB_HOST" "$HOST_OVERRIDE"
+fi
+
 PORT="${PORT_OVERRIDE:-${SPARK_AI_HUB_PORT:-$PORT}}"
-HOST="${SPARK_AI_HUB_HOST:-$HOST}"
+HOST="${HOST_OVERRIDE:-${SPARK_AI_HUB_HOST:-$HOST}}"
 NODE_MAJOR="${SPARK_AI_HUB_NODE_MAJOR:-$NODE_MAJOR}"
 
 # ---------- python venv + deps ----------

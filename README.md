@@ -32,6 +32,12 @@ Install on a custom port:
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --port 9010
 ```
 
+Install on a custom host and port:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --host 127.0.0.1 --port 9010
+```
+
 ### Windows install
 
 From a local clone in PowerShell:
@@ -50,6 +56,12 @@ Install on a custom port:
 
 ```powershell
 .\install.ps1 -Port 9010
+```
+
+Install on a custom host and port:
+
+```powershell
+.\install.ps1 -Host 127.0.0.1 -Port 9010
 ```
 
 Check the environment on Windows:
@@ -92,7 +104,7 @@ Because the backend serves the built frontend from `frontend/dist`, the UI is av
 
 If `--no-start` or `-NoStart` is used, the installer completes all setup steps but skips launching the API server.
 
-If `--port` or `-Port` is used during install, the chosen port is written into the shared root `.env` file.
+If `--port`, `--host`, `-Port`, or `-Host` is used during install, the chosen values are written into the shared root `.env` file.
 
 ## Features
 
@@ -182,6 +194,16 @@ You can also start on a custom port for a single run:
 .\run.ps1 -Port 9010
 ```
 
+You can also override host and port for a single run:
+
+```bash
+./run.sh --host 127.0.0.1 --port 9010
+```
+
+```powershell
+.\run.ps1 -Host 127.0.0.1 -Port 9010
+```
+
 If the frontend must be rebuilt, ensure the machine has:
 
 - `node` >= 22
@@ -217,7 +239,7 @@ If Docker Desktop is installed but not running yet, the installer warns and cont
 
 ## Shared configuration
 
-The repository now includes a shared root `.env` file used by:
+The repository now includes a shared root `.env` local file format, with `.env.example` checked in as the template, used by:
 
 - `daemon/config.py`
 - `install.sh`
@@ -236,7 +258,21 @@ Default values include:
 - `SPARK_AI_HUB_DATA_DIR`
 - `SPARK_AI_HUB_DB_PATH`
 
-Update `.env` if you want to keep a custom default port or path layout across runs.
+To create a local configuration manually:
+
+```bash
+cp .env.example .env
+```
+
+or in PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`install.sh` and `install.ps1` create `.env` from `.env.example` automatically when needed.
+
+Update `.env` if you want to keep a custom default host, port, or path layout across runs.
 
 ## Troubleshooting
 
@@ -284,6 +320,16 @@ On Windows PowerShell:
 
 ```powershell
 .\uninstall.ps1
+```
+
+Preserve local runtime data during uninstall:
+
+```bash
+./uninstall.sh --keep-data
+```
+
+```powershell
+.\uninstall.ps1 -KeepData
 ```
 
 The uninstaller now removes, in order:

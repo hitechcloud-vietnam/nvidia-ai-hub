@@ -2,9 +2,21 @@
 set -euo pipefail
 
 INSTALL_DIR="$HOME/spark-ai-hub"
+KEEP_DATA=false
+DATA_BACKUP_DIR=""
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+usage() {
+        cat <<'EOF'
+Usage: uninstall.sh [--keep-data]
+
+Options:
+    --keep-data  Preserve the local data/ directory during uninstall
+    -h, --help   Show this help message
+EOF
 }
 
 remove_path() {
@@ -18,6 +30,24 @@ remove_path() {
         echo "[spark-ai-hub] $label not found, skipping."
     fi
 }
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --keep-data)
+            KEEP_DATA=true
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "[spark-ai-hub] Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 echo ""
 echo "  Spark AI Hub Uninstaller"
@@ -72,7 +102,15 @@ fi
 
 if [ -d "$INSTALL_DIR" ]; then
     remove_path "$INSTALL_DIR/.venv" "backend virtual environment"
-    remove_path "$INSTALL_DIR/data" "backend runtime data"
+
+    if [ "$KEEP_DATA" = true ] && [ -d "$INSTALL_DIR/data" ]; then
+        DATA_BACKUP_DIR="$(mktemp -d)"
+        echo "[spark-ai-hub] Preserving backend runtime data..."
+        mv "$INSTALL_DIR/data" "$DATA_BACKUP_DIR/data"
+    else
+        remove_path "$INSTALL_DIR/data" "backend runtime data"
+    fi
+
     remove_path "$INSTALL_DIR/frontend/node_modules" "frontend node_modules cache"
     remove_path "$INSTALL_DIR/frontend/dist" "frontend build output"
 
@@ -97,6 +135,13 @@ if [ -d "$INSTALL_DIR" ]; then
     rm -rf "$INSTALL_DIR"
 else
     echo "[spark-ai-hub] $INSTALL_DIR not found, skipping."
+fi
+
+if [ "$KEEP_DATA" = true ] && [ -n "$DATA_BACKUP_DIR" ] && [ -d "$DATA_BACKUP_DIR/data" ]; then
+    mkdir -p "$INSTALL_DIR"
+    mv "$DATA_BACKUP_DIR/data" "$INSTALL_DIR/data"
+    rm -rf "$DATA_BACKUP_DIR"
+    echo "[spark-ai-hub] Preserved data restored to $INSTALL_DIR/data"
 fi
 
 echo ""
