@@ -13,7 +13,20 @@ from daemon.routers import recipes, containers, system
 from daemon.services.registry_service import load_recipes, get_recipes
 from daemon.services.docker_service import is_recipe_running, start_health_check
 
-DIST_DIR = settings.frontend_dir / "dist"
+
+def _resolve_dist_dir(frontend_dir: Path) -> Path:
+    candidates = [frontend_dir]
+    if frontend_dir.name != "dist":
+        candidates.append(frontend_dir / "dist")
+
+    for candidate in candidates:
+        if (candidate / "index.html").is_file():
+            return candidate
+
+    return candidates[-1]
+
+
+DIST_DIR = _resolve_dist_dir(settings.frontend_dir)
 
 
 async def _check_running_readiness():
