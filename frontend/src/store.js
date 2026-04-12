@@ -154,7 +154,7 @@ export const useStore = create((set, get) => ({
       get()._pollBuildStatus(slug)
     }
 
-    ws.onclose = (e) => {
+    ws.onclose = () => {
       if (get().installing === slug) {
         get()._pollBuildStatus(slug)
       }
