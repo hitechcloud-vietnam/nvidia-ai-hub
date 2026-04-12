@@ -33,9 +33,8 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - Security policy: [`SECURITY.md`](./SECURITY.md)
 - Code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Discussions: enable GitHub Discussions in repository settings for support questions, ideas, and roadmap conversations
 - Sponsorships and commercial licensing: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
-- Discussions: enable GitHub Discussions in the repository settings to use discussion forums for support, ideas, and roadmap conversations
-- Commercial contact: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 
 ## Quick install
 
