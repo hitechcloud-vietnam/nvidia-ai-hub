@@ -8,6 +8,7 @@ This document is the central index for repository governance, contribution workf
 - Security policy: [`../SECURITY.md`](../SECURITY.md)
 - Code of conduct: [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
 - Support guide: [`../SUPPORT.md`](../SUPPORT.md)
+- Pull request process: [`./pull-request-process.md`](./pull-request-process.md)
 - License: [`../LICENSE`](../LICENSE)
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
 - Licensing guide: [`./licensing.md`](./licensing.md)
@@ -75,6 +76,9 @@ Repository governance and licensing should remain consistent across:
 - `NOTICE`
 - `LICENSE`
 - `COMMERCIAL-LICENSE.md`
+- `.github/CODEOWNERS`
+- `.github/dependabot.yml`
+- `.github/labeler.yml`
 - issue and pull request templates
 
 When changing governance or licensing language, update all affected documents in the same pull request.

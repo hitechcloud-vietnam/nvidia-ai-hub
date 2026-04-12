@@ -1,0 +1,53 @@
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'daemon/**'
+          - 'requirements.txt'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'frontend/**'
+
+recipes:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'registry/recipes/**'
+
+scripts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'scripts/**'
+          - '*.ps1'
+          - '*.sh'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'docs/**'
+
+governance:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - 'CODE_OF_CONDUCT.md'
+          - 'CONTRIBUTING.md'
+          - 'SECURITY.md'
+          - 'SUPPORT.md'
+
+licensing:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'LICENSE'
+          - 'NOTICE'
+          - 'COMMERCIAL-LICENSE.md'
+          - 'docs/licensing.md'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'requirements.txt'
+          - 'frontend/package.json'
+          - 'frontend/package-lock.json'
+          - '.github/dependabot.yml'

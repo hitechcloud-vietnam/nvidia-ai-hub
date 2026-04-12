@@ -37,6 +37,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 - Support guide: [`SUPPORT.md`](./SUPPORT.md)
 - Governance index: [`docs/community.md`](./docs/community.md)
+- Pull request process: [`docs/pull-request-process.md`](./docs/pull-request-process.md)
 - Licensing guide: [`docs/licensing.md`](./docs/licensing.md)
 - Discussions: enable GitHub Discussions in repository settings for support questions, ideas, and roadmap conversations
 - Sponsorships and commercial licensing: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
