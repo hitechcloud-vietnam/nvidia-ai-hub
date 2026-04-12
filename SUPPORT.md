@@ -70,11 +70,7 @@ Consider running:
 ./check.sh
 ```
 
-On Windows:
-
-```powershell
-.\check.ps1
-```
+On Windows, run the equivalent checks from [`docs/local-development.md`](./docs/local-development.md).
 
 For backend startup validation:
 

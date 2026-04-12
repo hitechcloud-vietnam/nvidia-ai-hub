@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
 
-**Quick links:** [Overview](#overview) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
+**Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
@@ -20,6 +20,10 @@ The project includes:
 - A `FastAPI` backend for recipe, system, and container management
 - A `React + Vite` frontend served as static files by the backend
 - A Docker-based runtime model for AI applications in `registry/recipes`
+
+## Local development
+
+For a complete local dev workflow (backend + frontend), production build validation, and white-page troubleshooting, see [`docs/local-development.md`](./docs/local-development.md).
 
 ## Contributing
 
@@ -66,43 +70,11 @@ Install on a custom host and port:
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --host 127.0.0.1 --port 9010
 ```
 
-### Windows install
+### Windows local setup
 
-From a local clone in PowerShell:
+Use the local development guide for Windows-compatible commands:
 
-```powershell
-.\install.ps1
-```
-
-Install without starting the server:
-
-```powershell
-.\install.ps1 -NoStart
-```
-
-Install on a custom port:
-
-```powershell
-.\install.ps1 -Port 9010
-```
-
-Install on a custom host and port:
-
-```powershell
-.\install.ps1 -Host 127.0.0.1 -Port 9010
-```
-
-Check the environment on Windows:
-
-```powershell
-.\check.ps1
-```
-
-Run the app on Windows:
-
-```powershell
-.\run.ps1
-```
+- [`docs/local-development.md`](./docs/local-development.md)
 
 After installation, open:
 
@@ -198,19 +170,7 @@ Before starting, you can validate the machine state with:
 ./check.sh
 ```
 
-On Windows PowerShell:
-
-```powershell
-.\check.ps1
-```
-
 `run.sh` now checks whether `frontend/dist` is missing or outdated. If needed, it rebuilds the UI automatically before starting the backend.
-
-On Windows PowerShell, use:
-
-```powershell
-.\run.ps1
-```
 
 You can also start on a custom port for a single run:
 
@@ -218,18 +178,10 @@ You can also start on a custom port for a single run:
 ./run.sh --port 9010
 ```
 
-```powershell
-.\run.ps1 -Port 9010
-```
-
 You can also override host and port for a single run:
 
 ```bash
 ./run.sh --host 127.0.0.1 --port 9010
-```
-
-```powershell
-.\run.ps1 -Host 127.0.0.1 -Port 9010
 ```
 
 If the frontend must be rebuilt, ensure the machine has:
@@ -244,24 +196,7 @@ If the frontend must be rebuilt, ensure the machine has:
 
 ## Windows notes
 
-`install.ps1` is intended for Windows 11 or Windows Server environments with:
-
-- `winget` available
-- Docker Desktop support
-- PowerShell 7 or Windows PowerShell 5.1+
-
-The script will attempt to install:
-
-- Git
-- Python 3
-- Node.js LTS
-- Docker Desktop
-
-It then creates `.venv`, installs backend/frontend dependencies, builds `frontend/dist`, and optionally starts the API server.
-
-If Docker Desktop is installed but not running yet, the installer warns and continues. The UI can still start, but recipe lifecycle operations will need Docker to be running.
-
-`check.ps1` and `run.ps1` provide Windows equivalents for environment validation and local startup.
+Local development on Windows is supported through standard Python and npm commands. Use [`docs/local-development.md`](./docs/local-development.md) for setup and run instructions.
 
 `uninstall.ps1` provides a Windows-native cleanup flow.
 
@@ -273,9 +208,6 @@ The repository now includes a shared root `.env` local file format, with `.env.e
 - `install.sh`
 - `run.sh`
 - `check.sh`
-- `install.ps1`
-- `run.ps1`
-- `check.ps1`
 
 Default values include:
 
@@ -298,7 +230,7 @@ or in PowerShell:
 Copy-Item .env.example .env
 ```
 
-`install.sh` and `install.ps1` create `.env` from `.env.example` automatically when needed.
+`install.sh` creates `.env` from `.env.example` automatically when needed.
 
 Update `.env` if you want to keep a custom default host, port, or path layout across runs.
 
@@ -334,9 +266,9 @@ This means the checked-in or generated UI bundle is missing or stale, and the cu
 
 Start Docker Desktop or the Docker service, then re-run `./check.sh`. Spark AI Hub can start without Docker only in a limited UI/API state.
 
-### `install.ps1` cannot install dependencies automatically
+### Windows dependency installation fails
 
-This usually means `winget` is unavailable or blocked by policy. Install Git, Python 3, Node.js 22+, and Docker Desktop manually, then run `install.ps1` again.
+Install Git, Python 3.11+, Node.js 22+, and Docker Desktop manually, then follow [`docs/local-development.md`](./docs/local-development.md).
 
 ## Uninstall
 

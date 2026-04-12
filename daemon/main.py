@@ -15,9 +15,21 @@ from daemon.services.docker_service import is_recipe_running, start_health_check
 
 
 def _resolve_dist_dir(frontend_dir: Path) -> Path:
-    candidates = [frontend_dir]
+    # Prefer the built frontend bundle. The source `frontend/` directory also
+    # contains an index.html for Vite dev mode, but serving it from FastAPI
+    # causes a blank page because `/src/*.jsx` is not transpiled in production.
     if frontend_dir.name != "dist":
-        candidates.append(frontend_dir / "dist")
+        dist_candidate = frontend_dir / "dist"
+        if (dist_candidate / "index.html").is_file():
+            return dist_candidate
+
+        # If this looks like a Vite source directory, keep pointing to `dist`
+        # so the API serves 404 until a build exists, instead of serving raw
+        # source HTML that renders white.
+        if (frontend_dir / "src").is_dir() and (frontend_dir / "package.json").is_file():
+            return dist_candidate
+
+    candidates = [frontend_dir]
 
     for candidate in candidates:
         if (candidate / "index.html").is_file():

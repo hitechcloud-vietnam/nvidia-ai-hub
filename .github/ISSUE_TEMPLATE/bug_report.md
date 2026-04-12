@@ -52,7 +52,7 @@ List the checks you ran, for example:
 
 - [ ] `npm run build`
 - [ ] `npm run lint`
-- [ ] `./check.sh` or `.\check.ps1`
+- [ ] `./check.sh`
 - [ ] direct `uvicorn` startup
 - [ ] recipe registry load validation
 

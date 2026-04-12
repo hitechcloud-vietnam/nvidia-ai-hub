@@ -52,6 +52,8 @@ check.*            Environment validation entrypoints
 
 ## Local Development
 
+For the complete local setup and validation workflow, see [`docs/local-development.md`](./docs/local-development.md).
+
 ## Linux / macOS-style shell workflow
 
 Create local configuration:
@@ -74,23 +76,7 @@ Start the application:
 
 ## Windows PowerShell workflow
 
-Create local configuration:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Run environment checks:
-
-```powershell
-.\check.ps1
-```
-
-Start the application:
-
-```powershell
-.\run.ps1
-```
+Use the commands in [`docs/local-development.md`](./docs/local-development.md).
 
 ## Frontend Development
 

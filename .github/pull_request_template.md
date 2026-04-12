@@ -31,7 +31,7 @@ List the checks performed:
 - [ ] `npm run build`
 - [ ] `npm run lint`
 - [ ] backend startup with `uvicorn`
-- [ ] `./check.sh` or `.\check.ps1`
+- [ ] `./check.sh`
 - [ ] recipe registry load validation
 - [ ] manual UI verification
 
