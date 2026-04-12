@@ -1,7 +1,23 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 INSTALL_DIR="$HOME/spark-ai-hub"
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+remove_path() {
+    local target="$1"
+    local label="$2"
+
+    if [ -e "$target" ]; then
+        echo "[spark-ai-hub] Removing $label..."
+        rm -rf "$target"
+    else
+        echo "[spark-ai-hub] $label not found, skipping."
+    fi
+}
 
 echo ""
 echo "  Spark AI Hub Uninstaller"
@@ -10,7 +26,7 @@ echo ""
 
 # ---------- recipe containers ----------
 
-if command -v docker &>/dev/null; then
+if command_exists docker; then
     # Check if there are any spark-ai-hub containers
     containers=$(docker ps -a --filter "name=spark-ai-hub-" --format "{{.Names}}" 2>/dev/null)
 
@@ -50,6 +66,28 @@ if command -v docker &>/dev/null; then
             echo "[spark-ai-hub] Keeping installed apps."
         fi
     fi
+fi
+
+# ---------- clear project caches ----------
+
+if [ -d "$INSTALL_DIR" ]; then
+    remove_path "$INSTALL_DIR/.venv" "backend virtual environment"
+    remove_path "$INSTALL_DIR/data" "backend runtime data"
+    remove_path "$INSTALL_DIR/frontend/node_modules" "frontend node_modules cache"
+    remove_path "$INSTALL_DIR/frontend/dist" "frontend build output"
+
+    if [ -d "$INSTALL_DIR/registry/recipes" ]; then
+        echo "[spark-ai-hub] Removing generated recipe environment files..."
+        find "$INSTALL_DIR/registry/recipes" -maxdepth 2 -type f -name ".env" -print -delete 2>/dev/null || true
+    fi
+
+    echo "[spark-ai-hub] Removing Python cache directories..."
+    find "$INSTALL_DIR" -type d \( -name "__pycache__" -o -name ".pytest_cache" -o -name ".mypy_cache" -o -name ".ruff_cache" \) -prune -print | \
+        while IFS= read -r cache_dir; do
+            [ -n "$cache_dir" ] && rm -rf "$cache_dir"
+        done
+else
+    echo "[spark-ai-hub] $INSTALL_DIR not found, skipping cache cleanup."
 fi
 
 # ---------- remove spark-ai-hub directory ----------

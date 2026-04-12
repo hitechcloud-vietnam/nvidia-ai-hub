@@ -7,6 +7,7 @@ PORT=9000
 NODE_MAJOR=22
 FRONTEND_DIR="frontend"
 DIST_INDEX="frontend/dist/index.html"
+START_AFTER_INSTALL=true
 
 echo ""
 echo "  Spark AI Hub Installer"
@@ -34,6 +35,16 @@ ensure_apt_updated() {
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+usage() {
+        cat <<'EOF'
+Usage: install.sh [--no-start]
+
+Options:
+    --no-start   Install/update dependencies and build the frontend, but do not start the server
+    -h, --help   Show this help message
+EOF
 }
 
 node_major_version() {
@@ -104,6 +115,24 @@ frontend_needs_build() {
 
     return 1
 }
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --no-start)
+            START_AFTER_INSTALL=false
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "[spark-ai-hub] Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # ---------- git ----------
 
@@ -177,11 +206,16 @@ pip install -q -r requirements.txt
 
 # ---------- frontend deps + production build ----------
 
+should_build_frontend=false
+if frontend_needs_build; then
+    should_build_frontend=true
+fi
+
 echo "[spark-ai-hub] Installing frontend dependencies..."
 cd "$FRONTEND_DIR"
 eval "$(npm_install_command)"
 
-if frontend_needs_build; then
+if [ "$should_build_frontend" = true ]; then
     echo "[spark-ai-hub] Building frontend..."
     npm run build
 else
@@ -195,6 +229,15 @@ cd ..
 echo ""
 echo "[spark-ai-hub] Installation complete!"
 echo "[spark-ai-hub] Backend API and frontend UI are ready."
+
+if [ "$START_AFTER_INSTALL" = false ]; then
+    echo "[spark-ai-hub] --no-start was specified, so the server was not started."
+    echo "[spark-ai-hub] Run ./check.sh to verify the environment before launch."
+    echo "[spark-ai-hub] Run ./run.sh to start Spark AI Hub later."
+    echo ""
+    exit 0
+fi
+
 echo "[spark-ai-hub] Starting Spark AI Hub on port $PORT..."
 echo "[spark-ai-hub] Open http://localhost:$PORT in your browser"
 echo ""
