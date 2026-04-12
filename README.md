@@ -40,6 +40,18 @@ Install without starting the server:
 .\install.ps1 -NoStart
 ```
 
+Check the environment on Windows:
+
+```powershell
+.\check.ps1
+```
+
+Run the app on Windows:
+
+```powershell
+.\run.ps1
+```
+
 After installation, open:
 
 - `http://localhost:9000`
@@ -132,7 +144,19 @@ Before starting, you can validate the machine state with:
 ./check.sh
 ```
 
+On Windows PowerShell:
+
+```powershell
+.\check.ps1
+```
+
 `run.sh` now checks whether `frontend/dist` is missing or outdated. If needed, it rebuilds the UI automatically before starting the backend.
+
+On Windows PowerShell, use:
+
+```powershell
+.\run.ps1
+```
 
 If the frontend must be rebuilt, ensure the machine has:
 
@@ -162,6 +186,8 @@ The script will attempt to install:
 It then creates `.venv`, installs backend/frontend dependencies, builds `frontend/dist`, and optionally starts the API server.
 
 If Docker Desktop is installed but not running yet, the installer warns and continues. The UI can still start, but recipe lifecycle operations will need Docker to be running.
+
+`check.ps1` and `run.ps1` provide Windows equivalents for environment validation and local startup.
 
 ## Troubleshooting
 

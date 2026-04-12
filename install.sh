@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$(dirname "$0")"
+source ./scripts/common.sh
+
 REPO="https://github.com/hitechcloud-vietnam/spark-ai-hub.git"
 INSTALL_DIR="$HOME/spark-ai-hub"
-PORT=9000
-NODE_MAJOR=22
-FRONTEND_DIR="frontend"
-DIST_INDEX="frontend/dist/index.html"
+PORT="$SPARK_AI_HUB_PORT"
+NODE_MAJOR="$SPARK_AI_HUB_NODE_MAJOR"
 START_AFTER_INSTALL=true
 
 echo ""
@@ -33,10 +34,6 @@ ensure_apt_updated() {
     fi
 }
 
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
 usage() {
         cat <<'EOF'
 Usage: install.sh [--no-start]
@@ -47,18 +44,9 @@ Options:
 EOF
 }
 
-node_major_version() {
-    if ! command_exists node; then
-        echo "0"
-        return
-    fi
-
-    node -p "process.versions.node.split('.')[0]" 2>/dev/null || echo "0"
-}
-
 ensure_nodejs() {
     local installed_major
-    installed_major="$(node_major_version)"
+    installed_major="$(spark_node_major_version)"
 
     if [ "$installed_major" -ge "$NODE_MAJOR" ]; then
         return
@@ -78,42 +66,6 @@ ensure_nodejs() {
 
     need_sudo apt-get update -qq
     need_sudo apt-get install -y -qq nodejs
-}
-
-npm_install_command() {
-    if [ -f package-lock.json ]; then
-        echo "npm ci --no-fund --no-audit"
-    else
-        echo "npm install --no-fund --no-audit"
-    fi
-}
-
-frontend_needs_build() {
-    if [ ! -f "$DIST_INDEX" ]; then
-        return 0
-    fi
-
-    if [ "$FRONTEND_DIR/package.json" -nt "$DIST_INDEX" ]; then
-        return 0
-    fi
-
-    if [ -f "$FRONTEND_DIR/package-lock.json" ] && [ "$FRONTEND_DIR/package-lock.json" -nt "$DIST_INDEX" ]; then
-        return 0
-    fi
-
-    if [ -f "$FRONTEND_DIR/index.html" ] && [ "$FRONTEND_DIR/index.html" -nt "$DIST_INDEX" ]; then
-        return 0
-    fi
-
-    if [ -f "$FRONTEND_DIR/vite.config.js" ] && [ "$FRONTEND_DIR/vite.config.js" -nt "$DIST_INDEX" ]; then
-        return 0
-    fi
-
-    if find "$FRONTEND_DIR/src" "$FRONTEND_DIR/public" -type f -newer "$DIST_INDEX" 2>/dev/null | grep -q .; then
-        return 0
-    fi
-
-    return 1
 }
 
 while [ "$#" -gt 0 ]; do
@@ -136,7 +88,7 @@ done
 
 # ---------- git ----------
 
-if ! command_exists git; then
+if ! spark_command_exists git; then
     echo "[spark-ai-hub] Installing git..."
     ensure_apt_updated
     need_sudo apt-get install -y -qq git
@@ -144,7 +96,7 @@ fi
 
 # ---------- python3 + venv ----------
 
-if ! command_exists python3; then
+if ! spark_command_exists python3; then
     echo "[spark-ai-hub] Installing python3..."
     ensure_apt_updated
     need_sudo apt-get install -y -qq python3 python3-venv python3-pip
@@ -156,7 +108,7 @@ fi
 
 # ---------- docker ----------
 
-if ! command_exists docker; then
+if ! spark_command_exists docker; then
     echo "[spark-ai-hub] Installing Docker Engine..."
     ensure_apt_updated
     need_sudo apt-get install -y -qq ca-certificates curl
@@ -207,22 +159,19 @@ pip install -q -r requirements.txt
 # ---------- frontend deps + production build ----------
 
 should_build_frontend=false
-if frontend_needs_build; then
+if spark_frontend_needs_build; then
     should_build_frontend=true
 fi
 
 echo "[spark-ai-hub] Installing frontend dependencies..."
-cd "$FRONTEND_DIR"
-eval "$(npm_install_command)"
+spark_install_frontend_dependencies
 
 if [ "$should_build_frontend" = true ]; then
     echo "[spark-ai-hub] Building frontend..."
-    npm run build
+    spark_build_frontend
 else
     echo "[spark-ai-hub] Frontend build is up to date, skipping rebuild."
 fi
-
-cd ..
 
 # ---------- launch ----------
 

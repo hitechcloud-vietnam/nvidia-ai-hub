@@ -6,12 +6,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+Set-Location $PSScriptRoot
+. (Join-Path $PSScriptRoot 'scripts\common.ps1')
+
 $Repo = 'https://github.com/hitechcloud-vietnam/spark-ai-hub.git'
 $InstallDir = Join-Path $HOME 'spark-ai-hub'
-$Port = 9000
-$NodeMajor = 22
-$FrontendDir = 'frontend'
-$DistIndex = Join-Path $FrontendDir 'dist\index.html'
 $script:PythonLauncher = @()
 
 function Write-Section {
@@ -27,7 +26,7 @@ function Refresh-Path {
 
 function Test-Command {
     param([string]$Name)
-    return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
+    return Test-SparkCommand $Name
 }
 
 function Install-WithWinget {
@@ -75,63 +74,6 @@ function Invoke-Python {
     & $launcher @launcherArgs @Arguments
 }
 
-function Get-NodeMajorVersion {
-    if (-not (Test-Command 'node')) {
-        return 0
-    }
-
-    try {
-        return [int](& node -p "process.versions.node.split('.')[0]")
-    }
-    catch {
-        return 0
-    }
-}
-
-function Get-NpmInstallArgs {
-    if (Test-Path 'package-lock.json') {
-        return @('ci', '--no-fund', '--no-audit')
-    }
-
-    return @('install', '--no-fund', '--no-audit')
-}
-
-function Test-FrontendNeedsBuild {
-    if (-not (Test-Path $DistIndex)) {
-        return $true
-    }
-
-    $distTime = (Get-Item $DistIndex).LastWriteTimeUtc
-    $candidateFiles = @(
-        (Join-Path $FrontendDir 'package.json'),
-        (Join-Path $FrontendDir 'package-lock.json'),
-        (Join-Path $FrontendDir 'index.html'),
-        (Join-Path $FrontendDir 'vite.config.js')
-    )
-
-    foreach ($candidate in $candidateFiles) {
-        if ((Test-Path $candidate) -and ((Get-Item $candidate).LastWriteTimeUtc -gt $distTime)) {
-            return $true
-        }
-    }
-
-    foreach ($sourceDir in @((Join-Path $FrontendDir 'src'), (Join-Path $FrontendDir 'public'))) {
-        if (-not (Test-Path $sourceDir)) {
-            continue
-        }
-
-        $newerFile = Get-ChildItem -Path $sourceDir -File -Recurse | Where-Object {
-            $_.LastWriteTimeUtc -gt $distTime
-        } | Select-Object -First 1
-
-        if ($null -ne $newerFile) {
-            return $true
-        }
-    }
-
-    return $false
-}
-
 function Ensure-Git {
     if (Test-Command 'git') {
         return
@@ -157,14 +99,14 @@ function Ensure-Python {
 }
 
 function Ensure-Node {
-    if ((Get-NodeMajorVersion) -ge $NodeMajor) {
+    if ((Get-SparkNodeMajorVersion) -ge $script:SparkNodeMajor) {
         return
     }
 
     Install-WithWinget -Id 'OpenJS.NodeJS.LTS' -DisplayName 'Node.js LTS'
 
-    if ((Get-NodeMajorVersion) -lt $NodeMajor) {
-        throw "Node.js $NodeMajor or newer is required to build the frontend."
+    if ((Get-SparkNodeMajorVersion) -lt $script:SparkNodeMajor) {
+        throw "Node.js $($script:SparkNodeMajor) or newer is required to build the frontend."
     }
 }
 
@@ -246,21 +188,18 @@ Write-Section 'Upgrading pip...'
 Write-Section 'Installing Python dependencies...'
 & $venvPython -m pip install -r requirements.txt
 
-$shouldBuildFrontend = Test-FrontendNeedsBuild
+$shouldBuildFrontend = Test-SparkFrontendNeedsBuild
 
 Write-Section 'Installing frontend dependencies...'
-Set-Location (Join-Path $InstallDir $FrontendDir)
-& npm @(Get-NpmInstallArgs)
+Install-SparkFrontendDependencies
 
 if ($shouldBuildFrontend) {
     Write-Section 'Building frontend...'
-    & npm run build
+    Build-SparkFrontend
 }
 else {
     Write-Section 'Frontend build is up to date, skipping rebuild.'
 }
-
-Set-Location $InstallDir
 
 Write-Host ''
 Write-Section 'Installation complete!'
@@ -268,13 +207,13 @@ Write-Section 'Backend API and frontend UI are ready.'
 
 if ($NoStart) {
     Write-Section 'NoStart was specified, so the server was not started.'
-    Write-Section 'Run .\check.sh in a Bash shell to verify the environment before launch.'
+        Write-Section 'Run .\check.ps1 to verify the environment before launch.'
     Write-Section 'Start later with: .venv\Scripts\python.exe -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000'
     Write-Host ''
     exit 0
 }
 
-Write-Section "Starting Spark AI Hub on port $Port..."
-Write-Section "Open http://localhost:$Port in your browser"
+    Write-Section "Starting Spark AI Hub on port $($script:SparkPort)..."
+    Write-Section "Open http://localhost:$($script:SparkPort) in your browser"
 Write-Host ''
-& $venvPython -m uvicorn daemon.main:app --host 0.0.0.0 --port $Port
+    & $venvPython -m uvicorn daemon.main:app --host 0.0.0.0 --port $script:SparkPort
