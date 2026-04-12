@@ -1,6 +1,6 @@
 services:
   firered-image-edit:
-    image: ghcr.io/waxacabytes/firered-image-edit-spark-ai-hub:latest
+    image: ghcr.io/hitechcloud-vietnam/firered-image-edit-spark-ai-hub:latest
     container_name: spark-ai-hub-firered-image-edit
     ports:
       - "7865:7860"

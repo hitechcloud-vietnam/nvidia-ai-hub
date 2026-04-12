@@ -5,7 +5,7 @@ description: "Generate tempo-synced, key-aware musical loops and production-read
 author: "RoyalCities"
 source: "spark-ai-hub"
 website: "https://huggingface.co/RoyalCities/Foundation-1"
-upstream: "https://github.com/WaxacaBytes/foundation-1-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/foundation-1-spark-ai-hub"
 fork: "https://github.com/RoyalCities/RC-stable-audio-tools"
 category: multi-modal
 tags:

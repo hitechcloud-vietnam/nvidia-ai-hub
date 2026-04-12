@@ -1,6 +1,6 @@
 services:
   chatterbox-turbo:
-    image: ghcr.io/waxacabytes/chatterbox-turbo-spark-ai-hub:latest
+    image: ghcr.io/hitechcloud-vietnam/chatterbox-turbo-spark-ai-hub:latest
     container_name: spark-ai-hub-chatterbox-turbo
     ports:
       - "7864:7860"

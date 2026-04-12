@@ -5,7 +5,7 @@ description: "Generate images from text prompts with Qwen-Image-2512, the update
 author: "Qwen"
 source: "spark-ai-hub"
 website: "https://huggingface.co/Qwen/Qwen-Image-2512"
-upstream: "https://github.com/WaxacaBytes/qwen-image-2512-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/qwen-image-2512-spark-ai-hub"
 fork: "https://huggingface.co/Qwen/Qwen-Image-2512"
 category: image-gen
 categories:

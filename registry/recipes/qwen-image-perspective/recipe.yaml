@@ -5,7 +5,7 @@ description: "Reframe an image from new viewpoints with 3D camera controls for a
 author: "multimodalart"
 source: "spark-ai-hub"
 website: "https://huggingface.co/fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA"
-upstream: "https://github.com/WaxacaBytes/qwen-image-perspective-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/qwen-image-perspective-spark-ai-hub"
 fork: "https://huggingface.co/spaces/multimodalart/qwen-image-multiple-angles-3d-camera"
 category: image-gen
 categories:

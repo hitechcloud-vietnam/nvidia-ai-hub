@@ -5,7 +5,7 @@ description: "Edit up to 3 images with natural-language instructions using FireR
 author: "FireRed Team"
 source: "spark-ai-hub"
 website: "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1"
-upstream: "https://github.com/WaxacaBytes/firered-image-edit-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/firered-image-edit-spark-ai-hub"
 fork: "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1"
 category: image-gen
 categories:

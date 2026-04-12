@@ -5,7 +5,7 @@ description: "Clone voices, generate speech in multiple languages across several
 author: "Jamie Pine"
 source: "spark-ai-hub"
 website: "https://voicebox.sh/"
-upstream: "https://github.com/WaxacaBytes/voicebox-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/voicebox-spark-ai-hub"
 fork: "https://github.com/jamiepine/voicebox"
 category: multi-modal
 tags:

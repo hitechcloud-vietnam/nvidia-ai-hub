@@ -5,7 +5,7 @@ description: "Generate expressive English speech and clone voices from short aud
 author: "Resemble AI"
 source: "spark-ai-hub"
 website: "https://github.com/resemble-ai/chatterbox"
-upstream: "https://github.com/WaxacaBytes/chatterbox-turbo-spark-ai-hub"
+upstream: "https://github.com/hitechcloud-vietnam/chatterbox-turbo-spark-ai-hub"
 fork: "https://github.com/resemble-ai/chatterbox"
 category: multi-modal
 tags:

@@ -5,7 +5,7 @@ description: "Create and run node-based workflows for image, video, 3D, and audi
 author: "ComfyAnonymous"
 source: "spark-ai-hub"
 website: "https://www.comfy.org/"
-upstream: "https://github.com/WaxacaBytes/comfyui-spark"
+upstream: "https://github.com/hitechcloud-vietnam/comfyui-spark
 fork: "https://github.com/Comfy-Org/ComfyUI"
 category: image-gen
 categories:

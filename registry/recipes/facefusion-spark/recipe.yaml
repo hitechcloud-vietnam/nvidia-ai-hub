@@ -5,7 +5,7 @@ description: "Perform face swaps, lip-sync, and face enhancement across images a
 author: "FaceFusion"
 source: "spark-ai-hub"
 website: "https://github.com/facefusion/facefusion"
-upstream: "https://github.com/WaxacaBytes/facefusion-spark"
+upstream: "https://github.com/hitechcloud-vietnam/facefusion-spark"
 fork: "https://github.com/facefusion/facefusion"
 category: image-gen
 tags:

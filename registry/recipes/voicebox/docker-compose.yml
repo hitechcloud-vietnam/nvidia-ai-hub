@@ -1,6 +1,6 @@
 services:
   voicebox:
-    image: ghcr.io/waxacabytes/voicebox-spark-ai-hub:latest
+    image: ghcr.io/hitechcloud-vietnam/voicebox-spark-ai-hub:latest
     container_name: spark-ai-hub-voicebox
     ports:
       - "7867:17493"
