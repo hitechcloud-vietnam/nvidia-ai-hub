@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -47,34 +47,23 @@ export default function System() {
   const recipes = useStore((s) => s.recipes)
   const theme = useStore((s) => s.theme)
   const [history, setHistory] = useState([])
-  const metricsRef = useRef(metrics)
 
   const runningApps = recipes.filter((r) => r.running || r.starting)
 
   useEffect(() => {
-    metricsRef.current = metrics
+    if (!metrics) return
+    setHistory((prev) => {
+      const next = [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
+          gpu: metrics.gpu_utilization,
+          temp: metrics.gpu_temperature,
+        },
+      ]
+      return next.slice(-60)
+    })
   }, [metrics])
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const currentMetrics = metricsRef.current
-      if (!currentMetrics) return
-
-      setHistory((prev) => {
-        const next = [
-          ...prev,
-          {
-            time: new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
-            gpu: currentMetrics.gpu_utilization,
-            temp: currentMetrics.gpu_temperature,
-          },
-        ]
-        return next.slice(-60)
-      })
-    }, 1000)
-
-    return () => window.clearInterval(intervalId)
-  }, [])
 
   if (!metrics) {
     return (
@@ -85,6 +74,7 @@ export default function System() {
     )
   }
 
+  const ramPct = metrics.ram_total_gb > 0 ? (metrics.ram_used_gb / metrics.ram_total_gb) * 100 : 0
   const gridColor = theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'
   const axisColor = theme === 'light' ? '#8a8a9a' : '#6E6C7A'
   const tooltipBg = theme === 'light' ? '#ffffff' : '#161625'

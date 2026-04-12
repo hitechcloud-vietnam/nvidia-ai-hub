@@ -12,9 +12,7 @@ export function useMetrics() {
       ws.onmessage = (e) => {
         try {
           setMetrics(JSON.parse(e.data))
-        } catch {
-          console.warn('Failed to parse metrics payload')
-        }
+        } catch {}
       }
       ws.onclose = () => setTimeout(connect, 3000)
       ws.onerror = () => ws.close()

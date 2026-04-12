@@ -8,8 +8,6 @@ node_modules/
 
 # Data
 data/
-.env
-!.env.example
 
 # Build output
 frontend/dist/

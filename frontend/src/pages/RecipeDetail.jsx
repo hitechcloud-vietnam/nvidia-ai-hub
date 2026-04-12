@@ -38,7 +38,6 @@ export default function RecipeDetail() {
   const [hfToken, setHfToken] = useState('')
   const [hfSaving, setHfSaving] = useState(false)
   const [hfError, setHfError] = useState('')
-  const logoUrl = useThemedLogo(recipe?.logo)
 
   const isBuilding = installing === recipe?.slug
   const isUpdating = updating === recipe?.slug
@@ -85,6 +84,7 @@ export default function RecipeDetail() {
   }
 
   const isRemoving = removing === recipe.slug
+  const logoUrl = useThemedLogo(recipe.logo)
   const isReady = recipe.ready
   const cLogs = containerLogs[recipe.slug] || []
   const logLines = isBusy ? (buildLogs[recipe.slug] || []) : cLogs

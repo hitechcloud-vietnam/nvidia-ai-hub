@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
 
@@ -64,6 +64,8 @@ export default function Catalog({ search = '' }) {
   const installRecipe = useStore((s) => s.installRecipe)
   const [category, setCategory] = useState('all')
 
+  const heroIndex = useRef(Math.floor(Math.random() * 1000))
+
   const filtered = recipes.filter((r) => {
     const recipeCategories = Array.isArray(r.categories) && r.categories.length > 0
       ? r.categories
@@ -84,15 +86,8 @@ export default function Catalog({ search = '' }) {
   }, [filtered])
 
   const recipesWithBanners = recipes.filter((r) => getBanner(r.slug))
-  const heroIndex = useMemo(() => {
-    if (recipesWithBanners.length === 0) return 0
-    const seed = recipesWithBanners.reduce((total, recipe) => {
-      return total + Array.from(recipe.slug).reduce((sum, char) => sum + char.charCodeAt(0), 0)
-    }, 0)
-    return seed % recipesWithBanners.length
-  }, [recipesWithBanners])
   const featured = recipesWithBanners.length > 0
-    ? recipesWithBanners[heroIndex]
+    ? recipesWithBanners[heroIndex.current % recipesWithBanners.length]
     : null
   const bannerConf = featured ? getBanner(featured.slug) : null
 
