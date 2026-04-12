@@ -1,6 +1,6 @@
 services:
   facefusion:
-    image: abelpc/facefusion-spark:latest
+    image: ghcr.io/hitechcloud-vietnam/facefusion-spark:latest
     container_name: spark-ai-hub-facefusion
     ports:
       - "7860:7860"

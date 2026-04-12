@@ -1,6 +1,6 @@
 services:
   comfyui:
-    image: abelpc/comfyui-spark:latest
+    image: ghcr.io/hitechcloud-vietnam/comfyui-spark:latest
     container_name: spark-ai-hub-comfyui
     ports:
       - "8188:8188"

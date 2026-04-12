@@ -1,6 +1,6 @@
 services:
   hunyuan3d:
-    image: abelpc/hunyuan3d-spark:latest
+    image: ghcr.io/hitechcloud-vietnam/hunyuan3d-spark:latest
     container_name: spark-ai-hub-hunyuan3d
     ports:
       - "7861:7860"
