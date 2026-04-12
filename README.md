@@ -1,5 +1,7 @@
 # Spark AI Hub
 
+[![Contributing](https://img.shields.io/badge/Contributing-Guide-2ea44f?style=flat-square)](./CONTRIBUTING.md)
+
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
 ![Spark AI Hub](SparkDeck.png)
@@ -351,4 +353,6 @@ For repository contribution standards and templates, see [`CONTRIBUTING.md`](./C
 
 ## License
 
-MIT
+This repository is licensed for **strictly non-commercial use** under the terms of [`LICENSE`](./LICENSE).
+
+Commercial use, client delivery, paid services, SaaS distribution, marketplace redistribution, and other revenue-generating usage require separate written permission from the copyright holder. See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md).
