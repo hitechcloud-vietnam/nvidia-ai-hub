@@ -14,7 +14,7 @@ If this guide and the license text ever differ, the license text controls.
 
 `Spark AI Hub` is source-available under a strictly non-commercial license.
 
-Copyright (c) 2026 Nguyen Thanh An by Pho Tue SoftWare Solutions JSC
+Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
 
 This means:
 

@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
 
+**Quick links:** [Overview](#overview) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
+
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
 ![Spark AI Hub](SparkDeck.png)
@@ -374,6 +376,6 @@ For repository contribution standards and templates, see [`CONTRIBUTING.md`](./C
 
 This repository is licensed for **strictly non-commercial use** under the terms of [`LICENSE`](./LICENSE).
 
-Copyright (c) 2026 Nguyen Thanh An by Pho Tue SoftWare Solutions JSC.
+Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC.
 
 Commercial use, client delivery, paid services, SaaS distribution, marketplace redistribution, and other revenue-generating usage require separate written permission from the copyright holder. See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md) and [`docs/licensing.md`](./docs/licensing.md).

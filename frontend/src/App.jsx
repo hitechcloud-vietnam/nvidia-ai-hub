@@ -181,6 +181,26 @@ function About() {
               <span>Report an Issue</span>
               <ExternalLinkIcon className="w-3.5 h-3.5 text-text-dim ml-auto" />
             </a>
+            <a
+              href="https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/docs/community.md"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 text-sm text-text hover:text-primary transition-colors no-underline"
+            >
+              <InfoIcon className="w-5 h-5 text-text-dim" />
+              <span>Community and Governance</span>
+              <ExternalLinkIcon className="w-3.5 h-3.5 text-text-dim ml-auto" />
+            </a>
+            <a
+              href="https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/docs/licensing.md"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 text-sm text-text hover:text-primary transition-colors no-underline"
+            >
+              <ShieldIcon className="w-5 h-5 text-text-dim" />
+              <span>Licensing Guide</span>
+              <ExternalLinkIcon className="w-3.5 h-3.5 text-text-dim ml-auto" />
+            </a>
           </div>
         </div>
 
@@ -192,7 +212,7 @@ function About() {
             rel="noreferrer"
             className="text-sm text-text-muted hover:text-primary transition-colors no-underline"
           >
-            HiTechCloud by Pho Tue Software Solutions JSC
+            HiTechCloud by Pho Tue SoftWare Solutions JSC
           </a>
         </div>
       </div>
@@ -253,6 +273,15 @@ function GaugeIcon({ className }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
       <path d="M12 6v6l4 2" />
+    </svg>
+  )
+}
+
+function ShieldIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l7 3v6c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V6l7-3z" />
+      <path d="M9.5 12.5l1.75 1.75L14.5 11" />
     </svg>
   )
 }
