@@ -111,6 +111,8 @@ def _render_runtime_env(template_text: str) -> str:
         "minio_password": secrets.token_urlsafe(24),
     }
     generated_values = {
+        "OPENCLAW_GATEWAY_TOKEN": secrets.token_hex(32),
+        "GOG_KEYRING_PASSWORD": secrets.token_urlsafe(24),
         "USER_AUTH_SECRET": secrets.token_urlsafe(48),
         "POSTGRES_PASSWORD": secrets.token_urlsafe(24),
         "OPENSEARCH_ADMIN_PASSWORD": secrets.token_urlsafe(24),

@@ -1,0 +1,31 @@
+name: "OpenClaw"
+slug: openclaw
+version: "1.0.0"
+description: "Personal AI assistant gateway with a built-in dashboard, persistent workspace, device pairing, and Docker-managed runtime."
+author: "OpenClaw"
+source: "official"
+website: "https://openclaw.ai/"
+upstream: "https://github.com/openclaw/openclaw"
+category: llm
+tags:
+  - assistant
+  - agent
+  - gateway
+  - dashboard
+  - tools
+icon: "🦞"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 18789
+  path: "/"
+  health_path: "/healthz"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: official
