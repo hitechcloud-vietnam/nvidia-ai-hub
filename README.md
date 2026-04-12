@@ -27,6 +27,14 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Security policy: [`SECURITY.md`](./SECURITY.md)
 - Community and collaboration rules: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 
+## Community
+
+- Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- Security policy: [`SECURITY.md`](./SECURITY.md)
+- Code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Discussions: enable GitHub Discussions in the repository settings to use discussion forums for support, ideas, and roadmap conversations
+- Commercial contact: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
+
 ## Quick install
 
 ```bash
