@@ -3,6 +3,7 @@
 [![Contributing](https://img.shields.io/badge/Contributing-Guide-2ea44f?style=flat-square)](./CONTRIBUTING.md)
 [![Security](https://img.shields.io/badge/Security-Policy-blue?style=flat-square)](./SECURITY.md)
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
 
 **Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
 
@@ -32,6 +33,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - Security policy: [`SECURITY.md`](./SECURITY.md)
 - Code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Sponsorships and commercial licensing: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 - Discussions: enable GitHub Discussions in the repository settings to use discussion forums for support, ideas, and roadmap conversations
 - Commercial contact: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 

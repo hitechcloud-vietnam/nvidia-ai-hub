@@ -270,3 +270,12 @@ By contributing to this repository, you agree that your contributions will be li
 If the expected implementation approach is unclear, open an issue before starting large work.
 
 Clear, incremental contributions are preferred over broad rewrites.
+
+## Community Resources
+
+- Contribution workflow: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- Security reporting: [`SECURITY.md`](./SECURITY.md)
+- Collaboration rules: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Commercial licensing and sponsorship path: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
+
+If GitHub Discussions is enabled for the repository, prefer Discussions for roadmap ideas, usage questions, and broader community conversations that do not require an actionable issue.
