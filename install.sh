@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 REPO="https://github.com/hitechcloud-vietnam/spark-ai-hub.git"
 INSTALL_DIR="$HOME/spark-ai-hub"
 PORT=9000
 NODE_MAJOR=22
+FRONTEND_DIR="frontend"
+DIST_INDEX="frontend/dist/index.html"
 
 echo ""
 echo "  Spark AI Hub Installer"
@@ -65,6 +67,42 @@ ensure_nodejs() {
 
     need_sudo apt-get update -qq
     need_sudo apt-get install -y -qq nodejs
+}
+
+npm_install_command() {
+    if [ -f package-lock.json ]; then
+        echo "npm ci --no-fund --no-audit"
+    else
+        echo "npm install --no-fund --no-audit"
+    fi
+}
+
+frontend_needs_build() {
+    if [ ! -f "$DIST_INDEX" ]; then
+        return 0
+    fi
+
+    if [ "$FRONTEND_DIR/package.json" -nt "$DIST_INDEX" ]; then
+        return 0
+    fi
+
+    if [ -f "$FRONTEND_DIR/package-lock.json" ] && [ "$FRONTEND_DIR/package-lock.json" -nt "$DIST_INDEX" ]; then
+        return 0
+    fi
+
+    if [ -f "$FRONTEND_DIR/index.html" ] && [ "$FRONTEND_DIR/index.html" -nt "$DIST_INDEX" ]; then
+        return 0
+    fi
+
+    if [ -f "$FRONTEND_DIR/vite.config.js" ] && [ "$FRONTEND_DIR/vite.config.js" -nt "$DIST_INDEX" ]; then
+        return 0
+    fi
+
+    if find "$FRONTEND_DIR/src" "$FRONTEND_DIR/public" -type f -newer "$DIST_INDEX" 2>/dev/null | grep -q .; then
+        return 0
+    fi
+
+    return 1
 }
 
 # ---------- git ----------
@@ -140,11 +178,16 @@ pip install -q -r requirements.txt
 # ---------- frontend deps + production build ----------
 
 echo "[spark-ai-hub] Installing frontend dependencies..."
-cd frontend
-npm install
+cd "$FRONTEND_DIR"
+eval "$(npm_install_command)"
 
-echo "[spark-ai-hub] Building frontend..."
-npm run build
+if frontend_needs_build; then
+    echo "[spark-ai-hub] Building frontend..."
+    npm run build
+else
+    echo "[spark-ai-hub] Frontend build is up to date, skipping rebuild."
+fi
+
 cd ..
 
 # ---------- launch ----------

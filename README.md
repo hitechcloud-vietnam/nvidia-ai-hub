@@ -104,6 +104,13 @@ If the repository is already available locally:
 ./run.sh
 ```
 
+`run.sh` now checks whether `frontend/dist` is missing or outdated. If needed, it rebuilds the UI automatically before starting the backend.
+
+If the frontend must be rebuilt, ensure the machine has:
+
+- `node` >= 22
+- `npm`
+
 ### Default service URL
 
 - UI: `http://localhost:9000`
@@ -130,6 +137,10 @@ Ensure `python3-venv` is installed. The installer attempts to install it automat
 ### Frontend build fails because of Node.js version
 
 The installer installs Node.js 22.x when the detected version is too old. Re-run the installer if the system Node version changed unexpectedly.
+
+### `run.sh` exits with a frontend build requirement message
+
+This means the checked-in or generated UI bundle is missing or stale, and the current machine does not have a compatible Node.js toolchain. Run `install.sh` to provision Node.js and rebuild the frontend.
 
 ## Uninstall
 
