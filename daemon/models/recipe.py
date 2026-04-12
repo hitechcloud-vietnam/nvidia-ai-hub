@@ -31,6 +31,12 @@ class RecipeIntegration(BaseModel):
     curl_example: str = ""
 
 
+class RecipeCommand(BaseModel):
+    label: str
+    command: str
+    description: str = ""
+
+
 class Recipe(BaseModel):
     name: str
     slug: str
@@ -49,6 +55,7 @@ class Recipe(BaseModel):
     ui: RecipeUI = RecipeUI()
     docker: RecipeDocker = RecipeDocker()
     integration: RecipeIntegration | None = None
+    commands: list[RecipeCommand] = []
     source: str = "community"  # spark-ai-hub | official | community
     status: str = "experimental"
     depends_on: list[str] = []

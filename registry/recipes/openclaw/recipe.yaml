@@ -1,0 +1,39 @@
+name: "OpenClaw"
+slug: openclaw
+version: "1.0.0"
+description: "Open-source gateway and Control UI for local AI agents, tools, and channels. This recipe persists the OpenClaw config directory outside the container so gateway state and workspace data survive restarts."
+author: "OpenClaw"
+source: "official"
+website: "https://openclaw.ai/"
+upstream: "https://github.com/openclaw/openclaw"
+category: multi-modal
+tags:
+  - agents
+  - gateway
+  - control-ui
+  - tools
+  - channels
+icon: "🦞"
+logo: "/logos/openclaw-color.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 18789
+  path: "/"
+  health_path: "/healthz"
+commands:
+  - label: "Install / launch"
+    description: "Build the runtime env if needed and start OpenClaw with persisted host data."
+    command: "docker compose -p spark-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the OpenClaw container but keep the externalized config and workspace data."
+    command: "docker compose -p spark-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml down"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: false
+status: experimental

@@ -1,0 +1,101 @@
+services:
+  nemoclaw:
+    build:
+      context: https://github.com/NVIDIA/NemoClaw.git#main
+      dockerfile: Dockerfile
+      args:
+        NEMOCLAW_MODEL: ${NEMOCLAW_MODEL:-nvidia/nemotron-3-super-120b-a12b}
+        NEMOCLAW_PROVIDER_KEY: ${NEMOCLAW_PROVIDER_KEY:-nvidia}
+        NEMOCLAW_PRIMARY_MODEL_REF: ${NEMOCLAW_PRIMARY_MODEL_REF:-nvidia/nemotron-3-super-120b-a12b}
+        CHAT_UI_URL: ${CHAT_UI_URL:-http://127.0.0.1:18790}
+        NEMOCLAW_INFERENCE_BASE_URL: ${NEMOCLAW_INFERENCE_BASE_URL:-https://integrate.api.nvidia.com/v1}
+        NEMOCLAW_INFERENCE_API: ${NEMOCLAW_INFERENCE_API:-openai-completions}
+        NEMOCLAW_INFERENCE_COMPAT_B64: ${NEMOCLAW_INFERENCE_COMPAT_B64:-e30=}
+        NEMOCLAW_WEB_CONFIG_B64: ${NEMOCLAW_WEB_CONFIG_B64:-e30=}
+        NEMOCLAW_MESSAGING_CHANNELS_B64: ${NEMOCLAW_MESSAGING_CHANNELS_B64:-W10=}
+        NEMOCLAW_MESSAGING_ALLOWED_IDS_B64: ${NEMOCLAW_MESSAGING_ALLOWED_IDS_B64:-e30=}
+        NEMOCLAW_DISCORD_GUILDS_B64: ${NEMOCLAW_DISCORD_GUILDS_B64:-e30=}
+        NEMOCLAW_BUILD_ID: ${NEMOCLAW_BUILD_ID:-spark-ai-hub}
+        NEMOCLAW_DISABLE_DEVICE_AUTH: ${NEMOCLAW_DISABLE_DEVICE_AUTH:-1}
+    container_name: spark-ai-hub-nemoclaw
+    env_file:
+      - .env
+    environment:
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command:
+      - |
+        set -eu
+        mkdir -p \
+          /var/lib/nemoclaw-host \
+          /sandbox/.nemoclaw/state \
+          /sandbox/.nemoclaw/migration \
+          /sandbox/.nemoclaw/snapshots \
+          /sandbox/.nemoclaw/staging \
+          /sandbox/.openclaw-data/logs \
+          /sandbox/.openclaw-data/credentials \
+          /sandbox/.openclaw-data/sandbox
+        if [ ! -s /sandbox/.nemoclaw/config.json ]; then
+          printf '{}\n' >/sandbox/.nemoclaw/config.json
+        fi
+        chown sandbox:sandbox /sandbox/.nemoclaw/config.json || true
+        chown -R sandbox:sandbox \
+          /sandbox/.nemoclaw/state \
+          /sandbox/.nemoclaw/migration \
+          /sandbox/.nemoclaw/snapshots \
+          /sandbox/.nemoclaw/staging \
+          /sandbox/.openclaw-data || true
+        /usr/local/bin/nemoclaw-start /bin/bash &
+        app_pid=$!
+        cleanup() {
+          if kill -0 "$app_pid" 2>/dev/null; then
+            kill "$app_pid" 2>/dev/null || true
+            wait "$app_pid" || true
+          fi
+        }
+        trap cleanup INT TERM
+        python3 - <<'PY'
+        import json
+        import time
+        from pathlib import Path
+
+        source = Path('/sandbox/.openclaw/openclaw.json')
+        target = Path('/var/lib/nemoclaw-host/openclaw-token.txt')
+        deadline = time.time() + 180
+        while time.time() < deadline:
+            if source.is_file():
+                try:
+                    data = json.loads(source.read_text(encoding='utf-8'))
+                except json.JSONDecodeError:
+                    time.sleep(2)
+                    continue
+                token = (((data.get('gateway') or {}).get('auth') or {}).get('token'))
+                if token:
+                    target.write_text(f'{token}\n', encoding='utf-8')
+                    break
+            time.sleep(2)
+        PY
+        wait "$app_pid"
+    ports:
+      - "18790:18789"
+    volumes:
+      - ./config.json:/sandbox/.nemoclaw/config.json
+      - ./data/nemoclaw-state:/sandbox/.nemoclaw/state
+      - ./data/nemoclaw-migration:/sandbox/.nemoclaw/migration
+      - ./data/nemoclaw-snapshots:/sandbox/.nemoclaw/snapshots
+      - ./data/nemoclaw-staging:/sandbox/.nemoclaw/staging
+      - ./data/openclaw-data:/sandbox/.openclaw-data
+      - ./data/metadata:/var/lib/nemoclaw-host
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+    restart: unless-stopped

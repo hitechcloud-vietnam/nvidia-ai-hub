@@ -1,0 +1,39 @@
+name: "NemoClaw"
+slug: nemoclaw
+version: "1.0.0"
+description: "NVIDIA's reference stack for running OpenClaw in an OpenShell sandbox. This recipe builds the upstream sandbox image, persists writable NemoClaw state outside the container, and exports the dashboard token to a host file after the first launch."
+author: "NVIDIA"
+source: "official"
+website: "https://www.nvidia.com/nemoclaw"
+upstream: "https://github.com/NVIDIA/NemoClaw"
+category: multi-modal
+tags:
+  - agents
+  - sandbox
+  - openshell
+  - nvidia
+  - openclaw
+icon: "🦞"
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 18790
+  path: "/"
+  health_path: "/healthz"
+commands:
+  - label: "Install / build"
+    description: "Build the upstream NemoClaw sandbox image and start the dashboard with externalized state."
+    command: "docker compose -p spark-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the NemoClaw stack while preserving config, state, snapshots, and exported token files."
+    command: "docker compose -p spark-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml down"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: false
+status: experimental

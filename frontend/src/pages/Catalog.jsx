@@ -52,6 +52,19 @@ const SOURCE_SECTIONS = [
   { id: 'vllm', label: 'Ready-to-Serve Models', subtitle: 'Curated models for DGX Spark. Served on port 9001, one at a time', icon: 'models' },
 ]
 
+const CATALOG_PRIORITY = {
+  openclaw: 50,
+  nemoclaw: 49,
+}
+
+function sortRecipesForCatalog(recipes) {
+  return [...recipes].sort((a, b) => {
+    const priorityDiff = (CATALOG_PRIORITY[b.slug] || 0) - (CATALOG_PRIORITY[a.slug] || 0)
+    if (priorityDiff !== 0) return priorityDiff
+    return a.name.localeCompare(b.name)
+  })
+}
+
 function getSectionId(recipe) {
   if ((recipe.source || 'community') === 'spark-ai-hub') return 'spark-ai-hub'
   if (recipe.slug.startsWith('vllm-')) return 'vllm'
@@ -78,12 +91,14 @@ export default function Catalog({ search = '' }) {
     return true
   })
 
+  const orderedRecipes = useMemo(() => sortRecipesForCatalog(filtered), [filtered])
+
   const grouped = useMemo(() => {
     return SOURCE_SECTIONS.map((section) => ({
       ...section,
-      recipes: filtered.filter((r) => getSectionId(r) === section.id),
+      recipes: orderedRecipes.filter((r) => getSectionId(r) === section.id),
     })).filter((section) => section.recipes.length > 0)
-  }, [filtered])
+  }, [orderedRecipes])
 
   const recipesWithBanners = recipes.filter((r) => getBanner(r.slug))
   const featured = recipesWithBanners.length > 0

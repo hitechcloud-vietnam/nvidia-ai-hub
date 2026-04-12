@@ -455,6 +455,22 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
             </div>
           )}
 
+          {recipe.commands?.length > 0 && (
+            <div className="space-y-4 pt-5 border-t border-outline-dim">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Execution Commands</div>
+                <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                  Use these commands from the repository root if you want to install or operate this recipe manually outside the UI.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {recipe.commands.map((item) => (
+                  <CommandBlock key={`${recipe.slug}-${item.label}`} item={item} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {recipe.integration && (
             <div className="space-y-4 pt-5 border-t border-outline-dim">
               <div>
@@ -498,6 +514,39 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function CommandBlock({ item }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = () => {
+    const text = String(item.command)
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1200) })
+        .catch(() => fallbackCopy(text, setCopied))
+    } else {
+      fallbackCopy(text, setCopied)
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-text font-display">{item.label}</div>
+          {item.description && <p className="text-sm text-text-dim leading-6 m-0 mt-1">{item.description}</p>}
+        </div>
+        <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Copy command">
+          {copied ? (
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          ) : (
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          )}
+        </button>
+      </div>
+      <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">{item.command}</pre>
     </div>
   )
 }
