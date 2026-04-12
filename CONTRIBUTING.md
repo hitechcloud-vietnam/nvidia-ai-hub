@@ -276,6 +276,8 @@ Clear, incremental contributions are preferred over broad rewrites.
 - Contribution workflow: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - Security reporting: [`SECURITY.md`](./SECURITY.md)
 - Collaboration rules: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- Support guide: [`SUPPORT.md`](./SUPPORT.md)
+- Governance index: [`docs/community.md`](./docs/community.md)
 - Commercial licensing and sponsorship path: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 
 If GitHub Discussions is enabled for the repository, prefer Discussions for roadmap ideas, usage questions, and broader community conversations that do not require an actionable issue.
