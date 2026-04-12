@@ -9,6 +9,7 @@ from daemon.services.docker_service import (
     update_recipe,
     launch_recipe,
     stop_recipe,
+    restart_recipe,
     remove_recipe,
     purge_recipe,
     get_running_containers,
@@ -19,6 +20,7 @@ from daemon.services.docker_service import (
     start_health_check,
     set_pending,
     clear_pending,
+    ensure_runtime_env,
 )
 from daemon.services.registry_service import get_recipe, get_recipe_dir
 from daemon.models.container import ContainerInfo
@@ -121,14 +123,29 @@ async def stop(slug: str):
     return {"status": result, "slug": slug}
 
 
+@router.post("/api/recipes/{slug}/restart")
+async def restart(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    set_pending(slug, "launching")
+    clear_ready(slug)
+    result = await restart_recipe(slug)
+    if result == "restarted":
+        await start_health_check(slug)
+        return {"status": result, "slug": slug}
+    clear_pending(slug)
+    raise HTTPException(status_code=500, detail=result)
+
+
 @router.delete("/api/recipes/{slug}")
-async def remove(slug: str):
+async def remove(slug: str, delete_data: bool = True):
     recipe = get_recipe(slug)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     set_pending(slug, "removing")
     clear_ready(slug)
-    result = await remove_recipe(slug)
+    result = await remove_recipe(slug, delete_data=delete_data)
     clear_pending(slug)
     return {"status": result, "slug": slug}
 
@@ -143,6 +160,10 @@ async def purge(slug: str):
 
 
 class ComposeBody(BaseModel):
+    content: str
+
+
+class EnvBody(BaseModel):
     content: str
 
 
@@ -169,6 +190,36 @@ def _get_default_compose_content(compose_file: Path) -> str:
     if proc.returncode != 0:
         raise HTTPException(status_code=404, detail="Default docker-compose.yml not available")
     return proc.stdout
+
+
+def _env_paths_for_slug(slug: str) -> tuple[Path, Path, Path]:
+    recipe_dir = get_recipe_dir(slug)
+    if not recipe_dir:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    env_file = recipe_dir / ".env"
+    template_file = recipe_dir / ".env.example"
+    if not env_file.is_file() and not template_file.is_file():
+        raise HTTPException(status_code=404, detail="Runtime env not available")
+    return recipe_dir, env_file, template_file
+
+
+def _get_default_env_content(template_file: Path) -> str:
+    if not template_file.is_file():
+        raise HTTPException(status_code=404, detail="Default runtime env not available")
+
+    repo_root = template_file.parents[3]
+    rel_path = template_file.relative_to(repo_root)
+    proc = subprocess.run(
+        ["git", "show", f"HEAD:{rel_path.as_posix()}"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode == 0:
+        return proc.stdout
+    return template_file.read_text()
 
 
 @router.get("/api/recipes/{slug}/compose")
@@ -200,6 +251,57 @@ async def reset_compose(slug: str):
     return {
         "status": "reset",
         "content": default_content,
+    }
+
+
+@router.get("/api/recipes/{slug}/env")
+async def get_runtime_env(slug: str):
+    recipe_dir, env_file, template_file = _env_paths_for_slug(slug)
+
+    ensured_env_file, _ = ensure_runtime_env(recipe_dir)
+    if ensured_env_file and ensured_env_file.is_file():
+        env_file = ensured_env_file
+
+    if not env_file.is_file():
+        raise HTTPException(status_code=404, detail="Runtime env file not available")
+
+    try:
+        default_content = _get_default_env_content(template_file)
+    except HTTPException:
+        default_content = env_file.read_text()
+
+    return {
+        "content": env_file.read_text(),
+        "default_content": default_content,
+        "path": str(env_file),
+    }
+
+
+@router.put("/api/recipes/{slug}/env")
+async def put_runtime_env(slug: str, body: EnvBody):
+    recipe_dir, env_file, _ = _env_paths_for_slug(slug)
+    if not env_file.is_file():
+        ensured_env_file, _ = ensure_runtime_env(recipe_dir)
+        if ensured_env_file and ensured_env_file.is_file():
+            env_file = ensured_env_file
+    env_file.write_text(body.content)
+    return {"status": "saved"}
+
+
+@router.post("/api/recipes/{slug}/env/reset")
+async def reset_runtime_env(slug: str):
+    recipe_dir, env_file, template_file = _env_paths_for_slug(slug)
+    if not env_file.is_file():
+        ensured_env_file, _ = ensure_runtime_env(recipe_dir)
+        if ensured_env_file and ensured_env_file.is_file():
+            env_file = ensured_env_file
+
+    default_content = _get_default_env_content(template_file)
+    env_file.write_text(default_content)
+    return {
+        "status": "reset",
+        "content": default_content,
+        "path": str(env_file),
     }
 
 

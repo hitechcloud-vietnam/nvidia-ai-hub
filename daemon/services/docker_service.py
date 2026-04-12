@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import os
 import secrets
+import shutil
 import subprocess
 from pathlib import Path
 from typing import AsyncGenerator
@@ -365,7 +366,48 @@ async def stop_recipe(slug: str) -> str:
     return "stopped" if proc.returncode == 0 else "failed"
 
 
-async def remove_recipe(slug: str) -> str:
+async def restart_recipe(slug: str) -> str:
+    recipe_dir = get_recipe_dir(slug)
+    if not recipe_dir:
+        return f"Recipe directory not found for {slug}"
+
+    runtime_env_file, _ = ensure_runtime_env(recipe_dir)
+    if _runtime_env_template_file(recipe_dir).is_file() and runtime_env_file is None:
+        return f"Failed to prepare runtime env for {slug}"
+
+    cmd = _compose_cmd(slug, recipe_dir) + ["restart"]
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=str(recipe_dir),
+        env=_launch_env(),
+    )
+    output = await proc.stdout.read()
+    await proc.wait()
+
+    if proc.returncode == 0:
+        return "restarted"
+
+    fallback_cmd = _compose_cmd(slug, recipe_dir) + ["up", "-d"]
+    fallback_proc = await asyncio.create_subprocess_exec(
+        *fallback_cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=str(recipe_dir),
+        env=_launch_env(),
+    )
+    fallback_output = await fallback_proc.stdout.read()
+    await fallback_proc.wait()
+
+    if fallback_proc.returncode == 0:
+        return "restarted"
+
+    combined = b"\n".join(part for part in [output, fallback_output] if part)
+    return combined.decode(errors="replace") or "failed"
+
+
+async def remove_recipe(slug: str, delete_data: bool = True) -> str:
     recipe_dir = get_recipe_dir(slug)
     if not recipe_dir:
         return f"Recipe directory not found for {slug}"
@@ -380,13 +422,34 @@ async def remove_recipe(slug: str) -> str:
     await proc.wait()
 
     if proc.returncode == 0:
+        cleanup_errors: list[str] = []
+        if delete_data:
+            for path in _find_recipe_bind_paths(slug):
+                try:
+                    if path.is_dir():
+                        shutil.rmtree(path)
+                    elif path.exists():
+                        path.unlink()
+                except FileNotFoundError:
+                    continue
+                except Exception as exc:
+                    cleanup_errors.append(f"{path}: {exc}")
+
+            data_root = recipe_dir / "data"
+            if data_root.exists():
+                try:
+                    if not any(data_root.iterdir()):
+                        data_root.rmdir()
+                except Exception as exc:
+                    cleanup_errors.append(f"{data_root}: {exc}")
+
         db = await get_db()
         try:
             await db.execute("DELETE FROM installed_recipes WHERE slug = ?", (slug,))
             await db.commit()
         finally:
             await db.close()
-        return "removed"
+        return "removed" if not cleanup_errors else f"partial: {'; '.join(cleanup_errors)}"
     return "failed"
 
 
@@ -504,6 +567,56 @@ def _parse_compose_images(slug: str) -> list[str]:
         if img:
             images.append(img)
     return images
+
+
+def _find_recipe_bind_paths(slug: str) -> list[Path]:
+    """Find bind-mounted local paths located under the recipe directory."""
+    recipe_dir = get_recipe_dir(slug)
+    if not recipe_dir:
+        return []
+
+    compose_file = recipe_dir / "docker-compose.yml"
+    if not compose_file.is_file():
+        return []
+
+    with open(compose_file) as f:
+        data = yaml.safe_load(f)
+
+    recipe_root = recipe_dir.resolve()
+    matches: list[Path] = []
+    protected_files = {
+        (recipe_dir / "docker-compose.yml").resolve(),
+        (recipe_dir / "recipe.yaml").resolve(),
+        (recipe_dir / ".env").resolve(),
+        (recipe_dir / ".env.example").resolve(),
+    }
+
+    for svc in (data.get("services") or {}).values():
+        for volume in (svc.get("volumes") or []):
+            source = None
+            if isinstance(volume, str):
+                parts = volume.split(":", 1)
+                if len(parts) == 2:
+                    source = parts[0].strip()
+            elif isinstance(volume, dict) and volume.get("type") == "bind":
+                source = (volume.get("source") or "").strip()
+
+            if not source or source.startswith("/"):
+                continue
+
+            candidate = (recipe_dir / source).resolve()
+            try:
+                candidate.relative_to(recipe_root)
+            except ValueError:
+                continue
+
+            if candidate in protected_files:
+                continue
+
+            if candidate not in matches:
+                matches.append(candidate)
+
+    return matches
 
 
 async def _find_project_volumes(slug: str) -> list[str]:

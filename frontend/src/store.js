@@ -12,6 +12,7 @@ export const useStore = create((set, get) => ({
   buildLogs: {},
   installing: null,
   updating: null,
+  restarting: null,
   removing: null,
   purging: null,
   _inFlight: {},  // slug -> { starting, running, ready, installed } overrides during transitions
@@ -252,7 +253,26 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  removeRecipe: async (slug) => {
+  restartRecipe: async (slug) => {
+    const override = { running: true, ready: false, starting: true }
+    set({
+      restarting: slug,
+      _inFlight: { ...get()._inFlight, [slug]: override },
+      recipes: get().recipes.map(r => r.slug === slug ? { ...r, ...override } : r),
+    })
+    try {
+      const res = await fetch(`/api/recipes/${slug}/restart`, { method: 'POST' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    } catch (e) {
+      console.error('Restart failed:', e)
+    } finally {
+      set({ restarting: null, _inFlight: { ...get()._inFlight, [slug]: undefined } })
+      await get().fetchRecipes()
+    }
+  },
+
+  removeRecipe: async (slug, options = {}) => {
+    const { deleteData = true } = options
     const override = { installed: false, running: false, ready: false, starting: false }
     set({
       removing: slug,
@@ -260,7 +280,7 @@ export const useStore = create((set, get) => ({
       recipes: get().recipes.map(r => r.slug === slug ? { ...r, ...override } : r),
     })
     try {
-      const res = await fetch(`/api/recipes/${slug}`, { method: 'DELETE' })
+      const res = await fetch(`/api/recipes/${slug}?delete_data=${deleteData ? 'true' : 'false'}`, { method: 'DELETE' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Remove failed:', e)

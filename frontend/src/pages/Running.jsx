@@ -7,6 +7,8 @@ export default function Running() {
   const selectRecipe = useStore((s) => s.selectRecipe)
   const launchRecipe = useStore((s) => s.launchRecipe)
   const stopRecipe = useStore((s) => s.stopRecipe)
+  const restartRecipe = useStore((s) => s.restartRecipe)
+  const restarting = useStore((s) => s.restarting)
   const metrics = useStore((s) => s.metrics)
 
   const running = recipes.filter((r) => r.running || r.starting)
@@ -34,7 +36,7 @@ export default function Running() {
       ) : (
         <div className="flex flex-col gap-3 mb-10 animate-fadeIn">
           {running.map((r) => (
-            <RunningCard key={r.slug} recipe={r} onSelect={selectRecipe} onStop={stopRecipe} />
+            <RunningCard key={r.slug} recipe={r} onSelect={selectRecipe} onStop={stopRecipe} onRestart={restartRecipe} restarting={restarting === r.slug} />
           ))}
         </div>
       )}
@@ -57,7 +59,7 @@ export default function Running() {
   )
 }
 
-function RunningCard({ recipe, onSelect, onStop }) {
+function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
   const [logoFailed, setLogoFailed] = useState(false)
   const [stopping, setStopping] = useState(false)
   const logoUrl = useThemedLogo(recipe.logo)
@@ -70,6 +72,11 @@ function RunningCard({ recipe, onSelect, onStop }) {
     setStopping(true)
     await onStop(recipe.slug)
     setStopping(false)
+  }
+
+  const handleRestart = async (e) => {
+    e.stopPropagation()
+    await onRestart(recipe.slug)
   }
 
   return (
@@ -103,7 +110,7 @@ function RunningCard({ recipe, onSelect, onStop }) {
             ) : (
               <span className="flex items-center gap-1.5 text-xs font-medium font-label text-warning bg-warning/10 px-2.5 py-1 rounded-full animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-warning" />
-                Starting
+                {restarting ? 'Restarting' : 'Starting'}
               </span>
             )}
           </div>
@@ -134,7 +141,14 @@ function RunningCard({ recipe, onSelect, onStop }) {
             </a>
           )}
           <button
-            disabled={stopping}
+            disabled={stopping || restarting}
+            onClick={handleRestart}
+            className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
+          >
+            {restarting ? '...' : 'Restart'}
+          </button>
+          <button
+            disabled={stopping || restarting}
             onClick={handleStop}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
           >
