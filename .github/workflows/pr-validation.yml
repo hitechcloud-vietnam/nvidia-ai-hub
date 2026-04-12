@@ -1,0 +1,39 @@
+name: PR Template Validation
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-pr-body:
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required PR sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const requiredSections = [
+              '## Summary',
+              '## Related Issue',
+              '## Type of Change',
+              '## Affected Areas',
+              '## Validation',
+              '## Coverage and Verification Notes',
+              '## Security, Licensing, and Provenance',
+              '## Breaking Changes',
+              '## Documentation Impact',
+              '## Screenshots or Logs',
+              '## Reviewer Notes',
+              '## PR Instructions'
+            ];
+
+            const missing = requiredSections.filter((section) => !body.includes(section));
+            if (missing.length) {
+              core.setFailed(`Pull request body is missing required sections: ${missing.join(', ')}`);
+            }
