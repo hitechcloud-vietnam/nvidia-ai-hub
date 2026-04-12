@@ -10,6 +10,7 @@ This document is the central index for repository governance, contribution workf
 - Support guide: [`../SUPPORT.md`](../SUPPORT.md)
 - License: [`../LICENSE`](../LICENSE)
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
+- Licensing guide: [`./licensing.md`](./licensing.md)
 - Notice: [`../NOTICE`](../NOTICE)
 
 ## When to Use What

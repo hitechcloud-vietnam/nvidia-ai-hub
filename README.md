@@ -35,6 +35,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
 - Support guide: [`SUPPORT.md`](./SUPPORT.md)
 - Governance index: [`docs/community.md`](./docs/community.md)
+- Licensing guide: [`docs/licensing.md`](./docs/licensing.md)
 - Discussions: enable GitHub Discussions in repository settings for support questions, ideas, and roadmap conversations
 - Sponsorships and commercial licensing: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 
@@ -373,4 +374,6 @@ For repository contribution standards and templates, see [`CONTRIBUTING.md`](./C
 
 This repository is licensed for **strictly non-commercial use** under the terms of [`LICENSE`](./LICENSE).
 
-Commercial use, client delivery, paid services, SaaS distribution, marketplace redistribution, and other revenue-generating usage require separate written permission from the copyright holder. See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md).
+Copyright (c) 2026 Nguyen Thanh An by Pho Tue SoftWare Solutions JSC.
+
+Commercial use, client delivery, paid services, SaaS distribution, marketplace redistribution, and other revenue-generating usage require separate written permission from the copyright holder. See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md) and [`docs/licensing.md`](./docs/licensing.md).

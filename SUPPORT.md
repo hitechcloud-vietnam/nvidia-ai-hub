@@ -47,7 +47,7 @@ Follow the private reporting guidance in [`SECURITY.md`](./SECURITY.md).
 
 Commercial usage, client delivery, consulting, hosting, managed services, and other revenue-generating use require separate written permission.
 
-See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md) and [`LICENSE`](./LICENSE).
+See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), [`LICENSE`](./LICENSE), and [`docs/licensing.md`](./docs/licensing.md).
 
 ## What to Include in a Support Request
 

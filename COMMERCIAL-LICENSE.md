@@ -3,6 +3,8 @@
 `Spark AI Hub` is available to individuals, companies, and organizations for
 strictly non-commercial use under the terms of [`LICENSE`](LICENSE).
 
+Copyright (c) 2026 Nguyen Thanh An by Pho Tue SoftWare Solutions JSC
+
 ## Commercial use requires separate written permission
 
 You must obtain a separate written commercial license from the repository
@@ -30,8 +32,8 @@ strictly non-commercial purposes such as:
 
 ## Contact for licensing
 
-To request commercial rights or a custom commercial agreement, contact the
-repository owner / copyright holder.
+To request commercial rights or a custom commercial agreement, contact
+Nguyen Thanh An by Pho Tue SoftWare Solutions JSC as the copyright holder.
 
 Until such permission is granted in writing, all commercial rights remain
 reserved.
