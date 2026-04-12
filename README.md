@@ -14,6 +14,10 @@ The project includes:
 - A `React + Vite` frontend served as static files by the backend
 - A Docker-based runtime model for AI applications in `registry/recipes`
 
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, development setup, recipe guidance, and pull request expectations.
+
 ## Quick install
 
 ```bash
@@ -342,6 +346,8 @@ The uninstaller now removes, in order:
 - The installation directory itself
 
 It does not uninstall Docker itself.
+
+For repository contribution standards and templates, see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
