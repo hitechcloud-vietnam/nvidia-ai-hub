@@ -37,6 +37,18 @@ Use the recipe `Configuration` tab to edit:
 - `docker-compose.yml` for service topology or model swaps
 - `.env` for ports, credentials, and download URLs
 
+### Supervisor profiles
+
+The runtime env exposes `COMPOSE_PROFILES` so you can choose between two supervisor stacks without rewriting the compose file:
+
+- `full` → default `gpt-oss-120b`
+- `lightweight` → optional `gpt-oss-20b`
+
+When switching profiles, also keep `CHATBOT_MODELS` aligned with the selected container name:
+
+- `COMPOSE_PROFILES=full` with `CHATBOT_MODELS=gpt-oss-120b`
+- `COMPOSE_PROFILES=lightweight` with `CHATBOT_MODELS=gpt-oss-20b`
+
 ## Default model stack
 
 The compose file follows NVIDIA's default playbook layout:
@@ -48,7 +60,8 @@ The compose file follows NVIDIA's default playbook layout:
 
 ## Operational notes
 
-- The `qwen2.5-vl` container may report unhealthy for a while during startup.
+- The backend no longer waits for every model container to become healthy before it starts, which avoids stalled launches while large model services warm up.
+- The `qwen2.5-vl` and llama.cpp model services use a longer health-check grace period because first startup can take several minutes.
 - Downloaded GGUF files are cached in `registry/recipes/multi-agent-chatbot/data/models/`.
-- If the default supervisor is too large, use the compose editor to swap to `gpt-oss-20b` and update `CHATBOT_MODELS` to match.
+- If the default supervisor is too large, switch to the `lightweight` profile and update `CHATBOT_MODELS` to `gpt-oss-20b`.
 - Stopping the recipe preserves downloaded models and chat history. Remove data only if you want a full reset.
