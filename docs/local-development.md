@@ -60,7 +60,7 @@ From repository root:
 
 uvicorn daemon.main:app --host 0.0.0.0 --port 9000
 ```
-
+python -m pip install psutil==7.0.0
 On PowerShell:
 
 ```powershell

@@ -5,3 +5,4 @@ pydantic-settings==2.7.1
 aiosqlite==0.21.0
 pyyaml==6.0.2
 aiohttp
+psutil==7.0.0

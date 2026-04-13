@@ -6,12 +6,20 @@ export default function SystemBar() {
   const ramUsed = metrics?.ram_used_gb ?? 0
   const ramTotal = metrics?.ram_total_gb ?? 128
   const ramPct = ramTotal > 0 ? (ramUsed / ramTotal) * 100 : 0
+  const cpuPct = Math.round(metrics?.cpu_percent ?? 0)
+  const systemLabel = metrics?.gpu_name || metrics?.hostname || 'System'
+  const tempValue = metrics?.gpu_temperature || metrics?.cpu_temperature || 0
+  const tempSource = metrics?.gpu_temperature_source || metrics?.cpu_temperature_source || ''
 
   return (
     <div className="flex items-center gap-3 text-xs text-text-dim">
       <div className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-text-muted hidden xl:inline">{metrics?.gpu_name || 'GB10'}</span>
+        <span className="text-text-muted hidden xl:inline">{systemLabel}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="hidden lg:inline">CPU</span>
+        <span className="text-primary font-medium">{cpuPct}%</span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="hidden lg:inline">RAM</span>
@@ -30,13 +38,11 @@ export default function SystemBar() {
         <span className="hidden lg:inline">GPU</span>
         <span className="text-primary font-medium">{metrics?.gpu_utilization ?? 0}%</span>
       </div>
-      {metrics?.gpu_temperature > 0 && (
-        <div className="hidden xl:flex items-center gap-1">
-          <span className={metrics.gpu_temperature > 80 ? 'text-error' : 'text-primary'}>
-            {metrics.gpu_temperature}°C
-          </span>
-        </div>
-      )}
+      <div className="hidden xl:flex items-center gap-1" title={tempSource || 'Temperature source unavailable'}>
+        <span className={tempValue > 80 ? 'text-error' : 'text-primary'}>
+          {tempValue > 0 ? `${Math.round(tempValue)}°C` : 'Temp N/A'}
+        </span>
+      </div>
     </div>
   )
 }

@@ -2,10 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 
-const DETAIL_TABS = [
-  { id: 'details', label: 'Overview' },
-  { id: 'logs', label: 'Logs' },
-]
+const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw'])
+
+function getDetailTabs(recipe) {
+  const tabs = [{ id: 'details', label: 'Overview' }]
+
+  if (recipe && CONFIG_TAB_RECIPES.has(recipe.slug)) {
+    tabs.push({ id: 'config', label: 'Configuration' })
+  }
+
+  tabs.push({ id: 'logs', label: 'Logs' })
+  return tabs
+}
 
 export default function RecipeDetail() {
   const selectedRecipe = useStore((s) => s.selectedRecipe)
@@ -155,6 +163,8 @@ export default function RecipeDetail() {
   const recipeCategories = Array.isArray(recipe.categories) && recipe.categories.length > 0
     ? recipe.categories
     : [recipe.category]
+  const detailTabs = getDetailTabs(recipe)
+  const hasDedicatedConfigTab = CONFIG_TAB_RECIPES.has(recipe.slug)
 
   return (
     <div className="flex flex-col h-full animate-fadeIn">
@@ -262,7 +272,7 @@ export default function RecipeDetail() {
 
       <div className="shrink-0 px-6 py-3 border-b border-outline-dim bg-surface-low/40">
         <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim">
-          {DETAIL_TABS.map((tab) => {
+          {detailTabs.map((tab) => {
             const active = tab.id === activeTab
             return (
               <button
@@ -283,22 +293,30 @@ export default function RecipeDetail() {
 
       <div className="flex-1 min-h-0">
         {activeTab === 'details' ? (
-          <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,50rem)_minmax(24rem,1fr)]">
-            <div className="overflow-y-auto border-b border-outline-dim xl:border-b-0 xl:border-r bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
+          hasDedicatedConfigTab ? (
+            <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
               <AboutTab recipe={recipe} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
             </div>
+          ) : (
+            <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,50rem)_minmax(24rem,1fr)]">
+              <div className="overflow-y-auto border-b border-outline-dim xl:border-b-0 xl:border-r bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
+                <AboutTab recipe={recipe} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
+              </div>
 
-            <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] min-h-0">
-              <div className="h-full min-h-0 flex flex-col">
-                <div className="flex-1 min-h-0">
-                  <ComposeEditor slug={recipe.slug} />
+              <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] min-h-0">
+                <div className="h-full min-h-0 flex flex-col">
+                  <div className="flex-1 min-h-0">
+                    <ComposeEditor slug={recipe.slug} />
+                  </div>
+                  {recipe.runtime_env_path && (
+                    <EnvEditor slug={recipe.slug} runtimeEnvPath={recipe.runtime_env_path} />
+                  )}
                 </div>
-                {recipe.runtime_env_path && (
-                  <EnvEditor slug={recipe.slug} runtimeEnvPath={recipe.runtime_env_path} />
-                )}
               </div>
             </div>
-          </div>
+          )
+        ) : activeTab === 'config' ? (
+          <RecipeConfigTab recipe={recipe} />
         ) : (
           <div className="h-full min-h-0">
             <TerminalPanel
@@ -757,6 +775,63 @@ function ComposeEditor({ slug }) {
   )
 }
 
+function RecipeConfigTab({ recipe }) {
+  const tabs = [
+    { id: 'compose', label: 'Compose' },
+    ...(recipe.runtime_env_path ? [{ id: 'env', label: 'Environment' }] : []),
+  ]
+  const [activeConfigTab, setActiveConfigTab] = useState(tabs[0]?.id || 'compose')
+
+  useEffect(() => {
+    setActiveConfigTab('compose')
+  }, [recipe.slug])
+
+  useEffect(() => {
+    if (!tabs.some((tab) => tab.id === activeConfigTab)) {
+      setActiveConfigTab(tabs[0]?.id || 'compose')
+    }
+  }, [activeConfigTab, tabs])
+
+  return (
+    <div className="h-full min-h-0 flex flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]">
+      <div className="shrink-0 px-6 py-5 border-b border-outline-dim bg-surface-low/40">
+        <div className="max-w-4xl">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Configuration Workspace</div>
+          <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+            OpenClaw and NemoClaw expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.
+          </p>
+          <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim mt-4">
+            {tabs.map((tab) => {
+              const active = tab.id === activeConfigTab
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveConfigTab(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    active
+                      ? 'bg-primary text-primary-on shadow-lg shadow-primary/20'
+                      : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {activeConfigTab === 'compose' ? (
+          <ComposeEditor slug={recipe.slug} />
+        ) : (
+          <EnvEditor slug={recipe.slug} runtimeEnvPath={recipe.runtime_env_path} standalone />
+        )}
+      </div>
+    </div>
+  )
+}
+
 function parseEnvItems(content) {
   const items = []
   const lines = content.replace(/\r\n/g, '\n').split('\n')
@@ -943,7 +1018,7 @@ function groupEnvItems(items) {
     .filter((group) => group.items.length > 0)
 }
 
-function EnvEditor({ slug, runtimeEnvPath }) {
+function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
   const [items, setItems] = useState([])
   const [originalContent, setOriginalContent] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
@@ -1058,7 +1133,7 @@ function EnvEditor({ slug, runtimeEnvPath }) {
   }
 
   return (
-    <div className="border-t border-outline-dim bg-surface-low/30">
+    <div className={standalone ? 'h-full min-h-0 flex flex-col bg-surface-low/30' : 'border-t border-outline-dim bg-surface-low/30'}>
       <div className="px-5 py-4 border-b border-outline-dim bg-surface-low/50">
         <div className="flex items-start justify-between gap-4">
           <div>

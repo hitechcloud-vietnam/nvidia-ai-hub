@@ -80,7 +80,7 @@ export default function App() {
         <div className="flex flex-col items-center gap-3 mt-auto">
           {metrics && (
             <div className="flex flex-col items-center gap-1.5">
-              <MiniGauge value={metrics.gpu_utilization} label="GPU" color="var(--tertiary)" />
+              <MiniGauge value={Math.round(metrics.cpu_percent ?? 0)} label="CPU" color="var(--tertiary)" />
               <MiniGauge value={metrics.ram_total_gb > 0 ? Math.round((metrics.ram_used_gb / metrics.ram_total_gb) * 100) : 0} label="RAM" color="var(--tertiary)" />
             </div>
           )}
@@ -115,7 +115,7 @@ export default function App() {
 
           {selectedRecipe && (
             <div className="text-sm text-text-dim font-label">
-              {metrics?.gpu_name || 'NVIDIA GB10'}
+              {metrics?.gpu_name || metrics?.hostname || 'System'}
             </div>
           )}
         </header>
