@@ -1,0 +1,52 @@
+name: "Multi-Agent Chatbot"
+slug: multi-agent-chatbot
+version: "1.0.0"
+description: "Deploy NVIDIA's DGX Spark multi-agent chatbot with a local FastAPI backend, Next.js frontend, Milvus retrieval, PostgreSQL chat history, and GPU-served supervisor, coding, embedding, and vision models."
+author: "NVIDIA"
+source: "official"
+website: "https://github.com/NVIDIA/dgx-spark-playbooks/tree/main/nvidia/multi-agent-chatbot"
+upstream: "https://github.com/NVIDIA/dgx-spark-playbooks/tree/main/nvidia/multi-agent-chatbot"
+category: multi-modal
+categories:
+  - multi-modal
+  - dgx-spark
+tags:
+  - agents
+  - chatbot
+  - rag
+  - mcp
+  - milvus
+  - postgres
+  - vision-language
+  - coding
+  - nvidia
+  - dgx-spark
+icon: "🤖"
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 96
+  recommended_memory_gb: 128
+  disk_gb: 120
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/"
+  health_path: "/"
+commands:
+  - label: "Install / build"
+    description: "Build the upstream frontend, backend, and llama.cpp model server images, then launch the full DGX Spark multi-agent chatbot stack."
+    command: "docker compose -p spark-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the multi-agent chatbot stack while preserving downloaded models, Milvus data, and PostgreSQL conversation history."
+    command: "docker compose -p spark-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml down"
+docker:
+  build: true
+  build_time_minutes: 30
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:8000"
+  model_id: "gpt-oss-120b"
+  api_key: "not-required"
+  curl_example: "curl http://<SPARK_IP>:8000/available_models"

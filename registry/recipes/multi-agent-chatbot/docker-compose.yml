@@ -1,0 +1,263 @@
+x-llama-base: &llama-base
+  build:
+    context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets
+    dockerfile: Dockerfile.llamacpp
+  image: spark-ai-hub/llama.cpp:multi-agent-chatbot
+  restart: unless-stopped
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 10
+    start_period: 120s
+
+services:
+  frontend:
+    container_name: spark-ai-hub-chatbot-frontend
+    build:
+      context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  backend:
+    container_name: spark-ai-hub-chatbot-backend
+    build:
+      context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets/backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      milvus:
+        condition: service_healthy
+      gpt-oss-120b:
+        condition: service_healthy
+      deepseek-coder:
+        condition: service_healthy
+      qwen3-embedding:
+        condition: service_healthy
+      qwen2.5-vl:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-chatbot}
+      POSTGRES_USER: ${POSTGRES_USER:-chatbot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+      MILVUS_ADDRESS: milvus:19530
+      MODELS: ${CHATBOT_MODELS:-gpt-oss-120b}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/available_models"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  postgres:
+    container_name: spark-ai-hub-chatbot-postgres
+    image: postgres:15-alpine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-chatbot}
+      POSTGRES_USER: ${POSTGRES_USER:-chatbot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chatbot_user} -d ${POSTGRES_DB:-chatbot}"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  etcd:
+    container_name: spark-ai-hub-chatbot-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: 1000
+      ETCD_QUOTA_BACKEND_BYTES: 4294967296
+      ETCD_SNAPSHOT_COUNT: 50000
+    volumes:
+      - ./data/etcd:/etcd
+    command: >-
+      etcd -advertise-client-urls=http://127.0.0.1:2379
+      -listen-client-urls http://0.0.0.0:2379
+      --data-dir /etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    container_name: spark-ai-hub-chatbot-minio
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    volumes:
+      - ./data/minio:/minio_data
+    command: minio server /minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    restart: unless-stopped
+
+  milvus:
+    container_name: spark-ai-hub-chatbot-milvus
+    image: milvusdb/milvus:v2.5.15-20250718-3a3b374f-gpu-arm64
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - ./data/milvus:/var/lib/milvus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      start_period: 90s
+      timeout: 20s
+      retries: 5
+    ports:
+      - "${MILVUS_PORT:-19530}:19530"
+      - "${MILVUS_HEALTH_PORT:-9091}:9091"
+    depends_on:
+      etcd:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  qwen2.5-vl:
+    container_name: qwen2.5-vl
+    image: nvcr.io/nvidia/tensorrt-llm/release:spark-single-gpu-dev
+    shm_size: "1g"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      TOKENIZERS_PARALLELISM: "false"
+      NCCL_P2P_LEVEL: SYS
+      NCCL_DEBUG: INFO
+      UCX_TLS: tcp,sm,self
+      UCX_MEMTYPE_CACHE: "n"
+      CUDA_VISIBLE_DEVICES: ${QWEN_VL_GPU_DEVICE:-0}
+    command: >-
+      trtllm-serve serve ${QWEN_VL_MODEL_ID:-Qwen/Qwen2-VL-7B-Instruct}
+      --backend pytorch
+      --host 0.0.0.0
+      --port 8000
+      --trust_remote_code
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  qwen3-embedding:
+    <<: *llama-base
+    container_name: qwen3-embedding
+    volumes:
+      - ./data/models:/models
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command: |
+      set -euo pipefail
+      mkdir -p /models
+      if [ ! -f /models/Qwen3-Embedding-4B-Q8_0.gguf ]; then
+        curl -C - -L -o /models/Qwen3-Embedding-4B-Q8_0.gguf "${QWEN_EMBEDDING_URL}"
+      fi
+      exec /app/llama-server \
+        -m /models/Qwen3-Embedding-4B-Q8_0.gguf \
+        --port 8000 \
+        --host 0.0.0.0 \
+        --jinja \
+        --embeddings
+
+  gpt-oss-120b:
+    <<: *llama-base
+    container_name: gpt-oss-120b
+    volumes:
+      - ./data/models:/models
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command: |
+      set -euo pipefail
+      mkdir -p /models
+      if [ ! -f /models/gpt-oss-120b-mxfp4-00001-of-00003.gguf ]; then
+        curl -C - -L -o /models/gpt-oss-120b-mxfp4-00001-of-00003.gguf "${GPT_OSS_PART_1_URL}"
+      fi
+      if [ ! -f /models/gpt-oss-120b-mxfp4-00002-of-00003.gguf ]; then
+        curl -C - -L -o /models/gpt-oss-120b-mxfp4-00002-of-00003.gguf "${GPT_OSS_PART_2_URL}"
+      fi
+      if [ ! -f /models/gpt-oss-120b-mxfp4-00003-of-00003.gguf ]; then
+        curl -C - -L -o /models/gpt-oss-120b-mxfp4-00003-of-00003.gguf "${GPT_OSS_PART_3_URL}"
+      fi
+      exec /app/llama-server \
+        -m /models/gpt-oss-120b-mxfp4-00001-of-00003.gguf \
+        --port 8000 \
+        --host 0.0.0.0 \
+        -n 65536 \
+        --n-gpu-layers 70 \
+        --jinja
+
+  deepseek-coder:
+    <<: *llama-base
+    container_name: deepseek-coder
+    volumes:
+      - ./data/models:/models
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command: |
+      set -euo pipefail
+      mkdir -p /models
+      if [ ! -f /models/deepseek-coder-6.7b-instruct.Q8_0.gguf ]; then
+        curl -C - -L -o /models/deepseek-coder-6.7b-instruct.Q8_0.gguf "${DEEPSEEK_CODER_URL}"
+      fi
+      exec /app/llama-server \
+        -m /models/deepseek-coder-6.7b-instruct.Q8_0.gguf \
+        --port 8000 \
+        --host 0.0.0.0 \
+        -n 256 \
+        --n-gpu-layers 999 \
+        --jinja

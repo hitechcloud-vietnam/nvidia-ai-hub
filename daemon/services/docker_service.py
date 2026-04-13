@@ -123,6 +123,7 @@ def _render_runtime_env(template_text: str) -> str:
         "POSTGRES_PASSWORD": secrets.token_urlsafe(24),
         "OPENSEARCH_ADMIN_PASSWORD": secrets.token_urlsafe(24),
         "MINIO_ROOT_PASSWORD": shared_secrets["minio_password"],
+        "MINIO_SECRET_KEY": shared_secrets["minio_password"],
         "S3_AWS_SECRET_ACCESS_KEY": shared_secrets["minio_password"],
     }
 
