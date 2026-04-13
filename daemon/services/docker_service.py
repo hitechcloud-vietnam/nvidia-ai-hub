@@ -67,15 +67,22 @@ async def start_health_check(slug: str):
     ui_port = recipe.ui.port if recipe.ui else 8080
     ui_path = recipe.ui.path if recipe.ui else "/"
     health_path = recipe.ui.health_path if recipe.ui and recipe.ui.health_path else ui_path
+    ui_scheme = recipe.ui.scheme if recipe.ui and recipe.ui.scheme else "http"
+    skip_verify = bool(recipe.ui and recipe.ui.insecure_skip_verify)
 
     async def _check():
-        url = f"http://127.0.0.1:{ui_port}{health_path}"
+        url = f"{ui_scheme}://127.0.0.1:{ui_port}{health_path}"
         # Up to 5 minutes of polling
         async with aiohttp.ClientSession() as session:
             for _ in range(300):
                 await asyncio.sleep(1)
                 try:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=3), allow_redirects=True) as resp:
+                    async with session.get(
+                        url,
+                        timeout=aiohttp.ClientTimeout(total=3),
+                        allow_redirects=True,
+                        ssl=False if ui_scheme == "https" and skip_verify else None,
+                    ) as resp:
                         if 200 <= resp.status < 400:
                             mark_ready(slug)
                             print(f"[health] {slug} is ready at {url} ({resp.status})")

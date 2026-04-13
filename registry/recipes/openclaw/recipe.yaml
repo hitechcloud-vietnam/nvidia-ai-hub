@@ -13,7 +13,6 @@ tags:
   - control-ui
   - tools
   - channels
-icon: "🦞"
 logo: "/logos/openclaw-color.png"
 requirements:
   min_memory_gb: 8

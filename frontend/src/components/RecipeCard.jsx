@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
+import { getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 
 export default function RecipeCard({ recipe }) {
   const selectRecipe = useStore((s) => s.selectRecipe)
@@ -13,6 +14,7 @@ export default function RecipeCard({ recipe }) {
   const isBuilding = installing === recipe.slug
   const isUpdating = updating === recipe.slug
   const isBusy = isBuilding || isUpdating
+  const isNotebook = isNotebookRecipe(recipe)
 
   const handleInstall = (e) => {
     e.stopPropagation()
@@ -62,6 +64,11 @@ export default function RecipeCard({ recipe }) {
 
           {/* Tags */}
           <div className="flex items-center gap-1.5 mt-2">
+            <span className={`text-[10px] font-label px-2 py-0.5 rounded-full ${
+              isNotebook ? 'text-primary bg-primary/10' : 'text-text-dim bg-surface-high'
+            }`}>
+              {getRecipeSurfaceLabel(recipe)}
+            </span>
             {recipeCategories.slice(0, 2).map((cat) => (
               <span key={cat} className="text-[10px] font-label text-secondary bg-secondary/10 px-2 py-0.5 rounded-full">
                 {cat}
@@ -87,13 +94,13 @@ export default function RecipeCard({ recipe }) {
           )}
           {!isBusy && recipe.running && recipe.ready && (
             <a
-              href={`http://${location.hostname}:${recipe.ui?.port ?? 8080}${recipe.ui?.path ?? '/'}`}
+              href={getRecipeUrl(recipe)}
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="btn-secondary px-3.5 py-1.5 text-[11px] font-semibold no-underline"
             >
-              Open
+              {getRecipeOpenLabel(recipe)}
             </a>
           )}
           {!isBusy && recipe.starting && (

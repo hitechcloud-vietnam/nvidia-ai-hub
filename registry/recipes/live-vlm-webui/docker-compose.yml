@@ -1,0 +1,22 @@
+services:
+  live-vlm-webui:
+    image: ghcr.io/nvidia-ai-iot/live-vlm-webui:latest
+    container_name: spark-ai-hub-live-vlm-webui
+    network_mode: host
+    env_file:
+      - .env
+    environment:
+      LIVE_VLM_API_BASE: ${LIVE_VLM_API_BASE:-http://localhost:11434/v1}
+      LIVE_VLM_DEFAULT_MODEL: ${LIVE_VLM_DEFAULT_MODEL:-llama3.2-vision:11b}
+      LIVE_VLM_PROCESS_EVERY: ${LIVE_VLM_PROCESS_EVERY:-30}
+      PORT: ${PORT:-8090}
+    volumes:
+      - ./data/config:/root/.config/live-vlm-webui
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

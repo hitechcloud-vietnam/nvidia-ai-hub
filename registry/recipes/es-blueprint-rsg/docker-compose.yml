@@ -1,0 +1,38 @@
+services:
+  jupyter:
+    image: quay.io/jupyter/base-notebook:python-3.11
+    container_name: spark-ai-hub-es-blueprint-rsg
+    working_dir: /workspace/es-blueprint-rsg
+    env_file:
+      - .env
+    environment:
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-spark-ai-hub}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-meta/llama-3.1-70b-instruct}
+      RSG_HOST: ${RSG_HOST:-3.211.96.252}
+      RSG_USER_NAME: ${RSG_USER_NAME:-user1}
+      SCENARIO_CONF: ${SCENARIO_CONF:-ai_rsg_config/config.conf}
+      RSG_ADDRESS: ${RSG_ADDRESS:-}
+      RSG_WHEEL_ADDRESS: ${RSG_WHEEL_ADDRESS:-http://3.211.96.252:8000}
+    command:
+      - bash
+      - -lc
+      - |
+        set -eu
+        if [ ! -d /workspace/es-blueprint-rsg/.git ]; then
+          echo "Upstream workspace not found at /workspace/es-blueprint-rsg."
+          echo "Run the manual clone command shown in the recipe first."
+          exit 1
+        fi
+        if [ ! -d /workspace/es-blueprint-rsg/.venv ]; then
+          echo "Virtual environment missing. Running upstream setup.sh..."
+          chmod +x /workspace/es-blueprint-rsg/setup.sh /workspace/es-blueprint-rsg/run.sh || true
+          /workspace/es-blueprint-rsg/setup.sh
+        fi
+        . /workspace/es-blueprint-rsg/.venv/bin/activate
+        python -m jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --NotebookApp.token="${JUPYTER_TOKEN:-spark-ai-hub}" --NotebookApp.allow_origin='*'
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./workspace:/workspace
+    restart: unless-stopped

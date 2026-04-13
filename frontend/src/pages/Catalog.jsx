@@ -1,6 +1,7 @@
-import { useState, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
+import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 
 const BANNERS = {
   'vllm-qwen35-08b':      { img: '/banners/wide/qwen-beach.png', layout: 'wide' },
@@ -26,7 +27,8 @@ const BANNERS = {
   'anythingllm':           { img: '/banners/wide/anythingllm.png', layout: 'wide' },
   'flowise':               { img: '/banners/wide/flowise.png', layout: 'wide' },
   'langflow':              { img: '/banners/wide/langflow.png', layout: 'wide' },
-  'localai':               { img: '/banners/wide/localai.png', layout: 'wide' },
+  'localai':               { img: '/banners/wide/localai.png', layout: 'wide' }
+
 }
 
 function getBanner(slug) {
@@ -39,11 +41,13 @@ function getBanner(slug) {
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
+  { id: 'dgx-spark', label: 'DGX Spark' },
   { id: 'llm', label: 'LLMs' },
   { id: 'image-gen', label: 'Image Gen' },
   { id: 'video-gen', label: 'Video Gen' },
   { id: '3d-gen', label: '3D Gen' },
   { id: 'multi-modal', label: 'Multi-Modal' },
+  { id: 'nemoclaw', label: 'NemoClaw' },
 ]
 
 const SOURCE_SECTIONS = [
@@ -71,18 +75,31 @@ function getSectionId(recipe) {
   return 'official'
 }
 
+function getRecipeCategories(recipe) {
+  const baseCategories = Array.isArray(recipe.categories) && recipe.categories.length > 0
+    ? recipe.categories
+    : [recipe.category]
+
+  const tags = Array.isArray(recipe.tags) ? recipe.tags : []
+  const description = (recipe.description || '').toLowerCase()
+  const isDgxSparkRecipe =
+    (recipe.source || 'community') === 'spark-ai-hub' ||
+    recipe.slug.includes('spark') ||
+    tags.includes('dgx-spark') ||
+    description.includes('dgx spark')
+
+  return isDgxSparkRecipe ? [...new Set([...baseCategories, 'dgx-spark'])] : baseCategories
+}
+
 export default function Catalog({ search = '' }) {
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installRecipe = useStore((s) => s.installRecipe)
   const [category, setCategory] = useState('all')
-
-  const heroIndex = useRef(Math.floor(Math.random() * 1000))
+  const [activeBannerSlug, setActiveBannerSlug] = useState(null)
 
   const filtered = recipes.filter((r) => {
-    const recipeCategories = Array.isArray(r.categories) && r.categories.length > 0
-      ? r.categories
-      : [r.category]
+    const recipeCategories = getRecipeCategories(r)
     if (category !== 'all' && !recipeCategories.includes(category)) return false
     if (search) {
       const q = search.toLowerCase()
@@ -100,11 +117,44 @@ export default function Catalog({ search = '' }) {
     })).filter((section) => section.recipes.length > 0)
   }, [orderedRecipes])
 
-  const recipesWithBanners = recipes.filter((r) => getBanner(r.slug))
-  const featured = recipesWithBanners.length > 0
-    ? recipesWithBanners[heroIndex.current % recipesWithBanners.length]
-    : null
+  const recipesWithBanners = useMemo(
+    () => orderedRecipes.filter((r) => getBanner(r.slug)),
+    [orderedRecipes],
+  )
+
+  useEffect(() => {
+    if (recipesWithBanners.length === 0) {
+      setActiveBannerSlug(null)
+      return
+    }
+
+    setActiveBannerSlug((current) => {
+      if (current && recipesWithBanners.some((recipe) => recipe.slug === current)) {
+        return current
+      }
+      return recipesWithBanners[0].slug
+    })
+  }, [recipesWithBanners])
+
+  useEffect(() => {
+    if (search || category !== 'all' || recipesWithBanners.length <= 1) return undefined
+
+    const interval = window.setInterval(() => {
+      setActiveBannerSlug((current) => {
+        const currentIndex = recipesWithBanners.findIndex((recipe) => recipe.slug === current)
+        const nextIndex = currentIndex >= 0
+          ? (currentIndex + 1) % recipesWithBanners.length
+          : 0
+        return recipesWithBanners[nextIndex].slug
+      })
+    }, 8000)
+
+    return () => window.clearInterval(interval)
+  }, [category, recipesWithBanners, search])
+
+  const featured = recipesWithBanners.find((recipe) => recipe.slug === activeBannerSlug) || recipesWithBanners[0] || null
   const bannerConf = featured ? getBanner(featured.slug) : null
+  const featuredIsNotebook = isNotebookRecipe(featured)
 
   return (
     <div className="pb-12">
@@ -137,7 +187,12 @@ export default function Catalog({ search = '' }) {
 
             <div className="flex-1 min-w-0">
               <span className="inline-block text-[10px] font-bold font-label text-primary-on bg-primary px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2">
-                {featured.running || featured.starting ? 'Now Running' : 'Featured'}
+                {getRecipeFeaturedLabel(featured)}
+              </span>
+              <span className={`inline-block text-[10px] font-bold font-label px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 ml-2 ${
+                featuredIsNotebook ? 'text-primary bg-primary/12 border border-primary/20' : 'text-text-dim bg-surface/45 border border-glass-border'
+              }`}>
+                {getRecipeSurfaceLabel(featured)}
               </span>
               <h1 className="text-3xl font-bold text-text tracking-tight font-display m-0 drop-shadow-md">
                 {featured.name}
@@ -148,13 +203,13 @@ export default function Catalog({ search = '' }) {
               <div className="mt-4 flex items-center gap-3">
                 {featured.running && featured.ready ? (
                   <a
-                    href={`http://${location.hostname}:${featured.ui?.port ?? 8080}${featured.ui?.path ?? '/'}`}
+                    href={getRecipeUrl(featured)}
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="btn-primary px-6 py-2 text-sm font-bold no-underline inline-block"
                   >
-                    Open ↗
+                      {getRecipeOpenLabelWithArrow(featured)}
                   </a>
                 ) : !featured.installed ? (
                   <button

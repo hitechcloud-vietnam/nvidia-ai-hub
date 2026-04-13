@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
+import { getRecipeLaunchLabel, getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl } from '../utils/recipePresentation'
 
 export default function Running() {
   const recipes = useStore((s) => s.recipes)
@@ -9,7 +10,6 @@ export default function Running() {
   const stopRecipe = useStore((s) => s.stopRecipe)
   const restartRecipe = useStore((s) => s.restartRecipe)
   const restarting = useStore((s) => s.restarting)
-  const metrics = useStore((s) => s.metrics)
 
   const running = recipes.filter((r) => r.running || r.starting)
   const installed = recipes.filter((r) => r.installed && !r.running && !r.starting)
@@ -118,7 +118,7 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
           {/* Port */}
           {recipe.ui?.port && (
             <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
-              :{recipe.ui.port}
+              {getRecipeSurfaceLabel(recipe)} · :{recipe.ui.port}
             </span>
           )}
 
@@ -131,13 +131,13 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
           {/* Actions */}
           {isReady && (
             <a
-              href={`http://${location.hostname}:${recipe.ui?.port ?? 8080}${recipe.ui?.path ?? '/'}`}
+              href={getRecipeUrl(recipe)}
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="btn-secondary px-4 py-1.5 text-xs font-semibold no-underline"
             >
-              Open
+                {getRecipeOpenLabel(recipe)}
             </a>
           )}
           <button
@@ -202,7 +202,7 @@ function StoppedCard({ recipe, onSelect, onLaunch }) {
           onClick={handleLaunch}
           className="btn-primary px-4 py-1.5 text-xs font-semibold shrink-0"
         >
-          {launching ? '...' : 'Launch'}
+          {launching ? '...' : getRecipeLaunchLabel(recipe)}
         </button>
       </div>
     </div>

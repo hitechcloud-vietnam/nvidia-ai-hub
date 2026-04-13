@@ -14,6 +14,8 @@ class RecipeUI(BaseModel):
     port: int = 8080
     path: str = "/"
     health_path: str | None = None
+    scheme: str = "http"
+    insecure_skip_verify: bool = False
 
 
 class RecipeDocker(BaseModel):

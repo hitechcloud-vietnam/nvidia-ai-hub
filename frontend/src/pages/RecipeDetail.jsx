@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
+import {
+  getRecipeLaunchLabel,
+  getRecipeOpenLabelWithArrow,
+  getRecipeSurfaceLabel,
+  getRecipeUrl,
+  isNotebookRecipe,
+} from '../utils/recipePresentation'
 
-const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw'])
+const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw', 'es-blueprint-rsg', 'live-vlm-webui'])
 
 function getDetailTabs(recipe) {
   const tabs = [{ id: 'details', label: 'Overview' }]
@@ -37,6 +44,7 @@ export default function RecipeDetail() {
   const disconnectLogs = useStore((s) => s.disconnectLogs)
 
   const recipe = recipes.find((r) => r.slug === selectedRecipe)
+  const logoUrl = useThemedLogo(recipe?.logo)
   const scrollRef = useRef(null)
   const previousRecipeRef = useRef(null)
   const previousPreferLogsRef = useRef(false)
@@ -97,8 +105,8 @@ export default function RecipeDetail() {
   }
 
   const isRemoving = removing === recipe.slug
-  const logoUrl = useThemedLogo(recipe.logo)
   const isReady = recipe.ready
+  const isNotebook = isNotebookRecipe(recipe)
   const cLogs = containerLogs[recipe.slug] || []
   const logLines = isBusy ? (buildLogs[recipe.slug] || []) : cLogs
 
@@ -190,6 +198,11 @@ export default function RecipeDetail() {
             <h1 className="text-2xl font-bold text-text tracking-tight m-0 font-display">{recipe.name}</h1>
             <p className="text-sm text-text-dim mt-0.5 m-0">{recipe.author}</p>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span className={`text-[10px] font-label px-2 py-0.5 rounded-full ${
+                isNotebook ? 'text-primary bg-primary/10' : 'text-text-dim bg-surface-high'
+              }`}>
+                {getRecipeSurfaceLabel(recipe)}
+              </span>
               {recipeCategories.map((cat) => (
                 <span key={cat} className="text-[10px] font-label text-secondary bg-secondary/10 px-2 py-0.5 rounded-full">{cat}</span>
               ))}
@@ -237,7 +250,7 @@ export default function RecipeDetail() {
             {recipe.installed && !recipe.running && !recipe.starting && !isBusy && !isRemoving && (
               <>
                 <button disabled={launching || isRemoving} onClick={handleLaunch} className="btn-primary px-6 py-2.5 text-sm font-bold">
-                  {launching ? '...' : '▶ Launch'}
+                  {launching ? '...' : `▶ ${getRecipeLaunchLabel(recipe)}`}
                 </button>
                 <button disabled={launching || isRemoving} onClick={() => updateRecipe(recipe.slug)} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:text-primary hover:bg-surface-highest disabled:opacity-50">
                   ↻ Update
@@ -250,9 +263,9 @@ export default function RecipeDetail() {
             {(recipe.running || recipe.starting) && (
               <>
                 {isReady && (
-                  <a href={`http://${location.hostname}:${recipe.ui?.port ?? 8080}${recipe.ui?.path ?? '/'}`} target="_blank" rel="noreferrer"
+                  <a href={getRecipeUrl(recipe)} target="_blank" rel="noreferrer"
                     className="btn-primary px-6 py-2.5 text-sm font-bold no-underline inline-block">
-                    Open ↗
+                    {getRecipeOpenLabelWithArrow(recipe)}
                   </a>
                 )}
                 <button disabled={stopping} onClick={handleStop} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50">
@@ -316,7 +329,7 @@ export default function RecipeDetail() {
             </div>
           )
         ) : activeTab === 'config' ? (
-          <RecipeConfigTab recipe={recipe} />
+          <RecipeConfigTab key={recipe.slug} recipe={recipe} />
         ) : (
           <div className="h-full min-h-0">
             <TerminalPanel
@@ -486,6 +499,7 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
   const sourceUrl = recipe.upstream || recipe.fork || ''
+  const isNotebook = isNotebookRecipe(recipe)
   const relatedRecipes = (recipe.depends_on || [])
     .map((slug) => recipes.find((item) => item.slug === slug))
     .filter(Boolean)
@@ -540,8 +554,9 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
               <div>
                 <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Advanced Configuration</div>
                 <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                  This app creates a local runtime config file on first install. Most users should leave it alone.
-                  If you know what you are doing, you can edit it manually and relaunch the app.
+                  {isNotebook
+                    ? 'This notebook blueprint creates a local runtime env file on first install. Review it before launch if you need to supply NVIDIA API credentials or VIAVI endpoint details.'
+                    : 'This app creates a local runtime config file on first install. Most users should leave it alone. If you know what you are doing, you can edit it manually and relaunch the app.'}
                 </p>
               </div>
               <Field label="Runtime env file" value={recipe.runtime_env_path} />
@@ -776,21 +791,12 @@ function ComposeEditor({ slug }) {
 }
 
 function RecipeConfigTab({ recipe }) {
-  const tabs = [
+  const isNotebook = isNotebookRecipe(recipe)
+  const tabs = useMemo(() => [
     { id: 'compose', label: 'Compose' },
     ...(recipe.runtime_env_path ? [{ id: 'env', label: 'Environment' }] : []),
-  ]
+  ], [recipe.runtime_env_path])
   const [activeConfigTab, setActiveConfigTab] = useState(tabs[0]?.id || 'compose')
-
-  useEffect(() => {
-    setActiveConfigTab('compose')
-  }, [recipe.slug])
-
-  useEffect(() => {
-    if (!tabs.some((tab) => tab.id === activeConfigTab)) {
-      setActiveConfigTab(tabs[0]?.id || 'compose')
-    }
-  }, [activeConfigTab, tabs])
 
   return (
     <div className="h-full min-h-0 flex flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]">
@@ -798,7 +804,9 @@ function RecipeConfigTab({ recipe }) {
         <div className="max-w-4xl">
           <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Configuration Workspace</div>
           <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-            OpenClaw and NemoClaw expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.
+            {isNotebook
+              ? 'This notebook blueprint separates container settings from runtime environment values so reviewers can check launch wiring without losing the main workflow overview.'
+              : 'OpenClaw, NemoClaw, and Live VLM WebUI expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.'}
           </p>
           <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim mt-4">
             {tabs.map((tab) => {

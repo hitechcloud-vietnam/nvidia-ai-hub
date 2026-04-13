@@ -1,0 +1,54 @@
+name: "Live VLM WebUI"
+slug: live-vlm-webui
+version: "0.4.0"
+description: "Run NVIDIA Live VLM WebUI on DGX Spark for real-time webcam and WebRTC vision-language workflows with local Ollama auto-detection and HTTPS access on port 8090."
+author: "NVIDIA"
+source: "official"
+website: "https://github.com/NVIDIA-AI-IOT/live-vlm-webui"
+upstream: "https://github.com/NVIDIA-AI-IOT/live-vlm-webui"
+category: multi-modal
+categories:
+  - multi-modal
+  - dgx-spark
+tags:
+  - vlm
+  - vision-language
+  - webrtc
+  - webcam
+  - ollama
+  - dgx-spark
+  - nvidia
+icon: "🎥"
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8090
+  path: "/"
+  health_path: "/models"
+  scheme: https
+  insecure_skip_verify: true
+commands:
+  - label: "Install / launch"
+    description: "Pull the official multi-arch Live VLM WebUI image and start the HTTPS WebRTC interface with host-network access to local Ollama or other compatible VLM backends."
+    command: "docker compose -p spark-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Live VLM WebUI while preserving the generated TLS certificate store and runtime configuration."
+    command: "docker compose -p spark-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml down"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: true
+status: experimental
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:11434/v1"
+  model_id: "llama3.2-vision:11b"
+  api_key: "EMPTY"
+  curl_example: "curl http://<SPARK_IP>:11434/v1/models"
+runtime_env_path: "registry/recipes/live-vlm-webui/.env"

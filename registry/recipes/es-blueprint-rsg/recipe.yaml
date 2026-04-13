@@ -1,0 +1,55 @@
+name: "Intent-Based RAN Energy Efficiency Blueprint"
+slug: es-blueprint-rsg
+version: "1.0.0"
+description: "VIAVI and NVIDIA's notebook-driven blueprint for simulation-validated, intent-based RAN energy optimization using AI RSG, VIAVI ADK, and NVIDIA-hosted LLMs. This recipe tracks the upstream PoC workflow and is intended for research and evaluation, not production deployment."
+author: "VIAVI Solutions & NVIDIA"
+source: "official"
+website: "https://build.nvidia.com/viavi/intent-driven-ran-energy-efficiency"
+upstream: "https://github.com/VIAVI-CTOO/es-blueprint-rsg"
+category: multi-modal
+tags:
+  - ran
+  - telecommunications
+  - energy-optimization
+  - notebook
+  - simulation
+  - viavi
+  - nvidia
+  - ai-rsg
+  - adk
+icon: "📶"
+logo: "/logos/es-blueprint-rsg.svg"
+requirements:
+  min_memory_gb: 32
+  recommended_memory_gb: 64
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8888
+  path: "/tree/notebooks"
+commands:
+  - label: "Clone upstream blueprint"
+    description: "Clone the official VIAVI blueprint repository next to this recipe so you can run the notebook workflow locally."
+    command: "git clone https://github.com/VIAVI-CTOO/es-blueprint-rsg.git registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg"
+  - label: "Install / launch notebook container"
+    description: "Start the Jupyter-based containerized workspace after the upstream blueprint has been cloned and configured."
+    command: "docker compose -p spark-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml up -d"
+  - label: "Prepare Python environment"
+    description: "Run the upstream setup script to create a virtual environment, install dependencies, and register the notebook kernel."
+    command: "cd registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg && ./setup.sh"
+  - label: "Launch Jupyter notebook"
+    description: "Start the upstream notebook launcher, then open notebooks/es_blueprint_poc.ipynb and run the cells sequentially."
+    command: "cd registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg && ./run.sh"
+  - label: "Install VIAVI ADK manually"
+    description: "Install the private VIAVI ADK wheel from the AI RSG host if your environment was not pre-authorized during setup."
+    command: "cd registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg && . .venv/bin/activate && pip install http://3.211.96.252:8000/adk"
+  - label: "Stop notebook container"
+    description: "Stop the Jupyter-based workspace while preserving the cloned upstream project and its local outputs."
+    command: "docker compose -p spark-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml down"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: ""
