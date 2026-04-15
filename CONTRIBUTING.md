@@ -225,19 +225,10 @@ Before opening a pull request, confirm:
 
 ## Optional GitHub Actions Workflows
 
-Additional GitHub Actions workflow files are present under `.github/workflows/`, but some are intentionally gated and will not run until the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
-
-This allows the repository to stage automation safely before enabling it in production.
-
-Current gated workflows include:
-
-- CI validation
-- Recipe validation
-- Docs and governance validation
-- Dependency update validation
-- Dependabot auto-triage
-- Release package build
+Additional GitHub Actions workflow files are staged under `.github/workflows/` and remain gated until `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
 
 The repository also includes `.github/dependabot.yml`, but dependency update pull requests remain paused until maintainers raise the configured `open-pull-requests-limit` above `0`.
 
-If your change relies on one of these workflows, mention that dependency in the pull request and confirm whether the repository variable is still disabled or has been enabled by maintainers.
+Use [`docs/github-actions.md`](./docs/github-actions.md) for the current workflow inventory and rollout guidance.
+
+If your change relies on staged automation, mention that dependency in the pull request and confirm whether the gate remains disabled or has been enabled by maintainers.

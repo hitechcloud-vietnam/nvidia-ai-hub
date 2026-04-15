@@ -57,7 +57,7 @@ This helps dependency and workflow pull requests request review from the expecte
 
 ### Optional GitHub Actions workflows
 
-The repository includes additional workflow definitions that are intentionally disabled by default:
+The repository includes staged workflow definitions that are gated by `ENABLE_OPTIONAL_WORKFLOWS`.
 
 Active workflows that are not gated:
 
@@ -74,7 +74,7 @@ Gated workflows:
 - `.github/workflows/dependabot-auto-triage-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
 
-These workflows do not execute their jobs unless the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
+These staged workflows do not execute their jobs unless the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
 
 Dependency update pull requests are also staged conservatively: `.github/dependabot.yml` exists, but each ecosystem currently uses `open-pull-requests-limit: 0` so Dependabot does not open update pull requests until maintainers explicitly allow it.
 
@@ -83,6 +83,8 @@ Recommended usage:
 - keep the variable unset during initial workflow rollout
 - review the workflow contents and required permissions first
 - enable the variable only when the repository is ready to run the optional automation set
+
+Use [`./github-actions.md`](./github-actions.md) for the full workflow inventory and rollout details.
 
 ## Merge Guidance
 

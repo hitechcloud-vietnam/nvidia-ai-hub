@@ -17,13 +17,13 @@
 
 **Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 
-**Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
+**Your AI app store for NVIDIA GPU platforms.** Browse, install, and launch AI apps with one click.
 
 ![NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC](SparkDeck.png)
 
 ## Overview
 
-NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC provides a web UI and API for managing curated AI application recipes on NVIDIA DGX Spark.
+NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC provides a web UI and API for managing curated AI application recipes across NVIDIA GPU workstations, servers, and DGX-class systems.
 
 The project includes:
 
@@ -99,7 +99,7 @@ Use the local development guide for Windows-compatible commands:
 After installation, open:
 
 - `http://localhost:9000`
-- or `http://<your-spark-ip>:9000` from another device on the same network
+- or `http://<your-host-ip>:9000` from another device on the same network
 
 Run the same command again to update.
 
@@ -128,7 +128,7 @@ If `--port`, `--host`, `-Port`, or `-Host` is used during install, the chosen va
 
 ## Features
 
-- Browse a catalog of AI apps ready for DGX Spark
+- Browse a catalog of AI apps ready for NVIDIA GPU platforms
 - Install any app with one click — no terminal needed
 - Launch, stop, and monitor running apps from the dashboard
 - Track GPU, RAM, disk, and temperature in real time
@@ -148,13 +148,13 @@ If `--port`, `--host`, `-Port`, or `-Host` is used during install, the chosen va
 | Flowise | Drag-and-drop LLM workflows | No |
 | Langflow | Visual LLM app builder | No |
 
-All apps run as Docker containers with ARM64 + CUDA support.
+Apps are delivered as Docker-based workloads with NVIDIA runtime integration. Architecture and GPU requirements vary by recipe.
 
 ## Requirements
 
 ### Minimum
 
-- NVIDIA DGX Spark
+- Linux host with a supported NVIDIA GPU, Docker Engine, and NVIDIA Container Toolkit or equivalent NVIDIA runtime integration
 - Ubuntu/Debian-based Linux environment with `apt-get`
 - Internet access during installation
 - Permission to use `sudo` for package installation

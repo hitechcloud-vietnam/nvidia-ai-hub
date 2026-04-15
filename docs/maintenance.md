@@ -53,7 +53,7 @@ Keep labels aligned with the current repository structure so pull requests are r
 Current default state:
 
 - Dependabot is configured
-- pull request creation is paused with `open-pull-requests-limit: 0`
+- dependency update pull request creation is paused with `open-pull-requests-limit: 0`
 
 When enabling an ecosystem, increase the limit only for the ecosystem that is ready for review.
 
@@ -75,6 +75,12 @@ Current active workflow for rollout visibility:
 - `optional-workflows-status.yml`
 
 Review `docs/github-actions.md` before enabling any staged workflow.
+
+Standard terminology in this repository:
+
+- **staged**: present in the repository but not yet intended for broad operational use
+- **gated**: workflow jobs run only when `ENABLE_OPTIONAL_WORKFLOWS == 'true'`
+- **paused**: Dependabot configuration exists, but pull request creation is held by `open-pull-requests-limit: 0`
 
 ### Branch protection
 
