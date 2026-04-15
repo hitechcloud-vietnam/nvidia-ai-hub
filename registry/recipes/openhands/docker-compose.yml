@@ -1,0 +1,21 @@
+services:
+  openhands:
+    image: ghcr.io/openhands/openhands:main
+    container_name: nvidia-ai-hub-openhands
+    env_file:
+      - .env
+    environment:
+      AGENT_SERVER_IMAGE_REPOSITORY: ${AGENT_SERVER_IMAGE_REPOSITORY:-ghcr.io/openhands/agent-server}
+      AGENT_SERVER_IMAGE_TAG: ${AGENT_SERVER_IMAGE_TAG:-1.17.0-python}
+      WORKSPACE_MOUNT_PATH: ${WORKSPACE_MOUNT_PATH:-/opt/workspace_base}
+    ports:
+      - "${OPENHANDS_PORT:-3000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/.openhands:/.openhands
+      - ./workspace:/opt/workspace_base
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

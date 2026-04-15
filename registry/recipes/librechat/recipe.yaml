@@ -1,0 +1,33 @@
+name: "LibreChat"
+slug: librechat
+version: "1.0.0"
+description: "Self-hosted multi-provider AI chat platform with agents, RAG, MCP support, search, and multi-user authentication using the official Docker images."
+author: "LibreChat"
+source: "official"
+website: "https://www.librechat.ai/"
+upstream: "https://github.com/danny-avila/LibreChat"
+category: llm
+tags:
+  - chat
+  - agents
+  - rag
+  - mcp
+  - multi-provider
+  - enterprise
+icon: "💬"
+logo: "/logos/librechat.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3080
+  path: "/"
+  health_path: "/api/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: official

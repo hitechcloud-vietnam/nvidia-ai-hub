@@ -1,0 +1,67 @@
+services:
+  api:
+    image: registry.librechat.ai/danny-avila/librechat-dev:latest
+    container_name: nvidia-ai-hub-librechat
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/LibreChat}
+      MEILI_HOST: ${MEILI_HOST:-http://meilisearch:7700}
+      RAG_PORT: ${RAG_PORT:-8000}
+      RAG_API_URL: ${RAG_API_URL:-http://rag_api:8000}
+    depends_on:
+      - mongodb
+      - rag_api
+    ports:
+      - "${PORT:-3080}:${PORT:-3080}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./.env:/app/.env
+      - ./data/images:/app/client/public/images
+      - ./data/uploads:/app/uploads
+      - ./data/logs:/app/logs
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:8.0.20
+    container_name: nvidia-ai-hub-librechat-mongodb
+    command: mongod --noauth
+    volumes:
+      - ./data/mongodb:/data/db
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.35.1
+    container_name: nvidia-ai-hub-librechat-meilisearch
+    environment:
+      MEILI_HOST: ${MEILI_HOST:-http://meilisearch:7700}
+      MEILI_NO_ANALYTICS: ${MEILI_NO_ANALYTICS:-true}
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-change-me-librechat-meili}
+    volumes:
+      - ./data/meili:/meili_data
+    restart: unless-stopped
+
+  vectordb:
+    image: pgvector/pgvector:0.8.0-pg15-trixie
+    container_name: nvidia-ai-hub-librechat-vectordb
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+      POSTGRES_USER: ${POSTGRES_USER:-myuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mypassword}
+    volumes:
+      - ./data/pgvector:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  rag_api:
+    image: registry.librechat.ai/danny-avila/librechat-rag-api-dev-lite:latest
+    container_name: nvidia-ai-hub-librechat-rag-api
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${DB_HOST:-vectordb}
+      RAG_PORT: ${RAG_PORT:-8000}
+    depends_on:
+      - vectordb
+    restart: unless-stopped

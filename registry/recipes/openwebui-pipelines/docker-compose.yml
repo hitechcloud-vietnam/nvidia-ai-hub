@@ -1,0 +1,17 @@
+services:
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: nvidia-ai-hub-openwebui-pipelines
+    env_file:
+      - .env
+    environment:
+      PIPELINES_API_KEY: ${PIPELINES_API_KEY:-change-me-openwebui-pipelines}
+      PIPELINES_URLS: ${PIPELINES_URLS:-}
+      PIPELINES_DIR: ${PIPELINES_DIR:-/app/pipelines}
+    ports:
+      - "${PIPELINES_PORT:-9099}:9099"
+    volumes:
+      - ./data/pipelines:${PIPELINES_DIR:-/app/pipelines}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

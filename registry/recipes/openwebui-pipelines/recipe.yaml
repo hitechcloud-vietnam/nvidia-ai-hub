@@ -1,0 +1,31 @@
+name: "Open WebUI Pipelines"
+slug: openwebui-pipelines
+version: "1.0.0"
+description: "Pipeline server for Open WebUI that lets you host custom filters, tools, and pipeline extensions with a local Docker recipe."
+author: "Open WebUI"
+source: "official"
+website: "https://openwebui.com/"
+upstream: "https://github.com/open-webui/pipelines"
+category: llm
+tags:
+  - open-webui
+  - pipelines
+  - tools
+  - extensions
+  - fastapi
+icon: "🧩"
+logo: "/logos/openwebui.png"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 5
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 9099
+  path: "/docs"
+docker:
+  build: false
+  build_time_minutes: 2
+  gpu: false
+status: official

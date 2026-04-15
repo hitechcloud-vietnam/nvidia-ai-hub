@@ -1,0 +1,31 @@
+name: "OpenHands"
+slug: openhands
+version: "1.0.0"
+description: "Open-source AI software engineering agent workspace with a browser UI, Docker-backed sandboxes, and persistent local state."
+author: "OpenHands"
+source: "official"
+website: "https://www.all-hands.dev/"
+upstream: "https://github.com/OpenHands/OpenHands"
+category: llm
+tags:
+  - agents
+  - software-engineering
+  - coding
+  - docker
+  - workspace
+icon: "🛠️"
+logo: "/logos/openhands.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
