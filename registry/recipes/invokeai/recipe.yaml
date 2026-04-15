@@ -1,0 +1,46 @@
+name: "InvokeAI"
+slug: invokeai
+version: "1.0.0"
+description: "Run InvokeAI on DGX Spark for node-based and canvas-driven image generation, inpainting, outpainting, and model management through the official web UI."
+author: "InvokeAI"
+source: "official"
+website: "https://invoke-ai.github.io/InvokeAI/"
+upstream: "https://github.com/invoke-ai/InvokeAI"
+category: image-gen
+categories:
+  - image-gen
+tags:
+  - stable-diffusion
+  - flux
+  - image-edit
+  - inpainting
+  - outpainting
+  - canvas
+  - workflow
+  - web-ui
+icon: "🎨"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 48
+  disk_gb: 80
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 9090
+  path: "/"
+  health_path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/invokeai/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Pull the official InvokeAI image and start the local web UI on port 9090 with persistent runtime storage for models, outputs, and configuration."
+    command: "docker compose -p spark-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop InvokeAI while preserving downloaded models, generated outputs, and runtime state."
+    command: "docker compose -p spark-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml down"

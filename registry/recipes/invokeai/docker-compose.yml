@@ -1,0 +1,28 @@
+services:
+  invokeai:
+    image: ghcr.io/invoke-ai/invokeai:latest
+    container_name: spark-ai-hub-invokeai
+    ports:
+      - "9090:9090"
+    env_file:
+      - .env
+    environment:
+      INVOKEAI_ROOT: ${INVOKEAI_ROOT:-/invokeai}
+      INVOKEAI_HOST: ${INVOKEAI_HOST:-0.0.0.0}
+      INVOKEAI_PORT: ${INVOKEAI_PORT:-9090}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
+      HF_HOME: ${HF_HOME:-/invokeai/.cache/huggingface}
+      PYTORCH_CUDA_ALLOC_CONF: ${PYTORCH_CUDA_ALLOC_CONF:-backend:cudaMallocAsync}
+    volumes:
+      - invokeai-data:/invokeai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  invokeai-data:
