@@ -1,20 +1,20 @@
-# Spark AI Hub — Project Blueprint
+# NVIDIA AI Hub — Project Blueprint
 ## A Docker-Native AI App Launcher for NVIDIA DGX Spark
 
 ---
 
 ## 1. Vision & Positioning
 
-**One-liner:** Spark AI Hub is the missing app store for DGX Spark — a web-based launcher that turns community-verified Docker recipes into one-click AI workloads.
+**One-liner:** NVIDIA AI Hub is the missing app store for DGX Spark — a web-based launcher that turns community-verified Docker recipes into one-click AI workloads.
 
 **The gap it fills:**
-- Pinokio (the leading AI app launcher) is broken on DGX Spark due to ARM64 incompatibility
+- Pinokio (the leading AI app launcher) is broken on DGX GPU due to ARM64 or AMD64 incompatibility
 - NVIDIA Sync's "Custom Scripts" proves the UX is possible but has no catalog, no community sharing, no versioning
 - NVIDIA's official playbooks are great but manual — copy-paste terminal commands
 - The DGX Spark community is scattered across forum threads, GitHub repos, Medium posts, and gists
 - Users are paying $4,000 for a machine that requires Docker expertise to use beyond the basics
 
-**Spark AI Hub unifies all of this** into a browsable catalog with one-click deploy.
+**NVIDIA AI Hub unifies all of this** into a browsable catalog with one-click deploy.
 
 ---
 
@@ -26,7 +26,7 @@
 │              (laptop/desktop via network)                │
 │                                                         │
 │   ┌───────────────────────────────────────────────────┐ │
-│   │           Spark AI Hub Web UI (React)                │ │
+│   │           NVIDIA AI Hub Web UI (React)                │ │
 │   │                                                    │ │
 │   │  ┌──────────┐ ┌──────────┐ ┌──────────────────┐  │ │
 │   │  │ Catalog   │ │ Running  │ │ System Monitor   │  │ │
@@ -38,10 +38,10 @@
                          │ HTTP/WebSocket
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   DGX SPARK DEVICE                       │
+│                   DGX SPARK or NVIDIA GPU DEVICE                       │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │         Spark AI Hub Daemon (Python/FastAPI)          │  │
+│  │        NVIDIA AI Hub Daemon (Python/FastAPI)          │  │
 │  │                                                     │  │
 │  │  ┌─────────────┐  ┌──────────────┐  ┌───────────┐ │  │
 │  │  │ Recipe       │  │ Docker       │  │ System    │ │  │
@@ -62,7 +62,7 @@
 │  └────────────────────────────────────────────────────┘  │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │     GB10 GPU (128GB Unified Memory) + 4TB NVMe     │  │
+│  │     NVIDIA GPU (128GB Unified Memory++) + 4TB NVMe     │  │
 │  └────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -262,7 +262,7 @@ models:
 
 ---
 
-## 6. Installation of Spark AI Hub Itself
+## 6. Installation of NVIDIA AI Hub Itself
 
 The tool must be trivially installable. One command:
 
@@ -272,11 +272,11 @@ curl -fsSL https://spark-ai-hub.dev/install.sh | bash
 
 What this does:
 1. Creates `~/spark-ai-hub/` directory
-2. Clones the Spark AI Hub daemon + frontend (pre-built)
+2. Clones the NVIDIA AI Hub daemon + frontend (pre-built)
 3. Clones the recipe registry
 4. Installs a systemd service (`spark-ai-hub.service`)
 5. Starts the service on port 9000
-6. Prints: "Spark AI Hub is running at http://localhost:9000"
+6. Prints: "NVIDIA AI Hub is running at http://localhost:9000"
 
 No pip, no conda, no node — the daemon is a single Python file with vendored dependencies, and the frontend is pre-built static files.
 
@@ -353,7 +353,7 @@ spark-ai-hub/
 
 ## 9. Differentiation vs. Alternatives
 
-| Feature | Pinokio | NVIDIA Sync | NVIDIA Playbooks | Spark AI Hub |
+| Feature | Pinokio | NVIDIA Sync | NVIDIA Playbooks | NVIDIA AI Hub |
 |---------|---------|-------------|-----------------|------------|
 | Works on DGX Spark | ❌ | ✅ | ✅ | ✅ |
 | One-click install | ✅ | ⚠️ Manual scripts | ❌ Copy-paste | ✅ |
@@ -381,7 +381,7 @@ spark-ai-hub/
 
 ## 11. Name & Branding Ideas
 
-- **Spark AI Hub** — Spark (DGX Spark) + Forge (building/crafting). Strong, memorable.
+- **NVIDIA AI Hub** — Spark (DGX Spark) + Forge (building/crafting). Strong, memorable.
 - **SparkHub** — Marketplace feel. Risk: too similar to DockerHub.
 - **Ignite** — "Ignite your Spark." Clean but generic.
 - **SparkStore** — Clear but Apple-ish.

@@ -1,0 +1,46 @@
+name: "CogVideoX Studio"
+slug: cogvideox-studio
+version: "1.0.0"
+description: "Run the official CogVideoX composite Gradio demo on DGX Spark for text-to-video, image-to-video, and video-to-video workflows with optional super-resolution, frame interpolation, and persistent model caches."
+author: "THUDM"
+source: "official"
+website: "https://github.com/THUDM/CogVideo"
+upstream: "https://github.com/THUDM/CogVideo"
+category: video-gen
+categories:
+  - video-gen
+  - image-gen
+tags:
+  - video-gen
+  - text-to-video
+  - image-to-video
+  - video-to-video
+  - gradio
+  - cogvideox
+  - apache-2.0
+icon: "🎬"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 48
+  disk_gb: 120
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 7871
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 25
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/cogvideox-studio/.env"
+requires_hf_token: true
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official CogVideoX composite demo environment and start the Gradio studio on port 7871 with persistent caches and generated video outputs."
+    command: "docker compose -p spark-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop CogVideoX Studio while preserving downloaded models, enhancer assets, and generated videos in the Docker volumes."
+    command: "docker compose -p spark-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml down"

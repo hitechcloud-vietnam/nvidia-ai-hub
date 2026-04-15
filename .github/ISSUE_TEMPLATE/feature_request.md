@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Propose a focused enhancement for Spark AI Hub
+about: Propose a focused enhancement for NVIDIA AI Hub
 labels: enhancement
 ---
 

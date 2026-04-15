@@ -1,6 +1,6 @@
 # Commercial Licensing
 
-`Spark AI Hub` is available to individuals, companies, and organizations for
+`NVIDIA AI Hub ` is available to individuals, companies, and organizations for
 strictly non-commercial use under the terms of [`LICENSE`](LICENSE).
 
 Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC

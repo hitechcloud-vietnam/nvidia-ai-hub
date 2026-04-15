@@ -4,7 +4,7 @@ set -e
 INSTALL_DIR="$HOME/spark-ai-hub"
 
 echo ""
-echo "  Spark AI Hub Uninstaller"
+echo "  NVIDIA AI Hub Uninstaller"
 echo "  ====================="
 echo ""
 

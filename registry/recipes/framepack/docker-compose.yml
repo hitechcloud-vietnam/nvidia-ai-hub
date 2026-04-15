@@ -1,0 +1,39 @@
+services:
+  framepack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-framepack
+    ports:
+      - "7867:7860"
+    env_file:
+      - .env
+    environment:
+      PORT: "${PORT:-7860}"
+      SERVER_NAME: "${SERVER_NAME:-0.0.0.0}"
+      HF_HOME: "${HF_HOME:-/opt/framepack/hf_download}"
+      TRANSFORMERS_CACHE: "${TRANSFORMERS_CACHE:-/opt/framepack/hf_download/transformers}"
+      HF_HUB_DISABLE_PROGRESS_BARS: "${HF_HUB_DISABLE_PROGRESS_BARS:-1}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+    command:
+      - bash
+      - -lc
+      - |
+        set -eu
+        cd /opt/framepack
+        python demo_gradio.py --server "${SERVER_NAME}" --port "${PORT}" ${FRAMEPACK_ARGS:-}
+    volumes:
+      - framepack-hf-cache:/opt/framepack/hf_download
+      - framepack-outputs:/opt/framepack/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  framepack-hf-cache:
+  framepack-outputs:

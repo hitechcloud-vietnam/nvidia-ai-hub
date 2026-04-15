@@ -6,7 +6,7 @@ INSTALL_DIR="$HOME/spark-ai-hub"
 PORT=9000
 
 echo ""
-echo "  Spark AI Hub Installer"
+echo "  NVIDIA AI Hub Installer"
 echo "  ==================="
 echo ""
 
@@ -78,7 +78,7 @@ if [ -d "$INSTALL_DIR" ]; then
     echo "[spark-ai-hub] Updating existing installation..."
     git -C "$INSTALL_DIR" pull --ff-only
 else
-    echo "[spark-ai-hub] Cloning Spark AI Hub..."
+    echo "[spark-ai-hub] Cloning NVIDIA AI Hub..."
     git clone "$REPO" "$INSTALL_DIR"
 fi
 
@@ -98,7 +98,7 @@ pip install -q -r requirements.txt
 
 echo ""
 echo "[spark-ai-hub] Installation complete!"
-echo "[spark-ai-hub] Starting Spark AI Hub on port $PORT..."
+echo "[spark-ai-hub] Starting NVIDIA AI Hub on port $PORT..."
 echo "[spark-ai-hub] Open http://localhost:$PORT in your browser"
 echo ""
 

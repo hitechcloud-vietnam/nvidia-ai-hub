@@ -1,9 +1,9 @@
-# FireRed Image Edit 1.1 for Spark AI Hub
+# FireRed Image Edit 1.1 for NVIDIA AI Hub
 
-Self-contained Spark AI Hub recipe for `FireRedTeam/FireRed-Image-Edit-1.1`.
+Self-contained NVIDIA AI Hub recipe for `FireRedTeam/FireRed-Image-Edit-1.1`.
 
 Install behavior:
-- Spark AI Hub performs a local Docker build from this recipe directory.
+- NVIDIA AI Hub performs a local Docker build from this recipe directory.
 - The running container downloads model weights on first launch into a persistent Hugging Face cache volume.
 - Outputs are written to a persistent output volume.
 

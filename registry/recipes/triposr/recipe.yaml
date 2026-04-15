@@ -1,0 +1,44 @@
+name: "TripoSR"
+slug: triposr
+version: "1.0.0"
+description: "Run the official TripoSR Gradio demo on DGX Spark for single-image 3D reconstruction with persistent model cache and downloadable OBJ and GLB outputs."
+author: "VAST-AI Research and Stability AI"
+source: "official"
+website: "https://github.com/VAST-AI-Research/TripoSR"
+upstream: "https://github.com/VAST-AI-Research/TripoSR"
+category: 3d-gen
+categories:
+  - 3d-gen
+tags:
+  - 3d
+  - reconstruction
+  - image-to-3d
+  - gradio
+  - triposr
+  - mit
+icon: "🗿"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7870
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/triposr/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official TripoSR environment and start the single-image 3D reconstruction Gradio UI on port 7870."
+    command: "docker compose -p spark-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop TripoSR while preserving the Hugging Face cache for faster relaunches."
+    command: "docker compose -p spark-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml down"

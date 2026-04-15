@@ -1,4 +1,4 @@
-# Kosmos-2.5 for Spark AI Hub
+# Kosmos-2.5 for NVIDIA AI Hub
 
 Local Gradio wrapper for `microsoft/kosmos-2.5` focused on OCR and image-to-markdown extraction from text-rich images.
 

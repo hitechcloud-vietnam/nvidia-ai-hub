@@ -4,7 +4,7 @@ Short reviewer/tester notes for the `Intent-Based RAN Energy Efficiency Blueprin
 
 ## What this recipe wraps
 
-This Spark AI Hub recipe exposes the upstream VIAVI/NVIDIA notebook workflow through a lightweight Jupyter container.
+This NVIDIA AI Hub recipe exposes the upstream VIAVI/NVIDIA notebook workflow through a lightweight Jupyter container.
 
 Upstream sources:
 - NVIDIA blueprint page: `https://build.nvidia.com/viavi/intent-driven-ran-energy-efficiency`
@@ -17,7 +17,7 @@ Upstream sources:
 3. Confirm VIAVI AI RSG access is available for the tester environment.
 4. Clone the upstream repository into:
    - `registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg`
-5. Install or launch the recipe from Spark AI Hub.
+5. Install or launch the recipe from NVIDIA AI Hub.
 6. Open the notebook UI and verify Jupyter loads at `/tree/notebooks`.
 7. Open `notebooks/es_blueprint_poc.ipynb` and confirm the environment is ready for sequential cell execution.
 

@@ -1,4 +1,4 @@
-# Contributing to Spark AI Hub
+# Contributing to NVIDIA AI Hub 
 
 Thank you for contributing to `spark-ai-hub`.
 

@@ -1,0 +1,35 @@
+services:
+  mochi-1-preview:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-mochi-1-preview
+    ports:
+      - "7868:7860"
+    env_file:
+      - .env
+    environment:
+      PORT: "${PORT:-7860}"
+      MOCHI_MODEL_DIR: "${MOCHI_MODEL_DIR:-/data/weights}"
+      MOCHI_CPU_OFFLOAD: "${MOCHI_CPU_OFFLOAD:-1}"
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      GRADIO_SERVER_NAME: "${GRADIO_SERVER_NAME:-0.0.0.0}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+      HF_HUB_DISABLE_PROGRESS_BARS: "${HF_HUB_DISABLE_PROGRESS_BARS:-1}"
+    volumes:
+      - mochi-1-preview-weights:/data/weights
+      - mochi-1-preview-hf-home:/data/hf-home
+      - mochi-1-preview-output:/opt/mochi/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  mochi-1-preview-weights:
+  mochi-1-preview-hf-home:
+  mochi-1-preview-output:

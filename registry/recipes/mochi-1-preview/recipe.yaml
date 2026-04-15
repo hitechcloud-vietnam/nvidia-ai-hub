@@ -1,0 +1,44 @@
+name: "Mochi 1 Preview"
+slug: mochi-1-preview
+version: "1.0.0"
+description: "Run the official Mochi 1 Preview Gradio app on DGX Spark for text-to-video generation with persistent local weights, Hugging Face cache, and configurable CPU offload for large-model inference."
+author: "Genmo"
+source: "official"
+website: "https://github.com/genmoai/mochi"
+upstream: "https://github.com/genmoai/mochi"
+category: video-gen
+categories:
+  - video-gen
+tags:
+  - video-gen
+  - text-to-video
+  - gradio
+  - diffusion
+  - mochi
+  - apache-2.0
+icon: "🎥"
+logo: ""
+requirements:
+  min_memory_gb: 48
+  recommended_memory_gb: 80
+  disk_gb: 120
+  cuda_compute: "12.6"
+ui:
+  type: web
+  port: 7868
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 25
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/mochi-1-preview/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official Mochi runtime, download weights if needed, and start the Gradio video generation UI on port 7868."
+    command: "docker compose -p spark-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Mochi 1 Preview while preserving downloaded model weights, Hugging Face cache, and generated outputs."
+    command: "docker compose -p spark-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml down"

@@ -1,4 +1,4 @@
-# Spark AI Hub
+# NVIDIA AI Hub By Pho Tue SoftWare Solutions JSC
 
 [![Contributing](https://img.shields.io/badge/Contributing-Guide-2ea44f?style=flat-square)](./CONTRIBUTING.md)
 [![Security](https://img.shields.io/badge/Security-Policy-blue?style=flat-square)](./SECURITY.md)
@@ -7,13 +7,13 @@
 
 **Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 
-**Your AI app store for NVIDIA DGX Spark.** Browse, install, and launch AI apps with one click.
+**Your AI app store for NVIDIA DGX Spark and NVIDIA GPU.** Browse, install, and launch AI apps with one click.
 
-![Spark AI Hub](SparkDeck.png)
+![NVIDIA AI Hub By Pho Tue SoftWare Solutions JSC](SparkDeck.png)
 
 ## Overview
 
-Spark AI Hub provides a web UI and API for managing curated AI application recipes on NVIDIA DGX Spark.
+NVIDIA AI Hub By Pho Tue SoftWare Solutions JSC provides a web UI and API for managing curated AI application recipes on NVIDIA DGX Spark and NVIDIA GPU.
 
 The project includes:
 
@@ -264,7 +264,7 @@ This means the checked-in or generated UI bundle is missing or stale, and the cu
 
 ### `check.sh` reports Docker daemon is not reachable
 
-Start Docker Desktop or the Docker service, then re-run `./check.sh`. Spark AI Hub can start without Docker only in a limited UI/API state.
+Start Docker Desktop or the Docker service, then re-run `./check.sh`. NVIDIA AI Hub can start without Docker only in a limited UI/API state.
 
 ### Windows dependency installation fails
 
@@ -294,7 +294,7 @@ Preserve local runtime data during uninstall:
 
 The uninstaller now removes, in order:
 
-- Spark AI Hub recipe containers, images, and volumes
+- NVIDIA AI Hub recipe containers, images, and volumes
 - Backend cache/runtime paths such as `.venv` and `data/`
 - Frontend cache/build paths such as `frontend/node_modules` and `frontend/dist`
 - Generated recipe `.env` files

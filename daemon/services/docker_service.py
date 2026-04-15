@@ -782,7 +782,7 @@ async def _find_project_images(slug: str) -> list[str]:
     """Find Docker images that were used by a spark-ai-hub compose project for this slug.
 
     Only matches images that are not currently used by any running container,
-    to avoid removing images used by non-Spark AI Hub containers.
+    to avoid removing images used by non-NVIDIA AI Hub containers.
     """
     compose_images = _parse_compose_images(slug)
     if not compose_images:

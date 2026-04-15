@@ -8,7 +8,7 @@ failures=0
 warnings=0
 
 echo ""
-echo "  Spark AI Hub Environment Check"
+echo "  NVIDIA AI Hub  Environment Check"
 echo "  =============================="
 echo ""
 
@@ -182,7 +182,7 @@ echo ""
 echo "[spark-ai-hub] Summary: ${failures} failure(s), ${warnings} warning(s)"
 
 if [ "$failures" -gt 0 ]; then
-    echo "[spark-ai-hub] Environment check failed. Resolve the issues above before running Spark AI Hub."
+    echo "[spark-ai-hub] Environment check failed. Resolve the issues above before running NVIDIA AI Hub ."
     exit 1
 fi
 

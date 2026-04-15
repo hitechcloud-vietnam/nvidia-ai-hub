@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible problem in Spark AI Hub
+about: Report a reproducible problem in NVIDIA AI Hub
 labels: bug
 ---
 
