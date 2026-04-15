@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useStore } from '../store'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -44,35 +44,12 @@ function CircularGauge({ value, max, label, sublabel, unit, color = 'var(--terti
 
 export default function System() {
   const metrics = useStore((s) => s.metrics)
+  const history = useStore((s) => s.metricHistory)
   const recipes = useStore((s) => s.recipes)
   const theme = useStore((s) => s.theme)
-  const [history, setHistory] = useState([])
+  const gpuList = useMemo(() => (Array.isArray(metrics?.gpus) ? metrics.gpus : []), [metrics])
 
   const runningApps = recipes.filter((r) => r.running || r.starting)
-
-  useEffect(() => {
-    if (!metrics) return
-    setHistory((prev) => {
-      const gpuSeries = (Array.isArray(metrics.gpus) ? metrics.gpus : []).reduce((acc, gpu) => {
-        acc[`gpu_${gpu.index}`] = gpu.utilization ?? 0
-        acc[`gpu_temp_${gpu.index}`] = gpu.temperature ?? 0
-        acc[`gpu_mem_${gpu.index}`] = gpu.memory_total_mb > 0 ? Math.min(100, ((gpu.memory_used_mb || 0) / gpu.memory_total_mb) * 100) : 0
-        return acc
-      }, {})
-
-      const next = [
-        ...prev,
-        {
-          time: new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
-          cpu: metrics.cpu_percent,
-          gpu: metrics.gpu_utilization,
-          temp: metrics.gpu_temperature || metrics.cpu_temperature,
-          ...gpuSeries,
-        },
-      ]
-      return next.slice(-60)
-    })
-  }, [metrics])
 
   if (!metrics) {
     return (
@@ -83,7 +60,6 @@ export default function System() {
     )
   }
 
-  const ramPct = metrics.ram_total_gb > 0 ? (metrics.ram_used_gb / metrics.ram_total_gb) * 100 : 0
   const gridColor = theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'
   const axisColor = theme === 'light' ? '#8a8a9a' : '#6E6C7A'
   const tooltipBg = theme === 'light' ? '#ffffff' : '#161625'
@@ -91,7 +67,6 @@ export default function System() {
   const systemTemp = metrics.gpu_temperature || metrics.cpu_temperature || 0
   const tempColor = systemTemp > 80 ? 'var(--error)' : '#FBBF24'
   const uptimeHours = metrics.uptime_seconds > 0 ? (metrics.uptime_seconds / 3600).toFixed(1) : '0.0'
-  const gpuList = Array.isArray(metrics.gpus) ? metrics.gpus : []
   const hasTemperature = systemTemp > 0
   const temperatureHint = [metrics.gpu_temperature_source, metrics.cpu_temperature_source].filter(Boolean).join(' • ')
   const gpuPalette = ['#7C3AED', '#22C55E', '#F97316', '#06B6D4', '#EF4444', '#EAB308']

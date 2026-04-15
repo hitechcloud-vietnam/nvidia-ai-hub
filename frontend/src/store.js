@@ -9,6 +9,7 @@ const getInitialTheme = () => {
 export const useStore = create((set, get) => ({
   recipes: [],
   metrics: null,
+  metricHistory: [],
   buildLogs: {},
   installing: null,
   updating: null,
@@ -30,7 +31,27 @@ export const useStore = create((set, get) => ({
   },
 
   setRecipes: (recipes) => set({ recipes }),
-  setMetrics: (metrics) => set({ metrics }),
+  setMetrics: (metrics) => set((state) => {
+    const gpuSeries = (Array.isArray(metrics?.gpus) ? metrics.gpus : []).reduce((acc, gpu) => {
+      acc[`gpu_${gpu.index}`] = gpu.utilization ?? 0
+      acc[`gpu_temp_${gpu.index}`] = gpu.temperature ?? 0
+      acc[`gpu_mem_${gpu.index}`] = gpu.memory_total_mb > 0 ? Math.min(100, ((gpu.memory_used_mb || 0) / gpu.memory_total_mb) * 100) : 0
+      return acc
+    }, {})
+
+    const nextPoint = {
+      time: new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
+      cpu: metrics?.cpu_percent ?? 0,
+      gpu: metrics?.gpu_utilization ?? 0,
+      temp: metrics?.gpu_temperature || metrics?.cpu_temperature || 0,
+      ...gpuSeries,
+    }
+
+    return {
+      metrics,
+      metricHistory: [...state.metricHistory, nextPoint].slice(-60),
+    }
+  }),
 
   selectRecipe: (slug) => {
     set({ selectedRecipe: slug })
@@ -155,7 +176,7 @@ export const useStore = create((set, get) => ({
       get()._pollBuildStatus(slug)
     }
 
-    ws.onclose = (e) => {
+    ws.onclose = () => {
       if (get().installing === slug) {
         get()._pollBuildStatus(slug)
       }

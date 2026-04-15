@@ -123,20 +123,6 @@ export default function Catalog({ search = '' }) {
   )
 
   useEffect(() => {
-    if (recipesWithBanners.length === 0) {
-      setActiveBannerSlug(null)
-      return
-    }
-
-    setActiveBannerSlug((current) => {
-      if (current && recipesWithBanners.some((recipe) => recipe.slug === current)) {
-        return current
-      }
-      return recipesWithBanners[0].slug
-    })
-  }, [recipesWithBanners])
-
-  useEffect(() => {
     if (search || category !== 'all' || recipesWithBanners.length <= 1) return undefined
 
     const interval = window.setInterval(() => {
@@ -152,7 +138,10 @@ export default function Catalog({ search = '' }) {
     return () => window.clearInterval(interval)
   }, [category, recipesWithBanners, search])
 
-  const featured = recipesWithBanners.find((recipe) => recipe.slug === activeBannerSlug) || recipesWithBanners[0] || null
+  const featuredSlug = recipesWithBanners.some((recipe) => recipe.slug === activeBannerSlug)
+    ? activeBannerSlug
+    : recipesWithBanners[0]?.slug ?? null
+  const featured = recipesWithBanners.find((recipe) => recipe.slug === featuredSlug) || recipesWithBanners[0] || null
   const bannerConf = featured ? getBanner(featured.slug) : null
   const featuredIsNotebook = isNotebookRecipe(featured)
 
