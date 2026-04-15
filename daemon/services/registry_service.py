@@ -18,7 +18,7 @@ def load_recipes() -> dict[str, Recipe]:
         if not yaml_path.is_file():
             continue
         try:
-            with open(yaml_path) as f:
+            with open(yaml_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             recipe = Recipe(**data)
             _recipes[recipe.slug] = recipe

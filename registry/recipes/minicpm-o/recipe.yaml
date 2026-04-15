@@ -20,7 +20,8 @@ tags:
   - webcam
   - realtime
   - dgx-spark
-icon: "M"
+icon: "🎙️"
+logo: "/logos/minicpm-o.svg"
 requirements:
   min_memory_gb: 24
   recommended_memory_gb: 48
