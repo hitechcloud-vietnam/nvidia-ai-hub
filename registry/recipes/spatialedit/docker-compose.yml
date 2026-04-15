@@ -1,0 +1,27 @@
+services:
+  spatialedit:
+    image: ghcr.io/hitechcloud-vietnam/spatialedit-spark-ai-hub:latest
+    container_name: spark-ai-hub-spatialedit
+    ports:
+      - "7870:7860"
+    environment:
+      GRADIO_SERVER_NAME: "0.0.0.0"
+      GRADIO_SERVER_PORT: "7860"
+      HF_HOME: "/root/.cache/huggingface"
+      OUTPUT_DIR: "/data/output"
+    volumes:
+      - spatialedit-hf-cache:/root/.cache/huggingface
+      - spatialedit-output:/data/output
+    shm_size: "4gb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  spatialedit-hf-cache:
+  spatialedit-output:
