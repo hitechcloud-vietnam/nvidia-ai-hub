@@ -10,6 +10,7 @@ This document is the central index for repository governance, contribution workf
 - Support guide: [`../SUPPORT.md`](../SUPPORT.md)
 - Pull request process: [`./pull-request-process.md`](./pull-request-process.md)
 - GitHub Actions rollout guide: [`./github-actions.md`](./github-actions.md)
+- Repository maintenance guide: [`./maintenance.md`](./maintenance.md)
 - License: [`../LICENSE`](../LICENSE)
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
 - Licensing guide: [`./licensing.md`](./licensing.md)
@@ -30,6 +31,13 @@ This document is the central index for repository governance, contribution workf
 - gated workflow inventory
 - staged automation rollout guidance
 - `ENABLE_OPTIONAL_WORKFLOWS` enablement notes
+
+### Use `maintenance.md` for
+
+- `CODEOWNERS` maintenance
+- label routing maintenance
+- Dependabot maintenance state
+- branch protection maintenance checklist
 
 ### Use `SECURITY.md` for
 

@@ -212,6 +212,8 @@ Documentation should not include unverifiable claims, internal-only customer con
 
 If you add or change commands, ports, environment variables, or prerequisites, update the relevant documentation in the same pull request.
 
+Maintainers updating repository policy, review routing, labels, Dependabot, or branch protection guidance should also review [`docs/maintenance.md`](./docs/maintenance.md).
+
 ## Pull Request Checklist
 
 Before opening a pull request, confirm:

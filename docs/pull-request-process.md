@@ -53,6 +53,7 @@ This helps dependency and workflow pull requests request review from the expecte
 - Prefer grouped review by ecosystem when several updates arrive at the same time.
 - Use labels from `.github/labeler.yml` to route changes quickly.
 - Rebase or refresh dependency pull requests before merging if they become stale.
+- Use [`./maintenance.md`](./maintenance.md) when updating `CODEOWNERS`, label routing, Dependabot policy, or branch protection guidance.
 
 ### Optional GitHub Actions workflows
 

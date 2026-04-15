@@ -52,6 +52,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Support guide: [`SUPPORT.md`](./SUPPORT.md)
 - Governance index: [`docs/community.md`](./docs/community.md)
 - GitHub Actions rollout guide: [`docs/github-actions.md`](./docs/github-actions.md)
+- Repository maintenance guide: [`docs/maintenance.md`](./docs/maintenance.md)
 - Pull request process: [`docs/pull-request-process.md`](./docs/pull-request-process.md)
 - Licensing guide: [`docs/licensing.md`](./docs/licensing.md)
 - Discussions: enable GitHub Discussions in repository settings for support questions, ideas, and roadmap conversations
