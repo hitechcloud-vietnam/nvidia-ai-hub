@@ -57,7 +57,7 @@ Create or reuse family banners as entries are added:
 8. Ministral 8B Instruct
 9. DeepSeek R1 Distill Qwen 7B
 10. DeepSeek R1 Distill Llama 8B
-11. DeepSeek V3 Lite
+11. DeepSeek V2 Lite Chat (official lightweight DeepSeek substitute; no public DeepSeek V3 Lite release)
 12. GLM 4.5 Air
 13. GLM 4.5
 14. Granite 3.1 8B Instruct

@@ -1,0 +1,44 @@
+name: "DeepSeek V2 Lite Chat"
+slug: vllm-deepseek-v2-lite-chat
+version: "1.0.0"
+description: "DeepSeek V2 Lite Chat served with vLLM as the official lightweight DeepSeek MoE chat model for compact multilingual, coding, and assistant workflows."
+author: "DeepSeek"
+source: "official"
+website: "https://huggingface.co/deepseek-ai/DeepSeek-V2-Lite-Chat"
+upstream: "https://huggingface.co/deepseek-ai/DeepSeek-V2-Lite-Chat"
+category: llm
+categories:
+  - llm
+  - reasoning
+  - code-gen
+tags:
+  - llm
+  - reasoning
+  - coding
+  - multilingual
+  - vllm
+  - deepseek
+  - moe
+  - mit
+icon: "🧠"
+logo: "/logos/deepseek.png"
+requirements:
+  min_memory_gb: 32
+  recommended_memory_gb: 40
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "deepseek-ai/DeepSeek-V2-Lite-Chat"
+  api_key: "not-needed"
+  max_context: "163840"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"deepseek-ai/DeepSeek-V2-Lite-Chat\", \"messages\": [{\"role\": \"user\", \"content\": \"Draft a multilingual launch checklist for an AI assistant.\"}]}'"
