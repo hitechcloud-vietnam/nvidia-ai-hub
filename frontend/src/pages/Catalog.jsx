@@ -4,6 +4,13 @@ import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 
 const BANNERS = {
+  'minicpm-o':            { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'live-vlm-webui':       { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'voicebox':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'chatterbox-turbo':     { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'openclaw':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'nemoclaw':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'multi-agent-chatbot':  { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
   'vllm-qwen35-08b':      { img: '/banners/wide/qwen-beach.png', layout: 'wide' },
   'vllm-qwen35-2b':       { img: '/banners/wide/qwen-beach.png', layout: 'wide' },
   'vllm-qwen35-4b':       { img: '/banners/wide/qwen-basketball.png', layout: 'wide' },
@@ -19,6 +26,11 @@ const BANNERS = {
   'vllm-gemma4-26b-a4b-fp8': { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
   'vllm-gemma4-31b':      { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
   'vllm-gemma4-31b-fp8':  { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
+  'vllm-phi4-multimodal-fp8': { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
+  'vllm-gpt-oss-20b':     { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
+  'vllm-gpt-oss-120b':    { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
+  'vllm-seed-oss-36b':    { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
+  'vllm-nemotron':        { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
   'ollama-openwebui':      { img: '/banners/wide/ollama-openwebui.png', layout: 'wide' },
   'comfyui':               { img: '/banners/wide/comfyui-spark.jpg', layout: 'wide' },
   'facefusion':            { img: '/banners/wide/facefusion-spark.png', layout: 'wide' },
@@ -43,6 +55,7 @@ const CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'dgx-spark', label: 'DGX Spark' },
   { id: 'llm', label: 'LLMs' },
+  { id: 'vllm', label: 'vLLMs' },
   { id: 'image-gen', label: 'Image Gen' },
   { id: 'video-gen', label: 'Video Gen' },
   { id: '3d-gen', label: '3D Gen' },
@@ -82,13 +95,36 @@ function getRecipeCategories(recipe) {
 
   const tags = Array.isArray(recipe.tags) ? recipe.tags : []
   const description = (recipe.description || '').toLowerCase()
+  const derivedCategories = [...baseCategories]
+
+  if (recipe.slug.startsWith('vllm-') || tags.includes('vllm')) {
+    derivedCategories.push('vllm')
+  }
+
+  if (
+    baseCategories.includes('multi-modal') ||
+    tags.includes('multi-modal') ||
+    tags.includes('multimodal') ||
+    tags.includes('vision') ||
+    tags.includes('vision-language') ||
+    tags.includes('audio') ||
+    tags.includes('speech') ||
+    description.includes('multimodal') ||
+    description.includes('multi-modal') ||
+    description.includes('text+image') ||
+    description.includes('image, audio') ||
+    description.includes('voice input')
+  ) {
+    derivedCategories.push('multi-modal')
+  }
+
   const isDgxSparkRecipe =
     (recipe.source || 'community') === 'spark-ai-hub' ||
     recipe.slug.includes('spark') ||
     tags.includes('dgx-spark') ||
     description.includes('dgx spark')
 
-  return isDgxSparkRecipe ? [...new Set([...baseCategories, 'dgx-spark'])] : baseCategories
+  return isDgxSparkRecipe ? [...new Set([...derivedCategories, 'dgx-spark'])] : [...new Set(derivedCategories)]
 }
 
 export default function Catalog({ search = '' }) {
