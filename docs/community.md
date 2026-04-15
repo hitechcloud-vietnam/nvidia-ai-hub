@@ -24,6 +24,13 @@ This document is the central index for repository governance, contribution workf
 - recipe submission guidance
 - pull request validation checklist
 
+### Use `github-actions.md` for
+
+- active workflow inventory
+- gated workflow inventory
+- staged automation rollout guidance
+- `ENABLE_OPTIONAL_WORKFLOWS` enablement notes
+
 ### Use `SECURITY.md` for
 
 - private security reporting

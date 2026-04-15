@@ -10,6 +10,25 @@ They are intentionally present but inactive by default.
 
 The repository also includes `.github/workflows/optional-workflows-status.yml`, which can run safely even while the gated workflows remain disabled. It reports whether `ENABLE_OPTIONAL_WORKFLOWS` is currently enabled.
 
+## Workflow Inventory
+
+### Active workflows
+
+The following workflows are active without the optional gate:
+
+- `.github/workflows/pr-validation.yml`
+- `.github/workflows/labeler.yml`
+- `.github/workflows/optional-workflows-status.yml`
+
+### Gated workflows
+
+The following workflows are staged and remain gated by `ENABLE_OPTIONAL_WORKFLOWS`:
+
+- `.github/workflows/ci-validation-disabled.yml`
+- `.github/workflows/recipe-validation-disabled.yml`
+- `.github/workflows/docs-governance-disabled.yml`
+- `.github/workflows/release-package-disabled.yml`
+
 ## Gated Workflows
 
 The following workflows are currently staged behind the repository variable `ENABLE_OPTIONAL_WORKFLOWS`:

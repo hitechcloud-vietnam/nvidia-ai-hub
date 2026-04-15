@@ -48,6 +48,14 @@ Use repository labels to help triage reviews:
 
 The repository includes additional workflow definitions that are intentionally disabled by default:
 
+Active workflows that are not gated:
+
+- `.github/workflows/pr-validation.yml`
+- `.github/workflows/labeler.yml`
+- `.github/workflows/optional-workflows-status.yml`
+
+Gated workflows:
+
 - `.github/workflows/ci-validation-disabled.yml`
 - `.github/workflows/recipe-validation-disabled.yml`
 - `.github/workflows/docs-governance-disabled.yml`
