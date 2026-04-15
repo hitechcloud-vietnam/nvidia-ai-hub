@@ -1,0 +1,31 @@
+name: "Parler TTS Studio"
+slug: parler-tts-studio
+version: "1.0.0"
+description: "Local Gradio studio for Parler-TTS promptable speech generation with speaker-style presets, custom voice descriptions, and persistent model cache on DGX Spark."
+author: "Hugging Face"
+source: "official"
+website: "https://github.com/huggingface/parler-tts"
+upstream: "https://github.com/huggingface/parler-tts"
+category: speech
+tags:
+  - speech
+  - tts
+  - audio
+  - gradio
+  - voice
+icon: "🔊"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 10
+  recommended_memory_gb: 20
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7882
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: true
+status: official

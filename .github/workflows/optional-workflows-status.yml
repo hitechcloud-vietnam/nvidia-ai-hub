@@ -38,6 +38,7 @@ jobs:
           echo "- .github/workflows/recipe-validation-disabled.yml"
           echo "- .github/workflows/docs-governance-disabled.yml"
           echo "- .github/workflows/dependency-updates-disabled.yml"
+          echo "- .github/workflows/dependabot-auto-triage-disabled.yml"
           echo "- .github/workflows/release-package-disabled.yml"
 
       - name: Report Dependabot pause state

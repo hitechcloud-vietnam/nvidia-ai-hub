@@ -1,0 +1,32 @@
+name: "STT Server"
+slug: stt-server
+version: "1.0.0"
+description: "Local Faster-Whisper FastAPI server for speech-to-text and translation with word timestamps, VAD filtering, and persistent model cache on DGX Spark."
+author: "SYSTRAN"
+source: "official"
+website: "https://github.com/SYSTRAN/faster-whisper"
+upstream: "https://github.com/SYSTRAN/faster-whisper"
+category: speech
+tags:
+  - speech
+  - asr
+  - whisper
+  - fastapi
+  - api
+icon: "🎧"
+logo: "/logos/whisper.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7880
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: true
+  build_time_minutes: 6
+  gpu: true
+status: official

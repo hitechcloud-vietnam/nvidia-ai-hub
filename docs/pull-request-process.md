@@ -37,6 +37,16 @@ Use repository labels to help triage reviews:
 
 `CODEOWNERS` should be enabled together with branch protection so reviewer requests are assigned automatically.
 
+For dependency and automation changes, keep explicit ownership entries for:
+
+- `requirements.txt`
+- `frontend/package.json`
+- `frontend/package-lock.json`
+- `.github/dependabot.yml`
+- `.github/workflows/*.yml`
+
+This helps dependency and workflow pull requests request review from the expected maintainers even when changes are narrowly scoped.
+
 ## Dependabot and Automation
 
 - Keep dependency update pull requests small and easy to review.
@@ -60,6 +70,7 @@ Gated workflows:
 - `.github/workflows/recipe-validation-disabled.yml`
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/dependency-updates-disabled.yml`
+- `.github/workflows/dependabot-auto-triage-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
 
 These workflows do not execute their jobs unless the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.

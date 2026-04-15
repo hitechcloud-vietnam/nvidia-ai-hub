@@ -1,0 +1,32 @@
+name: "WhisperX Workstation"
+slug: whisperx-workstation
+version: "1.0.0"
+description: "Local WhisperX transcription workstation with alignment, optional speaker diarization, subtitle export, and persistent model cache on DGX Spark."
+author: "WhisperX"
+source: "official"
+website: "https://github.com/m-bain/whisperX"
+upstream: "https://github.com/m-bain/whisperX"
+category: speech
+tags:
+  - speech
+  - asr
+  - diarization
+  - subtitles
+  - gradio
+icon: "📝"
+logo: "/logos/whisper.png"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 18
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7881
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: true
+status: official
+requires_hf_token: true

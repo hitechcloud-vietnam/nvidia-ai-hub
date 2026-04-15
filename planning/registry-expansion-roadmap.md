@@ -146,7 +146,7 @@ Create or reuse family banners as entries are added:
 14. Neo4j knowledge graph agent
 15. Jupyter AI lab
 
-### Batch 6 — local runtimes / gateways (15)
+### Batch 6 — local runtimes / gateways (16)
 1. Ollama base runtime presets
 2. llama.cpp server
 3. SGLang runtime
@@ -162,9 +162,10 @@ Create or reuse family banners as entries are added:
 13. Text Embeddings Inference
 14. Infinity embeddings runtime
 15. rerank server
+16. OmniRoute is an AI gateway for multi-provider LLMs: an OpenAI-compatible endpoint with smart routing, load balancing, retries, and fallbacks. Add policies, rate limits, caching, and observability for reliable, cost-aware inference.
 
 ## Total planned additions
-- 105 candidate registry entries.
+- 106 candidate registry entries.
 
 ## Suggested implementation order
 1. Batch 1: strengthen current vLLM catalog depth.

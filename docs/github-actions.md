@@ -31,6 +31,7 @@ The following workflows are staged and remain gated by `ENABLE_OPTIONAL_WORKFLOW
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
 - `.github/workflows/dependency-updates-disabled.yml`
+- `.github/workflows/dependabot-auto-triage-disabled.yml`
 
 ### Paused dependency automation
 
@@ -47,6 +48,7 @@ The following workflows are currently staged behind the repository variable `ENA
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
 - `.github/workflows/dependency-updates-disabled.yml`
+- `.github/workflows/dependabot-auto-triage-disabled.yml`
 
 Each workflow contains job-level gating:
 
@@ -109,6 +111,16 @@ Each workflow contains job-level gating:
 
 Dependabot remains paused until maintainers raise `open-pull-requests-limit` above `0` for the ecosystems they want to activate.
 
+### Dependabot auto-triage
+
+`dependabot-auto-triage-disabled.yml` is intended to triage Dependabot pull requests after maintainers allow them:
+
+- run only for `dependabot[bot]` pull requests
+- apply `dependencies` plus scope labels such as `backend`, `frontend`, or `governance`
+- post a short reviewer guidance comment on the pull request
+
+This workflow remains gated until maintainers are ready to allow dependency pull requests and automated triage together.
+
 ## How to Enable
 
 To enable the staged workflows:
@@ -131,7 +143,8 @@ Use a gradual rollout:
 3. enable `docs-governance-disabled.yml`
 4. enable `recipe-validation-disabled.yml`
 5. enable `dependency-updates-disabled.yml`
-6. enable `release-package-disabled.yml`
+6. enable `dependabot-auto-triage-disabled.yml`
+7. enable `release-package-disabled.yml`
 
 This order reduces risk by activating low-impact validation first and artifact packaging last.
 

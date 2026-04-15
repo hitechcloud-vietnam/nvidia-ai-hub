@@ -1,0 +1,29 @@
+services:
+  whisperx-workstation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-whisperx-workstation
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-7860}
+      WHISPERX_MODEL: ${WHISPERX_MODEL:-large-v2}
+      WHISPERX_BATCH_SIZE: ${WHISPERX_BATCH_SIZE:-8}
+      WHISPERX_COMPUTE_TYPE: ${WHISPERX_COMPUTE_TYPE:-float16}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/data/output}
+      HF_HOME: ${HF_HOME:-/data/hf-cache}
+      HF_TOKEN: ${HF_TOKEN:-}
+    ports:
+      - "${HOST_PORT:-7881}:${PORT:-7860}"
+    volumes:
+      - ./data/hf-cache:/data/hf-cache
+      - ./data/output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

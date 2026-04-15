@@ -1,0 +1,30 @@
+services:
+  stt-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-stt-server
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-8000}
+      MODEL_SIZE: ${MODEL_SIZE:-large-v3}
+      DEVICE: ${DEVICE:-cuda}
+      COMPUTE_TYPE: ${COMPUTE_TYPE:-float16}
+      DEFAULT_BEAM_SIZE: ${DEFAULT_BEAM_SIZE:-5}
+      DEFAULT_VAD_FILTER: ${DEFAULT_VAD_FILTER:-true}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/data/output}
+      HF_HOME: ${HF_HOME:-/data/hf-cache}
+    ports:
+      - "${HOST_PORT:-7880}:${PORT:-8000}"
+    volumes:
+      - ./data/hf-cache:/data/hf-cache
+      - ./data/output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

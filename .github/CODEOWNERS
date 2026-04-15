@@ -7,21 +7,31 @@
 
 # Frontend
 /frontend/ @hitechcloud-vietnam
+/frontend/package.json @hitechcloud-vietnam
+/frontend/package-lock.json @hitechcloud-vietnam
 
 # Registry recipes and runtime assets
 /registry/ @hitechcloud-vietnam
 /scripts/ @hitechcloud-vietnam
 /install.sh @hitechcloud-vietnam
-/install.ps1 @hitechcloud-vietnam
 /run.sh @hitechcloud-vietnam
-/run.ps1 @hitechcloud-vietnam
 /check.sh @hitechcloud-vietnam
-/check.ps1 @hitechcloud-vietnam
 /uninstall.sh @hitechcloud-vietnam
 /uninstall.ps1 @hitechcloud-vietnam
 
 # Governance and repository policy
 /.github/ @hitechcloud-vietnam
+/.github/dependabot.yml @hitechcloud-vietnam
+/.github/labeler.yml @hitechcloud-vietnam
+/.github/workflows/ci-validation-disabled.yml @hitechcloud-vietnam
+/.github/workflows/dependency-updates-disabled.yml @hitechcloud-vietnam
+/.github/workflows/dependabot-auto-triage-disabled.yml @hitechcloud-vietnam
+/.github/workflows/docs-governance-disabled.yml @hitechcloud-vietnam
+/.github/workflows/labeler.yml @hitechcloud-vietnam
+/.github/workflows/optional-workflows-status.yml @hitechcloud-vietnam
+/.github/workflows/pr-validation.yml @hitechcloud-vietnam
+/.github/workflows/recipe-validation-disabled.yml @hitechcloud-vietnam
+/.github/workflows/release-package-disabled.yml @hitechcloud-vietnam
 /*.md @hitechcloud-vietnam
 /NOTICE @hitechcloud-vietnam
 /LICENSE @hitechcloud-vietnam
