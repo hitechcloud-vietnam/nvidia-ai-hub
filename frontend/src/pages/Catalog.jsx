@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
@@ -126,17 +126,6 @@ const CATALOG_PRIORITY = {
   nemoclaw: 49,
 }
 
-const CATALOG_COLUMN_MIN_WIDTH = 340
-const CATALOG_ROW_GAP = 12
-const CATALOG_CARD_ESTIMATED_HEIGHT = 142
-const CATALOG_SECTION_HEADER_HEIGHT = 72
-const CATALOG_SECTION_PADDING_BOTTOM = 40
-const CATALOG_OVERSCAN_ROWS = 2
-const CATALOG_SECTION_GAP = 40
-const CATALOG_CATEGORY_BAR_HEIGHT = 72
-const CATALOG_SECTION_TOP_PADDING = 16
-const CATALOG_HERO_BLOCK_HEIGHT = 304
-
 function sortRecipesForCatalog(recipes) {
   return [...recipes].sort((a, b) => {
     const priorityDiff = (CATALOG_PRIORITY[b.slug] || 0) - (CATALOG_PRIORITY[a.slug] || 0)
@@ -227,7 +216,7 @@ function getRecipeCategories(recipe) {
   return isDgxSparkRecipe ? [...new Set([...derivedCategories, 'dgx-spark'])] : [...new Set(derivedCategories)]
 }
 
-export default function Catalog({ search = '', viewport = null }) {
+export default function Catalog({ search = '' }) {
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installRecipe = useStore((s) => s.installRecipe)
@@ -327,36 +316,7 @@ export default function Catalog({ search = '', viewport = null }) {
   const featured = recipesWithBanners.find((recipe) => recipe.slug === featuredSlug) || recipesWithBanners[0] || null
   const bannerConf = featured ? getBanner(featured.slug) : null
   const featuredIsNotebook = isNotebookRecipe(featured)
-  const viewportWidth = viewport?.width || 1280
-  const viewportHeight = viewport?.height || 900
-  const scrollTop = viewport?.scrollTop || 0
   const showHero = Boolean(featured && bannerConf && !search && category === 'all')
-  const availableGridWidth = Math.max(CATALOG_COLUMN_MIN_WIDTH, viewportWidth - 48)
-  const columns = Math.max(1, Math.floor(availableGridWidth / CATALOG_COLUMN_MIN_WIDTH))
-  const viewTop = Math.max(0, scrollTop - 320)
-  const viewBottom = scrollTop + viewportHeight + 320
-  const sectionLayouts = useMemo(() => {
-    const initialOffset = (showHero ? CATALOG_HERO_BLOCK_HEIGHT : 0) + CATALOG_CATEGORY_BAR_HEIGHT + CATALOG_SECTION_TOP_PADDING
-
-    return grouped.reduce((accumulator, section, index) => {
-      const totalRows = Math.ceil(section.recipes.length / columns)
-      const estimatedHeight = CATALOG_SECTION_HEADER_HEIGHT + (totalRows * CATALOG_CARD_ESTIMATED_HEIGHT) + (Math.max(0, totalRows - 1) * CATALOG_ROW_GAP) + CATALOG_SECTION_PADDING_BOTTOM
-      const layout = {
-        ...section,
-        estimatedTop: accumulator.offsetTop,
-        estimatedHeight,
-      }
-      const nextOffset = accumulator.offsetTop + estimatedHeight + (index < grouped.length - 1 ? CATALOG_SECTION_GAP : 0)
-
-      return {
-        offsetTop: nextOffset,
-        layouts: [...accumulator.layouts, layout],
-      }
-    }, {
-      offsetTop: initialOffset,
-      layouts: [],
-    }).layouts
-  }, [columns, grouped, showHero])
 
   return (
     <div className="pb-12">
@@ -459,16 +419,25 @@ export default function Catalog({ search = '', viewport = null }) {
 
       {/* ─── App Sections ─── */}
       <div className="px-6 pt-4 space-y-10">
-        {sectionLayouts.map((section) => (
-          <CatalogSection
-            key={section.id}
-            section={section}
-            columns={columns}
-            viewTop={viewTop}
-            viewBottom={viewBottom}
-          />
+        {grouped.map((section) => (
+          <div key={section.id} className="animate-fadeIn">
+            <div className="mb-4 flex items-center gap-2">
+              <SectionIcon kind={section.icon} />
+              <div>
+                <h2 className="text-lg font-bold text-text tracking-tight font-display m-0">
+                  {section.label}
+                </h2>
+                <p className="text-xs text-text-dim mt-0.5 m-0">{section.subtitle}</p>
+              </div>
+            </div>
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+              {section.recipes.map((recipe) => (
+                <RecipeCard key={recipe.slug} recipe={recipe} />
+              ))}
+            </div>
+          </div>
         ))}
-        {sectionLayouts.length === 0 && (
+        {grouped.length === 0 && (
           <div className="text-center py-20 text-text-dim animate-fadeIn">
             <div className="text-4xl mb-3">🔍</div>
             <div className="text-base font-semibold font-display">No apps found</div>
@@ -479,45 +448,6 @@ export default function Catalog({ search = '', viewport = null }) {
     </div>
   )
 }
-
-const CatalogSection = memo(function CatalogSection({ section, columns, viewTop, viewBottom }) {
-  const totalRows = Math.ceil(section.recipes.length / columns)
-  const sectionHeight = CATALOG_SECTION_HEADER_HEIGHT + (totalRows * CATALOG_CARD_ESTIMATED_HEIGHT) + (Math.max(0, totalRows - 1) * CATALOG_ROW_GAP) + CATALOG_SECTION_PADDING_BOTTOM
-  const cardAreaTop = (section.estimatedTop || 0) + CATALOG_SECTION_HEADER_HEIGHT
-  const visibleStart = Math.max(0, Math.floor((viewTop - cardAreaTop) / (CATALOG_CARD_ESTIMATED_HEIGHT + CATALOG_ROW_GAP)) - CATALOG_OVERSCAN_ROWS)
-  const visibleEnd = Math.min(totalRows, Math.ceil((viewBottom - cardAreaTop) / (CATALOG_CARD_ESTIMATED_HEIGHT + CATALOG_ROW_GAP)) + CATALOG_OVERSCAN_ROWS)
-  const startIndex = visibleStart * columns
-  const endIndex = Math.min(section.recipes.length, visibleEnd * columns)
-  const topSpacerHeight = visibleStart * (CATALOG_CARD_ESTIMATED_HEIGHT + CATALOG_ROW_GAP)
-  const renderedRowCount = Math.max(0, visibleEnd - visibleStart)
-  const bottomSpacerHeight = Math.max(
-    0,
-    (totalRows - visibleStart - renderedRowCount) * (CATALOG_CARD_ESTIMATED_HEIGHT + CATALOG_ROW_GAP),
-  )
-  const visibleRecipes = section.recipes.slice(startIndex, endIndex)
-
-  return (
-    <div className="animate-fadeIn" style={{ minHeight: sectionHeight }}>
-      <div className="mb-4 flex items-center gap-2">
-        <SectionIcon kind={section.icon} />
-        <div>
-          <h2 className="text-lg font-bold text-text tracking-tight font-display m-0">
-            {section.label}
-          </h2>
-          <p className="text-xs text-text-dim mt-0.5 m-0">{section.subtitle}</p>
-        </div>
-      </div>
-
-      <div style={{ paddingTop: topSpacerHeight, paddingBottom: bottomSpacerHeight }}>
-        <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
-          {visibleRecipes.map((recipe) => (
-            <RecipeCard key={recipe.slug} recipe={recipe} />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-})
 
 function SectionIcon({ kind }) {
   const shared = {

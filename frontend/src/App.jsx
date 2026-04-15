@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useStore } from './store'
 import { useMetrics } from './hooks/useMetrics'
 import ThemeToggle from './components/ThemeToggle'
@@ -18,7 +18,6 @@ const NAV_ITEMS = [
 export default function App() {
   const [tab, setTab] = useState('catalog')
   const [searchInput, setSearchInput] = useState('')
-  const [catalogViewport, setCatalogViewport] = useState({ width: 0, height: 0, scrollTop: 0 })
   const recipes = useStore((s) => s.recipes)
   const fetchRecipes = useStore((s) => s.fetchRecipes)
   const selectedRecipe = useStore((s) => s.selectedRecipe)
@@ -26,7 +25,6 @@ export default function App() {
   const theme = useStore((s) => s.theme)
   const metrics = useStore((s) => s.metrics)
   const [search, setSearch] = useState('')
-  const mainRef = useRef(null)
 
   useMetrics()
 
@@ -41,38 +39,6 @@ export default function App() {
 
     return () => window.clearTimeout(timer)
   }, [searchInput])
-
-  useEffect(() => {
-    const mainElement = mainRef.current
-    if (!mainElement) return undefined
-
-    const syncViewport = () => {
-      setCatalogViewport({
-        width: mainElement.clientWidth,
-        height: mainElement.clientHeight,
-        scrollTop: mainElement.scrollTop,
-      })
-    }
-
-    let ticking = false
-    const handleScroll = () => {
-      if (ticking) return
-      ticking = true
-      window.requestAnimationFrame(() => {
-        syncViewport()
-        ticking = false
-      })
-    }
-
-    syncViewport()
-    mainElement.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', syncViewport)
-
-    return () => {
-      mainElement.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', syncViewport)
-    }
-  }, [selectedRecipe, tab])
 
   useEffect(() => {
     fetchRecipes()
@@ -179,13 +145,13 @@ export default function App() {
         </header>
 
         {/* Content */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           <Suspense fallback={<PageSkeleton selectedRecipe={selectedRecipe} />}>
             {selectedRecipe ? (
               <RecipeDetail />
             ) : (
               <div className="animate-fadeIn">
-                {tab === 'catalog' && <Catalog search={search} viewport={catalogViewport} />}
+                {tab === 'catalog' && <Catalog search={search} />}
                 {tab === 'running' && <Running />}
                 {tab === 'system' && <System />}
                 {tab === 'about' && <About />}
