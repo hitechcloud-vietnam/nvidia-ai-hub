@@ -1,0 +1,47 @@
+name: "MiniCPM-o 2.6"
+slug: minicpm-o
+version: "1.0.0"
+description: "Run MiniCPM-o 2.6 on DGX Spark for streaming multimodal chat with image, audio, and voice input through the upstream web demo wrapped for local GPU deployment."
+author: "OpenBMB / HiTechCloud Vietnam"
+source: "spark-ai-hub"
+website: "https://github.com/OpenBMB/MiniCPM-o"
+upstream: "https://github.com/hitechcloud-vietnam/minicpm-o-spark-ai-hub"
+fork: "https://github.com/OpenBMB/MiniCPM-o"
+category: multi-modal
+categories:
+  - multi-modal
+  - dgx-spark
+tags:
+  - multi-modal
+  - vision-language
+  - audio
+  - speech
+  - voice
+  - webcam
+  - realtime
+  - dgx-spark
+icon: "M"
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7868
+  path: "/"
+  health_path: "/api/v1/ping"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/minicpm-o/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Pull the wrapped MiniCPM-o image and start the local multimodal web demo on port 7868."
+    command: "docker compose -p spark-ai-hub-minicpm-o -f registry/recipes/minicpm-o/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop MiniCPM-o while preserving the Hugging Face cache volume for faster relaunches."
+    command: "docker compose -p spark-ai-hub-minicpm-o -f registry/recipes/minicpm-o/docker-compose.yml down"

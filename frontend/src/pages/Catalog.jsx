@@ -133,7 +133,7 @@ export default function Catalog({ search = '' }) {
           : 0
         return recipesWithBanners[nextIndex].slug
       })
-    }, 8000)
+    }, 5000)
 
     return () => window.clearInterval(interval)
   }, [category, recipesWithBanners, search])
