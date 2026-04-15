@@ -16,6 +16,19 @@ This document is the central index for repository governance, contribution workf
 - Licensing guide: [`./licensing.md`](./licensing.md)
 - Notice: [`../NOTICE`](../NOTICE)
 
+## Document Purpose Matrix
+
+| Document | Primary use | Typical audience |
+|---|---|---|
+| `../CONTRIBUTING.md` | contribution workflow, local validation, submission expectations | contributors |
+| `./pull-request-process.md` | review flow, branch protection, merge guidance | reviewers and maintainers |
+| `./github-actions.md` | workflow inventory, rollout gating, automation enablement | maintainers |
+| `./maintenance.md` | `CODEOWNERS`, labels, Dependabot, branch protection maintenance | maintainers |
+| `../SECURITY.md` | vulnerability reporting and disclosure process | reporters and maintainers |
+| `../CODE_OF_CONDUCT.md` | collaboration and behavior expectations | all participants |
+| `../SUPPORT.md` | support routing and usage questions | users and triagers |
+| `./licensing.md` | licensing model and commercial-use interpretation | users and maintainers |
+
 ## When to Use What
 
 ### Use `CONTRIBUTING.md` for
