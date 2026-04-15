@@ -1,0 +1,60 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="200" y1="80" x2="1450" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111F"/>
+      <stop offset="0.45" stop-color="#10264A"/>
+      <stop offset="1" stop-color="#1B5E7A"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1260 240) rotate(132.442) scale(420 320)">
+      <stop stop-color="#7CE7FF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#7CE7FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(410 700) rotate(19.501) scale(520 280)">
+      <stop stop-color="#8E84FF" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#8E84FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="line" x1="274" y1="172" x2="1316" y2="728" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#74F3FF"/>
+      <stop offset="0.5" stop-color="#80C7FF"/>
+      <stop offset="1" stop-color="#7E8DFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" rx="48" fill="url(#bg)"/>
+  <rect width="1600" height="900" rx="48" fill="url(#glowA)"/>
+  <rect width="1600" height="900" rx="48" fill="url(#glowB)"/>
+
+  <g opacity="0.18" stroke="#B6F7FF">
+    <path d="M120 190H1480"/>
+    <path d="M120 340H1480"/>
+    <path d="M120 490H1480"/>
+    <path d="M120 640H1480"/>
+    <path d="M280 110V790"/>
+    <path d="M540 110V790"/>
+    <path d="M800 110V790"/>
+    <path d="M1060 110V790"/>
+    <path d="M1320 110V790"/>
+  </g>
+
+  <g stroke="url(#line)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M278 650L468 470L642 530L816 308L964 374L1176 212L1320 272"/>
+    <path opacity="0.7" d="M278 388L456 312L618 366L784 214L1002 284L1188 174L1326 214"/>
+    <path opacity="0.45" d="M278 712L452 590L624 636L792 454L986 522L1182 408L1320 446"/>
+  </g>
+
+  <g fill="#D6FBFF">
+    <circle cx="278" cy="650" r="16"/>
+    <circle cx="468" cy="470" r="14"/>
+    <circle cx="642" cy="530" r="14"/>
+    <circle cx="816" cy="308" r="18"/>
+    <circle cx="964" cy="374" r="14"/>
+    <circle cx="1176" cy="212" r="16"/>
+    <circle cx="1320" cy="272" r="15"/>
+  </g>
+
+  <g opacity="0.75">
+    <rect x="202" y="148" width="210" height="88" rx="24" fill="#0C1B34" stroke="#7EEAFF"/>
+    <text x="238" y="204" fill="#D9FAFF" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">GLM 4.5</text>
+    <rect x="1146" y="638" width="250" height="94" rx="26" fill="#10284A" stroke="#8AA2FF"/>
+    <text x="1184" y="698" fill="#EDF3FF" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Agent Stack</text>
+  </g>
+</svg>

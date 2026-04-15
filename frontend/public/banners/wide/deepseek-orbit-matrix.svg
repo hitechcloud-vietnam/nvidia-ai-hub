@@ -1,0 +1,44 @@
+<svg width="1600" height="600" viewBox="0 0 1600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="600" rx="32" fill="#08131F"/>
+  <rect x="32" y="32" width="1536" height="536" rx="28" fill="url(#bg)" stroke="rgba(148,163,184,0.18)"/>
+  <circle cx="250" cy="180" r="160" fill="url(#orbA)" opacity="0.95"/>
+  <circle cx="520" cy="390" r="190" fill="url(#orbB)" opacity="0.75"/>
+  <circle cx="1250" cy="170" r="180" fill="url(#orbC)" opacity="0.82"/>
+  <circle cx="1110" cy="420" r="220" fill="url(#orbD)" opacity="0.68"/>
+  <g stroke="#60A5FA" stroke-opacity="0.45">
+    <path d="M120 470C260 330 420 260 590 250C760 240 870 330 1010 310C1170 286 1290 154 1480 136" stroke-width="2"/>
+    <path d="M110 220C250 180 370 180 510 210C680 248 830 360 1010 360C1180 360 1308 284 1484 224" stroke-width="2"/>
+    <path d="M170 120L540 470" stroke-width="1.5" stroke-dasharray="8 10"/>
+    <path d="M1080 92L1370 460" stroke-width="1.5" stroke-dasharray="8 10"/>
+  </g>
+  <g fill="#E2E8F0" fill-opacity="0.9">
+    <circle cx="332" cy="256" r="6"/>
+    <circle cx="610" cy="286" r="7"/>
+    <circle cx="926" cy="346" r="6"/>
+    <circle cx="1228" cy="246" r="7"/>
+    <circle cx="1324" cy="394" r="6"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="88" y1="56" x2="1500" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1B2E"/>
+      <stop offset="0.52" stop-color="#102B46"/>
+      <stop offset="1" stop-color="#07121F"/>
+    </linearGradient>
+    <radialGradient id="orbA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(250 180) rotate(90) scale(160)">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520 390) rotate(90) scale(190)">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbC" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1250 170) rotate(90) scale(180)">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbD" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1110 420) rotate(90) scale(220)">
+      <stop stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

@@ -1,0 +1,44 @@
+name: "GLM 4.5 Air"
+slug: vllm-glm45-air
+version: "1.0.0"
+description: "Z.ai GLM 4.5 Air served with vLLM as a hybrid reasoning and agent model with tool calling for advanced DGX Spark workflows."
+author: "Z.ai"
+source: "official"
+website: "https://huggingface.co/zai-org/GLM-4.5-Air"
+upstream: "https://huggingface.co/zai-org/GLM-4.5-Air"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - reasoning
+  - code-gen
+  - tool-use
+  - agent
+  - glm
+  - zhipu
+  - mit
+  - vllm
+icon: "🛰️"
+logo: "/logos/zhipu.png"
+requirements:
+  min_memory_gb: 40
+  recommended_memory_gb: 48
+  disk_gb: 48
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "zai-org/GLM-4.5-Air"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"zai-org/GLM-4.5-Air\", \"messages\": [{\"role\": \"user\", \"content\": \"Plan a phased rollout for a new inference service.\"}], \"extra_body\": {\"chat_template_kwargs\": {\"enable_thinking\": false}}}'"

@@ -1,0 +1,43 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="90" x2="1480" y2="830" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#09151B"/>
+      <stop offset="0.52" stop-color="#10303C"/>
+      <stop offset="1" stop-color="#28495E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1260 250) rotate(134.442) scale(400 280)">
+      <stop stop-color="#A2FFE4" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#A2FFE4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pulse" x1="260" y1="614" x2="1328" y2="326" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#83FFC1"/>
+      <stop offset="0.45" stop-color="#73E4FF"/>
+      <stop offset="1" stop-color="#B59BFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" rx="48" fill="url(#bg)"/>
+  <rect width="1600" height="900" rx="48" fill="url(#glow)"/>
+
+  <g opacity="0.18" stroke="#C7FFF2">
+    <path d="M180 240H1420"/>
+    <path d="M180 450H1420"/>
+    <path d="M180 660H1420"/>
+  </g>
+
+  <path d="M234 588H410L484 408L566 684L650 478L726 532L822 300L914 548L1006 416L1092 480L1192 346L1362 346" stroke="url(#pulse)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g fill="#E8FFF7">
+    <circle cx="410" cy="588" r="14"/>
+    <circle cx="484" cy="408" r="12"/>
+    <circle cx="566" cy="684" r="12"/>
+    <circle cx="822" cy="300" r="15"/>
+    <circle cx="1192" cy="346" r="13"/>
+  </g>
+
+  <g>
+    <rect x="196" y="122" width="316" height="96" rx="28" fill="#11252E" stroke="#8DF7CA"/>
+    <text x="236" y="183" fill="#E7FFF4" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700">SmolLM3</text>
+    <text x="198" y="796" fill="#E8FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="76" font-weight="700">Small model, long context</text>
+    <text x="202" y="848" fill="#B8E8F8" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="500">Hybrid reasoning, tool use, and compact deployment for DGX Spark</text>
+  </g>
+</svg>

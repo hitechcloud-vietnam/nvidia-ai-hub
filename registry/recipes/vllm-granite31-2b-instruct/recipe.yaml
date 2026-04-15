@@ -1,0 +1,44 @@
+name: "Granite 3.1 2B Instruct"
+slug: vllm-granite31-2b-instruct
+version: "1.0.0"
+description: "IBM Granite 3.1 2B Instruct served with vLLM for compact enterprise chat, extraction, RAG, and function-calling flows on DGX Spark."
+author: "IBM"
+source: "official"
+website: "https://huggingface.co/ibm-granite/granite-3.1-2b-instruct"
+upstream: "https://huggingface.co/ibm-granite/granite-3.1-2b-instruct"
+category: llm
+categories:
+  - llm
+  - rag
+tags:
+  - llm
+  - rag
+  - code-gen
+  - tool-use
+  - long-context
+  - granite
+  - ibm
+  - apache-2.0
+  - vllm
+icon: "🧱"
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 10
+  recommended_memory_gb: 14
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "ibm-granite/granite-3.1-2b-instruct"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"ibm-granite/granite-3.1-2b-instruct\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize this meeting note and extract action items.\"}]}'"

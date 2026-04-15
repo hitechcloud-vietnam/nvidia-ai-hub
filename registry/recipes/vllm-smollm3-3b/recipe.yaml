@@ -1,0 +1,44 @@
+name: "SmolLM3 3B"
+slug: vllm-smollm3-3b
+version: "1.0.0"
+description: "Hugging Face SmolLM3 3B served with vLLM for small-footprint long-context reasoning, tool use, and multilingual assistant flows on DGX Spark."
+author: "Hugging Face"
+source: "official"
+website: "https://huggingface.co/HuggingFaceTB/SmolLM3-3B"
+upstream: "https://huggingface.co/HuggingFaceTB/SmolLM3-3B"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - reasoning
+  - code-gen
+  - tool-use
+  - long-context
+  - smollm
+  - huggingface
+  - apache-2.0
+  - vllm
+icon: "🫧"
+logo: "/logos/openai.png"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 18
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "HuggingFaceTB/SmolLM3-3B"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"HuggingFaceTB/SmolLM3-3B\", \"messages\": [{\"role\": \"user\", \"content\": \"Explain the deployment issue briefly.\"}], \"chat_template_kwargs\": {\"enable_thinking\": false}}'"

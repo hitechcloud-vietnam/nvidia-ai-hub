@@ -1,0 +1,37 @@
+name: "DeepSeek R1 Distill Qwen 7B"
+slug: vllm-deepseek-r1-distill-qwen-7b
+version: "1.0.0"
+description: "DeepSeek R1 Distill Qwen 7B served with vLLM for compact reasoning, math, and code workflows with DeepSeek's usage recommendations."
+author: "DeepSeek"
+source: "official"
+website: "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+upstream: "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+category: llm
+tags:
+  - llm
+  - reasoning
+  - coding
+  - vllm
+  - qwen
+  - deepseek
+  - mit
+logo: "/logos/deepseek.png"
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 32
+  disk_gb: 24
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"deepseek-ai/DeepSeek-R1-Distill-Qwen-7B\", \"messages\": [{\"role\": \"user\", \"content\": \"Please reason step by step and explain 37*48.\"}]}'"

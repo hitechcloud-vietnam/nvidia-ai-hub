@@ -1,0 +1,38 @@
+name: "Mixtral 8x7B Instruct"
+slug: vllm-mixtral-8x7b-instruct
+version: "1.0.0"
+description: "Mixtral 8x7B Instruct routed through vLLM for sparse-MoE chat, reasoning, and coding workloads on DGX Spark."
+author: "Mistral AI"
+source: "official"
+website: "https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1"
+upstream: "https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1"
+category: llm
+tags:
+  - llm
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - mistral
+  - moe
+  - apache-2.0
+logo: "/logos/mistral.png"
+requirements:
+  min_memory_gb: 40
+  recommended_memory_gb: 48
+  disk_gb: 56
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "mistralai/Mixtral-8x7B-Instruct-v0.1"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Mixtral-8x7B-Instruct-v0.1\", \"messages\": [{\"role\": \"user\", \"content\": \"Compare two rollout plans with pros and cons.\"}]}'"

@@ -32,6 +32,13 @@ const BANNERS = {
   'vllm-seed-oss-':       { img: '/banners/wide/seed-crystal-mesh.svg', layout: 'wide' },
   'vllm-nemotron':        { img: '/banners/wide/nemotron-nebula-core.svg', layout: 'wide' },
   'vllm-llama':           { img: '/banners/wide/llama-aurora-lattice.svg', layout: 'wide' },
+  'vllm-deepseek-':       { img: '/banners/wide/deepseek-orbit-matrix.svg', layout: 'wide' },
+  'vllm-glm45':           { img: '/banners/wide/glm-signal-weave.svg', layout: 'wide' },
+  'vllm-granite31-':      { img: '/banners/wide/granite-foundry-stack.svg', layout: 'wide' },
+  'vllm-mistral':         { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
+  'vllm-ministral':       { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
+  'vllm-mixtral':         { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
+  'vllm-smollm3':         { img: '/banners/wide/smollm-pocket-pulse.svg', layout: 'wide' },
   'ollama-openwebui':      { img: '/banners/wide/ollama-openwebui.png', layout: 'wide' },
   'comfyui':               { img: '/banners/wide/comfyui-spark.jpg', layout: 'wide' },
   'facefusion':            { img: '/banners/wide/facefusion-spark.png', layout: 'wide' },
@@ -61,6 +68,10 @@ const CATEGORIES = [
   { id: 'video-gen', label: 'Video Gen' },
   { id: '3d-gen', label: '3D Gen' },
   { id: 'multi-modal', label: 'Multi-Modal' },
+  { id: 'reasoning', label: 'Reasoning' },
+  { id: 'code-gen', label: 'Code Gen' },
+  { id: 'speech', label: 'Speech' },
+  { id: 'rag', label: 'RAG' },
   { id: 'nemoclaw', label: 'NemoClaw' },
 ]
 
@@ -136,6 +147,30 @@ function getRecipeCategories(recipe) {
     description.includes('voice input')
   ) {
     derivedCategories.push('multi-modal')
+  }
+
+  if (tags.includes('reasoning')) {
+    derivedCategories.push('reasoning')
+  }
+
+  if (tags.includes('coding') || tags.includes('code') || tags.includes('codegen')) {
+    derivedCategories.push('code-gen')
+  }
+
+  if (
+    tags.includes('speech') ||
+    tags.includes('audio') ||
+    tags.includes('tts') ||
+    tags.includes('voice-cloning') ||
+    description.includes('speech') ||
+    description.includes('text-to-speech') ||
+    description.includes('voice cloning')
+  ) {
+    derivedCategories.push('speech')
+  }
+
+  if (tags.includes('rag') || description.includes('retrieval')) {
+    derivedCategories.push('rag')
   }
 
   const isDgxSparkRecipe =
