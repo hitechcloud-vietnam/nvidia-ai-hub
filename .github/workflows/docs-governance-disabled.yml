@@ -1,0 +1,101 @@
+name: Disabled - Docs and Governance Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'CODE_OF_CONDUCT.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'SUPPORT.md'
+      - 'LICENSE'
+      - 'COMMERCIAL-LICENSE.md'
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'CODE_OF_CONDUCT.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'SUPPORT.md'
+      - 'LICENSE'
+      - 'COMMERCIAL-LICENSE.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-governance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-governance-validation:
+    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate required governance files
+        shell: python
+        run: |
+          from pathlib import Path
+
+          required_files = [
+              'README.md',
+              'CODE_OF_CONDUCT.md',
+              'CONTRIBUTING.md',
+              'SECURITY.md',
+              'SUPPORT.md',
+              'COMMERCIAL-LICENSE.md',
+              'docs/community.md',
+              'docs/licensing.md',
+              'docs/pull-request-process.md',
+          ]
+
+          missing = [path for path in required_files if not Path(path).is_file()]
+          if missing:
+              raise SystemExit(f'Missing required governance files: {", ".join(missing)}')
+
+      - name: Validate local markdown links
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          markdown_files = list(Path('.').glob('*.md')) + list(Path('docs').rglob('*.md'))
+          pattern = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
+          broken = []
+
+          for markdown_file in markdown_files:
+              text = markdown_file.read_text(encoding='utf-8')
+              for raw_target in pattern.findall(text):
+                  target = raw_target.strip()
+                  if not target or target.startswith('#'):
+                      continue
+                  parsed = urlparse(target)
+                  if parsed.scheme or target.startswith('mailto:'):
+                      continue
+                  clean_target = target.split('#', 1)[0]
+                  if not clean_target:
+                      continue
+                  resolved = (markdown_file.parent / clean_target).resolve()
+                  if not resolved.exists():
+                      broken.append(f'{markdown_file}: {target}')
+
+          if broken:
+              raise SystemExit('Broken markdown links found:\n' + '\n'.join(broken))

@@ -9,6 +9,7 @@ This document is the central index for repository governance, contribution workf
 - Code of conduct: [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
 - Support guide: [`../SUPPORT.md`](../SUPPORT.md)
 - Pull request process: [`./pull-request-process.md`](./pull-request-process.md)
+- GitHub Actions rollout guide: [`./github-actions.md`](./github-actions.md)
 - License: [`../LICENSE`](../LICENSE)
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
 - Licensing guide: [`./licensing.md`](./licensing.md)

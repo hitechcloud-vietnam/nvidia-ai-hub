@@ -1,0 +1,36 @@
+services:
+  ocr-captioning-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-ocr-captioning-studio
+    ports:
+      - "7870:7860"
+    env_file:
+      - .env
+    environment:
+      PORT: "7860"
+      OUTPUT_DIR: "/data/output"
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      HUGGINGFACE_HUB_CACHE: "${HUGGINGFACE_HUB_CACHE:-/data/hf-home}"
+      FLORENCE_MODEL: "${FLORENCE_MODEL:-microsoft/Florence-2-large-ft}"
+      MAX_NEW_TOKENS: "${MAX_NEW_TOKENS:-1024}"
+      NUM_BEAMS: "${NUM_BEAMS:-3}"
+      HF_TOKEN: "${HF_TOKEN:-}"
+      HF_HUB_OFFLINE: "${HF_HUB_OFFLINE:-0}"
+      TRANSFORMERS_OFFLINE: "${TRANSFORMERS_OFFLINE:-0}"
+    volumes:
+      - ocr-captioning-studio-hf-home:/data/hf-home
+      - ocr-captioning-studio-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ocr-captioning-studio-hf-home:
+  ocr-captioning-studio-output:

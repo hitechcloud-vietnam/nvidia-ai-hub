@@ -1,0 +1,47 @@
+name: "OCR + Captioning Studio"
+slug: ocr-captioning-studio
+version: "1.0.0"
+description: "Run Microsoft Florence-2 Large FT as a local Gradio studio for OCR, OCR with quadrilateral regions, captioning, detailed captioning, and dense region captioning on DGX Spark with persistent Hugging Face cache and exported outputs."
+author: "Microsoft"
+source: "official"
+website: "https://huggingface.co/microsoft/Florence-2-large-ft"
+upstream: "https://huggingface.co/microsoft/Florence-2-large-ft"
+category: image-understanding
+categories:
+  - image-understanding
+  - multi-modal
+  - workflow
+tags:
+  - florence
+  - microsoft
+  - ocr
+  - captioning
+  - dense-caption
+  - gradio
+  - vision-language
+icon: "🧾"
+logo: "/logos/microsoft.png"
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7870
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 12
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/ocr-captioning-studio/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the local Florence-2 studio image and launch the Gradio UI on port 7870."
+    command: "docker compose -p nvidia-ai-hub-ocr-captioning-studio -f registry/recipes/ocr-captioning-studio/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop OCR + Captioning Studio while preserving Hugging Face cache and exported outputs."
+    command: "docker compose -p nvidia-ai-hub-ocr-captioning-studio -f registry/recipes/ocr-captioning-studio/docker-compose.yml down"

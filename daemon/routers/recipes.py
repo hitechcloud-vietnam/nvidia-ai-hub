@@ -28,7 +28,7 @@ def _set_runtime_env_path(recipe: Recipe) -> None:
 
 
 def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
-    return RecipeSummary(
+    summary = RecipeSummary(
         name=recipe.name,
         slug=recipe.slug,
         version=recipe.version,
@@ -46,6 +46,8 @@ def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
         status=recipe.status,
         requires_hf_token=recipe.requires_hf_token,
     )
+    _set_runtime_env_path(summary)
+    return summary
 
 
 @router.get("", response_model=list[RecipeSummary])

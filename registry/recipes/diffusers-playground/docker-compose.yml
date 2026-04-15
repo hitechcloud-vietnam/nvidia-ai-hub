@@ -1,0 +1,38 @@
+services:
+  diffusers-playground:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-diffusers-playground
+    ports:
+      - "7871:7860"
+    env_file:
+      - .env
+    environment:
+      PORT: "7860"
+      OUTPUT_DIR: "/data/output"
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      HUGGINGFACE_HUB_CACHE: "${HUGGINGFACE_HUB_CACHE:-/data/hf-home}"
+      TXT2IMG_MODEL_ID: "${TXT2IMG_MODEL_ID:-stable-diffusion-v1-5/stable-diffusion-v1-5}"
+      IMG2IMG_MODEL_ID: "${IMG2IMG_MODEL_ID:-stable-diffusion-v1-5/stable-diffusion-v1-5}"
+      INPAINT_MODEL_ID: "${INPAINT_MODEL_ID:-stable-diffusion-v1-5/stable-diffusion-inpainting}"
+      HF_TOKEN: "${HF_TOKEN:-}"
+      HF_HUB_OFFLINE: "${HF_HUB_OFFLINE:-0}"
+      DIFFUSERS_OFFLINE: "${DIFFUSERS_OFFLINE:-0}"
+      TRANSFORMERS_OFFLINE: "${TRANSFORMERS_OFFLINE:-0}"
+      ENABLE_CPU_OFFLOAD: "${ENABLE_CPU_OFFLOAD:-0}"
+    volumes:
+      - diffusers-playground-hf-home:/data/hf-home
+      - diffusers-playground-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  diffusers-playground-hf-home:
+  diffusers-playground-output:

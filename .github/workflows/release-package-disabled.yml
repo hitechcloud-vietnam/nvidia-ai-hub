@@ -1,0 +1,71 @@
+name: Disabled - Release Package Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'daemon/**'
+      - 'frontend/**'
+      - 'registry/**'
+      - 'scripts/**'
+      - 'requirements.txt'
+      - '.github/workflows/release-package-disabled.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release-package:
+    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend distribution
+        working-directory: frontend
+        run: npm run build
+
+      - name: Prepare release bundle
+        run: |
+          mkdir -p dist
+          tar \
+            --exclude='.git' \
+            --exclude='.venv' \
+            --exclude='frontend/node_modules' \
+            --exclude='frontend/dist' \
+            -czf dist/nvidia-ai-hub-source.tar.gz .
+
+      - name: Upload release bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvidia-ai-hub-source
+          path: dist/nvidia-ai-hub-source.tar.gz
+          if-no-files-found: error

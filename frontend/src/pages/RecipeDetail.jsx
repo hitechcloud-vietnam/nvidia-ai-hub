@@ -12,12 +12,14 @@ import {
 const RecipeConfigTab = lazy(() => import('../components/recipe-detail/ConfigWorkspace'))
 const InlineConfigWorkspace = lazy(() => import('../components/recipe-detail/ConfigWorkspace').then((module) => ({ default: module.InlineConfigWorkspace })))
 
-const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw', 'es-blueprint-rsg', 'live-vlm-webui', 'multi-agent-chatbot', 'minicpm-o'])
+function hasDedicatedConfigTab(recipe) {
+  return Boolean(recipe?.runtime_env_path)
+}
 
 function getDetailTabs(recipe) {
   const tabs = [{ id: 'details', label: 'Overview' }]
 
-  if (recipe && CONFIG_TAB_RECIPES.has(recipe.slug)) {
+  if (hasDedicatedConfigTab(recipe)) {
     tabs.push({ id: 'config', label: 'Configuration' })
   }
 
@@ -219,7 +221,7 @@ export default function RecipeDetail() {
     ? recipe.categories
     : [recipe.category]
   const detailTabs = getDetailTabs(recipe)
-  const hasDedicatedConfigTab = CONFIG_TAB_RECIPES.has(recipe.slug)
+  const showDedicatedConfigTab = hasDedicatedConfigTab(recipe)
 
   return (
     <div className="flex flex-col h-full animate-fadeIn">
@@ -353,7 +355,7 @@ export default function RecipeDetail() {
 
       <div className="flex-1 min-h-0">
         {activeTab === 'details' ? (
-          hasDedicatedConfigTab ? (
+          showDedicatedConfigTab ? (
             <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
               <AboutTab recipe={recipe} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
             </div>

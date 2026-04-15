@@ -89,6 +89,7 @@ class RecipeSummary(BaseModel):
     source: str = "community"
     status: str = "experimental"
     requires_hf_token: bool = False
+    runtime_env_path: str = ""
 
     # runtime state
     installed: bool = False

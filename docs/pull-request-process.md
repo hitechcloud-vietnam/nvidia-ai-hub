@@ -44,6 +44,23 @@ Use repository labels to help triage reviews:
 - Use labels from `.github/labeler.yml` to route changes quickly.
 - Rebase or refresh dependency pull requests before merging if they become stale.
 
+### Optional GitHub Actions workflows
+
+The repository includes additional workflow definitions that are intentionally disabled by default:
+
+- `.github/workflows/ci-validation-disabled.yml`
+- `.github/workflows/recipe-validation-disabled.yml`
+- `.github/workflows/docs-governance-disabled.yml`
+- `.github/workflows/release-package-disabled.yml`
+
+These workflows do not execute their jobs unless the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
+
+Recommended usage:
+
+- keep the variable unset during initial workflow rollout
+- review the workflow contents and required permissions first
+- enable the variable only when the repository is ready to run the optional automation set
+
 ## Merge Guidance
 
 Prefer squash merges for routine changes unless preserving commit history is important for release or audit purposes.

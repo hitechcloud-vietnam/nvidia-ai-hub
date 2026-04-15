@@ -53,9 +53,9 @@ export default function RecipeConfigTab({ recipe }) {
 
 export function InlineConfigWorkspace({ recipe }) {
   return (
-    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] min-h-0 h-full">
-      <div className="h-full min-h-0 flex flex-col">
-        <div className="flex-1 min-h-0">
+    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] min-h-0 h-full overflow-hidden">
+      <div className="h-full min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <ComposeEditor slug={recipe.slug} />
         </div>
         {recipe.runtime_env_path && (
@@ -498,7 +498,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
   }
 
   return (
-    <div className={standalone ? 'h-full min-h-0 flex flex-col bg-surface-low/30' : 'border-t border-outline-dim bg-surface-low/30'}>
+    <div className={standalone ? 'h-full min-h-0 flex flex-col overflow-hidden bg-surface-low/30' : 'min-h-0 flex flex-col border-t border-outline-dim bg-surface-low/30'}>
       <div className="px-5 py-4 border-b border-outline-dim bg-surface-low/50">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -534,7 +534,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
         </div>
       </div>
 
-      <div className="p-5 flex flex-col">
+      <div className="flex-1 min-h-0 overflow-y-auto p-5 flex flex-col">
         {loading ? (
           <div className="h-56 rounded-2xl bg-[#08080F] border border-outline-dim flex items-center justify-center text-sm text-text-dim">
             Loading runtime env...
