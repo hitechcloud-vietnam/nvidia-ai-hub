@@ -87,6 +87,7 @@ Repository governance and licensing should remain consistent across:
 - `.github/CODEOWNERS`
 - `.github/dependabot.yml`
 - `.github/labeler.yml`
+- `.github/workflows/*.yml`
 - issue and pull request templates
 
 When changing governance or licensing language, update all affected documents in the same pull request.

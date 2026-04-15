@@ -8,6 +8,8 @@ The repository includes workflow files under `.github/workflows/`, but the newly
 
 They are intentionally present but inactive by default.
 
+The repository also includes `.github/dependabot.yml`, but Dependabot pull request creation is paused by default by setting each `open-pull-requests-limit` to `0`.
+
 The repository also includes `.github/workflows/optional-workflows-status.yml`, which can run safely even while the gated workflows remain disabled. It reports whether `ENABLE_OPTIONAL_WORKFLOWS` is currently enabled.
 
 ## Workflow Inventory
@@ -28,6 +30,13 @@ The following workflows are staged and remain gated by `ENABLE_OPTIONAL_WORKFLOW
 - `.github/workflows/recipe-validation-disabled.yml`
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
+- `.github/workflows/dependency-updates-disabled.yml`
+
+### Paused dependency automation
+
+The following dependency automation file is present but paused by configuration:
+
+- `.github/dependabot.yml`
 
 ## Gated Workflows
 
@@ -37,6 +46,7 @@ The following workflows are currently staged behind the repository variable `ENA
 - `.github/workflows/recipe-validation-disabled.yml`
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
+- `.github/workflows/dependency-updates-disabled.yml`
 
 Each workflow contains job-level gating:
 
@@ -80,6 +90,25 @@ Each workflow contains job-level gating:
 - create a compressed source archive
 - upload the archive as a workflow artifact
 
+### Dependency update validation
+
+`dependency-updates-disabled.yml` is intended to validate dependency automation changes:
+
+- detect whether Python, frontend, workflow, or Dependabot files changed
+- run backend install and `python -m compileall daemon` when Python dependencies change
+- run `npm ci`, `npm run lint`, and `npm run build` when frontend dependencies change
+- parse `.github/dependabot.yml` and workflow YAML files for syntax validation
+
+### Dependabot configuration
+
+`.github/dependabot.yml` stages dependency update automation for:
+
+- `pip` dependencies in `/`
+- `npm` dependencies in `/frontend`
+- GitHub Actions dependencies in `/`
+
+Dependabot remains paused until maintainers raise `open-pull-requests-limit` above `0` for the ecosystems they want to activate.
+
 ## How to Enable
 
 To enable the staged workflows:
@@ -97,10 +126,12 @@ You can use the `Optional Workflows Status` workflow to confirm the current vari
 
 Use a gradual rollout:
 
-1. enable `ci-validation-disabled.yml`
-2. enable `docs-governance-disabled.yml`
-3. enable `recipe-validation-disabled.yml`
-4. enable `release-package-disabled.yml`
+1. review `.github/dependabot.yml` and raise `open-pull-requests-limit` only for the ecosystem that is ready
+2. enable `ci-validation-disabled.yml`
+3. enable `docs-governance-disabled.yml`
+4. enable `recipe-validation-disabled.yml`
+5. enable `dependency-updates-disabled.yml`
+6. enable `release-package-disabled.yml`
 
 This order reduces risk by activating low-impact validation first and artifact packaging last.
 

@@ -232,6 +232,9 @@ Current gated workflows include:
 - CI validation
 - Recipe validation
 - Docs and governance validation
+- Dependency update validation
 - Release package build
+
+The repository also includes `.github/dependabot.yml`, but dependency update pull requests remain paused until maintainers raise the configured `open-pull-requests-limit` above `0`.
 
 If your change relies on one of these workflows, mention that dependency in the pull request and confirm whether the repository variable is still disabled or has been enabled by maintainers.

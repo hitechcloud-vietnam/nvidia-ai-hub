@@ -5,6 +5,15 @@
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
 [![Optional Workflows](https://img.shields.io/badge/GitHub%20Actions-Optional%20Workflows%20Status-6f42c1?style=flat-square)](./docs/github-actions.md)
+[![GitHub Stars](https://img.shields.io/github/stars/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/stargazers)
+[![Open Issues](https://img.shields.io/github/issues/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/issues)
+[![GitHub License](https://img.shields.io/github/license/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](./LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/graphs/contributors)
+[![Code Size](https://img.shields.io/github/languages/code-size/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/hitechcloud-vietnam/spark-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/pulls?q=is%3Apr+is%3Aclosed)
+[![Latest Tag](https://img.shields.io/github/v/tag/hitechcloud-vietnam/spark-ai-hub?sort=semver&style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/tags)
+[![GitHub Streak](https://img.shields.io/badge/GitHub-Streak%20via%20Insights-24292f?style=flat-square&logo=github)](https://github.com/hitechcloud-vietnam/spark-ai-hub/pulse)
 
 **Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 

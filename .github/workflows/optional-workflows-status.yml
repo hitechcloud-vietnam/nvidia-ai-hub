@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/optional-workflows-status.yml'
       - '.github/workflows/*-disabled.yml'
+      - '.github/dependabot.yml'
       - 'docs/github-actions.md'
       - 'docs/pull-request-process.md'
       - 'CONTRIBUTING.md'
@@ -36,4 +37,10 @@ jobs:
           echo "- .github/workflows/ci-validation-disabled.yml"
           echo "- .github/workflows/recipe-validation-disabled.yml"
           echo "- .github/workflows/docs-governance-disabled.yml"
+          echo "- .github/workflows/dependency-updates-disabled.yml"
           echo "- .github/workflows/release-package-disabled.yml"
+
+      - name: Report Dependabot pause state
+        run: |
+          echo "Dependabot configuration file: .github/dependabot.yml"
+          echo "Current default state: paused via open-pull-requests-limit=0 for each ecosystem."
