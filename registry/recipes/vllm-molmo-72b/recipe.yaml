@@ -1,0 +1,45 @@
+name: "Molmo 72B"
+slug: vllm-molmo-72b
+version: "1.0.0"
+description: "AllenAI Molmo 72B served through vLLM for frontier visual reasoning, OCR-heavy documents, chart analysis, and grounded image question answering on high-memory DGX Spark deployments."
+author: "Allen Institute for AI"
+source: "official"
+website: "https://huggingface.co/allenai/Molmo-72B-0924"
+upstream: "https://huggingface.co/allenai/Molmo-72B-0924"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - ocr
+  - chart-understanding
+  - docvqa
+  - molmo
+  - allenai
+  - vllm
+  - apache-2.0
+logo: "/logos/allenai.svg"
+requirements:
+  min_memory_gb: 160
+  recommended_memory_gb: 192
+  disk_gb: 180
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 15
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "allenai/Molmo-72B-0924"
+  api_key: "not-needed"
+  max_context: "4096"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"allenai/Molmo-72B-0924\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Inspect the slide and summarize the most important risk signal.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/slide.png\"}}]}]}'"

@@ -23,6 +23,7 @@ const BANNERS = {
   'vllm-qwen25-vl-':      { img: '/banners/wide/qwen-driving.png', layout: 'wide' },
   'vllm-internvl25-':     { img: '/banners/wide/internvl-canvas-array.svg', layout: 'wide' },
   'vllm-florence2-':      { img: '/banners/wide/florence-frame-atlas.svg', layout: 'wide' },
+  'kosmos-':              { img: '/banners/wide/florence-frame-atlas.svg', layout: 'wide' },
   'vllm-gemma4-e2b':      { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
   'vllm-gemma4-e4b':      { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
   'vllm-gemma4-e4b-fp8':  { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
@@ -44,6 +45,7 @@ const BANNERS = {
   'vllm-mistral':         { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
   'vllm-ministral':       { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
   'vllm-mixtral':         { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
+  'vllm-pixtral-':        { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },
   'vllm-molmo-':          { img: '/banners/wide/molmo-focus-stack.svg', layout: 'wide' },
   'vllm-smollm3':         { img: '/banners/wide/smollm-pocket-pulse.svg', layout: 'wide' },
   'ollama-openwebui':      { img: '/banners/wide/ollama-openwebui.png', layout: 'wide' },
@@ -75,6 +77,8 @@ const CATEGORIES = [
   { id: 'video-gen', label: 'Video Gen' },
   { id: '3d-gen', label: '3D Gen' },
   { id: 'multi-modal', label: 'Multi-Modal' },
+  { id: 'vision-language', label: 'Vision-Language' },
+  { id: 'image-understanding', label: 'Image Understanding' },
   { id: 'reasoning', label: 'Reasoning' },
   { id: 'code-gen', label: 'Code Gen' },
   { id: 'speech', label: 'Speech' },
@@ -154,6 +158,25 @@ function getRecipeCategories(recipe) {
     description.includes('voice input')
   ) {
     derivedCategories.push('multi-modal')
+  }
+
+  if (
+    baseCategories.includes('vision-language') ||
+    tags.includes('vision-language') ||
+    tags.includes('vlm')
+  ) {
+    derivedCategories.push('vision-language')
+  }
+
+  if (
+    baseCategories.includes('image-understanding') ||
+    tags.includes('image-understanding') ||
+    tags.includes('ocr') ||
+    tags.includes('document-ai') ||
+    tags.includes('grounding') ||
+    tags.includes('captioning')
+  ) {
+    derivedCategories.push('image-understanding')
   }
 
   if (tags.includes('reasoning')) {

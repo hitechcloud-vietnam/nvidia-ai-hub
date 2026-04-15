@@ -1,0 +1,31 @@
+services:
+  kosmos-25:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-kosmos-25
+    ports:
+      - "7869:7860"
+    env_file:
+      - .env
+    environment:
+      PORT: "7860"
+      HF_HOME: "/app/hf-cache"
+      KOSMOS_MODEL: "${KOSMOS_MODEL:-microsoft/kosmos-2.5}"
+      KOSMOS_TASK: "${KOSMOS_TASK:-ocr}"
+      HF_TOKEN: "${HF_TOKEN:-}"
+      HF_HUB_OFFLINE: "${HF_HUB_OFFLINE:-0}"
+      TRANSFORMERS_OFFLINE: "${TRANSFORMERS_OFFLINE:-0}"
+    volumes:
+      - kosmos-25-hf-cache:/app/hf-cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  kosmos-25-hf-cache:

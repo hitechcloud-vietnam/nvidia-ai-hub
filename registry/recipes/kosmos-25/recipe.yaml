@@ -1,0 +1,48 @@
+name: "Kosmos-2.5 Instruct"
+slug: kosmos-25
+version: "1.0.0"
+description: "Run Microsoft Kosmos-2.5 on DGX Spark through a local Gradio document-understanding UI for OCR and image-to-markdown extraction from text-rich images."
+author: "Microsoft"
+source: "official"
+website: "https://huggingface.co/microsoft/kosmos-2.5"
+upstream: "https://github.com/microsoft/unilm/tree/master/kosmos-2.5"
+category: multi-modal
+categories:
+  - multi-modal
+  - image-understanding
+tags:
+  - multi-modal
+  - vision-language
+  - image-understanding
+  - ocr
+  - document-ai
+  - markdown-generation
+  - microsoft
+  - kosmos
+  - mit
+icon: "📄"
+logo: "/logos/microsoft.png"
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7869
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/kosmos-25/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Build the local Kosmos-2.5 wrapper and start the OCR and image-to-markdown web UI on port 7869."
+    command: "docker compose -p spark-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Kosmos-2.5 while preserving the Hugging Face cache volume for faster relaunches."
+    command: "docker compose -p spark-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml down"
