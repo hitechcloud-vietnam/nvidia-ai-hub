@@ -1,0 +1,46 @@
+name: "Grounded SAM Workstation"
+slug: grounded-sam-workstation
+version: "1.0.0"
+description: "Run the official Grounded-Segment-Anything Gradio workstation on DGX Spark for open-vocabulary detection, segmentation, auto-labeling, and optional inpainting with persistent checkpoints, Hugging Face cache, and exported outputs."
+author: "IDEA Research"
+source: "official"
+website: "https://github.com/IDEA-Research/Grounded-Segment-Anything"
+upstream: "https://github.com/IDEA-Research/Grounded-Segment-Anything"
+category: image-understanding
+categories:
+  - image-understanding
+  - image-edit
+  - workflow
+tags:
+  - segmentation
+  - groundingdino
+  - segment-anything
+  - grounded-sam
+  - gradio
+  - workstation
+icon: "🎯"
+logo: ""
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 70
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 7589
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 30
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/grounded-sam-workstation/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official Grounded-Segment-Anything environment, download the default GroundingDINO and SAM checkpoints if missing, and launch the Gradio workstation on port 7589."
+    command: "docker compose -p nvidia-ai-hub-grounded-sam-workstation -f registry/recipes/grounded-sam-workstation/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Grounded SAM while preserving downloaded checkpoints, Hugging Face cache, and generated outputs."
+    command: "docker compose -p nvidia-ai-hub-grounded-sam-workstation -f registry/recipes/grounded-sam-workstation/docker-compose.yml down"

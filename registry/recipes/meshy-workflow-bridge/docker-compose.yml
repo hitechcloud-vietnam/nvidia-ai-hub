@@ -1,0 +1,35 @@
+services:
+  meshy-workflow-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-meshy-workflow-bridge
+    ports:
+      - "${COMFYUI_PORT:-8189}:8188"
+    env_file:
+      - .env
+    environment:
+      CLI_ARGS: "${CLI_ARGS:---listen 0.0.0.0 --port 8188}"
+      MESHY_API_KEY: "${MESHY_API_KEY:-}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+    volumes:
+      - meshy-comfyui-models:/app/ComfyUI/models
+      - meshy-comfyui-output:/app/ComfyUI/output
+      - meshy-comfyui-input:/app/ComfyUI/input
+      - meshy-comfyui-custom-nodes:/app/ComfyUI/custom_nodes
+      - meshy-comfyui-user:/app/ComfyUI/user
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  meshy-comfyui-models:
+  meshy-comfyui-output:
+  meshy-comfyui-input:
+  meshy-comfyui-custom-nodes:
+  meshy-comfyui-user:

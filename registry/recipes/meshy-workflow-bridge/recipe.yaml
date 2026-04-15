@@ -1,0 +1,45 @@
+name: "Meshy Workflow Bridge"
+slug: meshy-workflow-bridge
+version: "1.0.0"
+description: "Run ComfyUI with the ComfyUI-Meshy custom node bridge on DGX Spark so text-to-3D and image-to-3D Meshy API workflows can be authored visually while outputs remain in normal ComfyUI storage."
+author: "ComfyAnonymous + Kazama-Suichiku"
+source: "community"
+website: "https://github.com/Kazama-Suichiku/ComfyUI-Meshy"
+upstream: "https://github.com/Kazama-Suichiku/ComfyUI-Meshy"
+category: workflow
+categories:
+  - workflow
+  - 3d-gen
+tags:
+  - comfyui
+  - meshy
+  - api-bridge
+  - text-to-3d
+  - image-to-3d
+  - custom-nodes
+icon: "🧩"
+logo: "/logos/comfyui.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 8189
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 12
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/meshy-workflow-bridge/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the ComfyUI Meshy bridge, install the Meshy custom node into ComfyUI, and launch the workflow UI on port 8189 with persistent input, output, model, and custom node state."
+    command: "docker compose -p nvidia-ai-hub-meshy-workflow-bridge -f registry/recipes/meshy-workflow-bridge/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the Meshy workflow bridge while preserving ComfyUI models, uploaded assets, and Meshy-generated 3D outputs."
+    command: "docker compose -p nvidia-ai-hub-meshy-workflow-bridge -f registry/recipes/meshy-workflow-bridge/docker-compose.yml down"

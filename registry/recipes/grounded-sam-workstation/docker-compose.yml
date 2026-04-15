@@ -1,0 +1,36 @@
+services:
+  grounded-sam-workstation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-grounded-sam-workstation
+    ports:
+      - "${APP_PORT:-7589}:${GRADIO_SERVER_PORT:-7589}"
+    env_file:
+      - .env
+    environment:
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      HUGGINGFACE_HUB_CACHE: "${HUGGINGFACE_HUB_CACHE:-/data/hf-home}"
+      GRADIO_SERVER_PORT: "${GRADIO_SERVER_PORT:-7589}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+      HF_HUB_DISABLE_PROGRESS_BARS: "${HF_HUB_DISABLE_PROGRESS_BARS:-1}"
+      GROUNDINGDINO_CHECKPOINT_URL: "${GROUNDINGDINO_CHECKPOINT_URL:-https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth}"
+      SAM_CHECKPOINT_URL: "${SAM_CHECKPOINT_URL:-https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth}"
+      GROUNDING_SAM_EXTRA_ARGS: "${GROUNDING_SAM_EXTRA_ARGS:-}"
+    volumes:
+      - grounded-sam-checkpoints:/data/checkpoints
+      - grounded-sam-hf-home:/data/hf-home
+      - grounded-sam-outputs:/data/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  grounded-sam-checkpoints:
+  grounded-sam-hf-home:
+  grounded-sam-outputs:
