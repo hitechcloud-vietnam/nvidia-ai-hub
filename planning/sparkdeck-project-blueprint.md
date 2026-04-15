@@ -1,20 +1,26 @@
 # NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC — Project Blueprint
-## A Docker-Native AI App Launcher for NVIDIA DGX Spark
+## A Docker-Native AI App Launcher for NVIDIA GPU Platforms
 
 ---
 
 ## 1. Vision & Positioning
 
-**One-liner:** NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is the missing app store for DGX Spark — a web-based launcher that turns community-verified Docker recipes into one-click AI workloads.
+**One-liner:** NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is a web-based application launcher for NVIDIA GPU platforms that turns community-verified Docker recipes into one-click AI workloads across workstations, enterprise servers, and DGX environments.
 
 **The gap it fills:**
-- Pinokio (the leading AI app launcher) is broken on DGX GPU due to ARM64 or AMD64 incompatibility
-- NVIDIA Sync's "Custom Scripts" proves the UX is possible but has no catalog, no community sharing, no versioning
-- NVIDIA's official playbooks are great but manual — copy-paste terminal commands
-- The DGX Spark community is scattered across forum threads, GitHub repos, Medium posts, and gists
-- Users are paying $4,000 for a machine that requires Docker expertise to use beyond the basics
+- Existing AI app launchers are inconsistent across NVIDIA GPU environments, especially when users must juggle CUDA, drivers, Docker, and architecture-specific fixes.
+- NVIDIA Sync's "Custom Scripts" proves the UX is possible but has no catalog, no community sharing, and no versioned recipe lifecycle.
+- NVIDIA's official playbooks are valuable but still require manual cloning, environment setup, and terminal-heavy operations.
+- The NVIDIA GPU community is fragmented across deployment guides, workstation tutorials, GitHub repos, forum threads, blog posts, and internal team notes.
+- Teams invest heavily in NVIDIA GPU hardware but still need platform expertise to operationalize community AI stacks safely and repeatedly.
 
-**NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC unifies all of this** into a browsable catalog with one-click deploy.
+**NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC unifies these workflows** into a browsable catalog with one-click deployment, lifecycle controls, validation guardrails, and a clearer operational model for NVIDIA GPU environments.
+
+**Target platform scope:**
+- NVIDIA DGX platforms, including NVIDIA DGX Spark
+- NVIDIA GPU workstations
+- NVIDIA GPU servers and lab systems
+- Linux hosts with supported NVIDIA GPUs and NVIDIA Container Toolkit
 
 ---
 
@@ -38,10 +44,10 @@
                          │ HTTP/WebSocket
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   DGX SPARK or NVIDIA GPU DEVICE                       │
+│      NVIDIA GPU WORKSTATION / SERVER / DGX PLATFORM HOST             │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │ NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC Daemon│  │
+│  │ NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC Daemon │  │
 │  │                                                     │  │
 │  │  ┌─────────────┐  ┌──────────────┐  ┌───────────┐ │  │
 │  │  │ Recipe       │  │ Docker       │  │ System    │ │  │
@@ -62,22 +68,22 @@
 │  └────────────────────────────────────────────────────┘  │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │     NVIDIA GPU (128GB Unified Memory++) + 4TB NVMe     │  │
+│  │ NVIDIA GPU(s) + local NVMe / shared storage / datasets │  │
 │  └────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────┘
 ```
 
 ### Key Design Decisions
 
-1. **Web UI, not desktop app** — Runs on the Spark itself, accessed via browser from any device. No Electron, no ARM64 GUI compatibility issues. Works with NVIDIA Sync's port forwarding naturally.
+1. **Web UI, not desktop app** — Runs on the target host and is accessed through a browser from any device. No Electron packaging burden, no local GUI dependency, and no need to ship separate desktop clients for each NVIDIA GPU platform profile.
 
-2. **Docker-compose recipes, not pip/conda scripts** — Docker containers encapsulate the ARM64+CUDA13 fixes. A recipe is a `docker-compose.yml` + metadata, not a fragile installation script. This is the single most important architectural decision.
+2. **Docker-compose recipes, not pip/conda scripts** — Containers encapsulate CUDA, driver expectations, architecture-specific patches, and service topology. A recipe is a `docker-compose.yml` plus metadata, not a fragile installation script.
 
 3. **Git-backed recipe registry** — Recipes are stored in a GitHub repo. The daemon pulls updates. Community contributors submit PRs. Versioned, auditable, forkable.
 
-4. **Lightweight daemon** — A single Python process (FastAPI) running on the Spark. No heavy dependencies. Communicates with Docker via the Docker SDK for Python. Exposes a REST API + WebSocket for live logs.
+4. **Lightweight daemon** — A single Python process (FastAPI) runs on the managed NVIDIA GPU host. It communicates with Docker through the Docker SDK for Python and exposes REST and WebSocket endpoints for lifecycle operations, health, and logs.
 
-5. **NVIDIA Sync integration** — Generates compatible Custom Script entries that users can import, so apps also appear in NVIDIA Sync's launcher.
+5. **Platform-aware integrations** — NVIDIA Sync integration remains available where relevant, while the core platform remains portable across workstation, server, lab, and DGX deployments.
 
 ---
 
@@ -144,7 +150,13 @@ docker:
 status: "community-verified"         # community-verified | official | 
                                      # experimental | broken
 tested_on:
-  dgx_os: "7.2"
+  platforms:
+    - name: "NVIDIA DGX platform"
+      os: "DGX OS 7.2"
+      arch: "arm64"
+    - name: "NVIDIA GPU workstation or server"
+      os: "Ubuntu 24.04"
+      arch: "x86_64"
   date: "2025-12-01"
   tester: "dr-vij"
   
@@ -162,14 +174,14 @@ models:
 
 ## 4. Tech Stack
 
-### Backend (runs on DGX Spark)
+### Backend (runs on supported NVIDIA GPU hosts)
 
 | Component | Choice | Rationale |
 |-----------|--------|-----------|
-| Language | Python 3.12 | Pre-installed on DGX OS, ecosystem |
+| Language | Python 3.12 | Mature ecosystem, portable across supported Linux hosts |
 | Framework | FastAPI + Uvicorn | Async, WebSocket support, lightweight |
 | Docker SDK | `docker` (Python) | Official Docker SDK, compose support |
-| Process mgmt | systemd service | Native to DGX OS, auto-restart |
+| Process mgmt | systemd service | Native to modern Linux distributions, auto-restart |
 | Data store | SQLite | Zero config, single-file, sufficient for metadata |
 | Recipe sync | GitPython / subprocess git | Pull from registry repo |
 
@@ -189,7 +201,7 @@ models:
 |-----------|--------|-----------|
 | Hosting | GitHub | Free, PRs for contributions, Actions for CI |
 | CI | GitHub Actions | Auto-validate recipe.yaml, test compose files |
-| Images | GitHub Container Registry | Free for public repos, ARM64 support |
+| Images | GitHub Container Registry | Free for public repos, supports both ARM64 and x86_64 |
 
 ---
 
@@ -201,7 +213,7 @@ models:
 - Browse recipes by category (LLM, Image Gen, Video Gen, 3D, Audio, Coding)
 - Search and filter
 - Recipe detail page: description, screenshots, requirements, build time estimate
-- Memory check: warn if a recipe needs more RAM than currently available
+- Hardware fit check: warn if a recipe exceeds currently available RAM, disk, GPU memory, or expected compute capability
 
 **P1.2 — One-Click Install & Launch**
 - Click "Install" → daemon pulls images / builds containers
@@ -221,17 +233,19 @@ models:
 - Memory usage breakdown (total, used by containers, available)
 - Disk space (especially important with large models)
 - Temperature
+- Multi-GPU topology awareness where available
 
-### Phase 2: Community (weeks 6-10)
+### Phase 2: Community and Operations (weeks 6-10)
 
 **P2.1 — Recipe Updates**
 - Check for recipe updates (git pull)
 - Show changelog
 - One-click update (rebuild container with new recipe)
 
-**P2.2 — NVIDIA Sync Export**
-- Generate NVIDIA Sync Custom Script entry for any installed app
-- Copy-paste or auto-configure via SSH
+**P2.2 — Platform Integration Export**
+- Generate NVIDIA Sync Custom Script entries where applicable
+- Provide portable launch metadata for workstation, lab, server, and DGX environments
+- Copy-paste or auto-configure via SSH where needed
 
 **P2.3 — Model Manager**
 - Shared model storage directory (`~/nvidia-ai-hub/models/`)
@@ -242,7 +256,7 @@ models:
 
 **P2.4 — Community Contributions**
 - "Submit Recipe" flow → generates PR on GitHub
-- Recipe rating / "verified on my Spark" button
+- Recipe rating / "verified on my system" button
 - Comments / tips per recipe (stored in registry repo as YAML)
 
 ### Phase 3: Power User (weeks 10-14)
@@ -252,19 +266,20 @@ models:
 - Environment variable overrides (e.g., change model, port)
 - Save as "my fork" of a recipe
 
-**P3.2 — Multi-Spark Support**
-- Detect paired Spark (via QSFP)
-- Deploy distributed recipes across two Sparks (e.g., vLLM with tensor parallelism)
+**P3.2 — Multi-Node / Multi-GPU Support**
+- Detect host GPU inventory and topology
+- Support distributed recipes across multiple GPUs or multiple NVIDIA hosts where networking and storage are configured
+- Enable deployment profiles for single-GPU, multi-GPU, and clustered inference setups
 
 **P3.3 — Backup & Restore**
 - Export installed apps + model list
-- Restore on fresh Spark
+- Restore on a fresh supported NVIDIA GPU host
 
 ---
 
 ## 6. Installation of NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 
-The tool must be trivially installable. One command:
+The tool must be trivially installable on a supported Linux system with Docker and NVIDIA Container Toolkit. One command:
 
 ```bash
 curl -fsSL https://nvidia-ai-hub.dev/install.sh | bash
@@ -278,7 +293,7 @@ What this does:
 5. Starts the service on port 9000
 6. Prints: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is running at http://localhost:9000"
 
-No pip, no conda, no node — the daemon is a single Python file with vendored dependencies, and the frontend is pre-built static files.
+No pip, no conda, no node for end users in the ideal packaged flow — the daemon is distributed as a lightweight service and the frontend is served as pre-built static files.
 
 ---
 
@@ -334,7 +349,7 @@ nvidia-ai-hub/
 
 ---
 
-## 8. Initial Recipe Catalog (Launch Day)
+## 8. Initial Reference Catalog (Launch Day)
 
 | Recipe | Category | Source | Status | Build Time |
 |--------|----------|--------|--------|------------|
@@ -355,7 +370,7 @@ nvidia-ai-hub/
 
 | Feature | Pinokio | NVIDIA Sync | NVIDIA Playbooks | NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC |
 |---------|---------|-------------|-----------------|------------|
-| Works on DGX Spark | ❌ | ✅ | ✅ | ✅ |
+| Works on NVIDIA GPU hosts | ❌ | ⚠️ Limited | ⚠️ Manual | ✅ |
 | One-click install | ✅ | ⚠️ Manual scripts | ❌ Copy-paste | ✅ |
 | App catalog/discovery | ✅ | ❌ | ✅ (docs) | ✅ |
 | Community contributions | ✅ | ❌ | ❌ | ✅ |
@@ -363,7 +378,7 @@ nvidia-ai-hub/
 | System monitoring | ❌ | ✅ (Dashboard) | ❌ | ✅ |
 | Model management | ❌ | ❌ | ❌ | ✅ |
 | Docker-native | ❌ (pip/conda) | N/A | ✅ | ✅ |
-| ARM64 + CUDA 13 | ❌ | ✅ | ✅ | ✅ |
+| ARM64 and x86_64 NVIDIA targets | ❌ | ⚠️ Partial | ⚠️ Manual | ✅ |
 
 ---
 
@@ -372,9 +387,9 @@ nvidia-ai-hub/
 | Risk | Likelihood | Mitigation |
 |------|-----------|------------|
 | NVIDIA builds their own app store | Medium | Position as community-driven complement, not competitor. Integrate with their tools, don't replace them. Offer to merge if approached. |
-| CUDA 13 ecosystem matures, reducing need | High (12-18mo) | Expand to other ARM64+NVIDIA devices (Jetson Orin, future Grace laptops). The launcher UX remains valuable even when pip works. |
+| CUDA ecosystem matures, reducing need | High (12-18mo) | Expand value beyond install automation into catalog governance, validation, observability, and reproducible operations across NVIDIA GPU fleets. |
 | Recipe maintenance burden | High | Community-driven model with clear verification tiers. Automated CI testing. Mark recipes as "stale" after N months without test. |
-| Small user base | Medium | Start with DGX Spark, plan for Jetson, Grace-Blackwell laptops, and any future NVIDIA ARM desktop devices. |
+| Small user base | Medium | Start with early NVIDIA GPU infrastructure adopters, then expand to broader workstation, lab, and server users who need reproducible GPU application deployment. |
 | Security concerns (running untrusted Docker) | Medium | Verification tiers (official / community-verified / experimental). All recipes are open-source. Audit trail via Git. |
 
 ---
@@ -382,11 +397,11 @@ nvidia-ai-hub/
 ## 11. Name & Branding Ideas
 
 - **NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC** — adopted product branding for this project.
-- **SparkHub** — Marketplace feel. Risk: too similar to DockerHub.
-- **Ignite** — "Ignite your Spark." Clean but generic.
-- **SparkStore** — Clear but Apple-ish.
+- **GPUHub** — Broad platform coverage. Risk: generic.
+- **Ignite** — Strong activation metaphor. Clean but generic.
+- **LaunchPad** — Strong operational meaning. Risk: common term.
 - **Anvil** — Forge metaphor. Short.
-- **Kindling** — What starts a spark. Clever.
+- **Kindling** — Signals fast startup and activation. Clever, but less infrastructure-oriented.
 
 ---
 
@@ -404,11 +419,11 @@ nvidia-ai-hub/
 - [ ] Wire up to backend API
 - [ ] Package 3-5 recipes (Open WebUI, ComfyUI/SparkyUI, Hunyuan3D, LocalAI, LM Studio)
 - [ ] install.sh script
-- [ ] Test end-to-end on actual DGX Spark
+- [ ] Test end-to-end on at least one DGX-platform target and one standard NVIDIA GPU Linux host to validate cross-platform behavior
 
 **Week 3-4: Polish & launch**
 - [ ] System monitor page
 - [ ] Error handling & recovery (failed builds, OOM, etc.)
 - [ ] README, docs, screenshots
-- [ ] Post to DGX Spark community forum
+- [ ] Post to NVIDIA developer, enterprise AI, and DGX community channels
 - [ ] GitHub repo public launch
