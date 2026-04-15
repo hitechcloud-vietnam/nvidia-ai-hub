@@ -1,0 +1,44 @@
+name: "InternVL 2.5 8B"
+slug: vllm-internvl25-8b
+version: "1.0.0"
+description: "OpenGVLab InternVL 2.5 8B served through vLLM for stronger multilingual image understanding, OCR, chart reasoning, multi-image comparison, and multimodal assistant workflows on DGX Spark."
+author: "OpenGVLab"
+source: "official"
+website: "https://huggingface.co/OpenGVLab/InternVL2_5-8B"
+upstream: "https://huggingface.co/OpenGVLab/InternVL2_5-8B"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - ocr
+  - image-understanding
+  - video-understanding
+  - internvl
+  - vllm
+  - mit
+logo: "/logos/opengvlab.svg"
+requirements:
+  min_memory_gb: 28
+  recommended_memory_gb: 32
+  disk_gb: 34
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "OpenGVLab/InternVL2_5-8B"
+  api_key: "not-needed"
+  max_context: "8192"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"OpenGVLab/InternVL2_5-8B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the two product photos and highlight the main visual differences.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/product-a.png\"}}]}]}'"
