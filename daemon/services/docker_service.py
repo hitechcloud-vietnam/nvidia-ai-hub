@@ -629,6 +629,34 @@ async def is_recipe_running(slug: str) -> bool:
         return False
 
 
+async def get_running_recipe_slugs(installed_slugs: set[str] | None = None) -> set[str]:
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "docker", "ps",
+            "--format", '{{.Label "com.docker.compose.project"}}',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await proc.communicate()
+        prefix = "spark-ai-hub-"
+        running: set[str] = set()
+
+        for line in stdout.decode().splitlines():
+            project = line.strip()
+            if not project.startswith(prefix):
+                continue
+
+            slug = project[len(prefix):]
+            if installed_slugs is not None and slug not in installed_slugs:
+                continue
+
+            running.add(slug)
+
+        return running
+    except Exception:
+        return set()
+
+
 async def get_container_name(slug: str) -> str | None:
     project = _compose_project(slug)
     try:

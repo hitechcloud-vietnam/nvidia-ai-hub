@@ -1,0 +1,66 @@
+services:
+  kohya-ss-gui:
+    image: ghcr.io/bmaltais/kohya-ss-gui:latest
+    container_name: spark-ai-hub-kohya-ss
+    user: "1000:0"
+    ports:
+      - "${KOHYA_PORT:-7860}:7860"
+    env_file:
+      - .env
+    environment:
+      SAFETENSORS_FAST_GPU: ${SAFETENSORS_FAST_GPU:-1}
+      TENSORBOARD_PORT: ${TENSORBOARD_PORT:-6006}
+    tmpfs:
+      - /tmp
+    volumes:
+      - kohya-ss-models:/app/models
+      - kohya-ss-dataset:/dataset
+      - kohya-ss-images:/app/data
+      - kohya-ss-logs:/app/logs
+      - kohya-ss-outputs:/app/outputs
+      - kohya-ss-regularization:/app/regularization
+      - kohya-ss-config:/app/config
+      - kohya-ss-user-cache:/home/1000/.cache
+      - kohya-ss-user-triton:/home/1000/.triton
+      - kohya-ss-user-nv:/home/1000/.nv
+      - kohya-ss-user-keras:/home/1000/.keras
+      - kohya-ss-user-config:/home/1000/.config
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  tensorboard:
+    image: tensorflow/tensorflow:latest-gpu
+    container_name: spark-ai-hub-kohya-ss-tensorboard
+    ports:
+      - "${TENSORBOARD_PORT:-6006}:6006"
+    volumes:
+      - kohya-ss-logs:/app/logs
+    command: tensorboard --logdir=/app/logs --bind_all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  kohya-ss-models:
+  kohya-ss-dataset:
+  kohya-ss-images:
+  kohya-ss-logs:
+  kohya-ss-outputs:
+  kohya-ss-regularization:
+  kohya-ss-config:
+  kohya-ss-user-cache:
+  kohya-ss-user-triton:
+  kohya-ss-user-nv:
+  kohya-ss-user-keras:
+  kohya-ss-user-config:

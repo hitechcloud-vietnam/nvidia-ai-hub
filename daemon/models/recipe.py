@@ -70,3 +70,29 @@ class Recipe(BaseModel):
     ready: bool = False
     starting: bool = False
     has_leftovers: bool = False
+
+
+class RecipeSummary(BaseModel):
+    name: str
+    slug: str
+    version: str = "1.0.0"
+    description: str = ""
+    author: str = ""
+    category: str = "llm"
+    categories: list[str] = []
+    tags: list[str] = []
+    icon: str = ""
+    logo: str = ""
+    requirements: RecipeRequirements = RecipeRequirements()
+    ui: RecipeUI = RecipeUI()
+    docker: RecipeDocker = RecipeDocker()
+    source: str = "community"
+    status: str = "experimental"
+    requires_hf_token: bool = False
+
+    # runtime state
+    installed: bool = False
+    running: bool = False
+    ready: bool = False
+    starting: bool = False
+    has_leftovers: bool = False

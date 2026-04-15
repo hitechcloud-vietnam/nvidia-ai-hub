@@ -1,0 +1,48 @@
+services:
+  swarmui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-swarmui
+    ports:
+      - "7801:7801"
+    env_file:
+      - .env
+    environment:
+      SWARM_NO_VENV: ${SWARM_NO_VENV:-true}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://*:7801}
+      DOTNET_CLI_UI_LANGUAGE: ${DOTNET_CLI_UI_LANGUAGE:-en}
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-1}
+      DOTNET_CLI_TELEMETRY_OPTOUT: ${DOTNET_CLI_TELEMETRY_OPTOUT:-1}
+    command:
+      - bash
+      - -lc
+      - |
+        set -eu
+        bash /SwarmUI/launch-linux.sh --forward_restart --launch_mode none --host 0.0.0.0 --port 7801
+    volumes:
+      - swarmui-data:/SwarmUI/Data
+      - swarmui-dlbackend:/SwarmUI/dlbackend
+      - swarmui-dlnodes:/SwarmUI/src/BuiltinExtensions/ComfyUIBackend/DLNodes
+      - swarmui-extensions:/SwarmUI/src/Extensions
+      - swarmui-models:/SwarmUI/Models
+      - swarmui-output:/SwarmUI/Output
+      - swarmui-custom-workflows:/SwarmUI/src/BuiltinExtensions/ComfyUIBackend/CustomWorkflows
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  swarmui-data:
+  swarmui-dlbackend:
+  swarmui-dlnodes:
+  swarmui-extensions:
+  swarmui-models:
+  swarmui-output:
+  swarmui-custom-workflows:

@@ -1,0 +1,47 @@
+name: "SwarmUI"
+slug: swarmui
+version: "1.0.0"
+description: "Run the official SwarmUI Docker workflow on DGX Spark for advanced image and video generation with persistent data, backend, models, outputs, and custom workflow storage exposed through the web UI."
+author: "mcmonkeyprojects"
+source: "official"
+website: "https://github.com/mcmonkeyprojects/SwarmUI"
+upstream: "https://github.com/mcmonkeyprojects/SwarmUI"
+category: image-gen
+categories:
+  - image-gen
+  - video-gen
+tags:
+  - stable-diffusion
+  - comfyui
+  - workflow
+  - image-gen
+  - video-gen
+  - docker
+  - csharp
+  - mit
+icon: "🐝"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 48
+  disk_gb: 120
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7801
+  path: "/"
+  health_path: "/Install"
+docker:
+  build: true
+  build_time_minutes: 20
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/swarmui/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official standard SwarmUI Docker image and start the web UI on port 7801 with persistent Data, dlbackend, model, output, extension, and custom workflow storage."
+    command: "docker compose -p spark-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop SwarmUI while preserving Data, dlbackend, model metadata, outputs, extensions, and custom workflow state in the persistent Docker volumes."
+    command: "docker compose -p spark-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml down"

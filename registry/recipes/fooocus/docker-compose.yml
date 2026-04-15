@@ -1,0 +1,37 @@
+services:
+  fooocus:
+    image: ghcr.io/lllyasviel/fooocus
+    container_name: spark-ai-hub-fooocus
+    ports:
+      - "7865:7865"
+    env_file:
+      - .env
+    environment:
+      CMDARGS: ${CMDARGS:---listen --port 7865}
+      DATADIR: ${DATADIR:-/content/data}
+      config_path: ${config_path:-/content/data/config.txt}
+      config_example_path: ${config_example_path:-/content/data/config_modification_tutorial.txt}
+      path_checkpoints: ${path_checkpoints:-/content/data/models/checkpoints/}
+      path_loras: ${path_loras:-/content/data/models/loras/}
+      path_embeddings: ${path_embeddings:-/content/data/models/embeddings/}
+      path_vae_approx: ${path_vae_approx:-/content/data/models/vae_approx/}
+      path_upscale_models: ${path_upscale_models:-/content/data/models/upscale_models/}
+      path_inpaint: ${path_inpaint:-/content/data/models/inpaint/}
+      path_controlnet: ${path_controlnet:-/content/data/models/controlnet/}
+      path_clip_vision: ${path_clip_vision:-/content/data/models/clip_vision/}
+      path_fooocus_expansion: ${path_fooocus_expansion:-/content/data/models/prompt_expansion/fooocus_expansion/}
+      path_outputs: ${path_outputs:-/content/app/outputs/}
+      HF_MIRROR: ${HF_MIRROR:-}
+    volumes:
+      - fooocus-data:/content/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  fooocus-data:

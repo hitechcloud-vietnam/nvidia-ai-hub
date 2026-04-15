@@ -1,0 +1,36 @@
+services:
+  stable-diffusion-webui-forge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-stable-diffusion-webui-forge
+    ports:
+      - "7866:7860"
+    env_file:
+      - .env
+    environment:
+      COMMANDLINE_ARGS: ${COMMANDLINE_ARGS:---listen --port 7860 --data-dir /data}
+      HF_HOME: ${HF_HOME:-/data/.huggingface}
+      TORCH_INDEX_URL: ${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}
+      PYTORCH_CUDA_ALLOC_CONF: ${PYTORCH_CUDA_ALLOC_CONF:-backend:cudaMallocAsync}
+      GRADIO_ANALYTICS_ENABLED: ${GRADIO_ANALYTICS_ENABLED:-False}
+    command:
+      - bash
+      - -lc
+      - |
+        set -eu
+        cd /opt/forge
+        python launch.py
+    volumes:
+      - stable-diffusion-webui-forge-data:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  stable-diffusion-webui-forge-data:

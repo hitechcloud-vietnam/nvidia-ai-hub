@@ -1,10 +1,11 @@
 import asyncio
 from fastapi import APIRouter, HTTPException
 
-from daemon.models.recipe import Recipe
+from daemon.models.recipe import Recipe, RecipeSummary
 from daemon.services.registry_service import get_recipes, get_recipe, get_recipe_dir
 from daemon.services.docker_service import (
     get_installed_slugs,
+    get_running_recipe_slugs,
     is_recipe_running,
     is_ready,
     has_recipe_leftovers,
@@ -26,18 +27,40 @@ def _set_runtime_env_path(recipe: Recipe) -> None:
         recipe.runtime_env_path = str(env_file)
 
 
-@router.get("", response_model=list[Recipe])
+def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
+    return RecipeSummary(
+        name=recipe.name,
+        slug=recipe.slug,
+        version=recipe.version,
+        description=recipe.description,
+        author=recipe.author,
+        category=recipe.category,
+        categories=list(recipe.categories),
+        tags=list(recipe.tags),
+        icon=recipe.icon,
+        logo=recipe.logo,
+        requirements=recipe.requirements,
+        ui=recipe.ui,
+        docker=recipe.docker,
+        source=recipe.source,
+        status=recipe.status,
+        requires_hf_token=recipe.requires_hf_token,
+    )
+
+
+@router.get("", response_model=list[RecipeSummary])
 async def list_recipes(category: str | None = None, search: str | None = None):
     recipes = list(get_recipes().values())
     installed = await get_installed_slugs()
+    running = await get_running_recipe_slugs(installed)
 
     result = []
-    for r in recipes:
-        _set_runtime_env_path(r)
+    for recipe in recipes:
+        r = _to_recipe_summary(recipe)
         r.installed = r.slug in installed
         pending = get_pending(r.slug)
         if r.installed:
-            container_running = await is_recipe_running(r.slug)
+            container_running = r.slug in running
             r.ready = is_ready(r.slug) if container_running else False
             # If an action is in-flight, keep showing the right transition state
             if pending == "launching":
@@ -56,8 +79,6 @@ async def list_recipes(category: str | None = None, search: str | None = None):
             r.ready = False
             # If launching/installing, still show starting
             r.starting = pending in ("launching", "installing")
-            if not r.starting:
-                r.has_leftovers = await has_recipe_leftovers(r.slug)
         recipe_categories = r.categories if r.categories else [r.category]
         if category and category != "all" and category not in recipe_categories:
             continue
@@ -71,9 +92,11 @@ async def list_recipes(category: str | None = None, search: str | None = None):
 
 @router.get("/{slug}", response_model=Recipe)
 async def get_recipe_detail(slug: str):
-    recipe = get_recipe(slug)
-    if not recipe:
+    base_recipe = get_recipe(slug)
+    if not base_recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
+
+    recipe = base_recipe.model_copy(deep=True)
     _set_runtime_env_path(recipe)
     installed = await get_installed_slugs()
     recipe.installed = slug in installed

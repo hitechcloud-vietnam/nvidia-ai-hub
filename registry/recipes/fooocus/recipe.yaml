@@ -1,0 +1,46 @@
+name: "Fooocus"
+slug: fooocus
+version: "1.0.0"
+description: "Run the official Fooocus web UI on DGX Spark for SDXL-focused text-to-image, inpainting, outpainting, prompt expansion, and image-prompt workflows with persistent model and output storage."
+author: "lllyasviel"
+source: "official"
+website: "https://github.com/lllyasviel/Fooocus"
+upstream: "https://github.com/lllyasviel/Fooocus"
+category: image-gen
+categories:
+  - image-gen
+tags:
+  - stable-diffusion
+  - sdxl
+  - image-edit
+  - inpainting
+  - outpainting
+  - prompt-expansion
+  - gradio
+  - gpl-3.0
+icon: "🖼️"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 24
+  disk_gb: 60
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7865
+  path: "/"
+  health_path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/fooocus/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Pull the official Fooocus container image and start the SDXL web UI on port 7865 with persistent models, outputs, and config storage."
+    command: "docker compose -p spark-ai-hub-fooocus -f registry/recipes/fooocus/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Fooocus while preserving downloaded checkpoints, LoRAs, outputs, and generated runtime configuration."
+    command: "docker compose -p spark-ai-hub-fooocus -f registry/recipes/fooocus/docker-compose.yml down"

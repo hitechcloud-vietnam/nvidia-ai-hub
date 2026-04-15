@@ -1,0 +1,48 @@
+name: "Kohya SS"
+slug: kohya-ss
+version: "1.0.0"
+description: "Run the official Kohya SS Docker stack on DGX Spark for LoRA, Dreambooth, SDXL, and diffusion fine-tuning workflows through the Gradio training UI with persistent datasets, models, outputs, logs, and configuration state."
+author: "bmaltais"
+source: "official"
+website: "https://github.com/bmaltais/kohya_ss"
+upstream: "https://github.com/bmaltais/kohya_ss"
+category: image-gen
+categories:
+  - image-gen
+  - workflow
+tags:
+  - stable-diffusion
+  - lora
+  - dreambooth
+  - finetuning
+  - sdxl
+  - gradio
+  - training
+  - docker
+  - apache-2.0
+icon: "🧪"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 48
+  disk_gb: 150
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7860
+  path: "/"
+  health_path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/kohya-ss/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Pull the official Kohya SS Docker image and start the Gradio training UI on port 7860 together with the companion TensorBoard service on port 6006, preserving datasets, models, logs, outputs, and config state in Docker volumes."
+    command: "docker compose -p spark-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Kohya SS and TensorBoard while preserving datasets, cached models, outputs, logs, and configuration state in the persistent Docker volumes."
+    command: "docker compose -p spark-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml down"

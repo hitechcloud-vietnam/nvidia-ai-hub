@@ -8,6 +8,9 @@ const getInitialTheme = () => {
 
 export const useStore = create((set, get) => ({
   recipes: [],
+  recipesLoadedAt: 0,
+  recipeDetails: {},
+  recipeDetailStatus: {},
   metrics: null,
   metricHistory: [],
   buildLogs: {},
@@ -18,6 +21,8 @@ export const useStore = create((set, get) => ({
   purging: null,
   _inFlight: {},  // slug -> { starting, running, ready, installed } overrides during transitions
   _ws: null,
+  _recipesPromise: null,
+  _recipeDetailPromises: {},
   selectedRecipe: null,
   containerLogs: {},
   _logWs: null,
@@ -30,7 +35,14 @@ export const useStore = create((set, get) => ({
     set({ theme: next })
   },
 
-  setRecipes: (recipes) => set({ recipes }),
+  setRecipes: (recipes) => set({ recipes, recipesLoadedAt: Date.now() }),
+  setRecipeDetail: (slug, recipe) => set((state) => ({
+    recipeDetails: { ...state.recipeDetails, [slug]: recipe },
+    recipeDetailStatus: {
+      ...state.recipeDetailStatus,
+      [slug]: { loading: false, error: null, loadedAt: Date.now() },
+    },
+  })),
   setMetrics: (metrics) => set((state) => {
     const gpuSeries = (Array.isArray(metrics?.gpus) ? metrics.gpus : []).reduce((acc, gpu) => {
       acc[`gpu_${gpu.index}`] = gpu.utilization ?? 0
@@ -55,6 +67,7 @@ export const useStore = create((set, get) => ({
 
   selectRecipe: (slug) => {
     set({ selectedRecipe: slug })
+    get().fetchRecipeDetail(slug)
   },
 
   clearRecipe: () => {
@@ -75,6 +88,7 @@ export const useStore = create((set, get) => ({
       if (e.data === '[spark-ai-hub:ready]') {
         // Backend marked it ready; refetch so recipe.ready updates everywhere
         get().fetchRecipes()
+        get().fetchRecipeDetail(slug, { force: true })
         return
       }
       set((s) => {
@@ -131,17 +145,85 @@ export const useStore = create((set, get) => ({
   }),
 
   fetchRecipes: async () => {
-    try {
-      const res = await fetch(`/api/recipes?t=${Date.now()}`)
-      if (!res.ok) return
-      const fresh = await res.json()
-      const inFlight = get()._inFlight
-      // Overlay in-flight state so polling can't flash wrong states
-      const merged = fresh.map(r => inFlight[r.slug] ? { ...r, ...inFlight[r.slug] } : r)
-      set({ recipes: merged })
-    } catch (e) {
-      console.error('Failed to fetch recipes:', e)
-    }
+    const now = Date.now()
+    if (get()._recipesPromise) return get()._recipesPromise
+    if (get().recipes.length > 0 && now - get().recipesLoadedAt < 4000) return get().recipes
+
+    const request = (async () => {
+      try {
+        const res = await fetch('/api/recipes')
+        if (!res.ok) return get().recipes
+        const fresh = await res.json()
+        const inFlight = get()._inFlight
+        // Overlay in-flight state so polling can't flash wrong states
+        const merged = fresh.map(r => inFlight[r.slug] ? { ...r, ...inFlight[r.slug] } : r)
+        set({ recipes: merged, recipesLoadedAt: Date.now() })
+        return merged
+      } catch (e) {
+        console.error('Failed to fetch recipes:', e)
+        return get().recipes
+      } finally {
+        set({ _recipesPromise: null })
+      }
+    })()
+
+    set({ _recipesPromise: request })
+    return request
+  },
+
+  fetchRecipeDetail: async (slug, options = {}) => {
+    if (!slug) return null
+
+    const { force = false } = options
+    const status = get().recipeDetailStatus[slug]
+    const cached = get().recipeDetails[slug]
+    const pending = get()._recipeDetailPromises[slug]
+    const now = Date.now()
+
+    if (!force && pending) return pending
+    if (!force && cached && status?.loadedAt && now - status.loadedAt < 30000) return cached
+
+    set((state) => ({
+      recipeDetailStatus: {
+        ...state.recipeDetailStatus,
+        [slug]: { loading: true, error: null, loadedAt: status?.loadedAt || 0 },
+      },
+    }))
+
+    const request = (async () => {
+      try {
+        const res = await fetch(`/api/recipes/${slug}`)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const detail = await res.json()
+        set((state) => ({
+          recipeDetails: { ...state.recipeDetails, [slug]: detail },
+          recipeDetailStatus: {
+            ...state.recipeDetailStatus,
+            [slug]: { loading: false, error: null, loadedAt: Date.now() },
+          },
+        }))
+        return detail
+      } catch (e) {
+        console.error(`Failed to fetch recipe detail for ${slug}:`, e)
+        set((state) => ({
+          recipeDetailStatus: {
+            ...state.recipeDetailStatus,
+            [slug]: { loading: false, error: e.message || 'Failed to load recipe', loadedAt: status?.loadedAt || 0 },
+          },
+        }))
+        return get().recipeDetails[slug] || null
+      } finally {
+        set((state) => ({
+          _recipeDetailPromises: { ...state._recipeDetailPromises, [slug]: null },
+        }))
+      }
+    })()
+
+    set((state) => ({
+      _recipeDetailPromises: { ...state._recipeDetailPromises, [slug]: request },
+    }))
+
+    return request
   },
 
   installRecipe: async (slug) => {
@@ -164,6 +246,7 @@ export const useStore = create((set, get) => ({
       if (e.data === '[done]') {
         set({ installing: null, _ws: null })
         get().fetchRecipes()
+        get().fetchRecipeDetail(slug, { force: true })
         // Auto-connect container logs after install completes
         setTimeout(() => get().connectLogs(slug), 1000)
         return
@@ -202,6 +285,7 @@ export const useStore = create((set, get) => ({
       if (e.data === '[done]') {
         set({ updating: null, _ws: null })
         get().fetchRecipes()
+        get().fetchRecipeDetail(slug, { force: true })
         setTimeout(() => get().connectLogs(slug), 1000)
         return
       }
@@ -232,6 +316,7 @@ export const useStore = create((set, get) => ({
         if (data.status === 'done') {
           set({ [stateKey]: null })
           get().fetchRecipes()
+          get().fetchRecipeDetail(slug, { force: true })
         } else {
           setTimeout(poll, 1000)
         }
@@ -255,6 +340,7 @@ export const useStore = create((set, get) => ({
     } finally {
       set({ _inFlight: { ...get()._inFlight, [slug]: undefined } })
       await get().fetchRecipes()
+      await get().fetchRecipeDetail(slug, { force: true })
     }
   },
 
@@ -271,6 +357,7 @@ export const useStore = create((set, get) => ({
     } finally {
       set({ _inFlight: { ...get()._inFlight, [slug]: undefined } })
       await get().fetchRecipes()
+      await get().fetchRecipeDetail(slug, { force: true })
     }
   },
 
@@ -289,6 +376,7 @@ export const useStore = create((set, get) => ({
     } finally {
       set({ restarting: null, _inFlight: { ...get()._inFlight, [slug]: undefined } })
       await get().fetchRecipes()
+      await get().fetchRecipeDetail(slug, { force: true })
     }
   },
 
@@ -308,6 +396,16 @@ export const useStore = create((set, get) => ({
     } finally {
       set({ removing: null, _inFlight: { ...get()._inFlight, [slug]: undefined } })
       await get().fetchRecipes()
+      set((state) => {
+        const nextDetails = { ...state.recipeDetails }
+        delete nextDetails[slug]
+        const nextStatus = { ...state.recipeDetailStatus }
+        delete nextStatus[slug]
+        return {
+          recipeDetails: nextDetails,
+          recipeDetailStatus: nextStatus,
+        }
+      })
     }
   },
 
@@ -321,6 +419,7 @@ export const useStore = create((set, get) => ({
     } finally {
       set({ purging: null })
       await get().fetchRecipes()
+      await get().fetchRecipeDetail(slug, { force: true })
     }
   },
 }))

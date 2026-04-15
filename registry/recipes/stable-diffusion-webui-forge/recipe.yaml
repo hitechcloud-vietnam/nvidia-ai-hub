@@ -1,0 +1,48 @@
+name: "Stable Diffusion WebUI Forge"
+slug: stable-diffusion-webui-forge
+version: "1.0.0"
+description: "Build and run the official Stable Diffusion WebUI Forge project on DGX Spark with a persistent data directory for checkpoints, LoRAs, embeddings, configs, caches, and generated outputs through the Gradio web UI."
+author: "lllyasviel"
+source: "official"
+website: "https://github.com/lllyasviel/stable-diffusion-webui-forge"
+upstream: "https://github.com/lllyasviel/stable-diffusion-webui-forge"
+category: image-gen
+categories:
+  - image-gen
+tags:
+  - stable-diffusion
+  - forge
+  - automatic1111
+  - flux
+  - image-edit
+  - inpainting
+  - controlnet
+  - lora
+  - gradio
+  - agpl-3.0
+icon: "⚒️"
+logo: ""
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 100
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7866
+  path: "/"
+  health_path: "/internal/ping"
+docker:
+  build: true
+  build_time_minutes: 20
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/stable-diffusion-webui-forge/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build a local Stable Diffusion WebUI Forge image from the official upstream repository and start the Gradio UI on port 7866 with persistent runtime storage under /data."
+    command: "docker compose -p spark-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Stable Diffusion WebUI Forge while preserving downloaded models, caches, settings, and generated outputs in the persistent data volume."
+    command: "docker compose -p spark-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml down"
