@@ -1,0 +1,50 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="18" x2="1500" y2="530" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07131F"/>
+      <stop offset="0.52" stop-color="#111C35"/>
+      <stop offset="1" stop-color="#081320"/>
+    </linearGradient>
+    <linearGradient id="mesh" x1="420" y1="132" x2="1210" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#43D9FF"/>
+      <stop offset="0.5" stop-color="#7B63FF"/>
+      <stop offset="1" stop-color="#3CF0BB"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <g opacity="0.18" stroke="url(#mesh)" stroke-width="2.5">
+    <path d="M318 404L520 178L792 214L1064 130L1288 322L1032 430L708 402L456 458Z"/>
+    <path d="M520 178L708 402"/>
+    <path d="M792 214L1032 430"/>
+    <path d="M1064 130L1032 430"/>
+    <path d="M318 404L792 214"/>
+    <path d="M456 458L1064 130"/>
+    <path d="M520 178L1288 322"/>
+  </g>
+  <g>
+    <circle cx="520" cy="178" r="48" fill="#0D1F32" stroke="#43D9FF" stroke-width="3"/>
+    <path d="M500 178C500 163 512 151 527 151C542 151 554 163 554 178C554 193 542 205 527 205C512 205 500 193 500 178Z" stroke="#CFF9FF" stroke-width="3"/>
+    <circle cx="527" cy="178" r="8" fill="#CFF9FF"/>
+  </g>
+  <g>
+    <rect x="742" y="164" width="100" height="100" rx="28" fill="#10203A" stroke="#7B63FF" stroke-width="3"/>
+    <path d="M770 214H814" stroke="#E5DCFF" stroke-width="5" stroke-linecap="round"/>
+    <path d="M792 192V236" stroke="#E5DCFF" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g>
+    <circle cx="1064" cy="130" r="44" fill="#091E19" stroke="#3CF0BB" stroke-width="3"/>
+    <path d="M1040 130H1088" stroke="#D9FFF5" stroke-width="5" stroke-linecap="round"/>
+    <path d="M1064 106V154" stroke="#D9FFF5" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g>
+    <circle cx="1032" cy="430" r="44" fill="#0E1D32" stroke="#43D9FF" stroke-width="3"/>
+    <path d="M1010 430C1010 417 1020 407 1033 407C1046 407 1056 417 1056 430C1056 443 1046 453 1033 453C1020 453 1010 443 1010 430Z" stroke="#D9F9FF" stroke-width="3"/>
+    <circle cx="1033" cy="430" r="6" fill="#D9F9FF"/>
+  </g>
+  <g fill="#F3FBFF" opacity="0.88">
+    <circle cx="318" cy="404" r="5"/>
+    <circle cx="456" cy="458" r="5"/>
+    <circle cx="708" cy="402" r="5"/>
+    <circle cx="1288" cy="322" r="5"/>
+  </g>
+</svg>

@@ -1,0 +1,39 @@
+name: "Phi-4 Multimodal NVFP4"
+slug: vllm-phi4-multimodal-nvfp4
+version: "1.0.0"
+description: "Microsoft Phi-4 multimodal instruct, NVFP4 quantized by NVIDIA, served through vLLM for text, image, and audio workflows on DGX Spark."
+author: "Microsoft / NVIDIA"
+source: "official"
+website: "https://build.nvidia.com/spark/vllm"
+upstream: "https://huggingface.co/nvidia/Phi-4-multimodal-instruct-NVFP4"
+category: llm
+tags:
+  - llm
+  - multimodal
+  - vision
+  - audio
+  - speech
+  - phi
+  - vllm
+  - nvfp4
+  - nvidia-official
+logo: "/logos/microsoft.png"
+requirements:
+  min_memory_gb: 20
+  recommended_memory_gb: 28
+  disk_gb: 32
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "nvidia/Phi-4-multimodal-instruct-NVFP4"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Phi-4-multimodal-instruct-NVFP4\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the attached audio and image.\"}]}'"

@@ -1,0 +1,38 @@
+name: "Qwen2.5-VL-7B NVFP4"
+slug: vllm-qwen25-vl-7b-nvfp4
+version: "1.0.0"
+description: "Qwen2.5-VL-7B Instruct, NVFP4 quantized by NVIDIA, for image-grounded chat and visual reasoning on DGX Spark through vLLM."
+author: "Alibaba Cloud / NVIDIA"
+source: "official"
+website: "https://build.nvidia.com/spark/vllm"
+upstream: "https://huggingface.co/nvidia/Qwen2.5-VL-7B-Instruct-NVFP4"
+category: llm
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - qwen
+  - vllm
+  - nvfp4
+  - nvidia-official
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 20
+  recommended_memory_gb: 28
+  disk_gb: 28
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "nvidia/Qwen2.5-VL-7B-Instruct-NVFP4"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Qwen2.5-VL-7B-Instruct-NVFP4\", \"messages\": [{\"role\": \"user\", \"content\": \"Describe the image in one paragraph.\"}]}'"

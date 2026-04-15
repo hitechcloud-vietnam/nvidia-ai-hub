@@ -4,13 +4,13 @@ import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 
 const BANNERS = {
-  'minicpm-o':            { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'live-vlm-webui':       { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'voicebox':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'chatterbox-turbo':     { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'openclaw':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'nemoclaw':             { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
-  'multi-agent-chatbot':  { img: '/banners/wide/multi-modal-spectrum.svg', layout: 'wide' },
+  'minicpm-o':            { img: '/banners/wide/minicpm-voice-orbit.svg', layout: 'wide' },
+  'voicebox':             { img: '/banners/wide/voice-lab-wave.svg', layout: 'wide' },
+  'chatterbox-turbo':     { img: '/banners/wide/voice-lab-wave.svg', layout: 'wide' },
+  'live-vlm-webui':       { img: '/banners/wide/agent-vision-mesh.svg', layout: 'wide' },
+  'openclaw':             { img: '/banners/wide/agent-vision-mesh.svg', layout: 'wide' },
+  'nemoclaw':             { img: '/banners/wide/agent-vision-mesh.svg', layout: 'wide' },
+  'multi-agent-chatbot':  { img: '/banners/wide/agent-vision-mesh.svg', layout: 'wide' },
   'vllm-qwen35-08b':      { img: '/banners/wide/qwen-beach.png', layout: 'wide' },
   'vllm-qwen35-2b':       { img: '/banners/wide/qwen-beach.png', layout: 'wide' },
   'vllm-qwen35-4b':       { img: '/banners/wide/qwen-basketball.png', layout: 'wide' },
@@ -19,6 +19,7 @@ const BANNERS = {
   'vllm-qwen35-27b-int4': { img: '/banners/wide/qwen-driving.png', layout: 'wide' },
   'vllm-qwen35-35b-a3b':  { img: '/banners/wide/qwen-coder.png', layout: 'wide' },
   'vllm-qwen35-122b-a10b':{ img: '/banners/wide/qwen-coder.png', layout: 'wide' },
+  'vllm-qwen25-vl-':      { img: '/banners/wide/qwen-driving.png', layout: 'wide' },
   'vllm-gemma4-e2b':      { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
   'vllm-gemma4-e4b':      { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
   'vllm-gemma4-e4b-fp8':  { img: '/banners/wide/gemma-small.webp', layout: 'wide' },
@@ -26,11 +27,11 @@ const BANNERS = {
   'vllm-gemma4-26b-a4b-fp8': { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
   'vllm-gemma4-31b':      { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
   'vllm-gemma4-31b-fp8':  { img: '/banners/wide/gemma-large.webp', layout: 'wide' },
-  'vllm-phi4-multimodal-fp8': { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
-  'vllm-gpt-oss-20b':     { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
-  'vllm-gpt-oss-120b':    { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
-  'vllm-seed-oss-36b':    { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
-  'vllm-nemotron':        { img: '/banners/wide/vllm-cluster-grid.svg', layout: 'wide' },
+  'vllm-phi4-':           { img: '/banners/wide/phi-prism-arc.svg', layout: 'wide' },
+  'vllm-gpt-oss-':        { img: '/banners/wide/gptoss-forge-grid.svg', layout: 'wide' },
+  'vllm-seed-oss-':       { img: '/banners/wide/seed-crystal-mesh.svg', layout: 'wide' },
+  'vllm-nemotron':        { img: '/banners/wide/nemotron-nebula-core.svg', layout: 'wide' },
+  'vllm-llama':           { img: '/banners/wide/llama-aurora-lattice.svg', layout: 'wide' },
   'ollama-openwebui':      { img: '/banners/wide/ollama-openwebui.png', layout: 'wide' },
   'comfyui':               { img: '/banners/wide/comfyui-spark.jpg', layout: 'wide' },
   'facefusion':            { img: '/banners/wide/facefusion-spark.png', layout: 'wide' },
@@ -63,10 +64,35 @@ const CATEGORIES = [
   { id: 'nemoclaw', label: 'NemoClaw' },
 ]
 
-const SOURCE_SECTIONS = [
-  { id: 'spark-ai-hub', label: 'Spark-Optimized', subtitle: 'Built & tested for DGX Spark', icon: 'spark' },
-  { id: 'official', label: 'Official Apps', subtitle: 'Published by original developers', icon: 'official' },
-  { id: 'vllm', label: 'Ready-to-Serve Models', subtitle: 'Curated models for DGX Spark. Served on port 9001, one at a time', icon: 'models' },
+const CATALOG_SECTIONS = [
+  {
+    id: 'multi-modal',
+    label: 'Multi-Modal',
+    subtitle: 'Voice, vision, webcam, speech, and agent experiences curated first on the catalog.',
+    icon: 'multimodal',
+    match: (_recipe, categories) => categories.includes('multi-modal'),
+  },
+  {
+    id: 'vllm',
+    label: 'vLLMs',
+    subtitle: 'OpenAI-compatible DGX Spark model endpoints served through vLLM on port 9001.',
+    icon: 'models',
+    match: (_recipe, categories) => categories.includes('vllm'),
+  },
+  {
+    id: 'spark-ai-hub',
+    label: 'Spark-Optimized',
+    subtitle: 'Built & tested for DGX Spark',
+    icon: 'spark',
+    match: (recipe) => (recipe.source || 'community') === 'spark-ai-hub',
+  },
+  {
+    id: 'official',
+    label: 'Official Apps',
+    subtitle: 'Published by original developers',
+    icon: 'official',
+    match: () => true,
+  },
 ]
 
 const CATALOG_PRIORITY = {
@@ -80,12 +106,6 @@ function sortRecipesForCatalog(recipes) {
     if (priorityDiff !== 0) return priorityDiff
     return a.name.localeCompare(b.name)
   })
-}
-
-function getSectionId(recipe) {
-  if ((recipe.source || 'community') === 'spark-ai-hub') return 'spark-ai-hub'
-  if (recipe.slug.startsWith('vllm-')) return 'vllm'
-  return 'official'
 }
 
 function getRecipeCategories(recipe) {
@@ -147,10 +167,21 @@ export default function Catalog({ search = '' }) {
   const orderedRecipes = useMemo(() => sortRecipesForCatalog(filtered), [filtered])
 
   const grouped = useMemo(() => {
-    return SOURCE_SECTIONS.map((section) => ({
-      ...section,
-      recipes: orderedRecipes.filter((r) => getSectionId(r) === section.id),
-    })).filter((section) => section.recipes.length > 0)
+    const assigned = new Set()
+
+    return CATALOG_SECTIONS.map((section) => {
+      const sectionRecipes = orderedRecipes.filter((recipe) => {
+        if (assigned.has(recipe.slug)) return false
+        return section.match(recipe, getRecipeCategories(recipe))
+      })
+
+      sectionRecipes.forEach((recipe) => assigned.add(recipe.slug))
+
+      return {
+        ...section,
+        recipes: sectionRecipes,
+      }
+    }).filter((section) => section.recipes.length > 0)
   }, [orderedRecipes])
 
   const recipesWithBanners = useMemo(
@@ -336,6 +367,18 @@ function SectionIcon({ kind }) {
       <svg {...shared}>
         <circle cx="12" cy="12" r="9" />
         <path d="m8.5 12 2.5 2.5L15.5 10" />
+      </svg>
+    )
+  }
+
+  if (kind === 'multimodal') {
+    return (
+      <svg {...shared}>
+        <circle cx="7" cy="12" r="2.5" />
+        <circle cx="17" cy="7" r="2.5" />
+        <circle cx="17" cy="17" r="2.5" />
+        <path d="M9.2 11 14.8 8.1" />
+        <path d="M9.2 13 14.8 15.9" />
       </svg>
     )
   }

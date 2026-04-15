@@ -1,0 +1,45 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="110" y1="20" x2="1470" y2="536" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111B"/>
+      <stop offset="0.55" stop-color="#0F1731"/>
+      <stop offset="1" stop-color="#0A1724"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(446 184) rotate(28) scale(420 240)">
+      <stop stop-color="#39E0FF" stop-opacity="0.56"/>
+      <stop offset="1" stop-color="#39E0FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1118 222) rotate(12) scale(470 250)">
+      <stop stop-color="#8A5FFF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#8A5FFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <ellipse cx="446" cy="184" rx="420" ry="240" fill="url(#glow1)"/>
+  <ellipse cx="1118" cy="222" rx="470" ry="250" fill="url(#glow2)"/>
+  <g opacity="0.22" stroke="#72DFFF" stroke-width="2.5">
+    <circle cx="780" cy="280" r="180"/>
+    <circle cx="780" cy="280" r="230"/>
+    <circle cx="780" cy="280" r="280"/>
+  </g>
+  <g>
+    <circle cx="780" cy="280" r="74" fill="#0E2032" stroke="#7AE8FF" stroke-width="4"/>
+    <rect x="744" y="214" width="72" height="116" rx="36" fill="#9FF1FF" fill-opacity="0.16" stroke="#9FF1FF" stroke-width="3"/>
+    <path d="M780 344V386" stroke="#CFF9FF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M748 386H812" stroke="#CFF9FF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.88" stroke-linecap="round" fill="none">
+    <path d="M874 212C930 236 972 280 986 336" stroke="#8A5FFF" stroke-width="7"/>
+    <path d="M910 164C991 200 1052 266 1070 348" stroke="#8A5FFF" stroke-opacity="0.55" stroke-width="5"/>
+    <path d="M686 212C630 236 588 280 574 336" stroke="#39E0FF" stroke-width="7"/>
+    <path d="M650 164C569 200 508 266 490 348" stroke="#39E0FF" stroke-opacity="0.55" stroke-width="5"/>
+  </g>
+  <g fill="#EAFBFF" opacity="0.9">
+    <circle cx="1032" cy="136" r="5"/>
+    <circle cx="1090" cy="180" r="4"/>
+    <circle cx="1136" cy="248" r="4"/>
+    <circle cx="528" cy="146" r="5"/>
+    <circle cx="470" cy="190" r="4"/>
+    <circle cx="426" cy="250" r="4"/>
+  </g>
+</svg>

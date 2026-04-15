@@ -1,0 +1,39 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="132" y1="24" x2="1488" y2="528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08151C"/>
+      <stop offset="0.5" stop-color="#0F1C2E"/>
+      <stop offset="1" stop-color="#0A1621"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="302" y1="184" x2="1268" y2="386" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#30E3BF"/>
+      <stop offset="0.5" stop-color="#5DD8FF"/>
+      <stop offset="1" stop-color="#A86BFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <g opacity="0.14" stroke="#7EE9FF">
+    <path d="M150 126H1450"/>
+    <path d="M150 196H1450"/>
+    <path d="M150 266H1450"/>
+    <path d="M150 336H1450"/>
+    <path d="M150 406H1450"/>
+  </g>
+  <g>
+    <rect x="252" y="166" width="98" height="228" rx="49" fill="#0F2130" stroke="#6AE8FF" stroke-width="4"/>
+    <rect x="286" y="210" width="30" height="142" rx="15" fill="#6AE8FF" fill-opacity="0.18"/>
+    <path d="M301 394V428" stroke="#CFF9FF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M270 428H332" stroke="#CFF9FF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <path d="M414 280C462 280 462 212 510 212C558 212 558 348 606 348C654 348 654 174 702 174C750 174 750 388 798 388C846 388 846 228 894 228C942 228 942 320 990 320C1038 320 1038 186 1086 186C1134 186 1134 356 1182 356C1230 356 1230 248 1278 248" stroke="url(#wave)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#EFFFFB" opacity="0.88">
+    <circle cx="510" cy="212" r="5"/>
+    <circle cx="606" cy="348" r="5"/>
+    <circle cx="702" cy="174" r="5"/>
+    <circle cx="798" cy="388" r="5"/>
+    <circle cx="894" cy="228" r="5"/>
+    <circle cx="990" cy="320" r="5"/>
+    <circle cx="1086" cy="186" r="5"/>
+    <circle cx="1182" cy="356" r="5"/>
+  </g>
+</svg>

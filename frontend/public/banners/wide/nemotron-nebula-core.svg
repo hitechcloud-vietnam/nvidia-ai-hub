@@ -1,0 +1,37 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="122" y1="24" x2="1486" y2="530" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07131E"/>
+      <stop offset="0.55" stop-color="#112033"/>
+      <stop offset="1" stop-color="#091420"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(820 280) rotate(90) scale(210 360)">
+      <stop stop-color="#42E0FF" stop-opacity="0.44"/>
+      <stop offset="1" stop-color="#42E0FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <ellipse cx="820" cy="280" rx="360" ry="210" fill="url(#halo)"/>
+  <g opacity="0.24" stroke="#7FE7FF" stroke-width="2.5">
+    <circle cx="820" cy="280" r="92"/>
+    <circle cx="820" cy="280" r="146"/>
+    <circle cx="820" cy="280" r="214"/>
+  </g>
+  <g stroke="#8F74FF" stroke-width="4" stroke-linecap="round">
+    <path d="M620 192 734 250"/>
+    <path d="M620 368 734 310"/>
+    <path d="M1020 192 906 250"/>
+    <path d="M1020 368 906 310"/>
+  </g>
+  <g>
+    <circle cx="820" cy="280" r="70" fill="#13253A" stroke="#C9F7FF" stroke-width="3"/>
+    <path d="M786 280H854" stroke="#C9F7FF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M820 246V314" stroke="#C9F7FF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g fill="#F1FBFF">
+    <circle cx="620" cy="192" r="6"/>
+    <circle cx="620" cy="368" r="6"/>
+    <circle cx="1020" cy="192" r="6"/>
+    <circle cx="1020" cy="368" r="6"/>
+  </g>
+</svg>

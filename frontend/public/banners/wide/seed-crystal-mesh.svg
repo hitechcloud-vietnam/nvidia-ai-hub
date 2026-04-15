@@ -1,0 +1,33 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="130" y1="20" x2="1490" y2="528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08131C"/>
+      <stop offset="0.52" stop-color="#0E1E31"/>
+      <stop offset="1" stop-color="#0A1520"/>
+    </linearGradient>
+    <linearGradient id="crystal" x1="532" y1="118" x2="1080" y2="428" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#42E0FF"/>
+      <stop offset="0.48" stop-color="#7C66FF"/>
+      <stop offset="1" stop-color="#31E8B5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <g opacity="0.2" stroke="url(#crystal)" stroke-width="3">
+    <path d="M520 406L628 154L906 110L1080 270L964 430L690 450Z"/>
+    <path d="M628 154L690 450"/>
+    <path d="M906 110L964 430"/>
+    <path d="M520 406L906 110"/>
+    <path d="M628 154L1080 270"/>
+    <path d="M520 406L1080 270"/>
+  </g>
+  <polygon points="790,166 928,250 882,392 732,392 686,250" fill="#14243A" stroke="#A7B7FF" stroke-width="3"/>
+  <polygon points="790,206 874,258 846,346 734,346 706,258" fill="#253A63" stroke="#D8DEFF" stroke-width="2"/>
+  <g fill="#F1FBFF">
+    <circle cx="520" cy="406" r="5"/>
+    <circle cx="628" cy="154" r="5"/>
+    <circle cx="906" cy="110" r="5"/>
+    <circle cx="1080" cy="270" r="5"/>
+    <circle cx="964" cy="430" r="5"/>
+    <circle cx="690" cy="450" r="5"/>
+  </g>
+</svg>
