@@ -1,0 +1,44 @@
+name: "Wan 2.1 App"
+slug: wan-2.1-app
+version: "1.0.0"
+description: "Run an official Wan 2.1 text-to-video Gradio app on DGX Spark with persistent model storage, Hugging Face cache, and configurable generation settings."
+author: "Wan Team / Alibaba"
+source: "official"
+website: "https://github.com/Wan-Video/Wan2.1"
+upstream: "https://github.com/Wan-Video/Wan2.1"
+category: video-gen
+categories:
+  - video-gen
+tags:
+  - video-gen
+  - text-to-video
+  - gradio
+  - wan
+  - diffusion
+  - apache-2.0
+icon: "🪄"
+logo: ""
+requirements:
+  min_memory_gb: 48
+  recommended_memory_gb: 80
+  disk_gb: 180
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 7873
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 30
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/wan-2.1-app/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the Wan 2.1 environment, download the selected checkpoint if missing, and launch the Gradio text-to-video UI on port 7873."
+    command: "docker compose -p spark-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Wan 2.1 App while preserving model weights, Hugging Face cache, and generated outputs."
+    command: "docker compose -p spark-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml down"

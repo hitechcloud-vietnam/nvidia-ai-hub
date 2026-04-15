@@ -1,11 +1,11 @@
-# NVIDIA AI Hub — Project Blueprint
+# NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC — Project Blueprint
 ## A Docker-Native AI App Launcher for NVIDIA DGX Spark
 
 ---
 
 ## 1. Vision & Positioning
 
-**One-liner:** NVIDIA AI Hub is the missing app store for DGX Spark — a web-based launcher that turns community-verified Docker recipes into one-click AI workloads.
+**One-liner:** NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is the missing app store for DGX Spark — a web-based launcher that turns community-verified Docker recipes into one-click AI workloads.
 
 **The gap it fills:**
 - Pinokio (the leading AI app launcher) is broken on DGX GPU due to ARM64 or AMD64 incompatibility
@@ -14,7 +14,7 @@
 - The DGX Spark community is scattered across forum threads, GitHub repos, Medium posts, and gists
 - Users are paying $4,000 for a machine that requires Docker expertise to use beyond the basics
 
-**NVIDIA AI Hub unifies all of this** into a browsable catalog with one-click deploy.
+**NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC unifies all of this** into a browsable catalog with one-click deploy.
 
 ---
 
@@ -26,7 +26,7 @@
 │              (laptop/desktop via network)                │
 │                                                         │
 │   ┌───────────────────────────────────────────────────┐ │
-│   │           NVIDIA AI Hub Web UI (React)                │ │
+│   │ NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC UI    │ │
 │   │                                                    │ │
 │   │  ┌──────────┐ ┌──────────┐ ┌──────────────────┐  │ │
 │   │  │ Catalog   │ │ Running  │ │ System Monitor   │  │ │
@@ -41,7 +41,7 @@
 │                   DGX SPARK or NVIDIA GPU DEVICE                       │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │        NVIDIA AI Hub Daemon (Python/FastAPI)          │  │
+│  │ NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC Daemon│  │
 │  │                                                     │  │
 │  │  ┌─────────────┐  ┌──────────────┐  ┌───────────┐ │  │
 │  │  │ Recipe       │  │ Docker       │  │ System    │ │  │
@@ -262,7 +262,7 @@ models:
 
 ---
 
-## 6. Installation of NVIDIA AI Hub Itself
+## 6. Installation of NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 
 The tool must be trivially installable. One command:
 
@@ -272,11 +272,11 @@ curl -fsSL https://spark-ai-hub.dev/install.sh | bash
 
 What this does:
 1. Creates `~/spark-ai-hub/` directory
-2. Clones the NVIDIA AI Hub daemon + frontend (pre-built)
+2. Clones the NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC daemon + frontend (pre-built)
 3. Clones the recipe registry
 4. Installs a systemd service (`spark-ai-hub.service`)
 5. Starts the service on port 9000
-6. Prints: "NVIDIA AI Hub is running at http://localhost:9000"
+6. Prints: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is running at http://localhost:9000"
 
 No pip, no conda, no node — the daemon is a single Python file with vendored dependencies, and the frontend is pre-built static files.
 
@@ -353,7 +353,7 @@ spark-ai-hub/
 
 ## 9. Differentiation vs. Alternatives
 
-| Feature | Pinokio | NVIDIA Sync | NVIDIA Playbooks | NVIDIA AI Hub |
+| Feature | Pinokio | NVIDIA Sync | NVIDIA Playbooks | NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC |
 |---------|---------|-------------|-----------------|------------|
 | Works on DGX Spark | ❌ | ✅ | ✅ | ✅ |
 | One-click install | ✅ | ⚠️ Manual scripts | ❌ Copy-paste | ✅ |
@@ -381,7 +381,7 @@ spark-ai-hub/
 
 ## 11. Name & Branding Ideas
 
-- **NVIDIA AI Hub** — Spark (DGX Spark) + Forge (building/crafting). Strong, memorable.
+- **NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC** — adopted product branding for this project.
 - **SparkHub** — Marketplace feel. Risk: too similar to DockerHub.
 - **Ignite** — "Ignite your Spark." Clean but generic.
 - **SparkStore** — Clear but Apple-ish.

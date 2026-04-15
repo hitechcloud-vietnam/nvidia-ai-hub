@@ -1,9 +1,9 @@
-# FireRed Image Edit 1.1 for NVIDIA AI Hub
+# FireRed Image Edit 1.1 for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 
-Self-contained NVIDIA AI Hub recipe for `FireRedTeam/FireRed-Image-Edit-1.1`.
+Self-contained NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC recipe for `FireRedTeam/FireRed-Image-Edit-1.1`.
 
 Install behavior:
-- NVIDIA AI Hub performs a local Docker build from this recipe directory.
+- NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC performs a local Docker build from this recipe directory.
 - The running container downloads model weights on first launch into a persistent Hugging Face cache volume.
 - Outputs are written to a persistent output volume.
 

@@ -1,6 +1,6 @@
 # Multi-Agent Chatbot on DGX Spark
 
-This recipe adapts NVIDIA's `multi-agent-chatbot` DGX Spark playbook for NVIDIA AI Hub. It launches a full local stack with:
+This recipe adapts NVIDIA's `multi-agent-chatbot` DGX Spark playbook for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC. It launches a full local stack with:
 
 - Next.js frontend on port `3000`
 - FastAPI backend on port `8000`
@@ -8,7 +8,7 @@ This recipe adapts NVIDIA's `multi-agent-chatbot` DGX Spark playbook for NVIDIA 
 - Milvus vector retrieval with etcd and MinIO
 - GPU-served supervisor, coding, embedding, and vision model services
 
-## What NVIDIA AI Hub changes
+## What NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC changes
 
 Instead of requiring a manual clone of `NVIDIA/dgx-spark-playbooks`, this recipe builds the upstream images directly from Git and stores persistent runtime data under `registry/recipes/multi-agent-chatbot/data/`.
 

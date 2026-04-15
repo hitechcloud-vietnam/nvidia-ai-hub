@@ -4,7 +4,7 @@ set -e
 INSTALL_DIR="$HOME/spark-ai-hub"
 
 echo ""
-echo "  NVIDIA AI Hub Uninstaller"
+echo "  NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC Uninstaller"
 echo "  ====================="
 echo ""
 

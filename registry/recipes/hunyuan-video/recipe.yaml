@@ -1,0 +1,44 @@
+name: "HunyuanVideo"
+slug: hunyuan-video
+version: "1.0.0"
+description: "Run the official HunyuanVideo Gradio server on DGX Spark for high-end text-to-video generation with persistent checkpoints, text encoders, and generated clip storage."
+author: "Tencent Hunyuan"
+source: "official"
+website: "https://github.com/Tencent-Hunyuan/HunyuanVideo"
+upstream: "https://github.com/Tencent-Hunyuan/HunyuanVideo"
+category: video-gen
+categories:
+  - video-gen
+tags:
+  - video-gen
+  - text-to-video
+  - gradio
+  - hunyuanvideo
+  - tencent
+  - apache-2.0
+icon: "🎦"
+logo: ""
+requirements:
+  min_memory_gb: 48
+  recommended_memory_gb: 80
+  disk_gb: 180
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 7872
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 30
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/hunyuan-video/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official HunyuanVideo environment, download the default checkpoints and text encoders if missing, and launch the Gradio UI on port 7872."
+    command: "docker compose -p spark-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop HunyuanVideo while preserving downloaded checkpoints, Hugging Face cache, and generated videos."
+    command: "docker compose -p spark-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml down"

@@ -1,0 +1,36 @@
+services:
+  hunyuan-video:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-ai-hub-hunyuan-video
+    ports:
+      - "7872:8081"
+    env_file:
+      - .env
+    environment:
+      MODEL_BASE: "${MODEL_BASE:-/opt/HunyuanVideo/ckpts}"
+      HF_HOME: "${HF_HOME:-/root/.cache/huggingface}"
+      SERVER_NAME: "${SERVER_NAME:-0.0.0.0}"
+      SERVER_PORT: "${SERVER_PORT:-8081}"
+      HUNYUAN_USE_CPU_OFFLOAD: "${HUNYUAN_USE_CPU_OFFLOAD:-1}"
+      HUNYUAN_EXTRA_ARGS: "${HUNYUAN_EXTRA_ARGS:-}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+      HF_HUB_DISABLE_PROGRESS_BARS: "${HF_HUB_DISABLE_PROGRESS_BARS:-1}"
+    volumes:
+      - hunyuan-video-models:/opt/HunyuanVideo/ckpts
+      - hunyuan-video-hf-cache:/root/.cache/huggingface
+      - hunyuan-video-outputs:/opt/HunyuanVideo/gradio_outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  hunyuan-video-models:
+  hunyuan-video-hf-cache:
+  hunyuan-video-outputs:

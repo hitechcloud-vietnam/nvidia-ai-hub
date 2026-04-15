@@ -70,7 +70,7 @@ export default function App() {
         <button
           onClick={() => { clearRecipe(); setTab('catalog') }}
           className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] flex items-center justify-center border-none cursor-pointer shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow mb-6 p-1.5"
-          title="NVIDIA AI Hub"
+          title="NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC"
         >
           <img src="/brand/spark-ai-hub-mark.svg" alt="NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC" className="w-full h-full" />
         </button>
@@ -117,8 +117,8 @@ export default function App() {
         {/* Top Bar */}
         <header className="shrink-0 flex items-center justify-between px-6 py-3 bg-surface-low/60 backdrop-blur-md border-b border-outline-dim">
           <div className="flex items-center gap-3">
-            <span className="text-lg font-bold tracking-tight font-display">NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC</span>
-            <span className="text-[10px] text-text-dim font-medium font-label bg-surface-high px-2 py-0.5 rounded-md">v0.1</span>
+            <span className="text-lg font-bold tracking-tight font-display">NVIDIA AI Hub</span>
+            <span className="text-[10px] text-text-dim font-medium font-label bg-surface-high px-2 py-0.5 rounded-md">v1.1</span>
           </div>
 
           {!selectedRecipe && (
