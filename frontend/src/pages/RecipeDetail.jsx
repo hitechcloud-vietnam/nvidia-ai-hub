@@ -9,7 +9,7 @@ import {
   isNotebookRecipe,
 } from '../utils/recipePresentation'
 
-const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw', 'es-blueprint-rsg', 'live-vlm-webui', 'multi-agent-chatbot'])
+const CONFIG_TAB_RECIPES = new Set(['openclaw', 'nemoclaw', 'es-blueprint-rsg', 'live-vlm-webui', 'multi-agent-chatbot', 'minicpm-o'])
 
 function getDetailTabs(recipe) {
   const tabs = [{ id: 'details', label: 'Overview' }]
@@ -806,7 +806,7 @@ function RecipeConfigTab({ recipe }) {
           <p className="text-sm text-text-dim leading-6 m-0 mt-2">
             {isNotebook
               ? 'This notebook blueprint separates container settings from runtime environment values so reviewers can check launch wiring without losing the main workflow overview.'
-              : 'OpenClaw, NemoClaw, Live VLM WebUI, and the Multi-Agent Chatbot expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.'}
+              : 'OpenClaw, NemoClaw, MiniCPM-o, Live VLM WebUI, and the Multi-Agent Chatbot expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.'}
           </p>
           <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim mt-4">
             {tabs.map((tab) => {
