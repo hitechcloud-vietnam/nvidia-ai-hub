@@ -1,0 +1,46 @@
+name: "Florence-2 Large"
+slug: vllm-florence2-large
+version: "1.0.0"
+description: "Microsoft Florence-2 Large served through vLLM for prompt-driven image captioning, OCR, object detection, grounding, and visual task automation on DGX Spark."
+author: "Microsoft"
+source: "official"
+website: "https://huggingface.co/microsoft/Florence-2-large"
+upstream: "https://huggingface.co/microsoft/Florence-2-large"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - image-understanding
+  - ocr
+  - captioning
+  - object-detection
+  - grounding
+  - florence
+  - microsoft
+  - vllm
+  - mit
+logo: "/logos/microsoft.png"
+requirements:
+  min_memory_gb: 10
+  recommended_memory_gb: 16
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "microsoft/Florence-2-large"
+  api_key: "not-needed"
+  max_context: "4096"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"microsoft/Florence-2-large\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"<CAPTION>\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/street-scene.png\"}}]}]}'"

@@ -1,0 +1,45 @@
+name: "MiniCPM-V 4"
+slug: vllm-minicpm-v4
+version: "1.0.0"
+description: "OpenBMB MiniCPM-V 4 served through vLLM for compact multilingual image understanding, OCR, multi-image comparison, and video-aware multimodal assistant workflows on DGX Spark."
+author: "OpenBMB"
+source: "official"
+website: "https://huggingface.co/openbmb/MiniCPM-V-4"
+upstream: "https://huggingface.co/openbmb/MiniCPM-V-4"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - ocr
+  - multi-image
+  - video-understanding
+  - minicpm
+  - openbmb
+  - vllm
+  - apache-2.0
+logo: "/logos/openbmb.svg"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 18
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "openbmb/MiniCPM-V-4"
+  api_key: "not-needed"
+  max_context: "4096"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/MiniCPM-V-4\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the figures in the two screenshots and summarize the key differences.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/screenshot-a.png\"}}]}]}'"

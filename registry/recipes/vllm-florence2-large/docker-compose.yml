@@ -1,0 +1,38 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.17.1-aarch64-cu130
+    container_name: spark-ai-hub-vllm-florence2-large
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - --model
+      - microsoft/Florence-2-large
+      - --port
+      - "8000"
+      - --max-model-len
+      - "4096"
+      - --limit-mm-per-prompt
+      - image=1
+      - --trust-remote-code
+      - --enable-prefix-caching
+      - --gpu-memory-utilization
+      - "0.35"
+      - --served-model-name
+      - florence-2-large
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:
