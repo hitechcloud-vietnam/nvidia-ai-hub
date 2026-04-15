@@ -1,0 +1,45 @@
+name: "InternVL 2.5 26B"
+slug: vllm-internvl25-26b
+version: "1.0.0"
+description: "OpenGVLab InternVL 2.5 26B served through vLLM for high-end multilingual image understanding, OCR-heavy documents, chart reasoning, multi-image comparison, and advanced multimodal assistant workflows on DGX Spark."
+author: "OpenGVLab"
+source: "official"
+website: "https://huggingface.co/OpenGVLab/InternVL2_5-26B"
+upstream: "https://huggingface.co/OpenGVLab/InternVL2_5-26B"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - ocr
+  - image-understanding
+  - video-understanding
+  - chart-understanding
+  - internvl
+  - vllm
+  - mit
+logo: "/logos/opengvlab.svg"
+requirements:
+  min_memory_gb: 64
+  recommended_memory_gb: 80
+  disk_gb: 60
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "OpenGVLab/InternVL2_5-26B"
+  api_key: "not-needed"
+  max_context: "8192"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"OpenGVLab/InternVL2_5-26B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and summarize the main KPI anomalies.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
