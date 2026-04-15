@@ -1,0 +1,39 @@
+name: Optional Workflows Status
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/optional-workflows-status.yml'
+      - '.github/workflows/*-disabled.yml'
+      - 'docs/github-actions.md'
+      - 'docs/pull-request-process.md'
+      - 'CONTRIBUTING.md'
+
+permissions:
+  contents: read
+
+jobs:
+  report-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report optional workflow state
+        env:
+          ENABLE_OPTIONAL_WORKFLOWS: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS }}
+        run: |
+          echo "Repository variable ENABLE_OPTIONAL_WORKFLOWS='${ENABLE_OPTIONAL_WORKFLOWS}'"
+          if [ "${ENABLE_OPTIONAL_WORKFLOWS}" = "true" ]; then
+            echo "Optional workflows are enabled."
+          else
+            echo "Optional workflows are disabled."
+            echo "Set repository variable ENABLE_OPTIONAL_WORKFLOWS=true to activate gated jobs."
+          fi
+
+      - name: Summarize staged workflows
+        run: |
+          echo "Staged optional workflows:"
+          echo "- .github/workflows/ci-validation-disabled.yml"
+          echo "- .github/workflows/recipe-validation-disabled.yml"
+          echo "- .github/workflows/docs-governance-disabled.yml"
+          echo "- .github/workflows/release-package-disabled.yml"

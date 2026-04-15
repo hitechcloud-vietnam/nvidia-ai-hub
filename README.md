@@ -4,6 +4,7 @@
 [![Security](https://img.shields.io/badge/Security-Policy-blue?style=flat-square)](./SECURITY.md)
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
+[![Optional Workflows](https://img.shields.io/badge/GitHub%20Actions-Optional%20Workflows%20Status-6f42c1?style=flat-square)](./docs/github-actions.md)
 
 **Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 

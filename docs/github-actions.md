@@ -8,6 +8,8 @@ The repository includes workflow files under `.github/workflows/`, but the newly
 
 They are intentionally present but inactive by default.
 
+The repository also includes `.github/workflows/optional-workflows-status.yml`, which can run safely even while the gated workflows remain disabled. It reports whether `ENABLE_OPTIONAL_WORKFLOWS` is currently enabled.
+
 ## Gated Workflows
 
 The following workflows are currently staged behind the repository variable `ENABLE_OPTIONAL_WORKFLOWS`:
@@ -69,6 +71,8 @@ To enable the staged workflows:
 4. Set the value to `true`.
 
 To disable them again, delete the variable or set it to a value other than `true`.
+
+You can use the `Optional Workflows Status` workflow to confirm the current variable state from the GitHub Actions UI.
 
 ## Recommended Rollout Order
 
