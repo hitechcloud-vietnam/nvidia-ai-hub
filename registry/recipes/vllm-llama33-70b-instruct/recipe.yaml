@@ -1,0 +1,45 @@
+name: "Llama 3.3 70B Instruct"
+slug: vllm-llama33-70b-instruct
+version: "1.0.0"
+description: "Meta Llama 3.3 70B Instruct exposed through vLLM for multilingual chat, reasoning, coding, and long-context assistant workflows."
+author: "Meta"
+source: "official"
+website: "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+upstream: "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+category: llm
+categories:
+  - llm
+  - reasoning
+  - code-gen
+tags:
+  - llm
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - llama
+  - meta
+  - multilingual
+  - llama3.3
+logo: "/logos/meta.png"
+requirements:
+  min_memory_gb: 96
+  recommended_memory_gb: 112
+  disk_gb: 90
+  cuda_compute: "12.1"
+requires_hf_token: true
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "meta-llama/Llama-3.3-70B-Instruct"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the incident timeline and next actions.\"}]}'"

@@ -1,0 +1,44 @@
+name: "Llama 3.1 70B Instruct FP8"
+slug: vllm-llama31-70b-instruct-fp8
+version: "1.0.0"
+description: "Meta Llama 3.1 70B Instruct, FP8 quantized by NVIDIA, served through vLLM as a long-context OpenAI-compatible endpoint for DGX Spark-class deployments."
+author: "Meta / NVIDIA"
+source: "official"
+website: "https://build.nvidia.com/spark/vllm"
+upstream: "https://huggingface.co/nvidia/Llama-3.1-70B-Instruct-FP8"
+category: llm
+categories:
+  - llm
+  - reasoning
+  - code-gen
+tags:
+  - llm
+  - reasoning
+  - coding
+  - instruct
+  - vllm
+  - fp8
+  - llama
+  - meta
+  - nvidia-official
+logo: "/logos/meta.png"
+requirements:
+  min_memory_gb: 72
+  recommended_memory_gb: 90
+  disk_gb: 85
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "nvidia/Llama-3.1-70B-Instruct-FP8"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Llama-3.1-70B-Instruct-FP8\", \"messages\": [{\"role\": \"user\", \"content\": \"Draft a rollout checklist for a new model endpoint.\"}]}'"
