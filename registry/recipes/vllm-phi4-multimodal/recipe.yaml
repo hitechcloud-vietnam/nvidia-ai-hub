@@ -1,0 +1,45 @@
+name: "Phi-4 Multimodal Instruct"
+slug: vllm-phi4-multimodal
+version: "1.0.0"
+description: "Microsoft Phi-4 multimodal instruct served through vLLM for text, image, and audio understanding workflows on DGX Spark using the upstream modality adapters."
+author: "Microsoft"
+source: "official"
+website: "https://huggingface.co/microsoft/Phi-4-multimodal-instruct"
+upstream: "https://huggingface.co/microsoft/Phi-4-multimodal-instruct"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - audio
+  - speech
+  - ocr
+  - chart-understanding
+  - phi
+  - microsoft
+  - vllm
+  - mit
+logo: "/logos/microsoft.png"
+requirements:
+  min_memory_gb: 18
+  recommended_memory_gb: 28
+  disk_gb: 26
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "microsoft/Phi-4-multimodal-instruct"
+  api_key: "not-needed"
+  max_context: "131072"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"microsoft/Phi-4-multimodal-instruct\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Describe the uploaded image and summarize the attached audio clip.\"}]}]}'"

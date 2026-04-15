@@ -1,0 +1,46 @@
+name: "MiniCPM-o 2.6 via vLLM"
+slug: vllm-minicpm-o-26
+version: "1.0.0"
+description: "OpenBMB MiniCPM-o 2.6 served through vLLM for compact API-first multimodal understanding across image, video, and audio inputs on DGX Spark."
+author: "OpenBMB"
+source: "official"
+website: "https://huggingface.co/openbmb/MiniCPM-o-2_6"
+upstream: "https://huggingface.co/openbmb/MiniCPM-o-2_6"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision-language
+  - image-understanding
+  - audio
+  - speech
+  - video-understanding
+  - ocr
+  - minicpm
+  - openbmb
+  - vllm
+  - apache-2.0
+logo: "/logos/openbmb.svg"
+requirements:
+  min_memory_gb: 18
+  recommended_memory_gb: 28
+  disk_gb: 22
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "openbmb/MiniCPM-o-2_6"
+  api_key: "not-needed"
+  max_context: "4096"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/MiniCPM-o-2_6\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Read the chart and summarize the main trend.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/chart.png\"}}]}]}'"

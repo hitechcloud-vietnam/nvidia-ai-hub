@@ -1,0 +1,45 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.17.1-aarch64-cu130
+    container_name: spark-ai-hub-vllm-phi4-multimodal
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        pip install -q scipy &&
+        MODEL_DIR=$(python - <<'PY'
+        from huggingface_hub import snapshot_download
+        print(snapshot_download("microsoft/Phi-4-multimodal-instruct"))
+        PY
+        ) &&
+        vllm serve "$MODEL_DIR" \
+          --port 8000 \
+          --dtype auto \
+          --max-model-len 131072 \
+          --trust-remote-code \
+          --enable-lora \
+          --max-lora-rank 320 \
+          --max-loras 2 \
+          --limit-mm-per-prompt audio=1,image=1 \
+          --enable-prefix-caching \
+          --gpu-memory-utilization 0.35 \
+          --served-model-name phi-4-multimodal-instruct \
+          --lora-modules speech=$MODEL_DIR/speech-lora vision=$MODEL_DIR/vision-lora
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:

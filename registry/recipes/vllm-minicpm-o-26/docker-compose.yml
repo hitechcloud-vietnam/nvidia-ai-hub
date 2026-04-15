@@ -1,0 +1,40 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.17.1-aarch64-cu130
+    container_name: spark-ai-hub-vllm-minicpm-o-26
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - --model
+      - openbmb/MiniCPM-o-2_6
+      - --port
+      - "8000"
+      - --max-model-len
+      - "4096"
+      - --max-num-seqs
+      - "2"
+      - --limit-mm-per-prompt
+      - audio=1,image=1,video=1
+      - --trust-remote-code
+      - --enable-prefix-caching
+      - --gpu-memory-utilization
+      - "0.45"
+      - --served-model-name
+      - minicpm-o-2.6
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:
