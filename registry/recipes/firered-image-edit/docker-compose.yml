@@ -1,7 +1,7 @@
 services:
   firered-image-edit:
     image: ghcr.io/hitechcloud-vietnam/firered-image-edit-spark-ai-hub:latest
-    container_name: spark-ai-hub-firered-image-edit
+    container_name: nvidia-ai-hub-firered-image-edit
     ports:
       - "7865:7860"
     environment:

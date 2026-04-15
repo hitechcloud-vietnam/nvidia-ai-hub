@@ -58,7 +58,7 @@ class Recipe(BaseModel):
     docker: RecipeDocker = RecipeDocker()
     integration: RecipeIntegration | None = None
     commands: list[RecipeCommand] = []
-    source: str = "community"  # spark-ai-hub | official | community
+    source: str = "community"  # nvidia-ai-hub | official | community
     status: str = "experimental"
     depends_on: list[str] = []
     requires_hf_token: bool = False

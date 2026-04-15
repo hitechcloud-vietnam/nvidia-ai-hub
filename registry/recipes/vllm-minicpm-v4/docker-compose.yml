@@ -1,7 +1,7 @@
 services:
   vllm:
     image: vllm/vllm-openai:v0.17.1-aarch64-cu130
-    container_name: spark-ai-hub-vllm-minicpm-v4
+    container_name: nvidia-ai-hub-vllm-minicpm-v4
     ports:
       - "9001:8000"
     volumes:

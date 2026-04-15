@@ -38,7 +38,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the official Mochi runtime, download weights if needed, and start the Gradio video generation UI on port 7868."
-    command: "docker compose -p spark-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop Mochi 1 Preview while preserving downloaded model weights, Hugging Face cache, and generated outputs."
-    command: "docker compose -p spark-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-mochi-1-preview -f registry/recipes/mochi-1-preview/docker-compose.yml down"

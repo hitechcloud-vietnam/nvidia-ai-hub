@@ -1,7 +1,7 @@
 services:
   trellis2:
     image: abelpc/trellis2-spark:v2.0
-    container_name: spark-ai-hub-trellis2
+    container_name: nvidia-ai-hub-trellis2
     ports:
       - "12156:12156"
     volumes:

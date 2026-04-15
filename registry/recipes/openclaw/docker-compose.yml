@@ -1,7 +1,7 @@
 services:
   openclaw:
     image: ghcr.io/openclaw/openclaw:latest
-    container_name: spark-ai-hub-openclaw
+    container_name: nvidia-ai-hub-openclaw
     user: "0:0"
     env_file:
       - .env

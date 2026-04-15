@@ -3,7 +3,7 @@ slug: spatialedit
 version: "1.0.0"
 description: "Fine-grained spatial image editing with SpatialEdit-16B — rotate objects, move them, or change camera viewpoint on a single image. Built on Qwen3-VL-8B + Wan2.1 VAE + a 16B flow-matching DiT."
 author: "EasonXiao-888"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://github.com/EasonXiao-888/SpatialEdit"
 upstream: "https://github.com/hitechcloud-vietnam/spatialedit-spark-ai-hub"
 fork: "https://github.com/EasonXiao-888/SpatialEdit"

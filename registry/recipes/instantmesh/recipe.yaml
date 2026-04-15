@@ -1,0 +1,45 @@
+name: "InstantMesh"
+slug: instantmesh
+version: "1.0.0"
+description: "Run the official InstantMesh Gradio demo on DGX Spark for single-image 3D mesh generation with persistent model cache plus downloadable OBJ, GLB, and preview video outputs."
+author: "Tencent ARC"
+source: "official"
+website: "https://github.com/TencentARC/InstantMesh"
+upstream: "https://github.com/TencentARC/InstantMesh"
+category: 3d-gen
+categories:
+  - 3d-gen
+tags:
+  - 3d
+  - image-to-3d
+  - reconstruction
+  - mesh
+  - gradio
+  - instantmesh
+  - apache-2.0
+icon: "🧊"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 80
+  cuda_compute: "12.4"
+ui:
+  type: web
+  port: 7874
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 25
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/instantmesh/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official InstantMesh environment and launch the image-to-3D Gradio UI on port 7874 with persistent checkpoints, rembg cache, and exported assets."
+    command: "docker compose -p nvidia-ai-hub-instantmesh -f registry/recipes/instantmesh/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop InstantMesh while preserving downloaded model files and generated preview or mesh assets in Docker volumes."
+    command: "docker compose -p nvidia-ai-hub-instantmesh -f registry/recipes/instantmesh/docker-compose.yml down"

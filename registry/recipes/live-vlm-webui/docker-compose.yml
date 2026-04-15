@@ -1,7 +1,7 @@
 services:
   live-vlm-webui:
     image: ghcr.io/nvidia-ai-iot/live-vlm-webui:latest
-    container_name: spark-ai-hub-live-vlm-webui
+    container_name: nvidia-ai-hub-live-vlm-webui
     network_mode: host
     env_file:
       - .env

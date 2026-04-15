@@ -1,7 +1,7 @@
 services:
   hunyuan3d:
     image: ghcr.io/hitechcloud-vietnam/hunyuan3d-spark:latest
-    container_name: spark-ai-hub-hunyuan3d
+    container_name: nvidia-ai-hub-hunyuan3d
     ports:
       - "7861:7860"
     volumes:

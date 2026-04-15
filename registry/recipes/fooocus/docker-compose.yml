@@ -1,7 +1,7 @@
 services:
   fooocus:
     image: ghcr.io/lllyasviel/fooocus
-    container_name: spark-ai-hub-fooocus
+    container_name: nvidia-ai-hub-fooocus
     ports:
       - "7865:7865"
     env_file:

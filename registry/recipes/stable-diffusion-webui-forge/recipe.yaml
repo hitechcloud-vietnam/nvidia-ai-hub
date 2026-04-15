@@ -42,7 +42,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build a local Stable Diffusion WebUI Forge image from the official upstream repository and start the Gradio UI on port 7866 with persistent runtime storage under /data."
-    command: "docker compose -p spark-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop Stable Diffusion WebUI Forge while preserving downloaded models, caches, settings, and generated outputs in the persistent data volume."
-    command: "docker compose -p spark-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-stable-diffusion-webui-forge -f registry/recipes/stable-diffusion-webui-forge/docker-compose.yml down"

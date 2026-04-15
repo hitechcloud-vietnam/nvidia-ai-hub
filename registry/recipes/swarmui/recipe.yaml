@@ -41,7 +41,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the official standard SwarmUI Docker image and start the web UI on port 7801 with persistent Data, dlbackend, model, output, extension, and custom workflow storage."
-    command: "docker compose -p spark-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop SwarmUI while preserving Data, dlbackend, model metadata, outputs, extensions, and custom workflow state in the persistent Docker volumes."
-    command: "docker compose -p spark-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-swarmui -f registry/recipes/swarmui/docker-compose.yml down"

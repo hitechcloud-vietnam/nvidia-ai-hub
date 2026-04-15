@@ -3,7 +3,7 @@ slug: ollama-runtime
 version: "1.0.0"
 description: "Run a local Ollama server with a ready-to-use starter model, then use it across compatible apps like Open WebUI and Onyx."
 author: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://ollama.com/"
 upstream: "https://github.com/ollama/ollama"
 category: llm

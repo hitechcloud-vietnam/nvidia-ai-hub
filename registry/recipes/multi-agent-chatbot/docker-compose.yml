@@ -2,7 +2,7 @@ x-llama-base: &llama-base
   build:
     context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets
     dockerfile: Dockerfile.llamacpp
-  image: spark-ai-hub/llama.cpp:multi-agent-chatbot
+  image: nvidia-ai-hub/llama.cpp:multi-agent-chatbot
   restart: unless-stopped
   deploy:
     resources:
@@ -20,7 +20,7 @@ x-llama-base: &llama-base
 
 services:
   frontend:
-    container_name: spark-ai-hub-chatbot-frontend
+    container_name: nvidia-ai-hub-chatbot-frontend
     build:
       context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets/frontend
       dockerfile: Dockerfile
@@ -38,7 +38,7 @@ services:
       start_period: 120s
 
   backend:
-    container_name: spark-ai-hub-chatbot-backend
+    container_name: nvidia-ai-hub-chatbot-backend
     build:
       context: https://github.com/NVIDIA/dgx-spark-playbooks.git#main:nvidia/multi-agent-chatbot/assets/backend
       dockerfile: Dockerfile
@@ -72,7 +72,7 @@ services:
       start_period: 180s
 
   postgres:
-    container_name: spark-ai-hub-chatbot-postgres
+    container_name: nvidia-ai-hub-chatbot-postgres
     image: postgres:15-alpine
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
 
   etcd:
-    container_name: spark-ai-hub-chatbot-etcd
+    container_name: nvidia-ai-hub-chatbot-etcd
     image: quay.io/coreos/etcd:v3.5.5
     environment:
       ETCD_AUTO_COMPACTION_MODE: revision
@@ -111,7 +111,7 @@ services:
     restart: unless-stopped
 
   minio:
-    container_name: spark-ai-hub-chatbot-minio
+    container_name: nvidia-ai-hub-chatbot-minio
     image: minio/minio:RELEASE.2023-03-20T20-16-18Z
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
@@ -127,7 +127,7 @@ services:
     restart: unless-stopped
 
   milvus:
-    container_name: spark-ai-hub-chatbot-milvus
+    container_name: nvidia-ai-hub-chatbot-milvus
     image: milvusdb/milvus:v2.5.15-20250718-3a3b374f-gpu-arm64
     command: ["milvus", "run", "standalone"]
     environment:

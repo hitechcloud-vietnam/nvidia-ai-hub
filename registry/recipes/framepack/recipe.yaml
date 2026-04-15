@@ -40,7 +40,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the official FramePack environment and start the Gradio image-to-video UI on port 7867 with persistent model cache and output storage."
-    command: "docker compose -p spark-ai-hub-framepack -f registry/recipes/framepack/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-framepack -f registry/recipes/framepack/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop FramePack while preserving downloaded model assets and generated videos in the Docker volumes."
-    command: "docker compose -p spark-ai-hub-framepack -f registry/recipes/framepack/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-framepack -f registry/recipes/framepack/docker-compose.yml down"

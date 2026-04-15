@@ -1,7 +1,7 @@
 services:
   vllm:
     image: nvcr.io/nvidia/vllm:26.03-py3
-    container_name: spark-ai-hub-vllm-gemma4-31b-nvfp4
+    container_name: nvidia-ai-hub-vllm-gemma4-31b-nvfp4
     ports:
       - "9001:8000"
     volumes:

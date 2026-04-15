@@ -3,7 +3,7 @@ slug: firered-image-edit
 version: "1.0.0"
 description: "Edit up to 3 images with natural-language instructions using FireRed-Image-Edit-1.1, an open-source image editing model focused on strong prompt following and visual consistency, with optional FireRed LoRAs for makeup, stylized text, and faster Lightning sampling."
 author: "FireRed Team"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1"
 upstream: "https://github.com/hitechcloud-vietnam/firered-image-edit-spark-ai-hub"
 fork: "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1"

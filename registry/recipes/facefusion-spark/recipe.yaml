@@ -3,7 +3,7 @@ slug: facefusion-spark
 version: "1.0.0"
 description: "Perform face swaps, lip-sync, and face enhancement across images and videos with FaceFusion, an industry-leading face manipulation platform built for practical restoration and editing workflows."
 author: "FaceFusion"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://github.com/facefusion/facefusion"
 upstream: "https://github.com/hitechcloud-vietnam/facefusion-spark"
 fork: "https://github.com/facefusion/facefusion"

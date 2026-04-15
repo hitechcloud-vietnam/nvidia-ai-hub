@@ -34,7 +34,7 @@ commands:
     command: "git clone https://github.com/VIAVI-CTOO/es-blueprint-rsg.git registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg"
   - label: "Install / launch notebook container"
     description: "Start the Jupyter-based containerized workspace after the upstream blueprint has been cloned and configured."
-    command: "docker compose -p spark-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml up -d"
+    command: "docker compose -p nvidia-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml up -d"
   - label: "Prepare Python environment"
     description: "Run the upstream setup script to create a virtual environment, install dependencies, and register the notebook kernel."
     command: "cd registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg && ./setup.sh"
@@ -46,7 +46,7 @@ commands:
     command: "cd registry/recipes/es-blueprint-rsg/workspace/es-blueprint-rsg && . .venv/bin/activate && pip install http://3.211.96.252:8000/adk"
   - label: "Stop notebook container"
     description: "Stop the Jupyter-based workspace while preserving the cloned upstream project and its local outputs."
-    command: "docker compose -p spark-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-es-blueprint-rsg -f registry/recipes/es-blueprint-rsg/docker-compose.yml down"
 docker:
   build: false
   build_time_minutes: 5

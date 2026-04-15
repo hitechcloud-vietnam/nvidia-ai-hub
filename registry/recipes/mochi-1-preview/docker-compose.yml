@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-mochi-1-preview
+    container_name: nvidia-ai-hub-mochi-1-preview
     ports:
       - "7868:7860"
     env_file:

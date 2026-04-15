@@ -27,10 +27,10 @@ ui:
 commands:
   - label: "Install / launch"
     description: "Build the runtime env if needed and start OpenClaw with persisted host data."
-    command: "docker compose -p spark-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml up -d"
+    command: "docker compose -p nvidia-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml up -d"
   - label: "Stop"
     description: "Stop the OpenClaw container but keep the externalized config and workspace data."
-    command: "docker compose -p spark-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-openclaw -f registry/recipes/openclaw/docker-compose.yml down"
 docker:
   build: false
   build_time_minutes: 3

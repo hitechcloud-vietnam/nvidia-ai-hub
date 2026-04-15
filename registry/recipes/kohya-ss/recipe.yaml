@@ -42,7 +42,7 @@ requires_hf_token: false
 commands:
   - label: "Install / launch"
     description: "Pull the official Kohya SS Docker image and start the Gradio training UI on port 7860 together with the companion TensorBoard service on port 6006, preserving datasets, models, logs, outputs, and config state in Docker volumes."
-    command: "docker compose -p spark-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml up -d"
+    command: "docker compose -p nvidia-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml up -d"
   - label: "Stop"
     description: "Stop Kohya SS and TensorBoard while preserving datasets, cached models, outputs, logs, and configuration state in the persistent Docker volumes."
-    command: "docker compose -p spark-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-kohya-ss -f registry/recipes/kohya-ss/docker-compose.yml down"

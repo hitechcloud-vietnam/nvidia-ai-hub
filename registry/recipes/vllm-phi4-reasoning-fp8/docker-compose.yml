@@ -1,7 +1,7 @@
 services:
   vllm:
     image: nvcr.io/nvidia/vllm:26.02-py3
-    container_name: spark-ai-hub-vllm-phi4-reasoning-fp8
+    container_name: nvidia-ai-hubb-vllm-phi4-reasoning-fp8
     ports:
       - "9001:8000"
     volumes:

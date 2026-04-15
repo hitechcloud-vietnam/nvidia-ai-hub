@@ -350,7 +350,7 @@ async def container_log_ws(websocket: WebSocket, slug: str):
     try:
         container = await get_container_name(slug)
         if not container:
-            await websocket.send_text("[spark-ai-hub] Container not running")
+            await websocket.send_text("[nvidia-ai-hub] Container not running")
             await websocket.close()
             return
 
@@ -360,7 +360,7 @@ async def container_log_ws(websocket: WebSocket, slug: str):
         async def _notify_when_ready():
             for _ in range(600):  # up to 10 minutes
                 if is_ready(slug):
-                    await websocket.send_text("[spark-ai-hub:ready]")
+                    await websocket.send_text("[nvidia-ai-hub:ready]")
                     return
                 await asyncio.sleep(1)
 

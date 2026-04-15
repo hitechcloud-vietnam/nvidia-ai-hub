@@ -4,8 +4,8 @@ import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 
 const BANNER_ROTATION_INTERVAL_MS = 3000
-const BANNER_STORAGE_KEY = 'spark-ai-hub-active-banner-slug'
-const BANNER_PREVIOUS_STORAGE_KEY = 'spark-ai-hub-previous-banner-slug'
+const BANNER_STORAGE_KEY = 'nvidia-ai-hub-active-banner-slug'
+const BANNER_PREVIOUS_STORAGE_KEY = 'nvidia-ai-hub-previous-banner-slug'
 
 const BANNERS = {
   'minicpm-o':            { img: '/banners/wide/minicpm-voice-orbit.svg', layout: 'wide' },
@@ -106,11 +106,11 @@ const CATALOG_SECTIONS = [
     match: (_recipe, categories) => categories.includes('vllm'),
   },
   {
-    id: 'spark-ai-hub',
+    id: 'nvidia-ai-hub',
     label: 'Spark-Optimized',
     subtitle: 'Built & tested for DGX Spark',
     icon: 'spark',
-    match: (recipe) => (recipe.source || 'community') === 'spark-ai-hub',
+    match: (recipe) => (recipe.source || 'community') === 'nvidia-ai-hub',
   },
   {
     id: 'official',
@@ -208,7 +208,7 @@ function getRecipeCategories(recipe) {
   }
 
   const isDgxSparkRecipe =
-    (recipe.source || 'community') === 'spark-ai-hub' ||
+    (recipe.source || 'community') === 'nvidia-ai-hub' ||
     recipe.slug.includes('spark') ||
     tags.includes('dgx-spark') ||
     description.includes('dgx spark')

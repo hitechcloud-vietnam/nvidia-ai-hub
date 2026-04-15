@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-kosmos-25
+    container_name: nvidia-ai-hub-kosmos-25
     ports:
       - "7869:7860"
     env_file:

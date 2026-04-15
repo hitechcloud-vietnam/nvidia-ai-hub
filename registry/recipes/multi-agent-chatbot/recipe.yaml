@@ -36,10 +36,10 @@ ui:
 commands:
   - label: "Install / build"
     description: "Build the upstream frontend, backend, and llama.cpp model server images, then launch the full DGX Spark multi-agent chatbot stack."
-    command: "docker compose -p spark-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop the multi-agent chatbot stack while preserving downloaded models, Milvus data, and PostgreSQL conversation history."
-    command: "docker compose -p spark-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-multi-agent-chatbot -f registry/recipes/multi-agent-chatbot/docker-compose.yml down"
 docker:
   build: true
   build_time_minutes: 30

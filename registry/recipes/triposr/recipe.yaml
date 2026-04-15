@@ -38,7 +38,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the official TripoSR environment and start the single-image 3D reconstruction Gradio UI on port 7870."
-    command: "docker compose -p spark-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop TripoSR while preserving the Hugging Face cache for faster relaunches."
-    command: "docker compose -p spark-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-triposr -f registry/recipes/triposr/docker-compose.yml down"

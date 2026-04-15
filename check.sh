@@ -179,12 +179,12 @@ check_files
 check_port
 
 echo ""
-echo "[spark-ai-hub] Summary: ${failures} failure(s), ${warnings} warning(s)"
+echo "[nvidia-ai-hub] Summary: ${failures} failure(s), ${warnings} warning(s)"
 
 if [ "$failures" -gt 0 ]; then
-    echo "[spark-ai-hub] Environment check failed. Resolve the issues above before running NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC."
+    echo "[nvidia-ai-hub] Environment check failed. Resolve the issues above before running NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC."
     exit 1
 fi
 
-echo "[spark-ai-hub] Environment looks ready."
+echo "[nvidia-ai-hub] Environment looks ready."
 exit 0

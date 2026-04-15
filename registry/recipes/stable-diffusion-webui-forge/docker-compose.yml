@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-stable-diffusion-webui-forge
+    container_name: nvidia-ai-hub-stable-diffusion-webui-forge
     ports:
       - "7866:7860"
     env_file:

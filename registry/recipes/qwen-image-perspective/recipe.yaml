@@ -3,7 +3,7 @@ slug: qwen-image-perspective
 version: "1.0.0"
 description: "Reframe an image from new viewpoints with 3D camera controls for azimuth, elevation, and distance, powered by a multi-angle LoRA that supports 96 precise camera poses."
 author: "multimodalart"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://huggingface.co/fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA"
 upstream: "https://github.com/hitechcloud-vietnam/qwen-image-perspective-spark-ai-hub"
 fork: "https://huggingface.co/spaces/multimodalart/qwen-image-multiple-angles-3d-camera"

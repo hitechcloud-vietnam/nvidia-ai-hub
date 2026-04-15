@@ -1,7 +1,7 @@
 services:
   vllm:
     image: vllm/vllm-openai:v0.17.1-aarch64-cu130
-    container_name: spark-ai-hub-vllm-qwen25-vl-7b-instruct
+    container_name: nvidia-ai-hubb-vllm-qwen25-vl-7b-instruct
     ports:
       - "9001:8000"
     volumes:

@@ -3,7 +3,7 @@ slug: chatterbox-turbo
 version: "1.0.0"
 description: "Generate expressive English speech and clone voices from short audio samples with Chatterbox Turbo, including paralinguistic tags like laughs, coughs, and chuckles for voice agents, narration, and creative audio workflows."
 author: "Resemble AI"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://github.com/resemble-ai/chatterbox"
 upstream: "https://github.com/hitechcloud-vietnam/chatterbox-turbo-spark-ai-hub"
 fork: "https://github.com/resemble-ai/chatterbox"

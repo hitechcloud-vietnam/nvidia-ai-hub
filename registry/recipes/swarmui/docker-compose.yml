@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-swarmui
+    container_name: nvidia-ai-hub-swarmui
     ports:
       - "7801:7801"
     env_file:

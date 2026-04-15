@@ -1,7 +1,7 @@
 services:
   vllm:
     image: nvcr.io/nvidia/vllm:26.03-py3
-    container_name: spark-ai-hub-vllm-nemotron-cascade2-30b-a3b
+    container_name: nvidia-ai-hub-vllm-nemotron-cascade2-30b-a3b
     ports:
       - "9001:8000"
     volumes:

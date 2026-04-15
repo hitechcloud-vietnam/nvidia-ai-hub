@@ -1,7 +1,7 @@
 services:
   kohya-ss-gui:
     image: ghcr.io/bmaltais/kohya-ss-gui:latest
-    container_name: spark-ai-hub-kohya-ss
+    container_name: nvidia-ai-hub-kohya-ss
     user: "1000:0"
     ports:
       - "${KOHYA_PORT:-7860}:7860"
@@ -36,7 +36,7 @@ services:
 
   tensorboard:
     image: tensorflow/tensorflow:latest-gpu
-    container_name: spark-ai-hub-kohya-ss-tensorboard
+    container_name: nvidia-ai-hub-kohya-ss-tensorboard
     ports:
       - "${TENSORBOARD_PORT:-6006}:6006"
     volumes:

@@ -3,7 +3,7 @@ slug: comfyui-spark
 version: "1.0.0"
 description: "Create and run node-based workflows for image, video, 3D, and audio generation with ComfyUI, with full visual control to branch, remix, and reuse complex generative pipelines."
 author: "ComfyAnonymous"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://www.comfy.org/"
 upstream: "https://github.com/hitechcloud-vietnam/comfyui-spark"
 fork: "https://github.com/Comfy-Org/ComfyUI"

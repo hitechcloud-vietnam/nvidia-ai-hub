@@ -40,7 +40,7 @@ requires_hf_token: true
 commands:
   - label: "Install / build / launch"
     description: "Build the official CogVideoX composite demo environment and start the Gradio studio on port 7871 with persistent caches and generated video outputs."
-    command: "docker compose -p spark-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop CogVideoX Studio while preserving downloaded models, enhancer assets, and generated videos in the Docker volumes."
-    command: "docker compose -p spark-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-cogvideox-studio -f registry/recipes/cogvideox-studio/docker-compose.yml down"

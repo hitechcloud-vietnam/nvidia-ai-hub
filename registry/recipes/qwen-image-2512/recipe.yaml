@@ -3,7 +3,7 @@ slug: qwen-image-2512
 version: "1.0.0"
 description: "Generate images from text prompts with Qwen-Image-2512, the updated Qwen text-to-image model with stronger human realism and finer natural detail, plus controls for aspect ratio, seed, and sampling."
 author: "Qwen"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://huggingface.co/Qwen/Qwen-Image-2512"
 upstream: "https://github.com/hitechcloud-vietnam/qwen-image-2512-spark-ai-hub"
 fork: "https://huggingface.co/Qwen/Qwen-Image-2512"

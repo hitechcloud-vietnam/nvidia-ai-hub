@@ -1,7 +1,7 @@
 services:
   foundation-1:
     image: ghcr.io/hitechcloud-vietnam/foundation1-spark-ai-hub:latest
-    container_name: spark-ai-hub-foundation-1
+    container_name: nvidia-ai-hub-foundation-1
     ports:
       - "7866:7860"
     environment:

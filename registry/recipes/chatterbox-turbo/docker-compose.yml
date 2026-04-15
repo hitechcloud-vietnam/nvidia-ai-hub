@@ -1,7 +1,7 @@
 services:
   chatterbox-turbo:
     image: ghcr.io/hitechcloud-vietnam/chatterbox-turbo-spark-ai-hub:latest
-    container_name: spark-ai-hub-chatterbox-turbo
+    container_name: nvidia-ai-hub-chatterbox-turbo
     ports:
       - "7864:7860"
     environment:

@@ -1,17 +1,17 @@
 blank_issues_enabled: false
 contact_links:
   - name: Contribution Guide
-    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/CONTRIBUTING.md
+    url: https://github.com/hitechcloud-vietnam/nvidia-ai-hub/blob/main/CONTRIBUTING.md
     about: Review repository contribution standards, validation expectations, and recipe guidance before opening an issue.
   - name: Support Guide
-    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/SUPPORT.md
+    url: https://github.com/hitechcloud-vietnam/nvidia-ai-hub/blob/main/SUPPORT.md
     about: Review support routing, self-check steps, and reporting expectations before asking for help.
   - name: Community and Governance
-    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/docs/community.md
+    url: https://github.com/hitechcloud-vietnam/nvidia-ai-hub/blob/main/docs/community.md
     about: Review the central index for contribution, support, conduct, security, and licensing documents.
   - name: Security Policy
-    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/SECURITY.md
+    url: https://github.com/hitechcloud-vietnam/nvidia-ai-hub/blob/main/SECURITY.md
     about: Review the private vulnerability disclosure process before reporting a security issue.
   - name: Code of Conduct
-    url: https://github.com/hitechcloud-vietnam/spark-ai-hub/blob/main/CODE_OF_CONDUCT.md
+    url: https://github.com/hitechcloud-vietnam/nvidia-ai-hub/blob/main/CODE_OF_CONDUCT.md
     about: Review expected collaboration and review behavior for repository discussions and pull requests.

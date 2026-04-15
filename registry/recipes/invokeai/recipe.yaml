@@ -40,7 +40,7 @@ requires_hf_token: false
 commands:
   - label: "Install / launch"
     description: "Pull the official InvokeAI image and start the local web UI on port 9090 with persistent runtime storage for models, outputs, and configuration."
-    command: "docker compose -p spark-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml up -d"
+    command: "docker compose -p nvidia-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml up -d"
   - label: "Stop"
     description: "Stop InvokeAI while preserving downloaded models, generated outputs, and runtime state."
-    command: "docker compose -p spark-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-invokeai -f registry/recipes/invokeai/docker-compose.yml down"

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-cogvideox-studio
+    container_name: nvidia-ai-hub-cogvideox-studio
     ports:
       - "7871:7860"
     env_file:

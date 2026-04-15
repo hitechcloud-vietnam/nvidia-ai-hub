@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-triposr
+    container_name: nvidia-ai-hub-triposr
     ports:
       - "7870:7860"
     env_file:

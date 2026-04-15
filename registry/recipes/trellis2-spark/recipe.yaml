@@ -3,7 +3,7 @@ slug: trellis2-spark
 version: "2.0.0"
 description: "Generate high-fidelity 3D assets from images with TRELLIS.2, including complex topologies, sharp features, and full PBR materials for detailed textured output."
 author: "Microsoft"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://github.com/microsoft/TRELLIS.2"
 upstream: "https://github.com/microsoft/TRELLIS.2"
 category: 3d-gen

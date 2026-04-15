@@ -1,7 +1,7 @@
 services:
   invokeai:
     image: ghcr.io/invoke-ai/invokeai:latest
-    container_name: spark-ai-hub-invokeai
+    container_name: nvidia-ai-hub-invokeai
     ports:
       - "9090:9090"
     env_file:

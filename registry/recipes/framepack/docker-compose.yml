@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-framepack
+    container_name: nvidia-ai-hub-framepack
     ports:
       - "7867:7860"
     env_file:

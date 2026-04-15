@@ -1,7 +1,7 @@
 services:
   flowise:
     image: flowiseai/flowise:latest
-    container_name: spark-ai-hub-flowise
+    container_name: nvidia-ai-hub-flowise
     ports:
       - "3002:3000"
     volumes:

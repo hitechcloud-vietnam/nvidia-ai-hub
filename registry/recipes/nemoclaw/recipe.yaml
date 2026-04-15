@@ -35,10 +35,10 @@ ui:
 commands:
   - label: "Install / build"
     description: "Build the DGX Spark-oriented NemoClaw image and start the dashboard with persisted state, local Ollama routing, and Telegram-ready wiring."
-    command: "docker compose -p spark-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop the NemoClaw stack while preserving config, state, snapshots, and exported token files."
-    command: "docker compose -p spark-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml down"
 docker:
   build: true
   build_time_minutes: 15

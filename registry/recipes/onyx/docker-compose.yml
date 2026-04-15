@@ -1,7 +1,7 @@
 services:
   api_server:
     image: onyxdotapp/onyx-backend:${IMAGE_TAG:-latest}
-    container_name: spark-ai-hub-onyx-api-server
+    container_name: nvidia-ai-hub-onyx-api-server
     command: >
       /bin/sh -c "alembic upgrade head &&
       echo \"Starting Onyx Api Server\" &&
@@ -45,7 +45,7 @@ services:
 
   background:
     image: onyxdotapp/onyx-backend:${IMAGE_TAG:-latest}
-    container_name: spark-ai-hub-onyx-background
+    container_name: nvidia-ai-hub-onyx-background
     command: >
       /bin/sh -c "/app/scripts/supervisord_entrypoint.sh"
     env_file:
@@ -88,7 +88,7 @@ services:
 
   web_server:
     image: onyxdotapp/onyx-web-server:${IMAGE_TAG:-latest}
-    container_name: spark-ai-hub-onyx-web-server
+    container_name: nvidia-ai-hub-onyx-web-server
     env_file:
       - .env
     depends_on:
@@ -99,7 +99,7 @@ services:
 
   inference_model_server:
     image: onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}
-    container_name: spark-ai-hub-onyx-inference-model-server
+    container_name: nvidia-ai-hub-onyx-inference-model-server
     command: >
       /bin/sh -c "exec uvicorn model_server.main:app --host 0.0.0.0 --port 9000"
     env_file:
@@ -111,7 +111,7 @@ services:
 
   indexing_model_server:
     image: onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}
-    container_name: spark-ai-hub-onyx-indexing-model-server
+    container_name: nvidia-ai-hub-onyx-indexing-model-server
     command: >
       /bin/sh -c "exec uvicorn model_server.main:app --host 0.0.0.0 --port 9000"
     env_file:
@@ -125,7 +125,7 @@ services:
 
   relational_db:
     image: postgres:15.2-alpine
-    container_name: spark-ai-hub-onyx-postgres
+    container_name: nvidia-ai-hub-onyx-postgres
     shm_size: 1g
     command: -c 'max_connections=250'
     env_file:
@@ -144,7 +144,7 @@ services:
 
   index:
     image: vespaengine/vespa:8.609.39
-    container_name: spark-ai-hub-onyx-index
+    container_name: nvidia-ai-hub-onyx-index
     env_file:
       - .env
     environment:
@@ -155,7 +155,7 @@ services:
 
   opensearch:
     image: opensearchproject/opensearch:3.4.0
-    container_name: spark-ai-hub-onyx-opensearch
+    container_name: nvidia-ai-hub-onyx-opensearch
     environment:
       discovery.type: single-node
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-StrongPassword123!}
@@ -174,7 +174,7 @@ services:
 
   nginx:
     image: nginx:1.25.5-alpine
-    container_name: spark-ai-hub-onyx-nginx
+    container_name: nvidia-ai-hub-onyx-nginx
     depends_on:
       - api_server
       - web_server
@@ -215,7 +215,7 @@ services:
 
   cache:
     image: redis:7.4-alpine
-    container_name: spark-ai-hub-onyx-cache
+    container_name: nvidia-ai-hub-onyx-cache
     command: redis-server --save "" --appendonly no
     tmpfs:
       - /data
@@ -223,7 +223,7 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2025-07-23T15-54-02Z-cpuv1
-    container_name: spark-ai-hub-onyx-minio
+    container_name: nvidia-ai-hub-onyx-minio
     profiles: ["s3-filestore"]
     env_file:
       - .env
@@ -238,7 +238,7 @@ services:
 
   code-interpreter:
     image: onyxdotapp/code-interpreter:latest
-    container_name: spark-ai-hub-onyx-code-interpreter
+    container_name: nvidia-ai-hub-onyx-code-interpreter
     command: ["bash", "./entrypoint.sh", "code-interpreter-api"]
     user: root
     volumes:

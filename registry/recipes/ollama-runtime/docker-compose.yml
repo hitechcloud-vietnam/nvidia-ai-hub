@@ -1,7 +1,7 @@
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: spark-ai-hub-ollama-runtime
+    container_name: nvidia-ai-hub-ollama-runtime
     ports:
       - "11435:11434"
     volumes:
@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spark-ai-hub-ollama-runtime-ui
+    container_name: nvidia-ai-hub-ollama-runtime-ui
     ports:
       - "3014:3014"
     environment:

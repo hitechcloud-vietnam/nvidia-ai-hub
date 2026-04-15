@@ -1,7 +1,7 @@
 services:
   anythingllm:
     image: mintplexlabs/anythingllm:latest
-    container_name: spark-ai-hub-anythingllm
+    container_name: nvidia-ai-hub-anythingllm
     ports:
       - "3001:3001"
     volumes:

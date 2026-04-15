@@ -1,7 +1,7 @@
 services:
   facefusion:
     image: ghcr.io/hitechcloud-vietnam/facefusion-spark:latest
-    container_name: spark-ai-hub-facefusion
+    container_name: nvidia-ai-hub-facefusion
     ports:
       - "7860:7860"
     volumes:

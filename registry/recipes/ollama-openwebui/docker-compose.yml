@@ -1,7 +1,7 @@
 services:
   ollama:
     image: ollama/ollama
-    container_name: spark-ai-hub-ollama
+    container_name: nvidia-ai-hub-ollama
     volumes:
       - ollama-data:/root/.ollama
     deploy:
@@ -15,7 +15,7 @@ services:
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:cuda
-    container_name: spark-ai-hub-openwebui
+    container_name: nvidia-ai-hub-openwebui
     ports:
       - "8080:8080"
     volumes:

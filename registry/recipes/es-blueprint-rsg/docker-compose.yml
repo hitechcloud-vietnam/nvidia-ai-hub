@@ -1,12 +1,12 @@
 services:
   jupyter:
     image: quay.io/jupyter/base-notebook:python-3.11
-    container_name: spark-ai-hub-es-blueprint-rsg
+    container_name: nvidia-ai-hub-es-blueprint-rsg
     working_dir: /workspace/es-blueprint-rsg
     env_file:
       - .env
     environment:
-      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-spark-ai-hub}
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-nvidia-ai-hub}
       NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-meta/llama-3.1-70b-instruct}
       RSG_HOST: ${RSG_HOST:-3.211.96.252}
@@ -30,7 +30,7 @@ services:
           /workspace/es-blueprint-rsg/setup.sh
         fi
         . /workspace/es-blueprint-rsg/.venv/bin/activate
-        python -m jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --NotebookApp.token="${JUPYTER_TOKEN:-spark-ai-hub}" --NotebookApp.allow_origin='*'
+        python -m jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --NotebookApp.token="${JUPYTER_TOKEN:-nvidia-ai-hub}" --NotebookApp.allow_origin='*'
     ports:
       - "8888:8888"
     volumes:

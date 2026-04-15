@@ -234,7 +234,7 @@ models:
 - Copy-paste or auto-configure via SSH
 
 **P2.3 — Model Manager**
-- Shared model storage directory (`~/spark-ai-hub/models/`)
+- Shared model storage directory (`~/nvidia-ai-hub/models/`)
 - Mount into containers via bind mounts
 - Browse downloaded models
 - Download models from Hugging Face / Ollama registry
@@ -267,14 +267,14 @@ models:
 The tool must be trivially installable. One command:
 
 ```bash
-curl -fsSL https://spark-ai-hub.dev/install.sh | bash
+curl -fsSL https://nvidia-ai-hub.dev/install.sh | bash
 ```
 
 What this does:
-1. Creates `~/spark-ai-hub/` directory
+1. Creates `~/nvidia-ai-hub/` directory
 2. Clones the NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC daemon + frontend (pre-built)
 3. Clones the recipe registry
-4. Installs a systemd service (`spark-ai-hub.service`)
+4. Installs a systemd service (`nvidia-ai-hub.service`)
 5. Starts the service on port 9000
 6. Prints: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC is running at http://localhost:9000"
 
@@ -285,7 +285,7 @@ No pip, no conda, no node — the daemon is a single Python file with vendored d
 ## 7. Project Structure
 
 ```
-spark-ai-hub/
+nvidia-ai-hub/
 ├── daemon/                          # Backend
 │   ├── main.py                      # FastAPI app entry
 │   ├── routers/
@@ -328,7 +328,7 @@ spark-ai-hub/
 │       ├── vllm-community/
 │       └── ...
 ├── install.sh                       # One-line installer
-├── spark-ai-hub.service               # systemd unit
+├── nvidia-ai-hub.service               # systemd unit
 └── README.md
 ```
 

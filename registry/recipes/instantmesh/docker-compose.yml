@@ -1,0 +1,36 @@
+services:
+  instantmesh:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-instantmesh
+    ports:
+      - "7874:43839"
+    env_file:
+      - .env
+    environment:
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      HUGGINGFACE_HUB_CACHE: "${HUGGINGFACE_HUB_CACHE:-/data/hf-home}"
+      U2NET_HOME: "${U2NET_HOME:-/data/u2net}"
+      TMPDIR: "${TMPDIR:-/data/outputs}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+      HF_HUB_DISABLE_PROGRESS_BARS: "${HF_HUB_DISABLE_PROGRESS_BARS:-1}"
+    volumes:
+      - instantmesh-ckpts:/opt/InstantMesh/ckpts
+      - instantmesh-hf-home:/data/hf-home
+      - instantmesh-u2net:/data/u2net
+      - instantmesh-outputs:/data/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  instantmesh-ckpts:
+  instantmesh-hf-home:
+  instantmesh-u2net:
+  instantmesh-outputs:

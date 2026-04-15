@@ -3,7 +3,7 @@ slug: foundation-1
 version: "1.0.0"
 description: "Generate tempo-synced, key-aware musical loops and production-ready samples from text prompts with Foundation-1, using structured controls for instrumentation, timbre, effects, BPM, bars, and notation-aware prompting."
 author: "RoyalCities"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://huggingface.co/RoyalCities/Foundation-1"
 upstream: "https://github.com/hitechcloud-vietnam/foundation-1-spark-ai-hub"
 fork: "https://github.com/RoyalCities/RC-stable-audio-tools"

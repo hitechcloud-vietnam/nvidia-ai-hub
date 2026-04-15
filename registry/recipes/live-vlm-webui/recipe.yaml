@@ -35,10 +35,10 @@ ui:
 commands:
   - label: "Install / launch"
     description: "Pull the official multi-arch Live VLM WebUI image and start the HTTPS WebRTC interface with host-network access to local Ollama or other compatible VLM backends."
-    command: "docker compose -p spark-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml up -d"
+    command: "docker compose -p nvidia-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml up -d"
   - label: "Stop"
     description: "Stop Live VLM WebUI while preserving the generated TLS certificate store and runtime configuration."
-    command: "docker compose -p spark-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-live-vlm-webui -f registry/recipes/live-vlm-webui/docker-compose.yml down"
 docker:
   build: false
   build_time_minutes: 3

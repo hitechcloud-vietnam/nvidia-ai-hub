@@ -49,25 +49,25 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 ## Quick install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/install.sh | bash
 ```
 
 Install without starting the server:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --no-start
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/install.sh | bash -s -- --no-start
 ```
 
 Install on a custom port:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --port 9010
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/install.sh | bash -s -- --port 9010
 ```
 
 Install on a custom host and port:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash -s -- --host 127.0.0.1 --port 9010
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/install.sh | bash -s -- --host 127.0.0.1 --port 9010
 ```
 
 ### Windows local setup
@@ -93,7 +93,7 @@ It will:
 2. Install `python3`, `python3-venv`, and `pip` if missing
 3. Install Docker Engine if missing
 4. Install Node.js 22.x if the system version is not suitable for the frontend build
-5. Clone or update the `spark-ai-hub` repository in `$HOME/spark-ai-hub`
+5. Clone or update the `nvidia-ai-hub` repository in `$HOME/nvidia-ai-hub`
 6. Create a Python virtual environment in `.venv`
 7. Install backend dependencies from `requirements.txt`
 8. Install frontend dependencies from `frontend/package.json`
@@ -153,7 +153,7 @@ All apps run as Docker containers with ARM64 + CUDA support.
 Run the installer again:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/install.sh | bash
 ```
 
 ### Start manually from an existing clone
@@ -273,7 +273,7 @@ Install Git, Python 3.11+, Node.js 22+, and Docker Desktop manually, then follow
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/spark-ai-hub/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/uninstall.sh | bash
 ```
 
 On Windows PowerShell:

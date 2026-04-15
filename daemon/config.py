@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     base_dir: Path = Path(__file__).resolve().parent.parent
     registry_path: Path = Path(__file__).resolve().parent.parent / "registry" / "recipes"
     data_dir: Path = Path(__file__).resolve().parent.parent / "data"
-    db_path: Path = Path(__file__).resolve().parent.parent / "data" / "spark-ai-hub.db"
+    db_path: Path = Path(__file__).resolve().parent.parent / "data" / "nvidia-ai-hub.db"
 
     model_config = {"env_prefix": "SPARK_AI_HUB_"}
 

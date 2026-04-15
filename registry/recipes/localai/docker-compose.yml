@@ -1,7 +1,7 @@
 services:
   localai:
     image: localai/localai:latest-nvidia-l4t-arm64-cuda-13
-    container_name: spark-ai-hub-localai
+    container_name: nvidia-ai-hub-localai
     ports:
       - "8081:8080"
     volumes:

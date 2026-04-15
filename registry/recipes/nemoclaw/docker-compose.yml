@@ -15,9 +15,9 @@ services:
         NEMOCLAW_MESSAGING_CHANNELS_B64: ${NEMOCLAW_MESSAGING_CHANNELS_B64:-WyJ0ZWxlZ3JhbSJd}
         NEMOCLAW_MESSAGING_ALLOWED_IDS_B64: ${NEMOCLAW_MESSAGING_ALLOWED_IDS_B64:-e30=}
         NEMOCLAW_DISCORD_GUILDS_B64: ${NEMOCLAW_DISCORD_GUILDS_B64:-e30=}
-        NEMOCLAW_BUILD_ID: ${NEMOCLAW_BUILD_ID:-spark-ai-hub}
+        NEMOCLAW_BUILD_ID: ${NEMOCLAW_BUILD_ID:-nvidia-ai-hub}
         NEMOCLAW_DISABLE_DEVICE_AUTH: ${NEMOCLAW_DISABLE_DEVICE_AUTH:-1}
-    container_name: spark-ai-hub-nemoclaw
+    container_name: nvidia-ai-hub-nemoclaw
     env_file:
       - .env
     environment:

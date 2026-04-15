@@ -42,7 +42,7 @@ requires_hf_token: false
 commands:
   - label: "Install / launch"
     description: "Build the local Kosmos-2.5 wrapper and start the OCR and image-to-markdown web UI on port 7869."
-    command: "docker compose -p spark-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop Kosmos-2.5 while preserving the Hugging Face cache volume for faster relaunches."
-    command: "docker compose -p spark-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-kosmos-25 -f registry/recipes/kosmos-25/docker-compose.yml down"

@@ -1,7 +1,7 @@
 services:
   langflow:
     image: langflowai/langflow:latest
-    container_name: spark-ai-hub-langflow
+    container_name: nvidia-ai-hub-langflow
     ports:
       - "7860:7860"
     volumes:

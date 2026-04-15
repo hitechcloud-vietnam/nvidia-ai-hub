@@ -38,7 +38,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the Wan 2.1 environment, download the selected checkpoint if missing, and launch the Gradio text-to-video UI on port 7873."
-    command: "docker compose -p spark-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop Wan 2.1 App while preserving model weights, Hugging Face cache, and generated outputs."
-    command: "docker compose -p spark-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-wan-2-1-app -f registry/recipes/wan-2.1-app/docker-compose.yml down"

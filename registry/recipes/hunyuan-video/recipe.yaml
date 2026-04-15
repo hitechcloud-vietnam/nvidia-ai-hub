@@ -38,7 +38,7 @@ requires_hf_token: false
 commands:
   - label: "Install / build / launch"
     description: "Build the official HunyuanVideo environment, download the default checkpoints and text encoders if missing, and launch the Gradio UI on port 7872."
-    command: "docker compose -p spark-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml up -d --build"
+    command: "docker compose -p nvidia-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop HunyuanVideo while preserving downloaded checkpoints, Hugging Face cache, and generated videos."
-    command: "docker compose -p spark-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml down"
+    command: "docker compose -p nvidia-ai-hub-hunyuan-video -f registry/recipes/hunyuan-video/docker-compose.yml down"

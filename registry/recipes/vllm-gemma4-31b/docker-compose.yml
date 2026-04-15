@@ -1,7 +1,7 @@
 services:
   vllm:
     image: vllm/vllm-openai:gemma4-cu130
-    container_name: spark-ai-hub-vllm-gemma4-31b
+    container_name: nvidia-ai-hub-vllm-gemma4-31b
     ports:
       - "9001:8000"
     volumes:

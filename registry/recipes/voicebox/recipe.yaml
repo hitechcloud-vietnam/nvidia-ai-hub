@@ -3,7 +3,7 @@ slug: voicebox
 version: "1.0.0"
 description: "Clone voices, generate speech in multiple languages across several TTS engines, apply audio effects, and manage local voice projects with Voicebox."
 author: "Jamie Pine"
-source: "spark-ai-hub"
+source: "nvidia-ai-hub"
 website: "https://voicebox.sh/"
 upstream: "https://github.com/hitechcloud-vietnam/voicebox-spark-ai-hub"
 fork: "https://github.com/jamiepine/voicebox"

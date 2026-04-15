@@ -1,7 +1,7 @@
 services:
   vllm:
     image: vllm/vllm-openai:v0.17.1-aarch64-cu130
-    container_name: spark-ai-hub-vllm-granite31-8b-instruct
+    container_name: nvidia-ai-hub-vllm-granite31-8b-instruct
     ports:
       - "9001:8000"
     volumes:
