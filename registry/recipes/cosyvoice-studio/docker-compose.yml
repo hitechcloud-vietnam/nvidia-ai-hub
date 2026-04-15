@@ -1,0 +1,28 @@
+services:
+  cosyvoice-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-cosyvoice-studio
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-7860}
+      COSYVOICE_MODEL: ${COSYVOICE_MODEL:-FunAudioLLM/Fun-CosyVoice3-0.5B-2512}
+      HF_HOME: ${HF_HOME:-/data/hf-cache}
+      MODELSCOPE_CACHE: ${MODELSCOPE_CACHE:-/data/modelscope-cache}
+      GRADIO_TEMP_DIR: ${GRADIO_TEMP_DIR:-/data/gradio}
+    ports:
+      - "${HOST_PORT:-7884}:${PORT:-7860}"
+    volumes:
+      - ./data/hf-cache:/data/hf-cache
+      - ./data/modelscope-cache:/data/modelscope-cache
+      - ./data/gradio:/data/gradio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

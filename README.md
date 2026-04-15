@@ -58,6 +58,14 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, developmen
 - Discussions: enable GitHub Discussions in repository settings for support questions, ideas, and roadmap conversations
 - Sponsorships and commercial licensing: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 
+## Repository Operations
+
+For repository automation, governance maintenance, and review routing, use:
+
+- GitHub Actions rollout guide: [`docs/github-actions.md`](./docs/github-actions.md)
+- Repository maintenance guide: [`docs/maintenance.md`](./docs/maintenance.md)
+- Pull request process: [`docs/pull-request-process.md`](./docs/pull-request-process.md)
+
 ## Quick install
 
 ```bash

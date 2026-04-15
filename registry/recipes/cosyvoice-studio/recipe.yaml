@@ -1,0 +1,32 @@
+name: "CosyVoice Studio"
+slug: cosyvoice-studio
+version: "1.0.0"
+description: "Run the official CosyVoice web demo on DGX Spark for multilingual TTS, zero-shot voice cloning, cross-lingual synthesis, and instruct-style speech control with persistent model caches."
+author: "FunAudioLLM"
+source: "official"
+website: "https://github.com/FunAudioLLM/CosyVoice"
+upstream: "https://github.com/FunAudioLLM/CosyVoice"
+category: speech
+tags:
+  - tts
+  - speech
+  - audio
+  - gradio
+  - multilingual
+  - voice-cloning
+icon: "🗣️"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7884
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: true
+status: official

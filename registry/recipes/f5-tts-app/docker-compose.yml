@@ -1,0 +1,29 @@
+services:
+  f5-tts-app:
+    image: ghcr.io/swivid/f5-tts:main
+    container_name: nvidia-ai-hub-f5-tts-app
+    env_file:
+      - .env
+    entrypoint:
+      - f5-tts_infer-gradio
+      - --host
+      - 0.0.0.0
+      - --port
+      - "7860"
+    environment:
+      GRADIO_SERVER_PORT: ${PORT:-7860}
+      HF_HOME: ${HF_HOME:-/root/.cache/huggingface}
+      GRADIO_TEMP_DIR: ${GRADIO_TEMP_DIR:-/data/gradio}
+    ports:
+      - "${HOST_PORT:-7883}:${PORT:-7860}"
+    volumes:
+      - ./data/hf-cache:/root/.cache/huggingface
+      - ./data/gradio:/data/gradio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

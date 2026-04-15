@@ -1,0 +1,31 @@
+name: "MeloTTS Studio"
+slug: melotts-studio
+version: "1.0.0"
+description: "Local multilingual MeloTTS Gradio studio for fast text-to-speech across English accents plus Chinese, Japanese, Korean, Spanish, and French with persistent cache and WAV export storage."
+author: "MyShell.ai"
+source: "official"
+website: "https://github.com/myshell-ai/MeloTTS"
+upstream: "https://github.com/myshell-ai/MeloTTS"
+category: speech
+tags:
+  - tts
+  - speech
+  - audio
+  - gradio
+  - multilingual
+icon: "🔈"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7885
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: true
+status: official

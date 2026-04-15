@@ -1,0 +1,26 @@
+services:
+  melotts-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-melotts-studio
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-7860}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/data/output}
+      HF_HOME: ${HF_HOME:-/data/hf-cache}
+      HF_TOKEN: ${HF_TOKEN:-}
+    ports:
+      - "${HOST_PORT:-7885}:${PORT:-7860}"
+    volumes:
+      - ./data/hf-cache:/data/hf-cache
+      - ./data/output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

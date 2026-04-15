@@ -1,0 +1,31 @@
+name: "F5 TTS App"
+slug: f5-tts-app
+version: "1.0.0"
+description: "Run the official F5-TTS Gradio app on DGX Spark for prompt-audio-conditioned speech generation, multi-style synthesis, and persistent Hugging Face cache storage."
+author: "SWivid"
+source: "official"
+website: "https://github.com/SWivid/F5-TTS"
+upstream: "https://github.com/SWivid/F5-TTS"
+category: speech
+tags:
+  - tts
+  - speech
+  - audio
+  - gradio
+  - voice-cloning
+icon: "🎤"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 14
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7883
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: official
