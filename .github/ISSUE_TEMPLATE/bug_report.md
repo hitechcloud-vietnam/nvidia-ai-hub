@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible problem in NVIDIA AI Hub
+about: Report a reproducible problem in NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 labels: bug
 ---
 

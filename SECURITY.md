@@ -8,7 +8,7 @@ If you need a security fix, reproduce the issue against the latest `main` branch
 
 ## Reporting a Vulnerability
 
-If you believe you have found a security vulnerability in `spark-ai-hub`, do **not** open a public issue.
+If you believe you have found a security vulnerability in NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC, do **not** open a public issue.
 
 Instead:
 

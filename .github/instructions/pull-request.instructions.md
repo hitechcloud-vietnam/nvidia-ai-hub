@@ -1,5 +1,5 @@
 ---
-description: "Use when preparing pull requests, updating the PR template, or documenting reviewer guidance, validation scope, risks, and rollout notes for spark-ai-hub changes."
+description: "Use when preparing pull requests, updating the PR template, or documenting reviewer guidance, validation scope, risks, and rollout notes for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC changes."
 name: "Pull Request Instructions"
 ---
 # Pull Request Instructions

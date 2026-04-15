@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document explains where to ask questions, where to report problems, and how to request commercial assistance for `spark-ai-hub`.
+This document explains where to ask questions, where to report problems, and how to request commercial assistance for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 ## Support Channels
 

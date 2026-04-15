@@ -1,6 +1,6 @@
 # Licensing Guide
 
-This document explains the practical boundary between permitted non-commercial use and prohibited commercial use for `spark-ai-hub`.
+This document explains the practical boundary between permitted non-commercial use and prohibited commercial use for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 The controlling legal terms remain:
 
@@ -12,7 +12,7 @@ If this guide and the license text ever differ, the license text controls.
 
 ## Repository Licensing Model
 
-`NVIDIA AI Hub` is source-available under a strictly non-commercial license.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is source-available under a strictly non-commercial license.
 
 Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
 

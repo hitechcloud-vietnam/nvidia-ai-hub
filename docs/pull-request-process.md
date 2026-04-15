@@ -1,6 +1,6 @@
 # Pull Request Process
 
-This document defines the recommended repository review and merge workflow for `spark-ai-hub`.
+This document defines the recommended repository review and merge workflow for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 ## Branch Protection Recommendations
 

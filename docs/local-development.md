@@ -1,6 +1,6 @@
 # Local Development and Build Guide
 
-This guide describes the recommended local development workflow for `spark-ai-hub`.
+This guide describes the recommended local development workflow for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 It covers:
 

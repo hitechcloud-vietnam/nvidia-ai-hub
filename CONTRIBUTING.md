@@ -1,6 +1,6 @@
-# Contributing to NVIDIA AI Hub 
+# Contributing to NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 
-Thank you for contributing to `spark-ai-hub`.
+Thank you for contributing to NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 This document defines the expected workflow for code, documentation, and recipe contributions.
 
@@ -218,52 +218,3 @@ Before opening a pull request, confirm:
 
 - [ ] The change is scoped and reviewable
 - [ ] Documentation was updated if behavior changed
-- [ ] Security, licensing, and provenance impacts were reviewed
-- [ ] Frontend builds successfully with `npm run build` when frontend files changed
-- [ ] Frontend lint passes with `npm run lint` when frontend files changed
-- [ ] Backend starts successfully when backend or recipe loading behavior changed
-- [ ] New or updated recipe files load correctly
-- [ ] No secrets, local paths, or machine-specific artifacts were committed
-
-## Commit and PR Guidance
-
-Recommended practices:
-
-- Use clear commit messages
-- Reference the issue number when applicable
-- Describe user impact in the PR description
-- Include screenshots for UI changes
-- Include reproduction and validation steps for bug fixes
-- Call out breaking changes, security considerations, and license-sensitive updates explicitly
-
-## Review Expectations
-
-Pull requests may be asked to:
-
-- reduce scope
-- improve documentation
-- align with existing structure
-- preserve backward compatibility for scripts and configuration
-- add validation steps for recipes or startup flows
-- document third-party sources and licensing details more clearly
-
-## License
-
-By contributing to this repository, you agree that your contributions will be licensed under the repository license.
-
-## Questions
-
-If the expected implementation approach is unclear, open an issue before starting large work.
-
-Clear, incremental contributions are preferred over broad rewrites.
-
-## Community Resources
-
-- Contribution workflow: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-- Security reporting: [`SECURITY.md`](./SECURITY.md)
-- Collaboration rules: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
-- Support guide: [`SUPPORT.md`](./SUPPORT.md)
-- Governance index: [`docs/community.md`](./docs/community.md)
-- Commercial licensing and sponsorship path: [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
-
-If GitHub Discussions is enabled for the repository, prefer Discussions for roadmap ideas, usage questions, and broader community conversations that do not require an actionable issue.

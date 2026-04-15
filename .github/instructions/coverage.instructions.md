@@ -1,5 +1,5 @@
 ---
-description: "Use when describing test coverage, validation coverage, regression checks, or manual verification for backend, frontend, recipe, and installer changes in spark-ai-hub."
+description: "Use when describing test coverage, validation coverage, regression checks, or manual verification for backend, frontend, recipe, and installer changes in NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC."
 name: "Coverage Instructions"
 ---
 # Coverage Instructions
