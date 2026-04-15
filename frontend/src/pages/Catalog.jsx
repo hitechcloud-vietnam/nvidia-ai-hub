@@ -33,6 +33,8 @@ const BANNERS = {
   'vllm-nemotron':        { img: '/banners/wide/nemotron-nebula-core.svg', layout: 'wide' },
   'vllm-llama':           { img: '/banners/wide/llama-aurora-lattice.svg', layout: 'wide' },
   'vllm-deepseek-':       { img: '/banners/wide/deepseek-orbit-matrix.svg', layout: 'wide' },
+  'vllm-aya-':            { img: '/banners/wide/cohere-lingua-orbit.svg', layout: 'wide' },
+  'vllm-command-':        { img: '/banners/wide/cohere-lingua-orbit.svg', layout: 'wide' },
   'vllm-glm45':           { img: '/banners/wide/glm-signal-weave.svg', layout: 'wide' },
   'vllm-granite31-':      { img: '/banners/wide/granite-foundry-stack.svg', layout: 'wide' },
   'vllm-mistral':         { img: '/banners/wide/mistral-monsoon-flow.svg', layout: 'wide' },

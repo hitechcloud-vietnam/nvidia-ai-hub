@@ -1,0 +1,47 @@
+name: "Command R+ 104B"
+slug: vllm-command-r-plus-104b
+version: "1.0.0"
+description: "Cohere Command R+ 104B exposed through vLLM for advanced multilingual reasoning, grounded generation, and multi-step tool workflows on DGX Spark."
+author: "Cohere Labs"
+source: "official"
+website: "https://huggingface.co/CohereLabs/c4ai-command-r-plus-08-2024"
+upstream: "https://huggingface.co/CohereLabs/c4ai-command-r-plus-08-2024"
+category: llm
+categories:
+  - llm
+  - rag
+  - reasoning
+tags:
+  - llm
+  - multilingual
+  - reasoning
+  - rag
+  - tool-use
+  - code-gen
+  - command-r
+  - cohere
+  - vllm
+  - research-license
+icon: "🧭"
+logo: "/logos/deepseek.png"
+requirements:
+  min_memory_gb: 95
+  recommended_memory_gb: 112
+  disk_gb: 100
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+requires_hf_token: true
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "CohereLabs/c4ai-command-r-plus-08-2024"
+  api_key: "not-needed"
+  max_context: "128000"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/c4ai-command-r-plus-08-2024\", \"messages\": [{\"role\": \"user\", \"content\": \"Plan a multilingual incident triage workflow with tool calls.\"}]}'"

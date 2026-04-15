@@ -1,0 +1,44 @@
+name: "Aya Expanse 8B"
+slug: vllm-aya-expanse-8b
+version: "1.0.0"
+description: "Cohere Aya Expanse 8B served with vLLM for multilingual chat, translation, summarization, and enterprise knowledge tasks on DGX Spark."
+author: "Cohere Labs"
+source: "official"
+website: "https://huggingface.co/CohereLabs/aya-expanse-8b"
+upstream: "https://huggingface.co/CohereLabs/aya-expanse-8b"
+category: llm
+categories:
+  - llm
+  - rag
+tags:
+  - llm
+  - multilingual
+  - translation
+  - rag
+  - aya
+  - cohere
+  - vllm
+  - research-license
+icon: "🌍"
+logo: "/logos/deepseek.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 18
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+requires_hf_token: true
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "CohereLabs/aya-expanse-8b"
+  api_key: "not-needed"
+  max_context: "8192"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/aya-expanse-8b\", \"messages\": [{\"role\": \"user\", \"content\": \"Translate this release note into Vietnamese and Japanese.\"}]}'"
