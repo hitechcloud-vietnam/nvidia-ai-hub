@@ -15,7 +15,7 @@
 [![Latest Tag](https://img.shields.io/github/v/tag/hitechcloud-vietnam/spark-ai-hub?sort=semver&style=flat-square)](https://github.com/hitechcloud-vietnam/spark-ai-hub/tags)
 [![GitHub Streak](https://img.shields.io/badge/GitHub-Streak%20via%20Insights-24292f?style=flat-square&logo=github)](https://github.com/hitechcloud-vietnam/spark-ai-hub/pulse)
 
-**Quick links:** [Overview](#overview) · [Local development](#local-development) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
+**Quick links:** [Overview](#overview) · [Installation](./docs/installation.md) · [Production deployment](./docs/deployment-production.md) · [Local development](./docs/local-development.md) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 
 **Your AI app store for NVIDIA GPU platforms.** Browse, install, and launch AI apps with one click.
 
@@ -34,6 +34,12 @@ The project includes:
 ## Local development
 
 For a complete local dev workflow (backend + frontend), production build validation, and white-page troubleshooting, see [`docs/local-development.md`](./docs/local-development.md).
+
+## Installation and deployment
+
+For Linux deployment, Windows and macOS setup boundaries, Docker and NVIDIA runtime prerequisites, and optional PM2 process management, see [`docs/installation.md`](./docs/installation.md).
+
+For production-style Linux service management, reverse proxy setup, TLS, and network exposure guidance, see [`docs/deployment-production.md`](./docs/deployment-production.md).
 
 ## Contributing
 
@@ -95,6 +101,8 @@ curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/m
 Use the local development guide for Windows-compatible commands:
 
 - [`docs/local-development.md`](./docs/local-development.md)
+
+For supported platform boundaries and deployment guidance, see [`docs/installation.md`](./docs/installation.md).
 
 After installation, open:
 
@@ -218,7 +226,7 @@ If the frontend must be rebuilt, ensure the machine has:
 
 Local development on Windows is supported through standard Python and npm commands. Use [`docs/local-development.md`](./docs/local-development.md) for setup and run instructions.
 
-`uninstall.ps1` provides a Windows-native cleanup flow.
+Windows is documented as a development environment rather than the primary local GPU deployment target. See [`docs/installation.md`](./docs/installation.md) for platform boundaries.
 
 ## Shared configuration
 
@@ -296,20 +304,10 @@ Install Git, Python 3.11+, Node.js 22+, and Docker Desktop manually, then follow
 curl -fsSL https://raw.githubusercontent.com/hitechcloud-vietnam/nvidia-ai-hub/main/uninstall.sh | bash
 ```
 
-On Windows PowerShell:
-
-```powershell
-.\uninstall.ps1
-```
-
 Preserve local runtime data during uninstall:
 
 ```bash
 ./uninstall.sh --keep-data
-```
-
-```powershell
-.\uninstall.ps1 -KeepData
 ```
 
 The uninstaller now removes, in order:

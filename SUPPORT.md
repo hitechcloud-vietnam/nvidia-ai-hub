@@ -34,6 +34,9 @@ Use GitHub Issues for:
 Before opening an issue:
 
 - review [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- review [`docs/installation.md`](./docs/installation.md) for supported deployment boundaries and prerequisites
+- review [`docs/deployment-production.md`](./docs/deployment-production.md) for Linux production service, reverse proxy, TLS, and exposure guidance
+- review [`docs/local-development.md`](./docs/local-development.md) for source-based setup and validation commands
 - review [`SECURITY.md`](./SECURITY.md) if the problem may be security-related
 - gather logs, environment details, and reproduction steps
 
@@ -70,7 +73,11 @@ Consider running:
 ./check.sh
 ```
 
-On Windows, run the equivalent checks from [`docs/local-development.md`](./docs/local-development.md).
+On Windows or macOS, use the equivalent source-based checks from [`docs/local-development.md`](./docs/local-development.md).
+
+For platform prerequisites, Docker setup, NVIDIA runtime expectations, and PM2 notes, review [`docs/installation.md`](./docs/installation.md).
+
+For Linux production deployment patterns, reverse proxy validation, and network exposure notes, review [`docs/deployment-production.md`](./docs/deployment-production.md).
 
 For backend startup validation:
 

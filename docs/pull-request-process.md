@@ -20,6 +20,7 @@ Apply these protections to `main`:
 - Frontend changes should include build status and manual UI verification notes.
 - Recipe changes should identify the affected recipe(s) and any smoke-test evidence.
 - Script or installer changes should specify operating system and shell validation.
+- Deployment documentation changes should state whether Linux service, reverse proxy, TLS, or exposure guidance was reviewed.
 - Governance and licensing changes should identify every synchronized document updated in the same pull request.
 
 ## Labels and Ownership
@@ -85,6 +86,12 @@ Recommended usage:
 - enable the variable only when the repository is ready to run the optional automation set
 
 Use [`./github-actions.md`](./github-actions.md) for the full workflow inventory and rollout details.
+
+When pull requests change installation, local development, or production deployment guidance, also review:
+
+- [`./installation.md`](./installation.md)
+- [`./local-development.md`](./local-development.md)
+- [`./deployment-production.md`](./deployment-production.md)
 
 ## Merge Guidance
 

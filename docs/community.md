@@ -5,6 +5,9 @@ This document is the central index for repository governance, contribution workf
 ## Core Documents
 
 - Contribution guide: [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
+- Installation and deployment guide: [`./installation.md`](./installation.md)
+- Production deployment guide: [`./deployment-production.md`](./deployment-production.md)
+- Local development guide: [`./local-development.md`](./local-development.md)
 - Security policy: [`../SECURITY.md`](../SECURITY.md)
 - Code of conduct: [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
 - Support guide: [`../SUPPORT.md`](../SUPPORT.md)
@@ -21,6 +24,9 @@ This document is the central index for repository governance, contribution workf
 | Document | Primary use | Typical audience |
 |---|---|---|
 | `../CONTRIBUTING.md` | contribution workflow, local validation, submission expectations | contributors |
+| `./installation.md` | platform support boundaries, installation, deployment prerequisites, Docker and NVIDIA runtime guidance | operators and contributors |
+| `./deployment-production.md` | Linux production service layout, reverse proxy, TLS, LAN/public exposure guidance | operators and maintainers |
+| `./local-development.md` | cross-platform developer setup, backend/frontend workflow, local validation | contributors |
 | `./pull-request-process.md` | review flow, branch protection, merge guidance | reviewers and maintainers |
 | `./github-actions.md` | workflow inventory, rollout gating, automation enablement | maintainers |
 | `./maintenance.md` | `CODEOWNERS`, labels, Dependabot, branch protection maintenance | maintainers |
@@ -37,6 +43,27 @@ This document is the central index for repository governance, contribution workf
 - contribution expectations
 - recipe submission guidance
 - pull request validation checklist
+
+### Use `installation.md` for
+
+- Linux deployment workflow
+- Windows and macOS platform boundaries
+- Docker, NVIDIA driver, and NVIDIA Container Toolkit prerequisites
+- optional PM2 process management
+
+### Use `deployment-production.md` for
+
+- `systemd` service setup
+- optional PM2 persistence for Linux source deployments
+- reverse proxy examples with Nginx or Caddy
+- TLS, LAN, and public exposure notes
+
+### Use `local-development.md` for
+
+- backend and frontend setup from source
+- cross-platform developer commands
+- production-style local build validation
+- Docker-backed validation during development
 
 ### Use `github-actions.md` for
 

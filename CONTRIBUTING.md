@@ -54,6 +54,8 @@ check.*            Environment validation entrypoints
 
 For the complete local setup and validation workflow, see [`docs/local-development.md`](./docs/local-development.md).
 
+For installation, deployment boundaries, Docker and NVIDIA runtime prerequisites, and optional PM2 usage, see [`docs/installation.md`](./docs/installation.md).
+
 ## Linux / macOS-style shell workflow
 
 Create local configuration:
@@ -77,6 +79,8 @@ Start the application:
 ## Windows PowerShell workflow
 
 Use the commands in [`docs/local-development.md`](./docs/local-development.md).
+
+Note that the repository does not currently include `install.ps1`, `run.ps1`, or `check.ps1` entrypoints.
 
 ## Frontend Development
 
