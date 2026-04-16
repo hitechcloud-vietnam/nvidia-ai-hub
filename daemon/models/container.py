@@ -17,6 +17,7 @@ class GpuMetrics(BaseModel):
     vendor: str = ""
     driver_version: str = ""
     uuid: str = ""
+    compute_capability: str = ""
     utilization: int = 0
     utilization_source: str = ""
     memory_used_mb: int = 0
@@ -44,6 +45,7 @@ class SystemMetrics(BaseModel):
     gpu_temperature: float = 0.0
     gpu_temperature_source: str = ""
     gpu_name: str = ""
+    gpu_compute_capability: str = ""
     gpu_count: int = 0
     gpus: list[GpuMetrics] = Field(default_factory=list)
     ram_used_gb: float = 0.0

@@ -1,0 +1,47 @@
+name: "Audio Agent Console"
+slug: audio-agent-console
+version: "1.0.0"
+description: "Run a browser-based voice agent console on DGX Spark with Pipecat SmallWebRTC transport, OpenAI speech services, and a prebuilt web client."
+author: "Pho Tue SoftWare Solutions JSC"
+source: "community"
+website: "https://github.com/pipecat-ai/pipecat"
+upstream: "https://github.com/pipecat-ai/pipecat"
+category: speech
+categories:
+  - speech
+  - agent
+  - webui
+tags:
+  - speech
+  - voice-agent
+  - webrtc
+  - pipecat
+  - openai
+  - fastapi
+  - realtime
+icon: "🎧"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7890
+  path: "/client/"
+  health_path: "/health"
+docker:
+  build: true
+  build_time_minutes: 10
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/audio-agent-console/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the Audio Agent Console image, expose the Pipecat SmallWebRTC client on port 7890, and start the browser voice agent service."
+    command: "docker compose -p nvidia-ai-hub-audio-agent-console -f registry/recipes/audio-agent-console/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Audio Agent Console while preserving local recipe environment settings."
+    command: "docker compose -p nvidia-ai-hub-audio-agent-console -f registry/recipes/audio-agent-console/docker-compose.yml down"

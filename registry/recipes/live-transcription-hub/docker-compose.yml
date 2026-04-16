@@ -1,0 +1,36 @@
+services:
+  live-transcription-hub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-live-transcription-hub
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-8000}
+      MODEL_SIZE: ${MODEL_SIZE:-small}
+      DEVICE: ${DEVICE:-cuda}
+      COMPUTE_TYPE: ${COMPUTE_TYPE:-float16}
+      MAX_CLIENTS: ${MAX_CLIENTS:-4}
+      MAX_CONNECTION_TIME: ${MAX_CONNECTION_TIME:-600}
+      CHUNK_SECONDS: ${CHUNK_SECONDS:-2.0}
+      SEND_LAST_N_SEGMENTS: ${SEND_LAST_N_SEGMENTS:-10}
+      DEFAULT_USE_VAD: ${DEFAULT_USE_VAD:-true}
+      DEFAULT_TASK: ${DEFAULT_TASK:-transcribe}
+      HF_HOME: ${HF_HOME:-/data/hf-cache}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/data/output}
+      TEMP_DIR: ${TEMP_DIR:-/data/tmp}
+    ports:
+      - "${HOST_PORT:-7888}:${PORT:-8000}"
+    volumes:
+      - ./data/hf-cache:/data/hf-cache
+      - ./data/output:/data/output
+      - ./data/tmp:/data/tmp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

@@ -1,0 +1,47 @@
+name: "Live Transcription Hub"
+slug: live-transcription-hub
+version: "1.0.0"
+description: "Run a GPU-ready real-time transcription hub on DGX Spark with a WhisperLive-style WebSocket protocol, OpenAI-compatible upload API, and persistent model cache."
+author: "Pho Tue SoftWare Solutions JSC"
+source: "community"
+website: "https://github.com/collabora/WhisperLive"
+upstream: "https://github.com/collabora/WhisperLive"
+category: speech
+categories:
+  - speech
+  - api
+  - workflow
+tags:
+  - speech
+  - asr
+  - whisper
+  - websocket
+  - realtime
+  - fastapi
+  - openai-compatible
+icon: "🛰️"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7888
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/live-transcription-hub/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the live transcription hub image, expose the OpenAPI docs on port 7888, and start the Whisper-style WebSocket plus upload API service."
+    command: "docker compose -p nvidia-ai-hub-live-transcription-hub -f registry/recipes/live-transcription-hub/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Live Transcription Hub while preserving the Faster-Whisper model cache and exported transcript files."
+    command: "docker compose -p nvidia-ai-hub-live-transcription-hub -f registry/recipes/live-transcription-hub/docker-compose.yml down"

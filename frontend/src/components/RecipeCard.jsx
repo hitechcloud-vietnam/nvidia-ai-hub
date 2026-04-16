@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
+import { getRecipeHardwareFit } from '../utils/hardwareFit'
 
 export default function RecipeCard({ recipe }) {
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installing = useStore((s) => s.installing)
   const updating = useStore((s) => s.updating)
   const installRecipe = useStore((s) => s.installRecipe)
+  const metrics = useStore((s) => s.metrics)
   const [logoFailed, setLogoFailed] = useState(false)
 
   const logoUrl = useThemedLogo(recipe.logo)
@@ -15,6 +17,7 @@ export default function RecipeCard({ recipe }) {
   const isUpdating = updating === recipe.slug
   const isBusy = isBuilding || isUpdating
   const isNotebook = isNotebookRecipe(recipe)
+  const hardwareFit = getRecipeHardwareFit(recipe, metrics)
 
   const handleInstall = (e) => {
     e.stopPropagation()
@@ -69,6 +72,7 @@ export default function RecipeCard({ recipe }) {
             }`}>
               {getRecipeSurfaceLabel(recipe)}
             </span>
+            <HardwareFitPill fit={hardwareFit} />
             {recipeCategories.slice(0, 2).map((cat) => (
               <span key={cat} className="text-[10px] font-label text-secondary bg-secondary/10 px-2 py-0.5 rounded-full">
                 {cat}
@@ -117,5 +121,20 @@ export default function RecipeCard({ recipe }) {
         </div>
       </div>
     </div>
+  )
+}
+
+function HardwareFitPill({ fit }) {
+  const toneMap = {
+    success: 'text-success bg-success/10',
+    warning: 'text-warning bg-warning/10',
+    error: 'text-error bg-error-surface',
+    dim: 'text-text-dim bg-surface-high',
+  }
+
+  return (
+    <span className={`text-[10px] font-label px-2 py-0.5 rounded-full ${toneMap[fit.tone] || toneMap.dim}`} title={fit.headline}>
+      Host {fit.label}
+    </span>
   )
 }

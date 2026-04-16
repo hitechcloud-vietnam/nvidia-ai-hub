@@ -32,6 +32,13 @@ def _safe_float(value) -> float:
         return 0.0
 
 
+def _version_tuple(raw: str) -> tuple[int, ...]:
+    parts = re.findall(r"\d+", str(raw or ""))
+    if not parts:
+        return ()
+    return tuple(int(part) for part in parts)
+
+
 async def _run_command(*args: str, timeout_seconds: float = 5.0) -> str:
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -243,6 +250,9 @@ def _apply_gpu_summary(metrics: SystemMetrics):
         return
 
     metrics.gpu_name = metrics.gpus[0].name if len(metrics.gpus) == 1 else f"{len(metrics.gpus)} GPUs"
+    compute_caps = [gpu.compute_capability for gpu in metrics.gpus if gpu.compute_capability]
+    if compute_caps:
+        metrics.gpu_compute_capability = max(compute_caps, key=_version_tuple)
     metrics.gpu_utilization = max((gpu.utilization for gpu in metrics.gpus), default=0)
     metrics.gpu_memory_used_mb = sum(gpu.memory_used_mb for gpu in metrics.gpus)
     metrics.gpu_memory_total_mb = sum(gpu.memory_total_mb for gpu in metrics.gpus)
@@ -269,6 +279,7 @@ def _merge_gpu_entries(existing: list[GpuMetrics], incoming: list[GpuMetrics]) -
         "vendor",
         "driver_version",
         "uuid",
+        "compute_capability",
         "utilization_source",
         "temperature_source",
     ]
@@ -487,6 +498,24 @@ async def _populate_nvidia_gpu_metrics(metrics: SystemMetrics) -> bool:
                 fan_speed_percent=_safe_int(parts[10]),
             )
         )
+
+    compute_output = await _run_command(
+        "nvidia-smi",
+        "--query-gpu=index,compute_cap",
+        "--format=csv,noheader,nounits",
+    )
+    compute_by_index: dict[int, str] = {}
+    if compute_output:
+        for raw_line in compute_output.splitlines():
+            if not raw_line.strip():
+                continue
+            parts = [part.strip() for part in raw_line.split(",", maxsplit=1)]
+            if len(parts) < 2:
+                continue
+            compute_by_index[_safe_int(parts[0])] = parts[1]
+
+    for gpu in gpus:
+        gpu.compute_capability = compute_by_index.get(gpu.index, "")
 
     if not gpus:
         return False

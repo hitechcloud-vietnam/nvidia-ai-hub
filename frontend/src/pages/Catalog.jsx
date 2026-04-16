@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
+import { getRecipeHardwareFit } from '../utils/hardwareFit'
 
 const BANNER_ROTATION_INTERVAL_MS = 3000
 const BANNER_STORAGE_KEY = 'nvidia-ai-hub-active-banner-slug'
@@ -220,6 +221,7 @@ export default function Catalog({ search = '' }) {
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installRecipe = useStore((s) => s.installRecipe)
+  const metrics = useStore((s) => s.metrics)
   const [category, setCategory] = useState('all')
   const [activeBannerSlug, setActiveBannerSlug] = useState(null)
 
@@ -316,6 +318,7 @@ export default function Catalog({ search = '' }) {
   const featured = recipesWithBanners.find((recipe) => recipe.slug === featuredSlug) || recipesWithBanners[0] || null
   const bannerConf = featured ? getBanner(featured.slug) : null
   const featuredIsNotebook = isNotebookRecipe(featured)
+  const featuredHardwareFit = featured ? getRecipeHardwareFit(featured, metrics) : null
   const showHero = Boolean(featured && bannerConf && !search && category === 'all')
 
   return (
@@ -356,12 +359,22 @@ export default function Catalog({ search = '' }) {
               }`}>
                 {getRecipeSurfaceLabel(featured)}
               </span>
+              {featuredHardwareFit && (
+                <span className={`inline-block text-[10px] font-bold font-label px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 ml-2 ${getHardwareFitBannerClass(featuredHardwareFit)}`}>
+                  Host {featuredHardwareFit.label}
+                </span>
+              )}
               <h1 className="text-3xl font-bold text-text tracking-tight font-display m-0 drop-shadow-md">
                 {featured.name}
               </h1>
               <p className="text-text-muted text-sm leading-relaxed max-w-md line-clamp-2 m-0 mt-1 drop-shadow-sm">
                 {featured.description}
               </p>
+              {featuredHardwareFit?.headline && (
+                <p className="text-text-muted text-xs leading-relaxed max-w-lg m-0 mt-2 drop-shadow-sm">
+                  {featuredHardwareFit.headline}
+                </p>
+              )}
               <div className="mt-4 flex items-center gap-3">
                 {featured.running && featured.ready ? (
                   <a
@@ -447,6 +460,13 @@ export default function Catalog({ search = '' }) {
       </div>
     </div>
   )
+}
+
+function getHardwareFitBannerClass(fit) {
+  if (fit.tone === 'success') return 'text-success bg-success/15 border border-success/20'
+  if (fit.tone === 'warning') return 'text-warning bg-warning/15 border border-warning/20'
+  if (fit.tone === 'error') return 'text-error bg-error-surface border border-error/20'
+  return 'text-text-dim bg-surface/45 border border-glass-border'
 }
 
 function SectionIcon({ kind }) {

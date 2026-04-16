@@ -8,6 +8,7 @@ import {
   getRecipeUrl,
   isNotebookRecipe,
 } from '../utils/recipePresentation'
+import { getRecipeHardwareFit } from '../utils/hardwareFit'
 
 const RecipeConfigTab = lazy(() => import('../components/recipe-detail/ConfigWorkspace'))
 const InlineConfigWorkspace = lazy(() => import('../components/recipe-detail/ConfigWorkspace').then((module) => ({ default: module.InlineConfigWorkspace })))
@@ -32,6 +33,7 @@ export default function RecipeDetail() {
   const recipes = useStore((s) => s.recipes)
   const recipeDetails = useStore((s) => s.recipeDetails)
   const recipeDetailStatus = useStore((s) => s.recipeDetailStatus)
+  const metrics = useStore((s) => s.metrics)
   const clearRecipe = useStore((s) => s.clearRecipe)
   const installing = useStore((s) => s.installing)
   const updating = useStore((s) => s.updating)
@@ -53,6 +55,7 @@ export default function RecipeDetail() {
 
   const recipeSummary = recipes.find((r) => r.slug === selectedRecipe)
   const recipe = recipeDetails[selectedRecipe] || recipeSummary
+  const hardwareFit = getRecipeHardwareFit(recipe, metrics)
   const detailStatus = selectedRecipe ? recipeDetailStatus[selectedRecipe] : null
   const logoUrl = useThemedLogo(recipe?.logo)
   const scrollRef = useRef(null)
@@ -261,6 +264,7 @@ export default function RecipeDetail() {
               {!isBusy && recipe.running && isReady && <StatusPill color="success">Running</StatusPill>}
               {!isBusy && recipe.starting && <StatusPill color="warning" pulse>Starting...</StatusPill>}
               {!isBusy && !recipe.running && !recipe.starting && recipe.installed && <StatusPill color="dim">Stopped</StatusPill>}
+              <StatusPill color={hardwareFit.tone}>{`Host ${hardwareFit.label}`}</StatusPill>
             </div>
           </div>
 
@@ -357,12 +361,12 @@ export default function RecipeDetail() {
         {activeTab === 'details' ? (
           showDedicatedConfigTab ? (
             <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
-              <AboutTab recipe={recipe} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
+              <AboutTab recipe={recipe} hardwareFit={hardwareFit} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
             </div>
           ) : (
             <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,50rem)_minmax(24rem,1fr)]">
               <div className="overflow-y-auto border-b border-outline-dim xl:border-b-0 xl:border-r bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
-                <AboutTab recipe={recipe} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
+                <AboutTab recipe={recipe} hardwareFit={hardwareFit} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
               </div>
 
               <Suspense fallback={<ConfigWorkspaceSkeleton inline />}>
@@ -483,12 +487,13 @@ function StatusPill({ color, pulse, children }) {
     primary: 'bg-primary/10 text-primary',
     success: 'bg-success/10 text-success',
     warning: 'bg-warning/10 text-warning',
+    error: 'bg-error-surface text-error',
     dim: 'bg-surface-highest text-text-dim',
   }
   return (
     <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium font-label px-2.5 py-1 rounded-full ${colorMap[color]} ${pulse ? 'animate-pulse' : ''}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${
-        color === 'primary' ? 'bg-primary' : color === 'success' ? 'bg-success' : color === 'warning' ? 'bg-warning' : 'bg-text-dim'
+        color === 'primary' ? 'bg-primary' : color === 'success' ? 'bg-success' : color === 'warning' ? 'bg-warning' : color === 'error' ? 'bg-error' : 'bg-text-dim'
       }`} />
       {children}
     </span>
@@ -538,7 +543,7 @@ function RelatedRecipeCard({ recipe, onSelect }) {
   )
 }
 
-function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
+function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
@@ -576,6 +581,8 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
               ))}
             </div>
           )}
+
+          <HostFitPanel fit={hardwareFit} />
 
           {relatedRecipes.length > 0 && (
             <div className="space-y-4 pt-5 border-t border-outline-dim">
@@ -665,6 +672,46 @@ function AboutTab({ recipe, purging, purgeRecipe, isBuilding }) {
             </button>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function HostFitPanel({ fit }) {
+  const panelClass = fit.tone === 'success'
+    ? 'border-success/20 bg-success/5'
+    : fit.tone === 'warning'
+      ? 'border-warning/20 bg-warning/5'
+      : fit.tone === 'error'
+        ? 'border-error/20 bg-error-surface/60'
+        : 'border-outline-dim bg-surface-high/30'
+
+  return (
+    <div className="space-y-4 pt-5 border-t border-outline-dim">
+      <div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Host Fit Check</div>
+        <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+          {fit.headline}
+        </p>
+      </div>
+
+      <div className={`rounded-2xl border p-4 ${panelClass}`}>
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <StatusPill color={fit.tone}>{`Host ${fit.label}`}</StatusPill>
+        </div>
+        <div className="space-y-2.5">
+          {fit.checks.map((check) => (
+            <div key={check.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface/40 px-3 py-2.5">
+              <div>
+                <div className="text-sm font-semibold text-text font-display">{check.label}</div>
+                <div className="text-xs text-text-dim leading-5 mt-1">{check.message}</div>
+              </div>
+              <StatusPill color={check.status === 'critical' ? 'error' : check.status === 'warning' ? 'warning' : check.status === 'good' ? 'success' : 'dim'}>
+                {check.status === 'critical' ? 'Action needed' : check.status === 'warning' ? 'Review' : check.status === 'good' ? 'OK' : 'Unknown'}
+              </StatusPill>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
