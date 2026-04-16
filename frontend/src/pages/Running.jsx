@@ -36,7 +36,14 @@ export default function Running() {
       ) : (
         <div className="flex flex-col gap-3 mb-10 animate-fadeIn">
           {running.map((r) => (
-            <RunningCard key={r.slug} recipe={r} onSelect={selectRecipe} onStop={stopRecipe} onRestart={restartRecipe} restarting={restarting === r.slug} />
+            <RunningCard
+              key={r.slug}
+              recipe={r}
+              onSelect={selectRecipe}
+              onStop={stopRecipe}
+              onRestart={restartRecipe}
+              restarting={restarting === r.slug}
+            />
           ))}
         </div>
       )}
@@ -122,12 +129,6 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
             </span>
           )}
 
-          {/* GPU / RAM bars */}
-          <div className="hidden lg:flex items-center gap-3">
-            <MiniBar label="GPU" value={recipe.gpu_pct || 0} color="var(--tertiary)" />
-            <MiniBar label="RAM" value={recipe.ram_gb ? `${recipe.ram_gb}G` : '—'} color="var(--tertiary)" />
-          </div>
-
           {/* Actions */}
           {isReady && (
             <a
@@ -209,11 +210,3 @@ function StoppedCard({ recipe, onSelect, onLaunch }) {
   )
 }
 
-function MiniBar({ label, value }) {
-  return (
-    <div className="text-center">
-      <div className="text-[10px] text-text-dim font-label">{label}</div>
-      <div className="text-xs font-semibold text-tertiary font-label">{typeof value === 'number' ? `${value}%` : value}</div>
-    </div>
-  )
-}

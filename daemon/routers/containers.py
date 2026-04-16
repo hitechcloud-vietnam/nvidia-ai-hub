@@ -14,6 +14,8 @@ from daemon.services.docker_service import (
     purge_recipe,
     get_running_containers,
     get_container_name,
+    stream_container_logs,
+    exec_container_command,
     mark_ready,
     clear_ready,
     is_ready,
@@ -165,6 +167,10 @@ class ComposeBody(BaseModel):
 
 class EnvBody(BaseModel):
     content: str
+
+
+class ExecBody(BaseModel):
+    command: str
 
 
 def _compose_file_for_slug(slug: str) -> Path:
@@ -348,7 +354,13 @@ async def container_log_ws(websocket: WebSocket, slug: str):
     proc = None
     health_task = None
     try:
-        container = await get_container_name(slug)
+        container = None
+        for _ in range(20):
+            container = await get_container_name(slug)
+            if container:
+                break
+            await asyncio.sleep(0.5)
+
         if not container:
             await websocket.send_text("[nvidia-ai-hub] Container not running")
             await websocket.close()
@@ -366,24 +378,41 @@ async def container_log_ws(websocket: WebSocket, slug: str):
 
         health_task = asyncio.create_task(_notify_when_ready())
 
-        proc = await asyncio.create_subprocess_exec(
-            "docker", "logs", "-f", "--tail", "200", container,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT,
-        )
-
-        async for line in proc.stdout:
-            text = line.decode(errors="replace").rstrip()
-            # Handle carriage returns (progress bars): only keep last segment
-            if '\r' in text:
-                text = text.rsplit('\r', 1)[-1]
-            if text:
-                await websocket.send_text(text)
+        async for text in stream_container_logs(container):
+            await websocket.send_text(text)
     except (WebSocketDisconnect, RuntimeError):
         pass
     finally:
         if health_task and not health_task.done():
             health_task.cancel()
-        if proc and proc.returncode is None:
-            proc.kill()
-            await proc.wait()
+
+
+@router.post("/api/recipes/{slug}/exec")
+async def exec_in_container(slug: str, body: ExecBody):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    command = (body.command or "").strip()
+    if not command:
+        raise HTTPException(status_code=400, detail="Command is required")
+
+    container = await get_container_name(slug)
+    if not container:
+        raise HTTPException(status_code=409, detail="Container not running")
+
+    lines: list[str] = []
+    exit_code = 0
+    async for text, code in exec_container_command(container, command):
+        if text:
+            lines.append(text)
+        if code is not None:
+            exit_code = code
+
+    return {
+        "slug": slug,
+        "container": container,
+        "command": command,
+        "exit_code": exit_code,
+        "lines": lines,
+    }

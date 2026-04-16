@@ -5,13 +5,15 @@ import platform
 import re
 import shutil
 import socket
+import subprocess
 import time
 from pathlib import Path
 
 import psutil
 
 from daemon.config import settings
-from daemon.models.container import GpuMetrics, SystemMetrics
+from daemon.models.container import GpuMetrics, RecipeMetrics, SystemMetrics
+from daemon.services.registry_service import get_recipes
 
 
 def _round_gb(value: float) -> float:
@@ -54,8 +56,279 @@ async def _run_command(*args: str, timeout_seconds: float = 5.0) -> str:
         if proc.returncode not in (0, -9, 1):
             return ""
         return stdout.decode(errors="replace").strip()
+    except NotImplementedError:
+        try:
+            completed = await asyncio.to_thread(
+                subprocess.run,
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                timeout=timeout_seconds,
+            )
+            if completed.returncode not in (0, -9, 1):
+                return ""
+            return completed.stdout.decode(errors="replace").strip()
+        except Exception:
+            return ""
     except Exception:
         return ""
+
+
+def _safe_float_str(value: str) -> float:
+    try:
+        return round(float(str(value).strip()), 2)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def _safe_int_str(value: str) -> int:
+    try:
+        return int(float(str(value).strip()))
+    except (ValueError, TypeError):
+        return 0
+
+
+async def _get_container_pids(container_name: str) -> set[int]:
+    output = await _run_command("docker", "top", container_name, "-eo", "pid", timeout_seconds=4.0)
+    if not output:
+        return set()
+
+    pids: set[int] = set()
+    for line in output.splitlines():
+        text = line.strip()
+        if not text or text.lower() == "pid" or text.startswith("PID"):
+            continue
+        token = text.split()[0]
+        if token.isdigit():
+            pids.add(int(token))
+    return pids
+
+
+async def _collect_nvidia_process_metrics(gpu_index_by_uuid: dict[str, int]) -> dict[int, dict[str, object]]:
+    if not shutil.which("nvidia-smi"):
+        return {}
+
+    snapshot: dict[int, dict[str, object]] = {}
+
+    pmon_output = await _run_command("nvidia-smi", "pmon", "-c", "1", "-s", "um", timeout_seconds=5.0)
+    if pmon_output:
+        for raw_line in pmon_output.splitlines():
+            text = raw_line.strip()
+            if not text or text.startswith("#"):
+                continue
+            parts = text.split()
+            if len(parts) < 5 or not parts[1].isdigit():
+                continue
+
+            gpu_index = _safe_int(parts[0])
+            pid = int(parts[1])
+            sm_util = max(0, _safe_int(parts[3]))
+            mem_util = max(0, _safe_int(parts[4]))
+
+            record = snapshot.setdefault(
+                pid,
+                {
+                    "gpu_indices": set(),
+                    "util_by_gpu": {},
+                    "mem_util_by_gpu": {},
+                    "gpu_memory_used_mb": 0,
+                },
+            )
+            record["gpu_indices"].add(gpu_index)
+            record["util_by_gpu"][gpu_index] = max(record["util_by_gpu"].get(gpu_index, 0), sm_util)
+            record["mem_util_by_gpu"][gpu_index] = max(record["mem_util_by_gpu"].get(gpu_index, 0), mem_util)
+
+    compute_output = await _run_command(
+        "nvidia-smi",
+        "--query-compute-apps=pid,gpu_uuid,used_gpu_memory",
+        "--format=csv,noheader,nounits",
+        timeout_seconds=5.0,
+    )
+    if compute_output:
+        for raw_line in compute_output.splitlines():
+            if not raw_line.strip():
+                continue
+            parts = [part.strip() for part in raw_line.split(",", maxsplit=2)]
+            if len(parts) < 3:
+                continue
+
+            pid = _safe_int(parts[0])
+            if pid <= 0:
+                continue
+            gpu_index = gpu_index_by_uuid.get(parts[1])
+            used_mb = _safe_int(parts[2])
+
+            record = snapshot.setdefault(
+                pid,
+                {
+                    "gpu_indices": set(),
+                    "util_by_gpu": {},
+                    "mem_util_by_gpu": {},
+                    "gpu_memory_used_mb": 0,
+                },
+            )
+            if gpu_index is not None:
+                record["gpu_indices"].add(gpu_index)
+            record["gpu_memory_used_mb"] = int(record["gpu_memory_used_mb"]) + max(0, used_mb)
+
+    return snapshot
+
+
+async def _apply_nvidia_recipe_gpu_metrics(
+    per_recipe: dict[str, RecipeMetrics],
+    container_names_by_slug: dict[str, list[str]],
+    system_metrics: SystemMetrics,
+) -> set[str]:
+    gpu_index_by_uuid = {gpu.uuid: gpu.index for gpu in system_metrics.gpus if gpu.uuid}
+    process_snapshot = await _collect_nvidia_process_metrics(gpu_index_by_uuid)
+    if not process_snapshot:
+        return set()
+
+    gpu_by_index = {gpu.index: gpu for gpu in system_metrics.gpus}
+    attributed: set[str] = set()
+
+    for slug, container_names in container_names_by_slug.items():
+        recipe_metrics = per_recipe.get(slug)
+        if not recipe_metrics:
+            continue
+
+        container_pids: set[int] = set()
+        for container_name in container_names:
+            container_pids.update(await _get_container_pids(container_name))
+
+        if not container_pids:
+            continue
+
+        util_by_gpu: dict[int, int] = {}
+        touched_gpu_indices: set[int] = set()
+        gpu_memory_used_mb = 0
+
+        for pid in container_pids:
+            record = process_snapshot.get(pid)
+            if not record:
+                continue
+
+            gpu_indices = record.get("gpu_indices", set())
+            touched_gpu_indices.update(gpu_indices)
+            for gpu_index, util in record.get("util_by_gpu", {}).items():
+                util_by_gpu[gpu_index] = min(100, util_by_gpu.get(gpu_index, 0) + _safe_int(util))
+            gpu_memory_used_mb += _safe_int(record.get("gpu_memory_used_mb", 0))
+
+        if not touched_gpu_indices and gpu_memory_used_mb <= 0:
+            continue
+
+        touched_gpus = [gpu_by_index[index] for index in sorted(touched_gpu_indices) if index in gpu_by_index]
+        if touched_gpus:
+            recipe_metrics.gpu_name = touched_gpus[0].name if len(touched_gpus) == 1 else f"{len(touched_gpus)} GPUs"
+            recipe_metrics.gpu_memory_total_mb = sum(gpu.memory_total_mb for gpu in touched_gpus)
+            recipe_metrics.temperature = max((gpu.temperature for gpu in touched_gpus), default=recipe_metrics.temperature)
+            recipe_metrics.temperature_source = "nvidia-smi"
+
+        recipe_metrics.gpu_utilization = max(util_by_gpu.values(), default=recipe_metrics.gpu_utilization)
+        recipe_metrics.gpu_memory_used_mb = gpu_memory_used_mb or recipe_metrics.gpu_memory_used_mb
+        recipe_metrics.telemetry_source = "docker-stats + nvidia-smi pmon"
+        attributed.add(slug)
+
+    return attributed
+
+
+async def get_recipe_metrics() -> dict[str, RecipeMetrics]:
+    output = await _run_command(
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}",
+        timeout_seconds=8.0,
+    )
+    if not output:
+        return {}
+
+    per_recipe: dict[str, RecipeMetrics] = {}
+    container_names_by_slug: dict[str, list[str]] = {}
+    now = int(time.time())
+    known_projects = {
+        f"nvidia-ai-hub-{slug}": slug
+        for slug in get_recipes().keys()
+    }
+    ordered_projects = sorted(known_projects.items(), key=lambda item: len(item[0]), reverse=True)
+
+    for raw_line in output.splitlines():
+        if not raw_line.strip():
+            continue
+        parts = raw_line.split("\t")
+        if len(parts) < 3:
+            continue
+
+        name = parts[0].strip()
+        cpu_percent = _safe_float_str(parts[1].replace("%", ""))
+        mem_usage = parts[2].strip()
+
+        slug = ""
+        for project, candidate_slug in ordered_projects:
+            if name == project or name.startswith(f"{project}-"):
+                slug = candidate_slug
+                break
+        if not slug:
+            continue
+
+        container_names_by_slug.setdefault(slug, []).append(name)
+
+        used_mb = 0.0
+        limit_mb = 0.0
+        if "/" in mem_usage:
+            used_raw, limit_raw = [segment.strip() for segment in mem_usage.split("/", 1)]
+            used_mb = _to_mb(used_raw)
+            limit_mb = _to_mb(limit_raw)
+
+        entry = per_recipe.get(slug)
+        if not entry:
+            entry = RecipeMetrics(slug=slug, running=True, telemetry_source="docker-stats", updated_at=now)
+            per_recipe[slug] = entry
+
+        entry.container_count += 1
+        entry.cpu_percent = round(entry.cpu_percent + cpu_percent, 1)
+        entry.memory_used_mb = round(entry.memory_used_mb + used_mb, 1)
+        entry.memory_limit_mb = round(entry.memory_limit_mb + limit_mb, 1)
+
+    system_metrics = await get_system_metrics()
+    attributed_gpu_slugs = await _apply_nvidia_recipe_gpu_metrics(per_recipe, container_names_by_slug, system_metrics)
+    for entry in per_recipe.values():
+        if entry.memory_limit_mb > 0:
+            entry.memory_percent = round((entry.memory_used_mb / entry.memory_limit_mb) * 100, 1)
+        if entry.slug not in attributed_gpu_slugs:
+            entry.gpu_name = system_metrics.gpu_name
+            entry.gpu_utilization = system_metrics.gpu_utilization
+            entry.gpu_memory_used_mb = system_metrics.gpu_memory_used_mb
+            entry.gpu_memory_total_mb = system_metrics.gpu_memory_total_mb
+            entry.temperature = system_metrics.gpu_temperature or system_metrics.cpu_temperature
+            entry.temperature_source = system_metrics.gpu_temperature_source or system_metrics.cpu_temperature_source
+            entry.telemetry_source = "docker-stats + host gpu"
+
+    return per_recipe
+
+
+def _to_mb(value: str) -> float:
+    text = str(value or "").strip().upper()
+    match = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*([KMGTP]?I?B)$", text)
+    if not match:
+        return 0.0
+
+    amount = float(match.group(1))
+    unit = match.group(2)
+    factors = {
+        "KIB": 1 / 1024,
+        "MIB": 1,
+        "GIB": 1024,
+        "TIB": 1024 * 1024,
+        "KB": 1 / 1000,
+        "MB": 1,
+        "GB": 1000,
+        "TB": 1000 * 1000,
+        "B": 1 / (1024 * 1024),
+    }
+    return round(amount * factors.get(unit, 0.0), 1)
 
 
 def _parse_numeric(value) -> float:

@@ -12,6 +12,7 @@ export const useStore = create((set, get) => ({
   recipeDetails: {},
   recipeDetailStatus: {},
   metrics: null,
+  recipeMetrics: {},
   metricHistory: [],
   buildLogs: {},
   installing: null,
@@ -25,7 +26,7 @@ export const useStore = create((set, get) => ({
   _recipeDetailPromises: {},
   selectedRecipe: null,
   containerLogs: {},
-  _logWs: null,
+  _logWs: {},
   theme: getInitialTheme(),
 
   toggleTheme: () => {
@@ -64,6 +65,7 @@ export const useStore = create((set, get) => ({
       metricHistory: [...state.metricHistory, nextPoint].slice(-60),
     }
   }),
+  setRecipeMetrics: (recipeMetrics) => set({ recipeMetrics: recipeMetrics || {} }),
 
   selectRecipe: (slug) => {
     set({ selectedRecipe: slug })
@@ -71,23 +73,27 @@ export const useStore = create((set, get) => ({
   },
 
   clearRecipe: () => {
-    get().disconnectLogs()
     set({ selectedRecipe: null })
   },
 
-  connectLogs: (slug) => {
-    get().disconnectLogs()
+  connectLogs: (slug, options = {}) => {
+    const { reset = false } = options
+    const existing = get()._logWs[slug]
+    if (existing && existing.readyState <= 1) return
+
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:'
     const ws = new WebSocket(`${wsProto}//${location.host}/ws/logs/${slug}`)
     set({
-      _logWs: ws,
-      containerLogs: { ...get().containerLogs, [slug]: [] },
+      _logWs: { ...get()._logWs, [slug]: ws },
+      containerLogs: reset
+        ? { ...get().containerLogs, [slug]: [] }
+        : get().containerLogs,
     })
 
     ws.onmessage = (e) => {
       if (e.data === '[nvidia-ai-hub:ready]') {
         // Backend marked it ready; refetch so recipe.ready updates everywhere
-        get().fetchRecipes()
+        get().fetchRecipes({ force: true })
         get().fetchRecipeDetail(slug, { force: true })
         return
       }
@@ -115,16 +121,32 @@ export const useStore = create((set, get) => ({
     }
 
     ws.onclose = () => {
-      set({ _logWs: null })
+      set((state) => {
+        const next = { ...state._logWs }
+        delete next[slug]
+        return { _logWs: next }
+      })
     }
   },
 
-  disconnectLogs: () => {
-    const ws = get()._logWs
+  disconnectLogs: (slug) => {
+    if (!slug) {
+      Object.values(get()._logWs).forEach((ws) => {
+        if (ws && ws.readyState <= 1) ws.close()
+      })
+      set({ _logWs: {} })
+      return
+    }
+
+    const ws = get()._logWs[slug]
     if (ws && ws.readyState <= 1) {
       ws.close()
     }
-    set({ _logWs: null })
+    set((state) => {
+      const next = { ...state._logWs }
+      delete next[slug]
+      return { _logWs: next }
+    })
   },
 
   addBuildLine: (slug, line) => set((s) => {
@@ -144,10 +166,11 @@ export const useStore = create((set, get) => ({
     return { buildLogs: { ...s.buildLogs, [slug]: [...prev, line] } }
   }),
 
-  fetchRecipes: async () => {
+  fetchRecipes: async (options = {}) => {
+    const { force = false } = options
     const now = Date.now()
     if (get()._recipesPromise) return get()._recipesPromise
-    if (get().recipes.length > 0 && now - get().recipesLoadedAt < 4000) return get().recipes
+    if (!force && get().recipes.length > 0 && now - get().recipesLoadedAt < 4000) return get().recipes
 
     const request = (async () => {
       try {
@@ -230,9 +253,11 @@ export const useStore = create((set, get) => ({
     set({ installing: slug, buildLogs: { ...get().buildLogs, [slug]: [] } })
 
     try {
-      await fetch(`/api/recipes/${slug}/install`, { method: 'POST' })
+      const res = await fetch(`/api/recipes/${slug}/install`, { method: 'POST' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Install POST failed:', e)
+      get().addBuildLine(slug, `[error] ${e.message || 'Install request failed'}`)
       set({ installing: null })
       return
     }
@@ -245,10 +270,8 @@ export const useStore = create((set, get) => ({
     ws.onmessage = (e) => {
       if (e.data === '[done]') {
         set({ installing: null, _ws: null })
-        get().fetchRecipes()
+        get().fetchRecipes({ force: true })
         get().fetchRecipeDetail(slug, { force: true })
-        // Auto-connect container logs after install completes
-        setTimeout(() => get().connectLogs(slug), 1000)
         return
       }
       get().addBuildLine(slug, e.data)
@@ -270,9 +293,11 @@ export const useStore = create((set, get) => ({
     set({ updating: slug, buildLogs: { ...get().buildLogs, [slug]: [] } })
 
     try {
-      await fetch(`/api/recipes/${slug}/update`, { method: 'POST' })
+      const res = await fetch(`/api/recipes/${slug}/update`, { method: 'POST' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Update POST failed:', e)
+      get().addBuildLine(slug, `[error] ${e.message || 'Update request failed'}`)
       set({ updating: null })
       return
     }
@@ -284,9 +309,8 @@ export const useStore = create((set, get) => ({
     ws.onmessage = (e) => {
       if (e.data === '[done]') {
         set({ updating: null, _ws: null })
-        get().fetchRecipes()
+        get().fetchRecipes({ force: true })
         get().fetchRecipeDetail(slug, { force: true })
-        setTimeout(() => get().connectLogs(slug), 1000)
         return
       }
       get().addBuildLine(slug, e.data)
@@ -315,7 +339,7 @@ export const useStore = create((set, get) => ({
         }))
         if (data.status === 'done') {
           set({ [stateKey]: null })
-          get().fetchRecipes()
+          get().fetchRecipes({ force: true })
           get().fetchRecipeDetail(slug, { force: true })
         } else {
           setTimeout(poll, 1000)
@@ -339,7 +363,7 @@ export const useStore = create((set, get) => ({
       console.error('Launch failed:', e)
     } finally {
       set({ _inFlight: { ...get()._inFlight, [slug]: undefined } })
-      await get().fetchRecipes()
+      await get().fetchRecipes({ force: true })
       await get().fetchRecipeDetail(slug, { force: true })
     }
   },
@@ -356,7 +380,7 @@ export const useStore = create((set, get) => ({
       console.error('Stop failed:', e)
     } finally {
       set({ _inFlight: { ...get()._inFlight, [slug]: undefined } })
-      await get().fetchRecipes()
+      await get().fetchRecipes({ force: true })
       await get().fetchRecipeDetail(slug, { force: true })
     }
   },
@@ -375,7 +399,7 @@ export const useStore = create((set, get) => ({
       console.error('Restart failed:', e)
     } finally {
       set({ restarting: null, _inFlight: { ...get()._inFlight, [slug]: undefined } })
-      await get().fetchRecipes()
+      await get().fetchRecipes({ force: true })
       await get().fetchRecipeDetail(slug, { force: true })
     }
   },
@@ -395,7 +419,7 @@ export const useStore = create((set, get) => ({
       console.error('Remove failed:', e)
     } finally {
       set({ removing: null, _inFlight: { ...get()._inFlight, [slug]: undefined } })
-      await get().fetchRecipes()
+      await get().fetchRecipes({ force: true })
       set((state) => {
         const nextDetails = { ...state.recipeDetails }
         delete nextDetails[slug]
@@ -418,7 +442,7 @@ export const useStore = create((set, get) => ({
       console.error('Purge failed:', e)
     } finally {
       set({ purging: null })
-      await get().fetchRecipes()
+      await get().fetchRecipes({ force: true })
       await get().fetchRecipeDetail(slug, { force: true })
     }
   },

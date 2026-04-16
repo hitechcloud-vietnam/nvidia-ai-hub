@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import { useStore } from './store'
 import { useMetrics } from './hooks/useMetrics'
+import { useRecipeMetrics } from './hooks/useRecipeMetrics'
 import ThemeToggle from './components/ThemeToggle'
 import Catalog from './pages/Catalog'
 
@@ -27,6 +28,7 @@ export default function App() {
   const [search, setSearch] = useState('')
 
   useMetrics()
+  useRecipeMetrics()
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)

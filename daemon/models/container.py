@@ -29,6 +29,24 @@ class GpuMetrics(BaseModel):
     fan_speed_percent: int = 0
 
 
+class RecipeMetrics(BaseModel):
+    slug: str
+    running: bool = False
+    container_count: int = 0
+    cpu_percent: float = 0.0
+    memory_used_mb: float = 0.0
+    memory_limit_mb: float = 0.0
+    memory_percent: float = 0.0
+    gpu_name: str = ""
+    gpu_utilization: int = 0
+    gpu_memory_used_mb: int = 0
+    gpu_memory_total_mb: int = 0
+    temperature: float = 0.0
+    temperature_source: str = ""
+    telemetry_source: str = ""
+    updated_at: int = 0
+
+
 class SystemMetrics(BaseModel):
     platform: str = ""
     hostname: str = ""

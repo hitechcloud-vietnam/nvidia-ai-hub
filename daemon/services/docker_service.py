@@ -1,9 +1,12 @@
 from __future__ import annotations
 import asyncio
+import locale
 import os
+import re
 import secrets
 import shutil
 import subprocess
+import threading
 from pathlib import Path
 from typing import AsyncGenerator
 
@@ -114,6 +117,36 @@ def _runtime_env_template_file(recipe_dir: Path) -> Path:
     return recipe_dir / ".env.example"
 
 
+_ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+_ANSI_OSC_RE = re.compile(r"\x1B\].*?(?:\x07|\x1B\\)")
+_CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]")
+
+
+def _sanitize_command_text(text: str) -> str:
+    if not text:
+        return ""
+
+    text = _ANSI_OSC_RE.sub("", text)
+    text = _ANSI_ESCAPE_RE.sub("", text)
+    text = _CONTROL_CHARS_RE.sub("", text)
+    text = text.replace("\ufffd", "")
+    text = re.sub(r"(^|\n)m(?=\d{4}-\d{2}-\d{2}T)", r"\1", text)
+    return text
+
+
+def _decode_command_output(data: bytes) -> str:
+    if not data:
+        return ""
+
+    for encoding in ("utf-8", locale.getpreferredencoding(False), "cp1252"):
+        try:
+            return _sanitize_command_text(data.decode(encoding))
+        except (LookupError, UnicodeDecodeError):
+            continue
+
+    return _sanitize_command_text(data.decode("utf-8", errors="replace"))
+
+
 async def _run_command_capture(*args: str) -> tuple[int, str, str]:
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -122,16 +155,48 @@ async def _run_command_capture(*args: str) -> tuple[int, str, str]:
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await proc.communicate()
-        return proc.returncode, stdout.decode(errors="replace"), stderr.decode(errors="replace")
+        return proc.returncode, _decode_command_output(stdout), _decode_command_output(stderr)
     except NotImplementedError:
         completed = await asyncio.to_thread(
             subprocess.run,
             args,
             capture_output=True,
-            text=True,
             check=False,
         )
-        return completed.returncode, completed.stdout or "", completed.stderr or ""
+        return (
+            completed.returncode,
+            _decode_command_output(completed.stdout or b""),
+            _decode_command_output(completed.stderr or b""),
+        )
+
+
+async def _run_command_output(
+    cmd: list[str],
+    cwd: str | None = None,
+    env: dict | None = None,
+) -> tuple[int, str]:
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+            cwd=cwd,
+            env=env,
+        )
+        output = await proc.stdout.read()
+        await proc.wait()
+        return proc.returncode, _decode_command_output(output)
+    except NotImplementedError:
+        completed = await asyncio.to_thread(
+            subprocess.run,
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+            env=env,
+            check=False,
+        )
+        return completed.returncode, _decode_command_output(completed.stdout or b"")
 
 
 def _render_runtime_env(template_text: str) -> str:
@@ -204,26 +269,110 @@ def _parse_vllm_model_service(recipe_dir: Path) -> tuple[str, str] | None:
 
 async def _stream_proc(
     cmd: list[str],
-    cwd: str,
+    cwd: str | None = None,
     env: dict | None = None,
 ) -> AsyncGenerator[tuple[str, int | None], None]:
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=cwd,
-        env=env,
-    )
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+            cwd=cwd,
+            env=env,
+        )
 
-    async for line in proc.stdout:
-        text = line.decode(errors="replace").rstrip()
-        if "\r" in text:
-            text = text.rsplit("\r", 1)[-1]
+        async for line in proc.stdout:
+            text = _decode_command_output(line).rstrip()
+            if "\r" in text:
+                text = text.rsplit("\r", 1)[-1]
+            if text:
+                yield text, None
+
+        await proc.wait()
+        yield "", proc.returncode
+    except NotImplementedError:
+        queue: asyncio.Queue[tuple[str, int | None]] = asyncio.Queue()
+        loop = asyncio.get_running_loop()
+
+        def _worker() -> None:
+            try:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    cwd=cwd,
+                    env=env,
+                    bufsize=1,
+                )
+                assert proc.stdout is not None
+                for line in proc.stdout:
+                    text = _decode_command_output(line).rstrip()
+                    if "\r" in text:
+                        text = text.rsplit("\r", 1)[-1]
+                    if text:
+                        loop.call_soon_threadsafe(queue.put_nowait, (text, None))
+                proc.wait()
+                loop.call_soon_threadsafe(queue.put_nowait, ("", proc.returncode))
+            except Exception as exc:
+                message = str(exc) or exc.__class__.__name__
+                loop.call_soon_threadsafe(queue.put_nowait, (f"[error] {message}", None))
+                loop.call_soon_threadsafe(queue.put_nowait, ("", 1))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+        while True:
+            text, code = await queue.get()
+            yield text, code
+            if code is not None:
+                return
+
+
+async def stream_container_logs(container: str) -> AsyncGenerator[str, None]:
+    async for text, code in _stream_proc(
+        ["docker", "logs", "-f", "--tail", "200", container],
+        cwd=None,
+    ):
         if text:
-            yield text, None
+            yield text
+        if code is not None:
+            return
 
-    await proc.wait()
-    yield "", proc.returncode
+
+async def exec_container_command(container: str, command: str) -> AsyncGenerator[tuple[str, int | None], None]:
+    shell_cmd = ["docker", "exec", "-i", container, "/bin/sh", "-lc", command]
+    async for text, code in _stream_proc(shell_cmd, cwd=None):
+        yield text, code
+
+
+def _remove_empty_parent_dirs(paths: list[Path], recipe_root: Path, protected_paths: set[Path]) -> list[str]:
+    cleanup_errors: list[str] = []
+    parents: set[Path] = set()
+
+    for path in paths:
+        current = path.parent
+        while True:
+            try:
+                current.relative_to(recipe_root)
+            except ValueError:
+                break
+
+            if current == recipe_root:
+                break
+
+            if current not in protected_paths:
+                parents.add(current)
+            current = current.parent
+
+    for parent in sorted(parents, key=lambda item: len(item.parts), reverse=True):
+        if not parent.exists() or not parent.is_dir():
+            continue
+        try:
+            if not any(parent.iterdir()):
+                parent.rmdir()
+        except Exception as exc:
+            cleanup_errors.append(f"{parent}: {exc}")
+
+    return cleanup_errors
 
 
 async def install_recipe(slug: str) -> AsyncGenerator[str, None]:
@@ -452,17 +601,9 @@ async def launch_recipe(slug: str) -> str:
         return f"Failed to prepare runtime env for {slug}"
 
     cmd = _compose_cmd(slug, recipe_dir) + ["up", "-d"]
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=str(recipe_dir),
-        env=_launch_env(),
-    )
-    output = await proc.stdout.read()
-    await proc.wait()
+    returncode, output = await _run_command_output(cmd, cwd=str(recipe_dir), env=_launch_env())
 
-    if proc.returncode == 0:
+    if returncode == 0:
         db = await get_db()
         try:
             await db.execute(
@@ -473,7 +614,7 @@ async def launch_recipe(slug: str) -> str:
         finally:
             await db.close()
         return "launched"
-    return output.decode(errors="replace")
+    return output
 
 
 async def stop_recipe(slug: str) -> str:
@@ -482,14 +623,8 @@ async def stop_recipe(slug: str) -> str:
         return f"Recipe directory not found for {slug}"
 
     cmd = _compose_cmd(slug, recipe_dir) + ["down"]
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=str(recipe_dir),
-    )
-    await proc.wait()
-    return "stopped" if proc.returncode == 0 else "failed"
+    returncode, _ = await _run_command_output(cmd, cwd=str(recipe_dir))
+    return "stopped" if returncode == 0 else "failed"
 
 
 async def restart_recipe(slug: str) -> str:
@@ -502,35 +637,23 @@ async def restart_recipe(slug: str) -> str:
         return f"Failed to prepare runtime env for {slug}"
 
     cmd = _compose_cmd(slug, recipe_dir) + ["restart"]
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=str(recipe_dir),
-        env=_launch_env(),
-    )
-    output = await proc.stdout.read()
-    await proc.wait()
+    returncode, output = await _run_command_output(cmd, cwd=str(recipe_dir), env=_launch_env())
 
-    if proc.returncode == 0:
+    if returncode == 0:
         return "restarted"
 
     fallback_cmd = _compose_cmd(slug, recipe_dir) + ["up", "-d"]
-    fallback_proc = await asyncio.create_subprocess_exec(
-        *fallback_cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
+    fallback_returncode, fallback_output = await _run_command_output(
+        fallback_cmd,
         cwd=str(recipe_dir),
         env=_launch_env(),
     )
-    fallback_output = await fallback_proc.stdout.read()
-    await fallback_proc.wait()
 
-    if fallback_proc.returncode == 0:
+    if fallback_returncode == 0:
         return "restarted"
 
-    combined = b"\n".join(part for part in [output, fallback_output] if part)
-    return combined.decode(errors="replace") or "failed"
+    combined = "\n".join(part for part in [output, fallback_output] if part)
+    return combined or "failed"
 
 
 async def remove_recipe(slug: str, delete_data: bool = True) -> str:
@@ -539,18 +662,13 @@ async def remove_recipe(slug: str, delete_data: bool = True) -> str:
         return f"Recipe directory not found for {slug}"
 
     cmd = _compose_cmd(slug, recipe_dir) + ["down", "--rmi", "all", "--volumes"]
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=str(recipe_dir),
-    )
-    await proc.wait()
+    returncode, _ = await _run_command_output(cmd, cwd=str(recipe_dir))
 
-    if proc.returncode == 0:
+    if returncode == 0:
         cleanup_errors: list[str] = []
         if delete_data:
-            for path in _find_recipe_bind_paths(slug):
+            bind_paths = _find_recipe_bind_paths(slug)
+            for path in sorted(bind_paths, key=lambda item: len(item.parts), reverse=True):
                 try:
                     if path.is_dir():
                         shutil.rmtree(path)
@@ -564,10 +682,19 @@ async def remove_recipe(slug: str, delete_data: bool = True) -> str:
             data_root = recipe_dir / "data"
             if data_root.exists():
                 try:
-                    if not any(data_root.iterdir()):
-                        data_root.rmdir()
+                    shutil.rmtree(data_root)
                 except Exception as exc:
                     cleanup_errors.append(f"{data_root}: {exc}")
+
+            protected_paths = {
+                recipe_dir.resolve(),
+                (recipe_dir / "docker-compose.yml").resolve(),
+                (recipe_dir / "recipe.yaml").resolve(),
+                (recipe_dir / ".env").resolve(),
+                (recipe_dir / ".env.example").resolve(),
+                data_root.resolve(),
+            }
+            cleanup_errors.extend(_remove_empty_parent_dirs(bind_paths, recipe_dir.resolve(), protected_paths))
 
         db = await get_db()
         try:
@@ -581,18 +708,17 @@ async def remove_recipe(slug: str, delete_data: bool = True) -> str:
 
 async def get_running_containers() -> list[ContainerInfo]:
     try:
-        proc = await asyncio.create_subprocess_exec(
+        returncode, stdout, _ = await _run_command_capture(
             "docker", "ps", "--filter", "label=com.docker.compose.project",
             "--format", '{{.Names}}\t{{.Status}}\t{{.Image}}\t{{.Ports}}',
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
         )
-        stdout, _ = await proc.communicate()
+        if returncode != 0:
+            return []
     except Exception:
         return []
 
     containers = []
-    for line in stdout.decode().strip().splitlines():
+    for line in stdout.strip().splitlines():
         if not line.strip():
             continue
         parts = line.split("\t")
@@ -637,31 +763,27 @@ async def get_project_for_slug(slug: str) -> str | None:
 async def is_recipe_running(slug: str) -> bool:
     project = _compose_project(slug)
     try:
-        proc = await asyncio.create_subprocess_exec(
+        returncode, stdout, _ = await _run_command_capture(
             "docker", "ps", "-q",
             "--filter", f"label=com.docker.compose.project={project}",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
         )
-        stdout, _ = await proc.communicate()
-        return len(stdout.decode().strip()) > 0
+        return returncode == 0 and len(stdout.strip()) > 0
     except Exception:
         return False
 
 
 async def get_running_recipe_slugs(installed_slugs: set[str] | None = None) -> set[str]:
     try:
-        proc = await asyncio.create_subprocess_exec(
+        returncode, stdout, _ = await _run_command_capture(
             "docker", "ps",
             "--format", '{{.Label "com.docker.compose.project"}}',
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
         )
-        stdout, _ = await proc.communicate()
+        if returncode != 0:
+            return set()
         prefix = "nvidia-ai-hub-"
         running: set[str] = set()
 
-        for line in stdout.decode().splitlines():
+        for line in stdout.splitlines():
             project = line.strip()
             if not project.startswith(prefix):
                 continue
@@ -680,15 +802,33 @@ async def get_running_recipe_slugs(installed_slugs: set[str] | None = None) -> s
 async def get_container_name(slug: str) -> str | None:
     project = _compose_project(slug)
     try:
-        proc = await asyncio.create_subprocess_exec(
-            "docker", "compose", "-p", project, "ps",
-            "--format", "{{.Names}}",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+        returncode, stdout, _ = await _run_command_capture(
+            "docker", "ps", "-a",
+            "--filter", f"label=com.docker.compose.project={project}",
+            "--format", "{{.Names}}\t{{.State}}",
         )
-        stdout, _ = await proc.communicate()
-        names = stdout.decode().strip().splitlines()
-        return names[0] if names else None
+        if returncode != 0:
+            return None
+        running_name = None
+        fallback_name = None
+
+        for line in stdout.strip().splitlines():
+            if not line.strip():
+                continue
+
+            parts = line.split("\t")
+            name = parts[0].strip() if len(parts) > 0 else ""
+            state = parts[1].strip().lower() if len(parts) > 1 else ""
+            if not name:
+                continue
+
+            if fallback_name is None:
+                fallback_name = name
+            if state == "running":
+                running_name = name
+                break
+
+        return running_name or fallback_name
     except Exception:
         return None
 

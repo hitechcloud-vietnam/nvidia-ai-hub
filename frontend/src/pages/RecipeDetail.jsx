@@ -25,6 +25,7 @@ function getDetailTabs(recipe) {
   }
 
   tabs.push({ id: 'logs', label: 'Logs' })
+  tabs.push({ id: 'shell', label: 'Terminal' })
   return tabs
 }
 
@@ -49,6 +50,7 @@ export default function RecipeDetail() {
   const purgeRecipe = useStore((s) => s.purgeRecipe)
   const buildLogs = useStore((s) => s.buildLogs)
   const containerLogs = useStore((s) => s.containerLogs)
+  const recipeMetrics = useStore((s) => s.recipeMetrics)
   const connectLogs = useStore((s) => s.connectLogs)
   const disconnectLogs = useStore((s) => s.disconnectLogs)
   const fetchRecipeDetail = useStore((s) => s.fetchRecipeDetail)
@@ -71,6 +73,9 @@ export default function RecipeDetail() {
   const [hfToken, setHfToken] = useState('')
   const [hfSaving, setHfSaving] = useState(false)
   const [hfError, setHfError] = useState('')
+  const [execCommand, setExecCommand] = useState('')
+  const [execHistory, setExecHistory] = useState([])
+  const [execRunning, setExecRunning] = useState(false)
 
   useEffect(() => {
     if (selectedRecipe) {
@@ -87,9 +92,9 @@ export default function RecipeDetail() {
     if (recipe?.running || recipe?.starting) {
       connectLogs(recipe.slug)
     } else {
-      disconnectLogs()
+      disconnectLogs(recipe?.slug)
     }
-    return () => disconnectLogs()
+    return () => disconnectLogs(recipe?.slug)
   }, [recipe?.running, recipe?.starting, recipe?.slug, connectLogs, disconnectLogs])
 
   useEffect(() => {
@@ -117,6 +122,12 @@ export default function RecipeDetail() {
       fetchRecipeDetail(selectedRecipe, { force: true })
     }
   }, [selectedRecipe, recipeDetails, detailStatus?.error, fetchRecipeDetail])
+
+  useEffect(() => {
+    setExecCommand('')
+    setExecHistory([])
+    setExecRunning(false)
+  }, [recipe?.slug])
 
   if (!recipe) {
     return (
@@ -161,6 +172,8 @@ export default function RecipeDetail() {
   const isNotebook = isNotebookRecipe(recipe)
   const cLogs = containerLogs[recipe.slug] || []
   const logLines = isBusy ? (buildLogs[recipe.slug] || []) : cLogs
+  const runtimeMetrics = recipeMetrics[recipe.slug] || null
+  const showAppMonitor = Boolean(isBusy || recipe.running || recipe.starting)
 
   const handleRemove = () => {
     setShowUninstallModal(true)
@@ -218,6 +231,39 @@ export default function RecipeDetail() {
     setRestartingNow(true)
     await restartRecipe(recipe.slug)
     setRestartingNow(false)
+  }
+
+  const handleExec = async (event) => {
+    event?.preventDefault()
+    const command = execCommand.trim()
+    if (!command || execRunning || !recipe?.running) return
+
+    setExecRunning(true)
+    setExecHistory((prev) => [...prev, `$ ${command}`])
+
+    try {
+      const res = await fetch(`/api/recipes/${recipe.slug}/exec`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        const message = payload?.detail || `HTTP ${res.status}`
+        setExecHistory((prev) => [...prev, `[error] ${message}`])
+      } else {
+        setExecHistory((prev) => [
+          ...prev,
+          ...(Array.isArray(payload.lines) && payload.lines.length > 0 ? payload.lines : ['[nvidia-ai-hub] Command completed with no output']),
+          `[exit ${payload.exit_code ?? 0}]`,
+        ])
+      }
+    } catch (error) {
+      setExecHistory((prev) => [...prev, `[error] ${error?.message || 'Command failed'}`])
+    } finally {
+      setExecCommand('')
+      setExecRunning(false)
+    }
   }
 
   const recipeCategories = Array.isArray(recipe.categories) && recipe.categories.length > 0
@@ -378,17 +424,39 @@ export default function RecipeDetail() {
           <Suspense fallback={<ConfigWorkspaceSkeleton />}>
             <RecipeConfigTab key={recipe.slug} recipe={recipe} />
           </Suspense>
+        ) : activeTab === 'logs' ? (
+          <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,1fr)_24rem]">
+            <div className="min-h-0 border-b border-outline-dim xl:border-b-0 xl:border-r">
+              <div className="h-full min-h-0">
+                <TerminalPanel
+                  lines={logLines}
+                  isBuilding={isBusy}
+                  isUpdating={isUpdating}
+                  isRunning={recipe.running || recipe.starting}
+                  isReady={isReady}
+                  hasLogs={cLogs.length > 0}
+                  scrollRef={scrollRef}
+                  wide
+                />
+              </div>
+            </div>
+            <div className="min-h-0 overflow-y-auto bg-surface-low/30">
+              {showAppMonitor ? (
+                <RecipeMonitorPanel recipe={recipe} metrics={runtimeMetrics} />
+              ) : (
+                <div className="px-5 py-5 text-sm text-text-dim">Launch or build the app to see live resource telemetry.</div>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="h-full min-h-0">
-            <TerminalPanel
-              lines={logLines}
-              isBuilding={isBusy}
-              isUpdating={isUpdating}
-              isRunning={recipe.running || recipe.starting}
-              isReady={isReady}
-              hasLogs={cLogs.length > 0}
-              scrollRef={scrollRef}
-              wide
+            <CommandTerminalPanel
+              recipe={recipe}
+              lines={execHistory}
+              command={execCommand}
+              setCommand={setExecCommand}
+              onSubmit={handleExec}
+              running={execRunning}
             />
           </div>
         )}
@@ -866,4 +934,142 @@ function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasL
       </div>
     </div>
   )
+}
+
+function RecipeMonitorPanel({ recipe, metrics }) {
+  const rows = [
+    {
+      label: 'CPU',
+      value: `${Math.round(metrics?.cpu_percent ?? 0)}%`,
+      hint: metrics?.running ? `${metrics.container_count || 0} container${(metrics?.container_count || 0) > 1 ? 's' : ''}` : 'Waiting for live telemetry',
+    },
+    {
+      label: 'RAM',
+      value: metrics?.memory_used_mb ? `${formatMb(metrics.memory_used_mb)} / ${formatMb(metrics.memory_limit_mb)}` : '—',
+      hint: metrics?.memory_percent ? `${metrics.memory_percent}% used` : 'No memory data yet',
+    },
+    {
+      label: 'GPU',
+      value: `${metrics?.gpu_utilization ?? 0}%`,
+      hint: metrics?.gpu_name || 'No GPU telemetry',
+    },
+    {
+      label: 'GPU RAM',
+      value: metrics?.gpu_memory_total_mb ? `${metrics.gpu_memory_used_mb || 0} / ${metrics.gpu_memory_total_mb} MB` : '—',
+      hint: metrics?.telemetry_source || 'Shared host telemetry',
+    },
+    {
+      label: 'Temperature',
+      value: metrics?.temperature ? `${Number(metrics.temperature).toFixed(1)} °C` : '—',
+      hint: metrics?.temperature_source || 'No sensor data',
+    },
+  ]
+
+  return (
+    <div className="px-5 py-5 space-y-4">
+      <div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">App Monitor</div>
+        <h3 className="text-base font-semibold text-text font-display mt-2 mb-1">{recipe.name}</h3>
+        <p className="text-sm text-text-dim leading-6 m-0">
+          Live resource snapshot for this app. The panel appears while install, build, startup, or runtime activity is active.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-outline-dim bg-surface-high/50">
+        <table className="w-full border-collapse text-sm">
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.label} className="border-t border-outline-dim first:border-t-0">
+                <td className="px-4 py-3 align-top text-text-dim font-label uppercase text-[11px] tracking-[0.14em] w-[6.5rem]">{row.label}</td>
+                <td className="px-4 py-3 align-top">
+                  <div className="text-text font-semibold font-display">{row.value}</div>
+                  <div className="text-xs text-text-dim mt-1 leading-5">{row.hint}</div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function CommandTerminalPanel({ recipe, lines, command, setCommand, onSubmit, running }) {
+  const scrollRef = useRef(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [lines.length])
+
+  const disabled = !recipe?.running || running
+
+  return (
+    <div className="h-full flex flex-col bg-[#06060D]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1a1a2a] bg-[#0B0B12]">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]/70" />
+          </div>
+          <span className="text-[10px] text-gray-500 font-mono">interactive - container shell</span>
+        </div>
+        <div className="text-[10px] font-mono text-text-dim">
+          {recipe?.running ? (running ? 'executing...' : 'ready') : 'container offline'}
+        </div>
+      </div>
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-5">
+        {lines.length === 0 ? (
+          <div className="text-gray-600 italic">Type a shell command to run inside the container.</div>
+        ) : (
+          lines.map((line, index) => (
+            <div
+              key={index}
+              className={
+                line.startsWith('$ ')
+                  ? 'text-primary whitespace-pre-wrap [tab-size:2]'
+                  : line.includes('[error]')
+                  ? 'text-red-400 whitespace-pre-wrap [tab-size:2]'
+                  : line.startsWith('[exit ')
+                  ? 'text-amber-300 whitespace-pre-wrap [tab-size:2]'
+                  : 'text-gray-300 whitespace-pre-wrap [tab-size:2]'
+              }
+            >
+              {line}
+            </div>
+          ))
+        )}
+      </div>
+
+      <form onSubmit={onSubmit} className="shrink-0 border-t border-[#1a1a2a] p-3">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={command}
+            onChange={(e) => setCommand(e.target.value)}
+            placeholder={recipe?.running ? 'e.g. ls -la /workspace' : 'Start the app to use container shell'}
+            disabled={disabled}
+            className="flex-1 rounded-xl border border-outline-dim bg-[#0B0B12] px-3 py-2 text-sm font-mono text-text focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={disabled || !command.trim()}
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-on disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {running ? 'Run...' : 'Run'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+function formatMb(value) {
+  const numeric = Number(value || 0)
+  if (!numeric) return '0 MB'
+  if (numeric >= 1024) return `${(numeric / 1024).toFixed(1)} GB`
+  return `${numeric.toFixed(0)} MB`
 }
