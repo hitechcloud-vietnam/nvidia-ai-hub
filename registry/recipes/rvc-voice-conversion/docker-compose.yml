@@ -1,0 +1,32 @@
+services:
+  rvc-voice-conversion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-rvc-voice-conversion
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-7865}
+      RVC_PYTHON_CMD: ${RVC_PYTHON_CMD:-python3}
+      TEMP_ROOT: ${TEMP_ROOT:-/opt/rvc/TEMP}
+      OUTPUT_ROOT: ${OUTPUT_ROOT:-/opt/rvc/opt}
+      weight_root: ${weight_root:-/opt/rvc/assets/weights}
+      weight_uvr5_root: ${weight_uvr5_root:-/opt/rvc/assets/uvr5_weights}
+      index_root: ${index_root:-/opt/rvc/logs}
+      outside_index_root: ${outside_index_root:-/opt/rvc/logs}
+    ports:
+      - "${HOST_PORT:-7887}:${PORT:-7865}"
+    volumes:
+      - ./data/assets:/opt/rvc/assets
+      - ./data/logs:/opt/rvc/logs
+      - ./data/opt:/opt/rvc/opt
+      - ./data/temp:/opt/rvc/TEMP
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

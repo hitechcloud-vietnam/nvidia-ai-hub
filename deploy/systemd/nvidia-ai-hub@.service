@@ -1,0 +1,20 @@
+[Unit]
+Description=NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/home/%i/nvidia-ai-hub
+Environment=PYTHONUNBUFFERED=1
+Environment=HOST=127.0.0.1
+Environment=PORT=9000
+ExecStart=/home/%i/nvidia-ai-hub/.venv/bin/python -m uvicorn daemon.main:app --host ${HOST} --port ${PORT}
+Restart=always
+RestartSec=5
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

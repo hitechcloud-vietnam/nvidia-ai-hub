@@ -7,6 +7,7 @@ This document is the central index for repository governance, contribution workf
 - Contribution guide: [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 - Installation and deployment guide: [`./installation.md`](./installation.md)
 - Production deployment guide: [`./deployment-production.md`](./deployment-production.md)
+- Deployment example assets: `../deploy/systemd/`, `../deploy/nginx/`, `../deploy/caddy/`, `../deploy/pm2/`
 - Local development guide: [`./local-development.md`](./local-development.md)
 - Security policy: [`../SECURITY.md`](../SECURITY.md)
 - Code of conduct: [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
@@ -26,6 +27,7 @@ This document is the central index for repository governance, contribution workf
 | `../CONTRIBUTING.md` | contribution workflow, local validation, submission expectations | contributors |
 | `./installation.md` | platform support boundaries, installation, deployment prerequisites, Docker and NVIDIA runtime guidance | operators and contributors |
 | `./deployment-production.md` | Linux production service layout, reverse proxy, TLS, LAN/public exposure guidance | operators and maintainers |
+| `../deploy/*` | tracked deployment example files for service managers and reverse proxies | operators and maintainers |
 | `./local-development.md` | cross-platform developer setup, backend/frontend workflow, local validation | contributors |
 | `./pull-request-process.md` | review flow, branch protection, merge guidance | reviewers and maintainers |
 | `./github-actions.md` | workflow inventory, rollout gating, automation enablement | maintainers |

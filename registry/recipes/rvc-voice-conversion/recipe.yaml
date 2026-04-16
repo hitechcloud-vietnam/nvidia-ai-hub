@@ -1,0 +1,46 @@
+name: "RVC Voice Conversion"
+slug: rvc-voice-conversion
+version: "1.0.0"
+description: "Run the official RVC WebUI on DGX Spark for voice conversion, dataset preprocessing, training, and UVR workflows with persistent assets and indexes."
+author: "RVC Project"
+source: "official"
+website: "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI"
+upstream: "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI"
+category: speech
+categories:
+  - speech
+  - workflow
+tags:
+  - speech
+  - audio
+  - voice-conversion
+  - gradio
+  - training
+  - uvr5
+  - rmvpe
+icon: "🎙️"
+logo: "/logos/speech.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 50
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7887
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 25
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/rvc-voice-conversion/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official RVC WebUI environment, download the required pretrained assets on first launch, and start the Gradio studio on port 7887."
+    command: "docker compose -p nvidia-ai-hub-rvc-voice-conversion -f registry/recipes/rvc-voice-conversion/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop RVC Voice Conversion while preserving checkpoints, indexes, pretrained assets, and output folders."
+    command: "docker compose -p nvidia-ai-hub-rvc-voice-conversion -f registry/recipes/rvc-voice-conversion/docker-compose.yml down"

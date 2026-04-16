@@ -41,6 +41,8 @@ For Linux deployment, Windows and macOS setup boundaries, Docker and NVIDIA runt
 
 For production-style Linux service management, reverse proxy setup, TLS, and network exposure guidance, see [`docs/deployment-production.md`](./docs/deployment-production.md).
 
+For tracked deployment example files, see [`deploy/systemd/nvidia-ai-hub@.service`](./deploy/systemd/nvidia-ai-hub@.service), [`deploy/nginx/nvidia-ai-hub.conf`](./deploy/nginx/nvidia-ai-hub.conf), [`deploy/caddy/Caddyfile`](./deploy/caddy/Caddyfile), and [`deploy/pm2/ecosystem.config.cjs`](./deploy/pm2/ecosystem.config.cjs).
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution workflow, development setup, recipe guidance, and pull request expectations.

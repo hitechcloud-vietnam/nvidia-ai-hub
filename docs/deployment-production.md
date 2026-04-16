@@ -14,6 +14,13 @@ This guide covers:
 - reverse proxy patterns with Nginx and Caddy
 - TLS, LAN exposure, and public exposure notes
 
+Tracked deployment example assets are available under [`../deploy/`](../deploy/):
+
+- [`../deploy/systemd/nvidia-ai-hub@.service`](../deploy/systemd/nvidia-ai-hub@.service)
+- [`../deploy/nginx/nvidia-ai-hub.conf`](../deploy/nginx/nvidia-ai-hub.conf)
+- [`../deploy/caddy/Caddyfile`](../deploy/caddy/Caddyfile)
+- [`../deploy/pm2/ecosystem.config.cjs`](../deploy/pm2/ecosystem.config.cjs)
+
 For baseline installation and platform requirements, see [`docs/installation.md`](./installation.md).
 
 ## 1. Recommended production model
@@ -101,7 +108,7 @@ Do not move to `systemd`, PM2, or reverse proxy setup until the foreground proce
 
 `systemd` is the preferred Linux production process manager.
 
-Create `/etc/systemd/system/nvidia-ai-hub.service`:
+Create `/etc/systemd/system/nvidia-ai-hub@.service`:
 
 ```ini
 [Unit]
@@ -141,6 +148,8 @@ sudo systemctl stop nvidia-ai-hub@ubuntu.service
 
 Adjust the working directory and user path to match your installation path.
 
+If you want a tracked starter file instead of copying from this document, begin with [`../deploy/systemd/nvidia-ai-hub@.service`](../deploy/systemd/nvidia-ai-hub@.service) and update the user, group, working directory, and bind settings for your host.
+
 ## 6. Optional PM2 deployment
 
 PM2 is optional. It can be useful for quick persistence on single-user systems or lab environments.
@@ -170,6 +179,8 @@ pm2 delete nvidia-ai-hub
 ```
 
 PM2 is acceptable for lightweight persistence, but `systemd` remains the preferred Linux production option.
+
+If you prefer a tracked PM2 starter, use [`../deploy/pm2/ecosystem.config.cjs`](../deploy/pm2/ecosystem.config.cjs) and update the repository path, Python path, and bind settings before use.
 
 ## 7. Reverse proxy with Nginx
 
@@ -207,6 +218,8 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+You can also start from the tracked example file at [`../deploy/nginx/nvidia-ai-hub.conf`](../deploy/nginx/nvidia-ai-hub.conf).
+
 ## 8. Reverse proxy with Caddy
 
 Caddy is a good option when you want simpler configuration and automatic TLS in environments with valid DNS and inbound access.
@@ -220,6 +233,8 @@ ai-hub.example.internal {
 ```
 
 Reload Caddy after updating the file.
+
+You can also start from the tracked example file at [`../deploy/caddy/Caddyfile`](../deploy/caddy/Caddyfile).
 
 If the deployment is internal-only and not suitable for public certificate issuance, use your internal PKI or terminate TLS with your existing infrastructure.
 

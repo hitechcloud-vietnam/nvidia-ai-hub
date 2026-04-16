@@ -12,6 +12,8 @@ For day-to-day coding workflows, see [`docs/local-development.md`](./local-devel
 
 For Linux production-style service layout, reverse proxy patterns, TLS notes, and LAN/public exposure guidance, see [`docs/deployment-production.md`](./deployment-production.md).
 
+For tracked deployment example files that can be adapted locally, see the `deploy/` directory in the repository root.
+
 ## 1. Platform support summary
 
 | Platform | Source development | Quick installer | Full local GPU recipe runtime | Recommended use |
