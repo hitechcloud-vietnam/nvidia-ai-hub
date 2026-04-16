@@ -114,6 +114,26 @@ def _runtime_env_template_file(recipe_dir: Path) -> Path:
     return recipe_dir / ".env.example"
 
 
+async def _run_command_capture(*args: str) -> tuple[int, str, str]:
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await proc.communicate()
+        return proc.returncode, stdout.decode(errors="replace"), stderr.decode(errors="replace")
+    except NotImplementedError:
+        completed = await asyncio.to_thread(
+            subprocess.run,
+            args,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        return completed.returncode, completed.stdout or "", completed.stderr or ""
+
+
 def _render_runtime_env(template_text: str) -> str:
     shared_secrets: dict[str, str] = {
         "minio_password": secrets.token_urlsafe(24),
@@ -763,13 +783,10 @@ async def _find_project_volumes(slug: str) -> list[str]:
     if base != slug:
         prefixes.add(f"nvidia-ai-hub-{base}_")
 
-    proc = await asyncio.create_subprocess_exec(
-        "docker", "volume", "ls", "-q",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    stdout, _ = await proc.communicate()
-    all_volumes = stdout.decode().strip().splitlines()
+    returncode, stdout, _ = await _run_command_capture("docker", "volume", "ls", "-q")
+    if returncode != 0:
+        return []
+    all_volumes = stdout.strip().splitlines()
 
     matched = []
     for v in all_volumes:
@@ -789,24 +806,16 @@ async def _find_project_images(slug: str) -> list[str]:
         return []
 
     # Get images currently in use by running containers
-    proc = await asyncio.create_subprocess_exec(
-        "docker", "ps", "--format", "{{.Image}}",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    stdout, _ = await proc.communicate()
-    in_use = set(stdout.decode().strip().splitlines())
+    returncode, stdout, _ = await _run_command_capture("docker", "ps", "--format", "{{.Image}}")
+    if returncode != 0:
+        return []
+    in_use = set(stdout.strip().splitlines())
 
     matched = []
     for img in compose_images:
         # Check exact image:tag exists
-        proc = await asyncio.create_subprocess_exec(
-            "docker", "images", "-q", img,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, _ = await proc.communicate()
-        if stdout.decode().strip() and img not in in_use:
+        returncode, stdout, _ = await _run_command_capture("docker", "images", "-q", img)
+        if returncode == 0 and stdout.strip() and img not in in_use:
             matched.append(img)
 
     return matched
@@ -831,27 +840,17 @@ async def purge_recipe(slug: str) -> str:
 
     volumes = await _find_project_volumes(slug)
     for vol in volumes:
-        proc = await asyncio.create_subprocess_exec(
-            "docker", "volume", "rm", "-f", vol,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        _, stderr = await proc.communicate()
-        if proc.returncode != 0:
-            err = stderr.decode().strip()
+        returncode, _, stderr = await _run_command_capture("docker", "volume", "rm", "-f", vol)
+        if returncode != 0:
+            err = stderr.strip()
             if err and "No such volume" not in err:
                 errors.append(err)
 
     images = await _find_project_images(slug)
     for img in images:
-        proc = await asyncio.create_subprocess_exec(
-            "docker", "rmi", "-f", img,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        _, stderr = await proc.communicate()
-        if proc.returncode != 0:
-            err = stderr.decode().strip()
+        returncode, _, stderr = await _run_command_capture("docker", "rmi", "-f", img)
+        if returncode != 0:
+            err = stderr.strip()
             if err and "No such image" not in err:
                 errors.append(err)
 
