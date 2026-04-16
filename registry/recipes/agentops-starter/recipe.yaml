@@ -1,0 +1,46 @@
+name: "AgentOps Starter"
+slug: agentops-starter
+version: "1.0.0"
+description: "Run a practical self-hosted AgentOps starter stack with the official API, dashboard, OpenTelemetry collector, and a local ClickHouse backend while connecting to external or host-managed Supabase credentials."
+author: "AgentOps"
+source: "official"
+website: "https://github.com/AgentOps-AI/agentops"
+upstream: "https://github.com/AgentOps-AI/agentops"
+category: agent
+categories:
+  - agent
+  - observability
+  - webui
+tags:
+  - agentops
+  - observability
+  - tracing
+  - opentelemetry
+  - clickhouse
+  - nextjs
+  - fastapi
+icon: "📈"
+logo: "/logos/agent.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 20
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/agentops-starter/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official AgentOps API, dashboard, and OpenTelemetry collector images, start local ClickHouse, initialize the ClickHouse schema, and publish the dashboard on port 3000."
+    command: "docker compose -p nvidia-ai-hub-agentops-starter -f registry/recipes/agentops-starter/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop AgentOps Starter while preserving local ClickHouse data."
+    command: "docker compose -p nvidia-ai-hub-agentops-starter -f registry/recipes/agentops-starter/docker-compose.yml down"

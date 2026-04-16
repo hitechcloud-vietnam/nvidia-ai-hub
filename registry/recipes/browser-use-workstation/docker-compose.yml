@@ -1,0 +1,53 @@
+services:
+  browser-use-workstation:
+    build:
+      context: https://github.com/browser-use/web-ui.git#main
+    container_name: nvidia-ai-hub-browser-use-workstation
+    env_file:
+      - .env
+    environment:
+      VNC_PASSWORD: ${VNC_PASSWORD:-youvncpassword}
+      DEFAULT_LLM: ${DEFAULT_LLM:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_ENDPOINT: ${OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_ENDPOINT: ${DEEPSEEK_ENDPOINT:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      MISTRAL_ENDPOINT: ${MISTRAL_ENDPOINT:-}
+      ALIBABA_API_KEY: ${ALIBABA_API_KEY:-}
+      ALIBABA_ENDPOINT: ${ALIBABA_ENDPOINT:-}
+      MOONSHOT_API_KEY: ${MOONSHOT_API_KEY:-}
+      MOONSHOT_ENDPOINT: ${MOONSHOT_ENDPOINT:-}
+      IBM_API_KEY: ${IBM_API_KEY:-}
+      IBM_ENDPOINT: ${IBM_ENDPOINT:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      USE_OWN_BROWSER: ${USE_OWN_BROWSER:-false}
+      KEEP_BROWSER_OPEN: ${KEEP_BROWSER_OPEN:-true}
+      BROWSER_PATH: ${BROWSER_PATH:-}
+      BROWSER_USER_DATA: ${BROWSER_USER_DATA:-}
+      BROWSER_CDP: ${BROWSER_CDP:-}
+      SKIP_LLM_API_KEY_VERIFICATION: ${SKIP_LLM_API_KEY_VERIFICATION:-false}
+    ports:
+      - "${HOST_PORT:-7788}:7788"
+      - "${NOVNC_HOST_PORT:-6080}:6080"
+      - "${VNC_HOST_PORT:-5901}:5901"
+      - "${CDP_HOST_PORT:-9222}:9222"
+    volumes:
+      - ./data/tmp:/app/tmp
+      - ./data/browser-profile:/data/browser-profile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    shm_size: "2gb"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1:7788/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped

@@ -1,0 +1,45 @@
+name: "Browser-Use Workstation"
+slug: browser-use-workstation
+version: "1.0.0"
+description: "Run the official browser-use WebUI on DGX Spark with Gradio controls, optional noVNC browser viewing, and persistent task artifacts."
+author: "browser-use"
+source: "official"
+website: "https://github.com/browser-use/web-ui"
+upstream: "https://github.com/browser-use/web-ui"
+category: agent
+categories:
+  - agent
+  - browser
+  - webui
+tags:
+  - browser-use
+  - browser-automation
+  - gradio
+  - playwright
+  - novnc
+  - agent
+icon: "🌐"
+logo: "/logos/browser.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7788
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/browser-use-workstation/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the official browser-use WebUI image, expose the Gradio workstation on port 7788, and publish optional noVNC and VNC access for browser observation."
+    command: "docker compose -p nvidia-ai-hub-browser-use-workstation -f registry/recipes/browser-use-workstation/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Browser-Use Workstation while preserving local settings, browser artifacts, and persistent task outputs."
+    command: "docker compose -p nvidia-ai-hub-browser-use-workstation -f registry/recipes/browser-use-workstation/docker-compose.yml down"

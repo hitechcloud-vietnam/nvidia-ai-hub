@@ -1,0 +1,46 @@
+name: "Dify"
+slug: dify
+version: "1.0.0"
+description: "Practical self-hosted Dify stack with the official web, API, worker, sandbox, plugin daemon, PostgreSQL, Redis, and Weaviate services for workflows, agents, and RAG on DGX Spark."
+author: "LangGenius"
+source: "official"
+website: "https://dify.ai/"
+upstream: "https://github.com/langgenius/dify"
+category: multi-modal
+categories:
+  - workflow
+  - rag
+  - agent
+tags:
+  - dify
+  - workflow
+  - agents
+  - rag
+  - datasets
+  - plugins
+  - weaviate
+  - postgres
+icon: "🧩"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3081
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/dify/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the practical Dify stack with the official upstream images, local PostgreSQL, Redis, Weaviate, sandbox, and plugin daemon services."
+    command: "docker compose --env-file registry/recipes/dify/.env -p nvidia-ai-hub-dify -f registry/recipes/dify/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Dify while preserving PostgreSQL, Redis, Weaviate, uploaded files, and plugin data."
+    command: "docker compose --env-file registry/recipes/dify/.env -p nvidia-ai-hub-dify -f registry/recipes/dify/docker-compose.yml down"
