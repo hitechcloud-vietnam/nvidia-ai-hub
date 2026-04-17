@@ -60,15 +60,24 @@ def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
     return summary
 
 
+def _apply_registry_delta(recipe: Recipe | RecipeSummary, registry_delta: dict) -> None:
+    updates = registry_delta.get("recipe_deltas", {}).get(recipe.slug, [])
+    recipe.registry_updates = updates
+    recipe.registry_update_count = len(updates)
+    recipe.registry_changed = recipe.registry_update_count > 0
+
+
 @router.get("", response_model=list[RecipeSummary])
 async def list_recipes(category: str | None = None, search: str | None = None):
     recipes = list(get_recipes().values())
+    registry_delta = get_registry_delta()
     installed = await get_installed_slugs()
     running = await get_running_recipe_slugs(installed)
 
     result = []
     for recipe in recipes:
         r = _to_recipe_summary(recipe)
+        _apply_registry_delta(r, registry_delta)
         r.installed = r.slug in installed
         pending = get_pending(r.slug)
         if r.installed:
@@ -109,6 +118,7 @@ async def get_recipe_detail(slug: str):
         raise HTTPException(status_code=404, detail="Recipe not found")
 
     recipe = base_recipe.model_copy(deep=True)
+    _apply_registry_delta(recipe, get_registry_delta())
     _set_runtime_env_path(recipe)
     installed = await get_installed_slugs()
     recipe.installed = slug in installed

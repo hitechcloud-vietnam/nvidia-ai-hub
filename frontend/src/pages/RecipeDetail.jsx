@@ -52,7 +52,6 @@ export default function RecipeDetail() {
   const buildProgress = useStore((s) => s.buildProgress)
   const containerLogs = useStore((s) => s.containerLogs)
   const recipeMetrics = useStore((s) => s.recipeMetrics)
-  const registryStatus = useStore((s) => s.registryStatus)
   const connectLogs = useStore((s) => s.connectLogs)
   const disconnectLogs = useStore((s) => s.disconnectLogs)
   const fetchRecipeDetail = useStore((s) => s.fetchRecipeDetail)
@@ -177,7 +176,7 @@ export default function RecipeDetail() {
   const progressState = buildProgress[recipe.slug] || null
   const runtimeMetrics = recipeMetrics[recipe.slug] || null
   const showAppMonitor = Boolean(isBusy || recipe.running || recipe.starting)
-  const registryChanged = Boolean(registryStatus?.registry_changed)
+  const registryChanged = Boolean(recipe.registry_changed)
 
   const handleRemove = () => {
     setShowUninstallModal(true)
@@ -360,7 +359,7 @@ export default function RecipeDetail() {
                 </button>
                 {registryChanged && (
                   <span className="px-3 py-2 bg-warning/10 text-warning rounded-xl text-xs font-semibold font-label">
-                    Registry changed
+                    Registry changed{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
                   </span>
                 )}
                 <button disabled={isRemoving} onClick={handleRemove} className="px-4 py-2.5 bg-error-surface text-error border-none rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50">
@@ -623,16 +622,63 @@ function RelatedRecipeCard({ recipe, onSelect }) {
 
 function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
   const recipes = useStore((s) => s.recipes)
-  const registryStatus = useStore((s) => s.registryStatus)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
   const sourceUrl = recipe.upstream || recipe.fork || ''
   const isNotebook = isNotebookRecipe(recipe)
-  const registryChanged = Boolean(registryStatus?.registry_changed)
-  const recentCommits = Array.isArray(registryStatus?.recent_commits) ? registryStatus.recent_commits : []
+  const registryChanged = Boolean(recipe.registry_changed)
+  const recentCommits = Array.isArray(recipe.registry_updates) ? recipe.registry_updates : []
   const relatedRecipes = (recipe.depends_on || [])
     .map((slug) => recipes.find((item) => item.slug === slug))
     .filter(Boolean)
+  const platformExports = buildPlatformExports(recipe)
+  const exportCards = [
+    {
+      key: 'metadata',
+      label: 'Portable metadata',
+      description: 'Structured metadata for external launchers or inventory systems.',
+      value: platformExports.metadata,
+      filename: `${recipe.slug}-metadata.json`,
+      mimeType: 'application/json;charset=utf-8',
+      visible: true,
+    },
+    {
+      key: 'deploymentProfiles',
+      label: 'Deployment profiles',
+      description: 'Portable environment presets for workstation, lab, server, and DGX rollout planning.',
+      value: platformExports.deploymentProfiles,
+      filename: `${recipe.slug}-deployment-profiles.json`,
+      mimeType: 'application/json;charset=utf-8',
+      visible: true,
+    },
+    {
+      key: 'syncScript',
+      label: 'NVIDIA Sync custom script',
+      description: 'Drop-in shell snippet for a custom script integration surface.',
+      value: platformExports.syncScript,
+      filename: `${recipe.slug}-nvidia-sync.sh`,
+      mimeType: 'text/x-shellscript;charset=utf-8',
+      visible: platformExports.showSyncScript,
+    },
+    {
+      key: 'sshCommand',
+      label: 'SSH remote launch',
+      description: 'Bootstrap the recipe on a remote supported NVIDIA Linux host over SSH.',
+      value: platformExports.sshCommand,
+      filename: `${recipe.slug}-ssh-launch.sh`,
+      mimeType: 'text/x-shellscript;charset=utf-8',
+      visible: platformExports.showSshCommand,
+    },
+    {
+      key: 'endpointSummary',
+      label: 'Launch endpoint',
+      description: 'Resolved endpoint and runtime hints for downstream tooling.',
+      value: platformExports.endpointSummary,
+      filename: `${recipe.slug}-endpoint.txt`,
+      mimeType: 'text/plain;charset=utf-8',
+      visible: platformExports.showEndpointSummary,
+    },
+  ].filter((item) => item.visible)
 
   return (
     <div className="w-full px-6 py-6">
@@ -737,6 +783,21 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
             </div>
           )}
 
+          <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Platform Integration Export</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                Copy portable launch metadata, bootstrap snippets, and SSH-friendly commands for workstation, lab, server, or DGX deployment flows.
+              </p>
+            </div>
+
+            <div className="grid gap-3 xl:grid-cols-2">
+              {exportCards.map((item) => (
+                <ExportBlock key={item.key} label={item.label} description={item.description} value={item.value} filename={item.filename} mimeType={item.mimeType} />
+              ))}
+            </div>
+          </div>
+
           {registryChanged && recentCommits.length > 0 && (
             <div className="space-y-4 pt-5 border-t border-outline-dim">
               <div>
@@ -778,6 +839,198 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
       </div>
     </div>
   )
+}
+
+function ExportBlock({ label, description, value, filename, mimeType }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = () => {
+    const text = String(value)
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1200) })
+        .catch(() => fallbackCopy(text, setCopied))
+    } else {
+      fallbackCopy(text, setCopied)
+    }
+  }
+
+  const download = () => {
+    const blob = new Blob([String(value)], { type: mimeType || 'text/plain;charset=utf-8' })
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = filename || 'export.txt'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(objectUrl)
+  }
+
+  return (
+    <div className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-text font-display">{label}</div>
+          <p className="m-0 mt-1 text-sm text-text-dim leading-6">{description}</p>
+          {filename && <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{filename}</div>}
+        </div>
+        <div className="flex items-center gap-2">
+          {filename && (
+            <button onClick={download} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Download export">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          )}
+          <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Copy export">
+            {copied ? (
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            )}
+          </button>
+        </div>
+      </div>
+      <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">{value}</pre>
+    </div>
+  )
+}
+
+function buildPlatformExports(recipe) {
+  const host = location.hostname
+  const apiUrl = recipe.integration?.api_url?.replace(/<NVIDIA_AI_HUB_IP>/g, host) || ''
+  const launchUrl = getRecipeUrl(recipe)
+  const runtimeEnvPath = recipe.runtime_env_path || '<recipe>/.env'
+  const installCommand = recipe.commands?.[0]?.command || `./run.sh ${recipe.slug}`
+  const launchPort = recipe.ui?.port ?? 8080
+  const surfaceType = recipe.ui?.type || 'web'
+  const isNotebook = isNotebookRecipe(recipe)
+  const surfaceLabel = getRecipeSurfaceLabel(recipe)
+  const openLabel = getRecipeOpenLabelWithArrow(recipe)
+  const hasApiIntegration = Boolean(apiUrl || recipe.integration?.model_id || surfaceType === 'api-only')
+  const showEndpointSummary = true
+  const showSyncScript = surfaceType !== 'cli'
+  const showSshCommand = true
+  const memoryMin = recipe.requirements?.min_memory_gb ?? 8
+  const memoryRecommended = recipe.requirements?.recommended_memory_gb ?? memoryMin
+
+  const deploymentProfiles = [
+    {
+      profile: 'workstation',
+      host: 'Single-user NVIDIA workstation',
+      launch_mode: 'local-ui',
+      recommended_memory_gb: memoryRecommended,
+      network: `Direct browser access on :${launchPort}`,
+    },
+    {
+      profile: 'lab',
+      host: 'Shared lab or classroom node',
+      launch_mode: 'shared-ui',
+      recommended_memory_gb: memoryRecommended,
+      network: 'Reverse proxy or controlled LAN exposure recommended',
+    },
+    {
+      profile: 'server',
+      host: 'Headless remote NVIDIA server',
+      launch_mode: 'ssh-bootstrap',
+      recommended_memory_gb: memoryRecommended,
+      network: 'Use SSH bootstrap plus endpoint export for consumers',
+    },
+    {
+      profile: 'dgx',
+      host: 'DGX or multi-user GPU platform',
+      launch_mode: 'managed-service',
+      recommended_memory_gb: Math.max(memoryRecommended, memoryMin),
+      network: 'Integrate with scheduler, reverse proxy, or fleet tooling',
+    },
+  ]
+
+  const metadata = JSON.stringify({
+    app: recipe.name,
+    slug: recipe.slug,
+    version: recipe.version,
+    surface: {
+      type: surfaceType,
+      url: launchUrl,
+      port: launchPort,
+      path: recipe.ui?.path || '/',
+      scheme: recipe.ui?.scheme || 'http',
+    },
+    integration: recipe.integration ? {
+      api_url: apiUrl,
+      model_id: recipe.integration.model_id || '',
+      api_key: recipe.integration.api_key || '',
+    } : null,
+    runtime_env_path: runtimeEnvPath,
+    source: recipe.source,
+  }, null, 2)
+
+  const syncScriptSteps = isNotebook
+    ? [
+        `export NVIDIA_AI_HUB_NOTEBOOK_URL="${launchUrl}"`,
+        `export NVIDIA_AI_HUB_NOTEBOOK_PORT="${launchPort}"`,
+        `echo "Notebook surface ready for ${recipe.name}"`,
+      ]
+    : surfaceType === 'api-only'
+      ? [
+          apiUrl ? `export NVIDIA_AI_HUB_API_URL="${apiUrl}"` : `export NVIDIA_AI_HUB_API_URL="http://${host}:${launchPort}"`,
+          recipe.integration?.model_id ? `export NVIDIA_AI_HUB_MODEL_ID="${recipe.integration.model_id}"` : null,
+          `echo "API endpoint prepared for ${recipe.name}"`,
+        ]
+      : [
+          `export NVIDIA_AI_HUB_URL="${launchUrl}"`,
+          `export NVIDIA_AI_HUB_PORT="${launchPort}"`,
+          `echo "Web surface ready for ${recipe.name}"`,
+        ]
+
+  const syncScript = [
+    '#!/usr/bin/env bash',
+    'set -euo pipefail',
+    '',
+    `export NVIDIA_AI_HUB_RECIPE="${recipe.slug}"`,
+    `export NVIDIA_AI_HUB_RUNTIME_ENV="${runtimeEnvPath}"`,
+    ...syncScriptSteps,
+    `echo "Launching ${recipe.name} via NVIDIA AI Hub exports"`,
+    installCommand,
+  ].filter(Boolean).join('\n')
+
+  const remoteBootstrap = [
+    'cd ~/nvidia-ai-hub',
+    `export NVIDIA_AI_HUB_RECIPE=${recipe.slug}`,
+    `export NVIDIA_AI_HUB_RUNTIME_ENV=${runtimeEnvPath.replace(/'/g, "'\\''")}`,
+    isNotebook
+      ? `echo "Notebook endpoint will be exposed at ${launchUrl.replace(/'/g, "'\\''")}"`
+      : surfaceType === 'api-only'
+        ? `echo "API endpoint will be exposed at ${(apiUrl || `http://${host}:${launchPort}`).replace(/'/g, "'\\''")}"`
+        : `echo "Web endpoint will be exposed at ${launchUrl.replace(/'/g, "'\\''")}"`,
+    installCommand.replace(/'/g, "'\\''"),
+  ]
+
+  const sshCommand = [
+    'ssh <nvidia-host>',
+    `'${remoteBootstrap.join(' && ')}'`,
+  ].join(' ')
+
+  const endpointSummary = [
+    `Surface label: ${surfaceLabel}`,
+    `Open action: ${openLabel}`,
+    `Surface type: ${surfaceType}`,
+    `Launch URL: ${launchUrl}`,
+    hasApiIntegration ? `API URL: ${apiUrl || `http://${host}:${launchPort}`}` : null,
+    `Port: ${launchPort}`,
+    `Path: ${recipe.ui?.path || '/'}`,
+    `Scheme: ${recipe.ui?.scheme || 'http'}`,
+    `Runtime env: ${runtimeEnvPath}`,
+  ].filter(Boolean).join('\n')
+
+  return {
+    metadata,
+    deploymentProfiles: JSON.stringify(deploymentProfiles, null, 2),
+    syncScript,
+    sshCommand,
+    endpointSummary,
+    showEndpointSummary,
+    showSyncScript,
+    showSshCommand,
+  }
 }
 
 function HostFitPanel({ fit }) {

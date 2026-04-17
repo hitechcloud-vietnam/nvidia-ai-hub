@@ -11,6 +11,7 @@ export const useStore = create((set, get) => ({
   recipesLoadedAt: 0,
   recipeDetails: {},
   recipeDetailStatus: {},
+  modelManagerLoadedAt: 0,
   registryStatus: null,
   syncingRegistry: false,
   metrics: null,
@@ -29,6 +30,14 @@ export const useStore = create((set, get) => ({
   _recipeDetailPromises: {},
   selectedRecipe: null,
   containerLogs: {},
+  modelOverview: null,
+  modelRuntime: null,
+  modelCatalog: { models: [] },
+  installedModels: { models: [] },
+  modelDownloads: { downloads: [] },
+  modelsLoading: false,
+  modelsError: null,
+  modelAction: '',
   _logWs: {},
   theme: getInitialTheme(),
 
@@ -215,6 +224,113 @@ export const useStore = create((set, get) => ({
     } catch (e) {
       console.error('Failed to fetch registry status:', e)
       return get().registryStatus
+    }
+  },
+
+  fetchModelManager: async (options = {}) => {
+    const { silent = false } = options
+    if (!silent) {
+      set({ modelsLoading: true, modelsError: null })
+    }
+    try {
+      const [overviewRes, runtimeRes, installedRes, catalogRes, downloadsRes] = await Promise.all([
+        fetch('/api/models/overview'),
+        fetch('/api/models/runtime'),
+        fetch('/api/models/installed'),
+        fetch('/api/models/catalog'),
+        fetch('/api/models/downloads'),
+      ])
+
+      const parseJson = async (res) => {
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          throw new Error(data?.detail || `HTTP ${res.status}`)
+        }
+        return data
+      }
+
+      const modelOverview = await parseJson(overviewRes)
+
+      const safeParse = async (res, fallback) => {
+        try {
+          return await parseJson(res)
+        } catch {
+          return fallback
+        }
+      }
+
+      const [modelRuntime, installedModels, modelCatalog, modelDownloads] = await Promise.all([
+        safeParse(runtimeRes, { reachable: false }),
+        safeParse(installedRes, { models: [] }),
+        safeParse(catalogRes, { models: [] }),
+        safeParse(downloadsRes, { downloads: [] }),
+      ])
+
+      const degraded = !modelRuntime?.reachable && modelOverview?.installed
+      const modelsError = degraded
+        ? 'Ollama Runtime is installed, but its management API is currently unreachable. Start the runtime to browse and manage shared models.'
+        : null
+
+      set({
+        modelOverview,
+        modelRuntime,
+        installedModels,
+        modelCatalog,
+        modelDownloads,
+        modelsError,
+        modelManagerLoadedAt: Date.now(),
+      })
+      return { modelOverview, modelRuntime, installedModels, modelCatalog, modelDownloads }
+    } catch (e) {
+      console.error('Failed to fetch model manager data:', e)
+      set({ modelsError: e.message || 'Failed to load model manager data' })
+      return null
+    } finally {
+      if (!silent) {
+        set({ modelsLoading: false })
+      }
+    }
+  },
+
+  pullModel: async (name) => {
+    set({ modelAction: `pull:${name}`, modelsError: null })
+    try {
+      const res = await fetch('/api/models/pull', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to pull model:', e)
+      set({ modelsError: e.message || 'Failed to pull model' })
+      return null
+    } finally {
+      set({ modelAction: '' })
+    }
+  },
+
+  deleteModel: async (name) => {
+    set({ modelAction: `delete:${name}`, modelsError: null })
+    try {
+      const res = await fetch('/api/models/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to delete model:', e)
+      set({ modelsError: e.message || 'Failed to delete model' })
+      return null
+    } finally {
+      set({ modelAction: '' })
     }
   },
 

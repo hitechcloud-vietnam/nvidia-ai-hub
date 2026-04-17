@@ -8,6 +8,18 @@ from daemon.models.recipe import Recipe
 _recipes: dict[str, Recipe] = {}
 
 
+def _extract_recipe_slug_from_path(path_value: str) -> str | None:
+    path = path_value.strip().replace('\\', '/')
+    marker = 'registry/recipes/'
+    if marker not in path:
+        return None
+    suffix = path.split(marker, 1)[1]
+    parts = [part for part in suffix.split('/') if part]
+    if not parts:
+        return None
+    return parts[0]
+
+
 def _run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", *args],
@@ -166,12 +178,64 @@ def get_registry_delta() -> dict:
                     "subject": parts[2],
                 })
 
+    changed_files_proc = _run_git([
+        "diff",
+        "--name-only",
+        "HEAD..@{upstream}",
+        "--",
+        "registry/recipes",
+    ])
+    changed_recipe_slugs: list[str] = []
+    if changed_files_proc.returncode == 0:
+        seen: set[str] = set()
+        for line in changed_files_proc.stdout.splitlines():
+            slug = _extract_recipe_slug_from_path(line)
+            if slug and slug not in seen:
+                changed_recipe_slugs.append(slug)
+                seen.add(slug)
+
+    recipe_commit_log_proc = _run_git([
+        "log",
+        "--name-only",
+        "--pretty=%H\t%h\t%cd\t%s",
+        "--date=short",
+        f"HEAD..{upstream_ref}",
+        "--",
+        "registry/recipes",
+    ])
+    recipe_deltas: dict[str, list[dict]] = {}
+    if recipe_commit_log_proc.returncode == 0:
+        current_commit: dict | None = None
+        for raw_line in recipe_commit_log_proc.stdout.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if '\t' in line:
+                parts = line.split('\t', 3)
+                if len(parts) == 4:
+                    current_commit = {
+                        "sha": parts[1],
+                        "date": parts[2],
+                        "subject": parts[3],
+                    }
+                continue
+            if not current_commit:
+                continue
+            slug = _extract_recipe_slug_from_path(line)
+            if not slug:
+                continue
+            entries = recipe_deltas.setdefault(slug, [])
+            if not any(entry["sha"] == current_commit["sha"] for entry in entries):
+                entries.append(current_commit)
+
     return {
         **status,
         "ahead": ahead,
         "behind": behind,
         "registry_changed": behind > 0,
         "recent_commits": recent_commits,
+        "changed_recipe_slugs": changed_recipe_slugs,
+        "recipe_deltas": recipe_deltas,
     }
 
 

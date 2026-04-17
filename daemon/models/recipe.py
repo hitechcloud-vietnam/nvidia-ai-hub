@@ -39,6 +39,12 @@ class RecipeCommand(BaseModel):
     description: str = ""
 
 
+class RecipeRegistryUpdate(BaseModel):
+    sha: str
+    date: str = ""
+    subject: str = ""
+
+
 class Recipe(BaseModel):
     name: str
     slug: str
@@ -70,6 +76,9 @@ class Recipe(BaseModel):
     ready: bool = False
     starting: bool = False
     has_leftovers: bool = False
+    registry_changed: bool = False
+    registry_update_count: int = 0
+    registry_updates: list[RecipeRegistryUpdate] = []
 
 
 class RecipeSummary(BaseModel):
@@ -97,3 +106,6 @@ class RecipeSummary(BaseModel):
     ready: bool = False
     starting: bool = False
     has_leftovers: bool = False
+    registry_changed: bool = False
+    registry_update_count: int = 0
+    registry_updates: list[RecipeRegistryUpdate] = []

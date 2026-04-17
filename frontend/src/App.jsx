@@ -6,13 +6,17 @@ import ThemeToggle from './components/ThemeToggle'
 import Catalog from './pages/Catalog'
 
 const Running = lazy(() => import('./pages/Running'))
+const Models = lazy(() => import('./pages/Models'))
 const System = lazy(() => import('./pages/System'))
+const Updates = lazy(() => import('./pages/Updates'))
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'))
 
 const NAV_ITEMS = [
   { id: 'catalog', label: 'Store', icon: StorefrontIcon },
+  { id: 'models', label: 'Models', icon: ModelsIcon },
   { id: 'running', label: 'Running', icon: PlayIcon },
   { id: 'system', label: 'System', icon: GaugeIcon },
+  { id: 'updates', label: 'Updates', icon: RefreshIcon },
   { id: 'about', label: 'About', icon: InfoIcon },
 ]
 
@@ -26,6 +30,7 @@ export default function App() {
   const clearRecipe = useStore((s) => s.clearRecipe)
   const theme = useStore((s) => s.theme)
   const metrics = useStore((s) => s.metrics)
+  const registryStatus = useStore((s) => s.registryStatus)
   const [search, setSearch] = useState('')
 
   useMetrics()
@@ -67,6 +72,7 @@ export default function App() {
   }, [fetchRecipes, fetchRegistryStatus])
 
   const runningCount = recipes.filter((r) => r.running || r.starting).length
+  const updatesCount = recipes.filter((r) => r.registry_changed).length || registryStatus?.changed_recipe_slugs?.length || 0
 
   return (
     <div className="bg-bg text-text flex h-screen overflow-hidden transition-colors duration-300">
@@ -99,6 +105,11 @@ export default function App() {
                 {item.id === 'running' && runningCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-primary text-primary-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
                     {runningCount}
+                  </span>
+                )}
+                {item.id === 'updates' && updatesCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-warning text-warning-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
+                    {updatesCount}
                   </span>
                 )}
               </button>
@@ -158,6 +169,8 @@ export default function App() {
             ) : (
               <div className="animate-fadeIn">
                 {tab === 'catalog' && <Catalog search={search} />}
+                {tab === 'models' && <Models />}
+                {tab === 'updates' && <Updates />}
                 {tab === 'running' && <Running />}
                 {tab === 'system' && <System />}
                 {tab === 'about' && <About />}
@@ -248,6 +261,8 @@ function About() {
             <InfoTile label="Recipes" value={typeof registryStatus?.recipe_count === 'number' ? String(registryStatus.recipe_count) : '—'} />
             <InfoTile label="Commit" value={registryStatus?.head || '—'} />
             <InfoTile label="Workspace" value={registryStatus?.dirty ? 'Local changes present' : 'Clean'} />
+            <InfoTile label="Upstream changes" value={typeof registryStatus?.behind === 'number' ? String(registryStatus.behind) : '0'} />
+            <InfoTile label="Changed recipes" value={Array.isArray(registryStatus?.changed_recipe_slugs) ? String(registryStatus.changed_recipe_slugs.length) : '0'} />
           </div>
 
           {(registryStatus?.head_subject || registryStatus?.last_updated) && (
@@ -265,6 +280,24 @@ function About() {
 
           {registryStatus?.sync_output ? (
             <pre className="mt-4 mb-0 rounded-xl bg-surface-high p-3 text-xs text-text-muted overflow-x-auto whitespace-pre-wrap">{registryStatus.sync_output}</pre>
+          ) : null}
+
+          {Array.isArray(registryStatus?.changed_recipe_slugs) && registryStatus.changed_recipe_slugs.length > 0 ? (
+            <div className="mt-4">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label mb-2">Affected recipes</div>
+              <div className="flex flex-wrap gap-2">
+                {registryStatus.changed_recipe_slugs.slice(0, 16).map((slug) => (
+                  <span key={slug} className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">
+                    {slug}
+                  </span>
+                ))}
+                {registryStatus.changed_recipe_slugs.length > 16 && (
+                  <span className="rounded-full bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">
+                    +{registryStatus.changed_recipe_slugs.length - 16} more
+                  </span>
+                )}
+              </div>
+            </div>
           ) : null}
         </div>
 
@@ -373,11 +406,30 @@ function PlayIcon({ className }) {
   )
 }
 
+function ModelsIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="7" ry="3" />
+      <path d="M5 5v6c0 1.66 3.13 3 7 3s7-1.34 7-3V5" />
+      <path d="M5 11v8c0 1.66 3.13 3 7 3s7-1.34 7-3v-8" />
+    </svg>
+  )
+}
+
 function GaugeIcon({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
       <path d="M12 6v6l4 2" />
+    </svg>
+  )
+}
+
+function RefreshIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 3v6h-6" />
     </svg>
   )
 }

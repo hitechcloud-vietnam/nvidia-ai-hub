@@ -11,7 +11,6 @@ export default function RecipeCard({ recipe }) {
   const installRecipe = useStore((s) => s.installRecipe)
   const updateRecipe = useStore((s) => s.updateRecipe)
   const metrics = useStore((s) => s.metrics)
-  const registryStatus = useStore((s) => s.registryStatus)
   const [logoFailed, setLogoFailed] = useState(false)
 
   const logoUrl = useThemedLogo(recipe.logo)
@@ -20,8 +19,8 @@ export default function RecipeCard({ recipe }) {
   const isBusy = isBuilding || isUpdating
   const isNotebook = isNotebookRecipe(recipe)
   const hardwareFit = getRecipeHardwareFit(recipe, metrics)
-  const registryChanged = Boolean(registryStatus?.registry_changed)
-  const updateCount = Number(registryStatus?.behind || 0)
+  const registryChanged = Boolean(recipe.registry_changed)
+  const updateCount = Number(recipe.registry_update_count || 0)
 
   const handleInstall = (e) => {
     e.stopPropagation()

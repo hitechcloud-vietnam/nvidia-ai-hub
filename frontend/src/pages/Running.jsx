@@ -16,6 +16,7 @@ export default function Running() {
 
   const running = recipes.filter((r) => r.running || r.starting)
   const installed = recipes.filter((r) => r.installed && !r.running && !r.starting)
+  const installedWithUpdates = installed.filter((r) => r.registry_changed)
 
   return (
     <div className="px-6 py-6 pb-12">
@@ -60,6 +61,11 @@ export default function Running() {
           <div className="flex items-center gap-3 mb-4 mt-6">
             <h2 className="text-xl font-bold tracking-tight font-display m-0">Installed</h2>
             <span className="text-xs font-label text-text-dim">{installed.length} stopped</span>
+            {installedWithUpdates.length > 0 && (
+              <span className="text-xs font-medium font-label text-warning bg-warning/10 px-2.5 py-1 rounded-full">
+                {installedWithUpdates.length} update{installedWithUpdates.length > 1 ? 's' : ''} available
+              </span>
+            )}
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
             {installed.map((r) => (
@@ -144,6 +150,11 @@ function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, r
                 Live telemetry
               </span>
             ) : null}
+            {recipe.registry_changed && (
+              <span className="text-[11px] font-label text-warning bg-warning/10 px-2 py-0.5 rounded-md">
+                Update available{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
+              </span>
+            )}
           </div>
         </div>
 
@@ -263,6 +274,11 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
             {metrics?.memory_used_mb > 0 && (
               <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
                 Last RAM {formatMemory(metrics.memory_used_mb)}
+              </span>
+            )}
+            {recipe.registry_changed && (
+              <span className="text-[11px] font-label text-warning bg-warning/10 px-2 py-0.5 rounded-md">
+                Update available{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
               </span>
             )}
           </div>

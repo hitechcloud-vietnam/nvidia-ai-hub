@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from daemon.config import settings
 from daemon.db import init_db
-from daemon.routers import recipes, containers, system
+from daemon.routers import recipes, containers, models, system
 from daemon.services.registry_service import load_recipes, get_recipes
 from daemon.services.docker_service import is_recipe_running, start_health_check
 
@@ -44,6 +44,7 @@ app.add_middleware(
 # API and WebSocket routers first — order matters
 app.include_router(recipes.router)
 app.include_router(containers.router)
+app.include_router(models.router)
 app.include_router(system.router)
 
 # Serve static assets (js, css, etc.) under /assets

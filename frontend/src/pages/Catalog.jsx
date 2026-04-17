@@ -133,6 +133,8 @@ const CATALOG_PRIORITY = {
 
 function sortRecipesForCatalog(recipes) {
   return [...recipes].sort((a, b) => {
+    const updateDiff = Number(Boolean(b.registry_changed)) - Number(Boolean(a.registry_changed))
+    if (updateDiff !== 0) return updateDiff
     const priorityDiff = (CATALOG_PRIORITY[b.slug] || 0) - (CATALOG_PRIORITY[a.slug] || 0)
     if (priorityDiff !== 0) return priorityDiff
     return a.name.localeCompare(b.name)
@@ -281,6 +283,11 @@ export default function Catalog({ search = '' }) {
     const startIndex = (currentPage - 1) * itemsPerPage
     return orderedRecipes.slice(startIndex, startIndex + itemsPerPage)
   }, [currentPage, itemsPerPage, orderedRecipes])
+
+  const recipesWithUpdates = useMemo(
+    () => orderedRecipes.filter((recipe) => recipe.registry_changed),
+    [orderedRecipes],
+  )
 
   const grouped = useMemo(() => {
     const assigned = new Set()
@@ -615,7 +622,35 @@ export default function Catalog({ search = '' }) {
                   <div className="flex flex-wrap items-center gap-2 text-xs font-label text-text-dim">
                     <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{filtered.length} apps</span>
                     <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{startItem}-{endItem}</span>
+                    {recipesWithUpdates.length > 0 && <span className="rounded-full border border-warning/20 bg-warning/10 px-3 py-1.5 text-warning">{recipesWithUpdates.length} updates available</span>}
                     {search && <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">Search active</span>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {category === 'all' && !search && recipesWithUpdates.length > 0 && (
+              <div className="rounded-2xl border border-warning/20 bg-warning/5 px-4 py-4 backdrop-blur-sm animate-fadeIn">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-warning font-label">Updates</div>
+                    <h3 className="m-0 mt-1 text-lg font-bold tracking-tight text-text font-display">Recipe updates available</h3>
+                    <p className="m-0 mt-1 text-sm text-text-dim leading-6">
+                      {recipesWithUpdates.length} installed or catalog recipes changed in the upstream registry. Review changelogs and rebuild where needed.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {recipesWithUpdates.slice(0, 8).map((recipe) => (
+                      <button
+                        key={recipe.slug}
+                        type="button"
+                        onClick={() => selectRecipe(recipe.slug)}
+                        className="rounded-full border border-warning/20 bg-warning/10 px-3 py-1.5 text-xs font-semibold text-warning cursor-pointer hover:bg-warning/15"
+                      >
+                        {recipe.name}
+                        {recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
