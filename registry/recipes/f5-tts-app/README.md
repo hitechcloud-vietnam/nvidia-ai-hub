@@ -1,6 +1,6 @@
 # F5 TTS App
 
-Run the official F5-TTS Gradio interface locally on DGX Spark.
+Run the official F5-TTS Gradio interface locally on NVIDIA GPUs.
 
 ## What it provides
 

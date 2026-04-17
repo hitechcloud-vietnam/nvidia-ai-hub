@@ -1,6 +1,6 @@
-# NemoClaw on DGX Spark
+# NemoClaw on NVIDIA GPUs
 
-This recipe is tuned for a DGX Spark-style local inference flow:
+This recipe is tuned for a NVIDIA GPUs-style local inference flow:
 
 - local Ollama on the host
 - `nemotron-3-super:120b` as the default model tag

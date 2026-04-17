@@ -1,7 +1,7 @@
 name: "Wan 2.1 App"
 slug: wan-2.1-app
 version: "1.0.0"
-description: "Run an official Wan 2.1 text-to-video Gradio app on DGX Spark with persistent model storage, Hugging Face cache, and configurable generation settings."
+description: "Run an official Wan 2.1 text-to-video Gradio app on NVIDIA GPUs with persistent model storage, Hugging Face cache, and configurable generation settings."
 author: "Wan Team / Alibaba"
 source: "official"
 website: "https://github.com/Wan-Video/Wan2.1"

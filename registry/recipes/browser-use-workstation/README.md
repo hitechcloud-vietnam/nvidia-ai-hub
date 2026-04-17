@@ -1,6 +1,6 @@
 # Browser-Use Workstation
 
-Browser-based automation workstation for DGX Spark using the official `browser-use/web-ui` project.
+Browser-based automation workstation for NVIDIA GPUs using the official `browser-use/web-ui` project.
 
 ## What it provides
 

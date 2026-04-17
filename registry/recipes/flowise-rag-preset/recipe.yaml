@@ -1,7 +1,7 @@
 name: "Flowise RAG Preset"
 slug: flowise-rag-preset
 version: "1.0.0"
-description: "Official-image Flowise preset for local RAG prototyping with persistent Flowise state, shared Ollama connectivity, and practical defaults for document ingestion and chatflow building on DGX Spark."
+description: "Official-image Flowise preset for local RAG prototyping with persistent Flowise state, shared Ollama connectivity, and practical defaults for document ingestion and chatflow building on NVIDIA GPUs."
 author: "FlowiseAI"
 source: "official"
 website: "https://flowiseai.com/"

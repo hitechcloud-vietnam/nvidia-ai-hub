@@ -1,7 +1,7 @@
 name: "Phi-4 Multimodal Instruct"
 slug: vllm-phi4-multimodal
 version: "1.0.0"
-description: "Microsoft Phi-4 multimodal instruct served through vLLM for text, image, and audio understanding workflows on DGX Spark using the upstream modality adapters."
+description: "Microsoft Phi-4 multimodal instruct served through vLLM for text, image, and audio understanding workflows on NVIDIA GPUs using the upstream modality adapters."
 author: "Microsoft"
 source: "official"
 website: "https://huggingface.co/microsoft/Phi-4-multimodal-instruct"

@@ -74,21 +74,21 @@ function getBanner(slug) {
 }
 
 const CATEGORIES = [
-  { id: 'all', label: 'All' },
-  { id: 'dgx-spark', label: 'DGX Spark' },
-  { id: 'llm', label: 'LLMs' },
-  { id: 'vllm', label: 'vLLMs' },
-  { id: 'image-gen', label: 'Image Gen' },
-  { id: 'video-gen', label: 'Video Gen' },
-  { id: '3d-gen', label: '3D Gen' },
-  { id: 'multi-modal', label: 'Multi-Modal' },
-  { id: 'vision-language', label: 'Vision-Language' },
-  { id: 'image-understanding', label: 'Image Understanding' },
-  { id: 'reasoning', label: 'Reasoning' },
-  { id: 'code-gen', label: 'Code Gen' },
-  { id: 'speech', label: 'Speech' },
-  { id: 'rag', label: 'RAG' },
-  { id: 'nemoclaw', label: 'NemoClaw' },
+  { id: 'all', label: 'All', icon: 'grid' },
+  { id: 'dgx-spark', label: 'DGX Spark', icon: 'spark' },
+  { id: 'llm', label: 'LLMs', icon: 'brain' },
+  { id: 'vllm', label: 'vLLMs', icon: 'server' },
+  { id: 'image-gen', label: 'Image Gen', icon: 'image' },
+  { id: 'video-gen', label: 'Video Gen', icon: 'video' },
+  { id: '3d-gen', label: '3D Gen', icon: 'cube' },
+  { id: 'multi-modal', label: 'Multi-Modal', icon: 'multimodal' },
+  { id: 'vision-language', label: 'Vision-Language', icon: 'eye' },
+  { id: 'image-understanding', label: 'Image Understanding', icon: 'scan' },
+  { id: 'reasoning', label: 'Reasoning', icon: 'reasoning' },
+  { id: 'code-gen', label: 'Code Gen', icon: 'code' },
+  { id: 'speech', label: 'Speech', icon: 'mic' },
+  { id: 'rag', label: 'RAG', icon: 'database' },
+  { id: 'nemoclaw', label: 'NemoClaw', icon: 'shield' },
 ]
 
 const CATALOG_SECTIONS = [
@@ -102,14 +102,14 @@ const CATALOG_SECTIONS = [
   {
     id: 'vllm',
     label: 'vLLMs',
-    subtitle: 'OpenAI-compatible DGX Spark model endpoints served through vLLM on port 9001.',
+    subtitle: 'OpenAI-compatible NVIDIA GPUs model endpoints served through vLLM on port 9001.',
     icon: 'models',
     match: (_recipe, categories) => categories.includes('vllm'),
   },
   {
     id: 'nvidia-ai-hub',
     label: 'Spark-Optimized',
-    subtitle: 'Built & tested for DGX Spark',
+    subtitle: 'Built & tested for NVIDIA GPUs',
     icon: 'spark',
     match: (recipe) => (recipe.source || 'community') === 'nvidia-ai-hub',
   },
@@ -224,25 +224,65 @@ export default function Catalog({ search = '' }) {
   const metrics = useStore((s) => s.metrics)
   const [category, setCategory] = useState('all')
   const [activeBannerSlug, setActiveBannerSlug] = useState(null)
+  const [itemsPerPage, setItemsPerPage] = useState(24)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const filtered = useMemo(() => recipes.filter((r) => {
-    const recipeCategories = getRecipeCategories(r)
-    if (category !== 'all' && !recipeCategories.includes(category)) return false
+  const searchMatchedRecipes = useMemo(() => recipes.filter((r) => {
     if (search) {
       const q = search.toLowerCase()
       const recipeTags = Array.isArray(r.tags) ? r.tags : []
       if (!r.name.toLowerCase().includes(q) && !recipeTags.some((t) => t.includes(q))) return false
     }
     return true
-  }), [category, recipes, search])
+  }), [recipes, search])
+
+  const categoryCounts = useMemo(() => {
+    const counts = Object.fromEntries(CATEGORIES.map((item) => [item.id, 0]))
+    counts.all = searchMatchedRecipes.length
+
+    searchMatchedRecipes.forEach((recipe) => {
+      const recipeCategories = getRecipeCategories(recipe)
+      recipeCategories.forEach((recipeCategory) => {
+        if (recipeCategory in counts) {
+          counts[recipeCategory] += 1
+        }
+      })
+    })
+
+    return counts
+  }, [searchMatchedRecipes])
+
+  const filtered = useMemo(() => searchMatchedRecipes.filter((r) => {
+    const recipeCategories = getRecipeCategories(r)
+    if (category !== 'all' && !recipeCategories.includes(category)) return false
+    return true
+  }), [category, searchMatchedRecipes])
 
   const orderedRecipes = useMemo(() => sortRecipesForCatalog(filtered), [filtered])
+
+  const totalPages = Math.max(1, Math.ceil(orderedRecipes.length / itemsPerPage))
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [category, search, itemsPerPage])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  const paginatedRecipes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return orderedRecipes.slice(startIndex, startIndex + itemsPerPage)
+  }, [currentPage, itemsPerPage, orderedRecipes])
 
   const grouped = useMemo(() => {
     const assigned = new Set()
 
     return CATALOG_SECTIONS.map((section) => {
-      const sectionRecipes = orderedRecipes.filter((recipe) => {
+      const sectionRecipes = paginatedRecipes.filter((recipe) => {
         if (assigned.has(recipe.slug)) return false
         return section.match(recipe, getRecipeCategories(recipe))
       })
@@ -254,7 +294,7 @@ export default function Catalog({ search = '' }) {
         recipes: sectionRecipes,
       }
     }).filter((section) => section.recipes.length > 0)
-  }, [orderedRecipes])
+  }, [paginatedRecipes])
 
   const recipesWithBanners = useMemo(
     () => orderedRecipes.filter((r) => getBanner(r.slug)),
@@ -320,13 +360,28 @@ export default function Catalog({ search = '' }) {
   const featuredIsNotebook = isNotebookRecipe(featured)
   const featuredHardwareFit = featured ? getRecipeHardwareFit(featured, metrics) : null
   const showHero = Boolean(featured && bannerConf && !search && category === 'all')
+  const activeCategoryMeta = CATEGORIES.find((item) => item.id === category) || CATEGORIES[0]
+  const startItem = orderedRecipes.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
+  const endItem = orderedRecipes.length === 0 ? 0 : Math.min(currentPage * itemsPerPage, orderedRecipes.length)
+
+  const handleCategorySelect = (nextCategory) => {
+    setCategory(nextCategory)
+    setCurrentPage(1)
+    setMobileMenuOpen(false)
+  }
+
+  const handleResetCategory = () => {
+    setCategory('all')
+    setCurrentPage(1)
+    setMobileMenuOpen(false)
+  }
 
   return (
     <div className="pb-12">
       {/* ─── Hero Banner ─── */}
       {showHero && (
         <div
-          className="mx-6 mt-6 rounded-2xl overflow-hidden cursor-pointer relative group h-[280px]"
+          className="group relative mx-6 mt-6 h-[248px] cursor-pointer overflow-hidden rounded-xl border border-outline-dim shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
           onClick={() => selectRecipe(featured.slug)}
         >
           <img
@@ -337,73 +392,73 @@ export default function Catalog({ search = '' }) {
           <div className="absolute inset-0" style={{ background: 'var(--hero-overlay-left)' }} />
           <div className="absolute inset-0" style={{ background: 'var(--hero-overlay-bottom)' }} />
 
-          <div className="relative h-full flex items-center gap-6 px-10">
+          <div className="relative flex h-full items-center gap-5 px-8">
             {featured.logo ? (
               <img
                 src={featured.logo}
                 alt={featured.name}
-                className="w-20 h-20 rounded-2xl object-contain bg-surface/70 backdrop-blur-md p-3 shadow-2xl shrink-0 border border-glass-border"
+                className="h-16 w-16 shrink-0 rounded-xl border border-glass-border bg-surface/70 object-contain p-2.5 shadow-2xl backdrop-blur-md"
               />
             ) : (
-              <div className="w-20 h-20 rounded-2xl bg-surface/70 backdrop-blur-md flex items-center justify-center text-4xl shrink-0 border border-glass-border">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-glass-border bg-surface/70 text-3xl backdrop-blur-md">
                 {featured.icon || '◻'}
               </div>
             )}
 
             <div className="flex-1 min-w-0">
-              <span className="inline-block text-[10px] font-bold font-label text-primary-on bg-primary px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2">
+              <span className="mb-2 inline-block rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-on font-label">
                 {getRecipeFeaturedLabel(featured)}
               </span>
-              <span className={`inline-block text-[10px] font-bold font-label px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 ml-2 ${
+              <span className={`mb-2 ml-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] font-label ${
                 featuredIsNotebook ? 'text-primary bg-primary/12 border border-primary/20' : 'text-text-dim bg-surface/45 border border-glass-border'
               }`}>
                 {getRecipeSurfaceLabel(featured)}
               </span>
               {featuredHardwareFit && (
-                <span className={`inline-block text-[10px] font-bold font-label px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 ml-2 ${getHardwareFitBannerClass(featuredHardwareFit)}`}>
+                <span className={`mb-2 ml-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] font-label ${getHardwareFitBannerClass(featuredHardwareFit)}`}>
                   Host {featuredHardwareFit.label}
                 </span>
               )}
-              <h1 className="text-3xl font-bold text-text tracking-tight font-display m-0 drop-shadow-md">
+              <h1 className="m-0 text-[28px] font-bold tracking-tight text-text drop-shadow-md font-display">
                 {featured.name}
               </h1>
-              <p className="text-text-muted text-sm leading-relaxed max-w-md line-clamp-2 m-0 mt-1 drop-shadow-sm">
+              <p className="m-0 mt-1 max-w-md line-clamp-2 text-sm leading-6 text-text-muted drop-shadow-sm">
                 {featured.description}
               </p>
               {featuredHardwareFit?.headline && (
-                <p className="text-text-muted text-xs leading-relaxed max-w-lg m-0 mt-2 drop-shadow-sm">
+                <p className="m-0 mt-1.5 max-w-lg text-xs leading-5 text-text-muted drop-shadow-sm">
                   {featuredHardwareFit.headline}
                 </p>
               )}
-              <div className="mt-4 flex items-center gap-3">
+              <div className="mt-3.5 flex items-center gap-2.5">
                 {featured.running && featured.ready ? (
                   <a
                     href={getRecipeUrl(featured)}
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="btn-primary px-6 py-2 text-sm font-bold no-underline inline-block"
+                    className="btn-primary inline-block rounded-lg px-5 py-2 text-sm font-bold no-underline"
                   >
                       {getRecipeOpenLabelWithArrow(featured)}
                   </a>
                 ) : !featured.installed ? (
                   <button
                     onClick={(e) => { e.stopPropagation(); installRecipe(featured.slug) }}
-                    className="btn-primary px-6 py-2 text-sm font-bold"
+                    className="btn-primary rounded-lg px-5 py-2 text-sm font-bold"
                   >
                     Install
                   </button>
                 ) : (
                   <button
                     onClick={(e) => { e.stopPropagation(); selectRecipe(featured.slug) }}
-                    className="btn-primary px-6 py-2 text-sm font-bold"
+                    className="btn-primary rounded-lg px-5 py-2 text-sm font-bold"
                   >
                     View Details
                   </button>
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); selectRecipe(featured.slug) }}
-                  className="px-5 py-2 bg-surface/40 backdrop-blur text-text text-sm font-medium border border-glass-border rounded-xl cursor-pointer hover:bg-surface/60 transition-all"
+                  className="cursor-pointer rounded-lg border border-glass-border bg-surface/40 px-4 py-2 text-sm font-medium text-text backdrop-blur transition-all hover:bg-surface/60"
                 >
                   Learn More
                 </button>
@@ -413,52 +468,393 @@ export default function Catalog({ search = '' }) {
         </div>
       )}
 
-      {/* ─── Category Filters ─── */}
-      <div className="px-6 pt-6 pb-2 flex gap-2 overflow-x-auto">
-        {CATEGORIES.map((c) => (
+      <div className="px-6 pt-6">
+        <div className="mb-3 flex items-center justify-between gap-2.5 xl:hidden">
           <button
-            key={c.id}
-            onClick={() => setCategory(c.id)}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 border ${
-              category === c.id
-                ? 'bg-primary text-primary-on border-primary shadow-md shadow-primary/15'
-                : 'bg-transparent text-text-muted border-outline hover:text-text hover:border-text-dim'
-            }`}
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-outline-dim bg-surface/80 px-3.5 py-2.5 text-sm font-semibold text-text shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm"
           >
-            {c.label}
+            <CategoryIcon kind={activeCategoryMeta.icon} active />
+            Categories
           </button>
-        ))}
-      </div>
-
-      {/* ─── App Sections ─── */}
-      <div className="px-6 pt-4 space-y-10">
-        {grouped.map((section) => (
-          <div key={section.id} className="animate-fadeIn">
-            <div className="mb-4 flex items-center gap-2">
-              <SectionIcon kind={section.icon} />
-              <div>
-                <h2 className="text-lg font-bold text-text tracking-tight font-display m-0">
-                  {section.label}
-                </h2>
-                <p className="text-xs text-text-dim mt-0.5 m-0">{section.subtitle}</p>
-              </div>
-            </div>
-            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
-              {section.recipes.map((recipe) => (
-                <RecipeCard key={recipe.slug} recipe={recipe} />
-              ))}
-            </div>
+          <div className="rounded-xl border border-outline-dim bg-surface/80 px-3.5 py-2.5 text-sm text-text-dim shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm">
+            {activeCategoryMeta.label} · {orderedRecipes.length}
           </div>
-        ))}
-        {grouped.length === 0 && (
-          <div className="text-center py-20 text-text-dim animate-fadeIn">
-            <div className="text-4xl mb-3">🔍</div>
-            <div className="text-base font-semibold font-display">No apps found</div>
-            <div className="text-sm mt-1">Try a different search or category</div>
+        </div>
+
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-40 xl:hidden">
+            <button
+              type="button"
+              aria-label="Close category menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+            />
+            <div className="absolute inset-y-0 left-0 w-[86vw] max-w-[340px] overflow-y-auto border-r border-outline-dim bg-bg/95 p-4 shadow-[0_18px_48px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Categories</div>
+                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">Browse apps</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                {CATEGORIES.map((c) => {
+                  const active = category === c.id
+                  return (
+                    <button
+                      key={`mobile-${c.id}`}
+                      type="button"
+                      onClick={() => handleCategorySelect(c.id)}
+                      className={`group flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left transition-all duration-200 ${
+                        active
+                          ? 'border-primary bg-primary/10 text-text shadow-[0_8px_20px_rgba(118,226,42,0.12)]'
+                          : 'border-outline-dim bg-surface-high/40 text-text-muted hover:border-outline hover:bg-surface-high/75 hover:text-text'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${active ? 'border-primary/30 bg-primary/10 text-primary' : 'border-outline-dim bg-surface-high/70 text-text-dim group-hover:text-text-muted'}`}>
+                          <CategoryIcon kind={c.icon} active={active} />
+                        </span>
+                        <span>
+                          <span className="block text-[13px] font-semibold font-display leading-5">{c.label}</span>
+                          <span className="mt-0.5 block text-[10px] uppercase tracking-[0.14em] text-text-dim font-label">{categoryCounts[c.id] || 0} apps</span>
+                        </span>
+                      </span>
+                      <span className="rounded-full border border-outline-dim bg-surface-high/70 px-2 py-0.5 text-[10px] font-label text-text-dim">
+                        {categoryCounts[c.id] || 0}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResetCategory}
+                className="mt-4 w-full rounded-xl border border-outline-dim bg-surface-high/60 px-3 py-2.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high"
+              >
+                Reset to all
+              </button>
+            </div>
           </div>
         )}
+
+        <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="hidden space-y-4 xl:sticky xl:top-6 xl:block xl:self-start">
+            <div className="rounded-2xl border border-outline-dim bg-surface/80 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.16)] backdrop-blur-sm">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Categories</div>
+                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">Explore apps</h2>
+                  <p className="m-0 text-xs leading-5 text-text-dim">Quick category filter.</p>
+                </div>
+                <div className="rounded-xl border border-outline-dim bg-surface-high/70 px-2.5 py-1.5 text-right">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Showing</div>
+                  <div className="text-sm font-bold text-text font-display">{filtered.length}</div>
+                </div>
+              </div>
+
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 xl:mx-0 xl:block xl:space-y-1.5 xl:overflow-visible xl:px-0 xl:pb-0">
+                {CATEGORIES.map((c) => {
+                  const active = category === c.id
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleCategorySelect(c.id)}
+                      className={`group shrink-0 rounded-xl border px-3 py-2.5 text-left transition-all duration-200 xl:flex xl:w-full xl:items-center xl:justify-between ${
+                        active
+                          ? 'border-primary bg-primary/10 text-text shadow-[0_8px_20px_rgba(118,226,42,0.12)]'
+                          : 'border-outline-dim bg-surface-high/40 text-text-muted hover:border-outline hover:bg-surface-high/75 hover:text-text'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${active ? 'border-primary/30 bg-primary/10 text-primary' : 'border-outline-dim bg-surface-high/70 text-text-dim group-hover:text-text-muted'}`}>
+                          <CategoryIcon kind={c.icon} active={active} />
+                        </span>
+                        <span>
+                          <span className="block text-[13px] font-semibold font-display leading-5">{c.label}</span>
+                          <span className={`mt-0.5 hidden text-[10px] uppercase tracking-[0.14em] font-label xl:block ${active ? 'text-primary' : 'text-text-dim group-hover:text-text-muted'}`}>
+                            {categoryCounts[c.id] || 0} apps
+                          </span>
+                        </span>
+                      </span>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-label ${active ? 'border-primary/30 bg-primary/10 text-primary' : 'border-outline-dim bg-surface-high/70 text-text-dim'}`}>
+                        {categoryCounts[c.id] || 0}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </aside>
+
+          <div className="min-w-0 space-y-5">
+            {(category !== 'all' || search) && (
+              <div className="rounded-2xl border border-outline-dim bg-surface/70 px-4 py-3.5 backdrop-blur-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Current category</div>
+                    <h3 className="m-0 mt-1.5 text-xl font-bold tracking-tight text-text font-display">{activeCategoryMeta.label}</h3>
+                    <p className="m-0 mt-1 text-xs text-text-dim leading-5">
+                      {search
+                        ? `Filtered by \"${search}\" across ${activeCategoryMeta.label.toLowerCase()} apps.`
+                        : `Showing curated apps for ${activeCategoryMeta.label.toLowerCase()}.`}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-label text-text-dim">
+                    <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{filtered.length} apps</span>
+                    <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{startItem}-{endItem}</span>
+                    {search && <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">Search active</span>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-8">
+              {category === 'all' ? (
+                <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3 animate-fadeIn">
+                  {paginatedRecipes.map((recipe) => (
+                    <RecipeCard key={recipe.slug} recipe={recipe} />
+                  ))}
+                </div>
+              ) : (
+                grouped.map((section) => (
+                  <div key={section.id} className="animate-fadeIn">
+                    <div className="mb-3 flex items-center gap-2">
+                      <SectionIcon kind={section.icon} />
+                      <div>
+                        <h2 className="text-base font-bold text-text tracking-tight font-display m-0">
+                          {section.label}
+                        </h2>
+                        <p className="text-[11px] text-text-dim mt-0.5 m-0 leading-4">{section.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                      {section.recipes.map((recipe) => (
+                        <RecipeCard key={recipe.slug} recipe={recipe} />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+              {((category === 'all' && paginatedRecipes.length === 0) || (category !== 'all' && grouped.length === 0)) && (
+                <div className="text-center py-20 text-text-dim animate-fadeIn">
+                  <div className="text-4xl mb-3">🔍</div>
+                  <div className="text-base font-semibold font-display">No apps found</div>
+                  <div className="text-sm mt-1">Try a different search or category</div>
+                </div>
+              )}
+            </div>
+
+            {orderedRecipes.length > 0 && (
+              <div className="flex flex-col gap-4 rounded-2xl border border-outline-dim bg-surface/70 px-4 py-3.5 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-2 text-sm text-text-dim">
+                  <span className="font-label">Items per page</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    className="rounded-lg border border-outline-dim bg-surface-high/70 px-3 py-1.5 text-sm text-text outline-none"
+                  >
+                    {[12, 24, 48, 96].map((size) => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    disabled={currentPage === 1}
+                    className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-9 rounded-lg border px-2.5 py-1.5 text-sm font-semibold transition-all ${
+                        currentPage === page
+                          ? 'border-primary bg-primary/12 text-primary'
+                          : 'border-outline-dim bg-surface-high/60 text-text hover:border-outline hover:bg-surface-high'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    disabled={currentPage === totalPages}
+                    className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+  )
+}
+
+function CategoryIcon({ kind, active = false }) {
+  const shared = {
+    className: `h-5 w-5 ${active ? 'text-primary' : 'text-current'}`,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  }
+
+  if (kind === 'grid') {
+    return (
+      <svg {...shared}>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    )
+  }
+
+  if (kind === 'brain' || kind === 'reasoning') {
+    return (
+      <svg {...shared}>
+        <path d="M9.5 7.5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1 2.5 2.5c0 .9-.47 1.7-1.18 2.15A2.5 2.5 0 0 1 14 16.5h-4A2.5 2.5 0 0 1 8.13 12.15 2.5 2.5 0 0 1 9.5 7.5Z" />
+        <path d="M12 7v10" />
+        <path d="M9.5 10.5h1.5" />
+        <path d="M13 13.5h1.5" />
+      </svg>
+    )
+  }
+
+  if (kind === 'server' || kind === 'database') {
+    return (
+      <svg {...shared}>
+        <rect x="4" y="4" width="16" height="6" rx="2" />
+        <rect x="4" y="14" width="16" height="6" rx="2" />
+        <path d="M8 7h.01" />
+        <path d="M8 17h.01" />
+        <path d="M14 7h2" />
+        <path d="M14 17h2" />
+      </svg>
+    )
+  }
+
+  if (kind === 'image') {
+    return (
+      <svg {...shared}>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <circle cx="9" cy="10" r="1.5" />
+        <path d="m21 15-4.5-4.5L8 19" />
+      </svg>
+    )
+  }
+
+  if (kind === 'video') {
+    return (
+      <svg {...shared}>
+        <rect x="3" y="6" width="13" height="12" rx="2" />
+        <path d="m16 10 5-3v10l-5-3" />
+      </svg>
+    )
+  }
+
+  if (kind === 'cube') {
+    return (
+      <svg {...shared}>
+        <path d="m12 3 7 4v10l-7 4-7-4V7l7-4Z" />
+        <path d="m12 12 7-4" />
+        <path d="m12 12-7-4" />
+        <path d="M12 12v9" />
+      </svg>
+    )
+  }
+
+  if (kind === 'eye' || kind === 'scan') {
+    return (
+      <svg {...shared}>
+        <path d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </svg>
+    )
+  }
+
+  if (kind === 'code') {
+    return (
+      <svg {...shared}>
+        <path d="m8 16-4-4 4-4" />
+        <path d="m16 8 4 4-4 4" />
+        <path d="m14 5-4 14" />
+      </svg>
+    )
+  }
+
+  if (kind === 'mic') {
+    return (
+      <svg {...shared}>
+        <rect x="9" y="3" width="6" height="11" rx="3" />
+        <path d="M5 11a7 7 0 0 0 14 0" />
+        <path d="M12 18v3" />
+        <path d="M8.5 21h7" />
+      </svg>
+    )
+  }
+
+  if (kind === 'shield') {
+    return (
+      <svg {...shared}>
+        <path d="M12 3 5 6v5c0 5 3.5 8.5 7 10 3.5-1.5 7-5 7-10V6l-7-3Z" />
+        <path d="m9.5 12 1.8 1.8L15 10.1" />
+      </svg>
+    )
+  }
+
+  if (kind === 'spark') {
+    return (
+      <svg {...shared}>
+        <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+      </svg>
+    )
+  }
+
+  if (kind === 'multimodal') {
+    return (
+      <svg {...shared}>
+        <circle cx="7" cy="12" r="2.5" />
+        <circle cx="17" cy="7" r="2.5" />
+        <circle cx="17" cy="17" r="2.5" />
+        <path d="M9.2 11 14.8 8.1" />
+        <path d="M9.2 13 14.8 15.9" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg {...shared}>
+      <rect x="3" y="4" width="18" height="6" rx="2" />
+      <rect x="3" y="14" width="18" height="6" rx="2" />
+      <path d="M7 7h.01" />
+      <path d="M7 17h.01" />
+      <path d="M17 7h-4" />
+      <path d="M17 17h-4" />
+    </svg>
   )
 }
 

@@ -1,6 +1,6 @@
 # Dify
 
-Practical self-hosted Dify stack for DGX Spark using the official upstream images for the web UI, API, workers, sandbox, plugin daemon, PostgreSQL, Redis, and Weaviate.
+Practical self-hosted Dify stack for NVIDIA GPUs using the official upstream images for the web UI, API, workers, sandbox, plugin daemon, PostgreSQL, Redis, and Weaviate.
 
 ## What it provides
 

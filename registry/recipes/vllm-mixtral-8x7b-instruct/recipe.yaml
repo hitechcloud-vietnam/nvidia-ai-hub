@@ -1,7 +1,7 @@
 name: "Mixtral 8x7B Instruct"
 slug: vllm-mixtral-8x7b-instruct
 version: "1.0.0"
-description: "Mixtral 8x7B Instruct routed through vLLM for sparse-MoE chat, reasoning, and coding workloads on DGX Spark."
+description: "Mixtral 8x7B Instruct routed through vLLM for sparse-MoE chat, reasoning, and coding workloads on NVIDIA GPUs."
 author: "Mistral AI"
 source: "official"
 website: "https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1"

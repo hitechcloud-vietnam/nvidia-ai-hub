@@ -1,7 +1,7 @@
 name: "Fooocus"
 slug: fooocus
 version: "1.0.0"
-description: "Run the official Fooocus web UI on DGX Spark for SDXL-focused text-to-image, inpainting, outpainting, prompt expansion, and image-prompt workflows with persistent model and output storage."
+description: "Run the official Fooocus web UI on NVIDIA GPUs for SDXL-focused text-to-image, inpainting, outpainting, prompt expansion, and image-prompt workflows with persistent model and output storage."
 author: "lllyasviel"
 source: "official"
 website: "https://github.com/lllyasviel/Fooocus"

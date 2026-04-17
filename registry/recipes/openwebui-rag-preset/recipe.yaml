@@ -1,7 +1,7 @@
 name: "Open WebUI RAG Preset"
 slug: openwebui-rag-preset
 version: "1.0.0"
-description: "Official-image Open WebUI preset for document chat and local RAG with a bundled Qdrant vector database plus easy pairing with the Ollama runtime recipe on DGX Spark."
+description: "Official-image Open WebUI preset for document chat and local RAG with a bundled Qdrant vector database plus easy pairing with the Ollama runtime recipe on NVIDIA GPUs."
 author: "Open WebUI"
 source: "official"
 website: "https://openwebui.com/"

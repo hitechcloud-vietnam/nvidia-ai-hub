@@ -1,7 +1,7 @@
 name: "WhisperX Workstation"
 slug: whisperx-workstation
 version: "1.0.0"
-description: "Local WhisperX transcription workstation with alignment, optional speaker diarization, subtitle export, and persistent model cache on DGX Spark."
+description: "Local WhisperX transcription workstation with alignment, optional speaker diarization, subtitle export, and persistent model cache on NVIDIA GPUs."
 author: "WhisperX"
 source: "official"
 website: "https://github.com/m-bain/whisperX"

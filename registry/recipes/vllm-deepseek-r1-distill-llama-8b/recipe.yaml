@@ -1,7 +1,7 @@
 name: "DeepSeek R1 Distill Llama 8B"
 slug: vllm-deepseek-r1-distill-llama-8b
 version: "1.0.0"
-description: "DeepSeek R1 Distill Llama 8B packaged for vLLM with compact reasoning and code-focused inference on DGX Spark."
+description: "DeepSeek R1 Distill Llama 8B packaged for vLLM with compact reasoning and code-focused inference on NVIDIA GPUs."
 author: "DeepSeek"
 source: "official"
 website: "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B"

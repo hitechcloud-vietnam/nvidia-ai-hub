@@ -1,7 +1,7 @@
 name: "MiniCPM-o 2.6"
 slug: minicpm-o
 version: "1.0.0"
-description: "Run MiniCPM-o 2.6 on DGX Spark for streaming multimodal chat with image, audio, and voice input through the upstream web demo wrapped for local GPU deployment."
+description: "Run MiniCPM-o 2.6 on NVIDIA GPUs for streaming multimodal chat with image, audio, and voice input through the upstream web demo wrapped for local GPU deployment."
 author: "OpenBMB / HiTechCloud Vietnam"
 source: "nvidia-ai-hub"
 website: "https://github.com/OpenBMB/MiniCPM-o"

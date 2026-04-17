@@ -1,0 +1,33 @@
+services:
+  segment-anything-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-segment-anything-studio
+    ports:
+      - "${APP_PORT:-7869}:${PORT:-7860}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${PORT:-7860}"
+      OUTPUT_DIR: "${OUTPUT_DIR:-/data/output}"
+      CHECKPOINT_DIR: "${CHECKPOINT_DIR:-/data/checkpoints}"
+      SAM_CHECKPOINT_URL: "${SAM_CHECKPOINT_URL:-https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth}"
+      SAM_CHECKPOINT_FILE: "${SAM_CHECKPOINT_FILE:-sam_vit_h_4b8939.pth}"
+      SAM_MODEL_TYPE: "${SAM_MODEL_TYPE:-vit_h}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+    volumes:
+      - segment-anything-checkpoints:/data/checkpoints
+      - segment-anything-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  segment-anything-checkpoints:
+  segment-anything-output:

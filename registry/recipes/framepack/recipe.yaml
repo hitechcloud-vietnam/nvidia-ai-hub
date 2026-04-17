@@ -1,7 +1,7 @@
 name: "FramePack"
 slug: framepack
 version: "1.0.0"
-description: "Run the official FramePack Gradio app on DGX Spark for image-to-video generation with long progressive video extension, low-VRAM-friendly sampling, and persistent Hugging Face cache plus rendered output storage."
+description: "Run the official FramePack Gradio app on NVIDIA GPUs for image-to-video generation with long progressive video extension, low-VRAM-friendly sampling, and persistent Hugging Face cache plus rendered output storage."
 author: "lllyasviel"
 source: "official"
 website: "https://github.com/lllyasviel/FramePack"

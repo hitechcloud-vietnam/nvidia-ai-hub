@@ -1,7 +1,7 @@
 name: "Qwen2.5-VL-7B Instruct"
 slug: vllm-qwen25-vl-7b-instruct
 version: "1.0.0"
-description: "Qwen2.5-VL-7B Instruct served through vLLM for image-grounded chat, OCR-heavy documents, chart understanding, visual localization, and agentic multimodal workflows on DGX Spark."
+description: "Qwen2.5-VL-7B Instruct served through vLLM for image-grounded chat, OCR-heavy documents, chart understanding, visual localization, and agentic multimodal workflows on NVIDIA GPUs."
 author: "Alibaba Cloud"
 source: "official"
 website: "https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct"

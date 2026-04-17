@@ -1,7 +1,7 @@
 name: "Florence-2 Large"
 slug: vllm-florence2-large
 version: "1.0.0"
-description: "Microsoft Florence-2 Large served through vLLM for prompt-driven image captioning, OCR, object detection, grounding, and visual task automation on DGX Spark."
+description: "Microsoft Florence-2 Large served through vLLM for prompt-driven image captioning, OCR, object detection, grounding, and visual task automation on NVIDIA GPUs."
 author: "Microsoft"
 source: "official"
 website: "https://huggingface.co/microsoft/Florence-2-large"

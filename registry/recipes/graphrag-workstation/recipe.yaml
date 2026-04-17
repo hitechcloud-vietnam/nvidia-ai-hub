@@ -1,7 +1,7 @@
 name: "GraphRAG Workstation"
 slug: graphrag-workstation
 version: "1.0.0"
-description: "Run a practical GraphRAG workstation with a local Streamlit workbench for dataset initialization, indexing, query comparisons, and community-report inspection on DGX Spark."
+description: "Run a practical GraphRAG workstation with a local Streamlit workbench for dataset initialization, indexing, query comparisons, and community-report inspection on NVIDIA GPUs."
 author: "Microsoft"
 source: "official"
 website: "https://microsoft.github.io/graphrag/"

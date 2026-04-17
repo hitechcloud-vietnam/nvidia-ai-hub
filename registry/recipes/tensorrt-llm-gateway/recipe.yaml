@@ -1,0 +1,53 @@
+name: "TensorRT-LLM API Gateway"
+slug: tensorrt-llm-gateway
+version: "1.0.0"
+description: "Official TensorRT-LLM OpenAI-compatible serving baseline with health and metrics endpoints, configurable parallelism, and persistent cache mounts for NVIDIA GPUs."
+author: "NVIDIA"
+source: "official"
+website: "https://nvidia.github.io/TensorRT-LLM/"
+upstream: "https://github.com/NVIDIA/TensorRT-LLM"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - tensorrt-llm
+  - trtllm
+  - runtime
+  - openai-compatible
+  - nvidia
+  - gpu
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 50
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3098
+  path: "/v1/models"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3098/v1"
+  model_id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  api_key: "TensorRT-LLM examples commonly use a placeholder key; this baseline leaves the endpoint unauthenticated"
+  max_context: "Configurable through TRTLLM_MAX_SEQ_LEN or the model defaults"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:3098/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"TinyLlama/TinyLlama-1.1B-Chat-v1.0\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+status: experimental
+runtime_env_path: "registry/recipes/tensorrt-llm-gateway/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official TensorRT-LLM OpenAI-compatible server with GPU access, shared memory sizing, metrics support, and cache mounts on port 3098."
+    command: "docker compose --env-file registry/recipes/tensorrt-llm-gateway/.env -p nvidia-ai-hub-tensorrt-llm-gateway -f registry/recipes/tensorrt-llm-gateway/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the TensorRT-LLM gateway while preserving local cache data and optional configuration files."
+    command: "docker compose --env-file registry/recipes/tensorrt-llm-gateway/.env -p nvidia-ai-hub-tensorrt-llm-gateway -f registry/recipes/tensorrt-llm-gateway/docker-compose.yml down"

@@ -1,7 +1,7 @@
 name: "Llama 3.1 8B FP8"
 slug: vllm-llama31-8b-fp8
 version: "1.0.0"
-description: "Meta Llama 3.1 8B Instruct, FP8 quantized by NVIDIA, served through vLLM as an OpenAI-compatible endpoint for DGX Spark."
+description: "Meta Llama 3.1 8B Instruct, FP8 quantized by NVIDIA, served through vLLM as an OpenAI-compatible endpoint for NVIDIA GPUs."
 author: "Meta / NVIDIA"
 source: "official"
 website: "https://build.nvidia.com/spark/vllm"
@@ -36,4 +36,4 @@ integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "nvidia/Llama-3.1-8B-Instruct-FP8"
   api_key: "not-needed"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Llama-3.1-8B-Instruct-FP8\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a short deployment checklist for DGX Spark.\"}]}'"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Llama-3.1-8B-Instruct-FP8\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a short deployment checklist for NVIDIA GPUs.\"}]}'"

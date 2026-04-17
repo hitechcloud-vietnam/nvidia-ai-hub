@@ -207,7 +207,7 @@ function About() {
         <img src="/brand/spark-ai-hub-mark.svg" alt="NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC" className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] p-2.5" />
         <div>
           <h1 className="text-2xl font-bold tracking-tight font-display m-0">NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC</h1>
-          <p className="text-sm text-text-dim m-0 mt-1">One-click AI app launcher for NVIDIA DGX Spark</p>
+          <p className="text-sm text-text-dim m-0 mt-1">One-click AI app launcher for NVIDIA NVIDIA GPUs</p>
         </div>
       </div>
 
@@ -215,7 +215,7 @@ function About() {
         <div className="bg-surface rounded-2xl p-5">
           <h3 className="font-semibold text-sm font-display m-0 mb-3">About</h3>
           <p className="text-sm text-text-muted m-0 leading-relaxed">
-            NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC lets you install, run, and manage GPU-accelerated AI applications on your NVIDIA DGX Spark — all from a single web interface. No terminal required.
+            NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC lets you install, run, and manage GPU-accelerated AI applications on your NVIDIA NVIDIA GPUs — all from a single web interface. No terminal required.
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 name: "Gemma 4 31B NVFP4"
 slug: vllm-gemma4-31b-nvfp4
 version: "1.0.0"
-description: "Google Gemma 4 31B Instruct served from NVIDIA's NVFP4-optimized checkpoint. Multimodal text+image, reasoning-enabled, and tuned for lower-memory vLLM deployment on DGX Spark."
+description: "Google Gemma 4 31B Instruct served from NVIDIA's NVFP4-optimized checkpoint. Multimodal text+image, reasoning-enabled, and tuned for lower-memory vLLM deployment on NVIDIA GPUs."
 author: "Google"
 source: "official"
 website: "https://ai.google.dev/gemma/docs/core"

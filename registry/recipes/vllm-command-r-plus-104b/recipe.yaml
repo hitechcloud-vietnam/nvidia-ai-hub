@@ -1,7 +1,7 @@
 name: "Command R+ 104B"
 slug: vllm-command-r-plus-104b
 version: "1.0.0"
-description: "Cohere Command R+ 104B exposed through vLLM for advanced multilingual reasoning, grounded generation, and multi-step tool workflows on DGX Spark."
+description: "Cohere Command R+ 104B exposed through vLLM for advanced multilingual reasoning, grounded generation, and multi-step tool workflows on NVIDIA GPUs."
 author: "Cohere Labs"
 source: "official"
 website: "https://huggingface.co/CohereLabs/c4ai-command-r-plus-08-2024"

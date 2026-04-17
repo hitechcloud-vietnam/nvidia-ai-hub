@@ -1,7 +1,7 @@
 name: "Phi-4 Multimodal NVFP4"
 slug: vllm-phi4-multimodal-nvfp4
 version: "1.0.0"
-description: "Microsoft Phi-4 multimodal instruct, NVFP4 quantized by NVIDIA, served through vLLM for text, image, and audio workflows on DGX Spark."
+description: "Microsoft Phi-4 multimodal instruct, NVFP4 quantized by NVIDIA, served through vLLM for text, image, and audio workflows on NVIDIA GPUs."
 author: "Microsoft / NVIDIA"
 source: "official"
 website: "https://build.nvidia.com/spark/vllm"

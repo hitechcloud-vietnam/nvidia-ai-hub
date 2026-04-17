@@ -1,6 +1,6 @@
 # Haystack Studio
 
-Official-style Haystack starter for DGX Spark using `Hayhooks` as the serving layer, `Open WebUI` as the chat frontend, local `Qdrant` storage, and the shared `ollama-runtime` recipe for both chat and embedding models.
+Official-style Haystack starter for NVIDIA GPUs using `Hayhooks` as the serving layer, `Open WebUI` as the chat frontend, local `Qdrant` storage, and the shared `ollama-runtime` recipe for both chat and embedding models.
 
 ## What it provides
 

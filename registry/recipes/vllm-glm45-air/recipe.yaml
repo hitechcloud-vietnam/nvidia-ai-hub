@@ -1,7 +1,7 @@
 name: "GLM 4.5 Air"
 slug: vllm-glm45-air
 version: "1.0.0"
-description: "Z.ai GLM 4.5 Air served with vLLM as a hybrid reasoning and agent model with tool calling for advanced DGX Spark workflows."
+description: "Z.ai GLM 4.5 Air served with vLLM as a hybrid reasoning and agent model with tool calling for advanced NVIDIA GPUs workflows."
 author: "Z.ai"
 source: "official"
 website: "https://huggingface.co/zai-org/GLM-4.5-Air"

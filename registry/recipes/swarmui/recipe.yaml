@@ -1,7 +1,7 @@
 name: "SwarmUI"
 slug: swarmui
 version: "1.0.0"
-description: "Run the official SwarmUI Docker workflow on DGX Spark for advanced image and video generation with persistent data, backend, models, outputs, and custom workflow storage exposed through the web UI."
+description: "Run the official SwarmUI Docker workflow on NVIDIA GPUs for advanced image and video generation with persistent data, backend, models, outputs, and custom workflow storage exposed through the web UI."
 author: "mcmonkeyprojects"
 source: "official"
 website: "https://github.com/mcmonkeyprojects/SwarmUI"

@@ -1,7 +1,7 @@
 name: "InstantMesh"
 slug: instantmesh
 version: "1.0.0"
-description: "Run the official InstantMesh Gradio demo on DGX Spark for single-image 3D mesh generation with persistent model cache plus downloadable OBJ, GLB, and preview video outputs."
+description: "Run the official InstantMesh Gradio demo on NVIDIA GPUs for single-image 3D mesh generation with persistent model cache plus downloadable OBJ, GLB, and preview video outputs."
 author: "Tencent ARC"
 source: "official"
 website: "https://github.com/TencentARC/InstantMesh"

@@ -1,0 +1,54 @@
+services:
+  text-embeddings-inference:
+    image: ${TEI_IMAGE}
+    container_name: text-embeddings-inference
+    restart: unless-stopped
+    ports:
+      - "${TEI_PORT}:${TEI_INTERNAL_PORT}"
+      - "${TEI_PROMETHEUS_PORT}:${TEI_PROMETHEUS_PORT}"
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      HUGGINGFACE_HUB_CACHE: /data
+      MODEL_ID: ${TEI_MODEL_ID}
+      REVISION: ${TEI_REVISION}
+      API_KEY: ${TEI_API_KEY}
+      JSON_OUTPUT: ${TEI_JSON_OUTPUT}
+      DISABLE_SPANS: ${TEI_DISABLE_SPANS}
+      OTLP_ENDPOINT: ${TEI_OTLP_ENDPOINT}
+      OTLP_SERVICE_NAME: ${TEI_OTLP_SERVICE_NAME}
+      PROMETHEUS_PORT: ${TEI_PROMETHEUS_PORT}
+    volumes:
+      - ./data:/data
+    shm_size: ${TEI_SHM_SIZE}
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: |
+      set -euo pipefail
+      EXTRA_ARGS=""
+      if [ -n "${TEI_DTYPE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --dtype ${TEI_DTYPE}"; fi
+      if [ -n "${TEI_SERVED_MODEL_NAME}" ]; then EXTRA_ARGS="$EXTRA_ARGS --served-model-name ${TEI_SERVED_MODEL_NAME}"; fi
+      if [ -n "${TEI_POOLING}" ]; then EXTRA_ARGS="$EXTRA_ARGS --pooling ${TEI_POOLING}"; fi
+      if [ -n "${TEI_MAX_CONCURRENT_REQUESTS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-concurrent-requests ${TEI_MAX_CONCURRENT_REQUESTS}"; fi
+      if [ -n "${TEI_MAX_BATCH_TOKENS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-batch-tokens ${TEI_MAX_BATCH_TOKENS}"; fi
+      if [ -n "${TEI_MAX_BATCH_REQUESTS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-batch-requests ${TEI_MAX_BATCH_REQUESTS}"; fi
+      if [ -n "${TEI_MAX_CLIENT_BATCH_SIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-client-batch-size ${TEI_MAX_CLIENT_BATCH_SIZE}"; fi
+      if [ -n "${TEI_DEFAULT_PROMPT_NAME}" ]; then EXTRA_ARGS="$EXTRA_ARGS --default-prompt-name ${TEI_DEFAULT_PROMPT_NAME}"; fi
+      if [ -n "${TEI_DEFAULT_PROMPT}" ]; then EXTRA_ARGS="$EXTRA_ARGS --default-prompt ${TEI_DEFAULT_PROMPT}"; fi
+      if [ -n "${TEI_DENSE_PATH}" ]; then EXTRA_ARGS="$EXTRA_ARGS --dense-path ${TEI_DENSE_PATH}"; fi
+      if [ -n "${TEI_TOKENIZATION_WORKERS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --tokenization-workers ${TEI_TOKENIZATION_WORKERS}"; fi
+      if [ -n "${TEI_PAYLOAD_LIMIT}" ]; then EXTRA_ARGS="$EXTRA_ARGS --payload-limit ${TEI_PAYLOAD_LIMIT}"; fi
+      if [ -n "${TEI_CORS_ALLOW_ORIGIN}" ]; then EXTRA_ARGS="$EXTRA_ARGS --cors-allow-origin ${TEI_CORS_ALLOW_ORIGIN}"; fi
+      if [ "${TEI_AUTO_TRUNCATE}" = "false" ]; then EXTRA_ARGS="$EXTRA_ARGS --auto-truncate false"; fi
+      exec text-embeddings-router \
+        --model-id "${TEI_MODEL_ID}" \
+        --hostname "${TEI_HOSTNAME}" \
+        --port "${TEI_INTERNAL_PORT}" \
+        $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

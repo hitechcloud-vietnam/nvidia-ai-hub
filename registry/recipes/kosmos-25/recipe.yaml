@@ -1,7 +1,7 @@
 name: "Kosmos-2.5 Instruct"
 slug: kosmos-25
 version: "1.0.0"
-description: "Run Microsoft Kosmos-2.5 on DGX Spark through a local Gradio document-understanding UI for OCR and image-to-markdown extraction from text-rich images."
+description: "Run Microsoft Kosmos-2.5 on NVIDIA GPUs through a local Gradio document-understanding UI for OCR and image-to-markdown extraction from text-rich images."
 author: "Microsoft"
 source: "official"
 website: "https://huggingface.co/microsoft/kosmos-2.5"

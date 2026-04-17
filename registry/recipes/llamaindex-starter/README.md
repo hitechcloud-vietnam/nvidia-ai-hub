@@ -1,6 +1,6 @@
 # LlamaIndex Starter
 
-Practical self-hosted LlamaIndex starter for DGX Spark using a local FastAPI app, Qdrant vector storage, and the shared `ollama-runtime` recipe for chat and embedding models.
+Practical self-hosted LlamaIndex starter for NVIDIA GPUs using a local FastAPI app, Qdrant vector storage, and the shared `ollama-runtime` recipe for chat and embedding models.
 
 ## What it provides
 

@@ -1,7 +1,7 @@
 name: "STT Server"
 slug: stt-server
 version: "1.0.0"
-description: "Local Faster-Whisper FastAPI server for speech-to-text and translation with word timestamps, VAD filtering, and persistent model cache on DGX Spark."
+description: "Local Faster-Whisper FastAPI server for speech-to-text and translation with word timestamps, VAD filtering, and persistent model cache on NVIDIA GPUs."
 author: "SYSTRAN"
 source: "official"
 website: "https://github.com/SYSTRAN/faster-whisper"

@@ -1,0 +1,47 @@
+name: "ImageBind Demo App"
+slug: imagebind-demo-app
+version: "1.0.0"
+description: "Run the official Meta ImageBind model as a local Gradio demo on NVIDIA GPUs for cross-modal similarity experiments across text, images, and audio with persistent model cache and exported reports."
+author: "Meta AI"
+source: "official"
+website: "https://github.com/facebookresearch/ImageBind"
+upstream: "https://github.com/facebookresearch/ImageBind"
+category: image-understanding
+categories:
+  - image-understanding
+  - multi-modal
+  - workflow
+tags:
+  - imagebind
+  - meta
+  - multimodal
+  - retrieval
+  - embeddings
+  - audio
+  - gradio
+icon: "🪢"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 35
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7868
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/imagebind-demo-app/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the local ImageBind demo image and launch the Gradio UI on port 7868."
+    command: "docker compose --env-file registry/recipes/imagebind-demo-app/.env -p nvidia-ai-hub-imagebind-demo-app -f registry/recipes/imagebind-demo-app/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop ImageBind Demo App while preserving model cache and exported comparison reports."
+    command: "docker compose --env-file registry/recipes/imagebind-demo-app/.env -p nvidia-ai-hub-imagebind-demo-app -f registry/recipes/imagebind-demo-app/docker-compose.yml down"

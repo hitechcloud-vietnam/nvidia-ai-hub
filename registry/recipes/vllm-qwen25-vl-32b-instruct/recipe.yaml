@@ -1,7 +1,7 @@
 name: "Qwen2.5-VL-32B Instruct"
 slug: vllm-qwen25-vl-32b-instruct
 version: "1.0.0"
-description: "Qwen2.5-VL-32B Instruct served through vLLM for premium document AI, chart reasoning, image-grounded analysis, and stronger multimodal agent workflows on DGX Spark."
+description: "Qwen2.5-VL-32B Instruct served through vLLM for premium document AI, chart reasoning, image-grounded analysis, and stronger multimodal agent workflows on NVIDIA GPUs."
 author: "Alibaba Cloud"
 source: "official"
 website: "https://huggingface.co/Qwen/Qwen2.5-VL-32B-Instruct"

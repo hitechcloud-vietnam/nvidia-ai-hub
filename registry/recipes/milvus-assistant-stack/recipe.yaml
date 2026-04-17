@@ -1,7 +1,7 @@
 name: "Milvus Assistant Stack"
 slug: milvus-assistant-stack
 version: "1.0.0"
-description: "Milvus standalone vector database preset with etcd, MinIO, and Attu for local assistant retrieval experiments, collection management, and shared Ollama connectivity on DGX Spark."
+description: "Milvus standalone vector database preset with etcd, MinIO, and Attu for local assistant retrieval experiments, collection management, and shared Ollama connectivity on NVIDIA GPUs."
 author: "Milvus Project"
 source: "official"
 website: "https://milvus.io/"

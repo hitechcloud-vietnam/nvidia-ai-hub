@@ -1,6 +1,6 @@
-# Multi-Agent Chatbot on DGX Spark
+# Multi-Agent Chatbot on NVIDIA GPUs
 
-This recipe adapts NVIDIA's `multi-agent-chatbot` DGX Spark playbook for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC. It launches a full local stack with:
+This recipe adapts NVIDIA's `multi-agent-chatbot` NVIDIA GPUs playbook for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC. It launches a full local stack with:
 
 - Next.js frontend on port `3000`
 - FastAPI backend on port `8000`

@@ -1,7 +1,7 @@
 name: "Aya Expanse 32B"
 slug: vllm-aya-expanse-32b
 version: "1.0.0"
-description: "Cohere Aya Expanse 32B exposed through vLLM for higher-quality multilingual generation, translation, and cross-lingual support workflows on DGX Spark."
+description: "Cohere Aya Expanse 32B exposed through vLLM for higher-quality multilingual generation, translation, and cross-lingual support workflows on NVIDIA GPUs."
 author: "Cohere Labs"
 source: "official"
 website: "https://huggingface.co/CohereLabs/aya-expanse-32b"

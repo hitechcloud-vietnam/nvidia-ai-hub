@@ -1,7 +1,7 @@
 name: "Ollama Runtime"
 slug: ollama-runtime
 version: "1.0.0"
-description: "Official Ollama runtime baseline with a lightweight management UI, persistent local model storage, configurable starter-model bootstrap, and a shared endpoint for DGX Spark applications."
+description: "Official Ollama runtime baseline with a lightweight management UI, persistent local model storage, configurable starter-model bootstrap, and a shared endpoint for NVIDIA GPUsUs applications."
 author: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC"
 source: "nvidia-ai-hub"
 website: "https://ollama.com/"

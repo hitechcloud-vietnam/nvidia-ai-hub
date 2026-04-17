@@ -1,0 +1,43 @@
+services:
+  comfyui-manager-preset-pack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${COMFYUI_MANAGER_IMAGE:-comfyui-manager-preset-pack:latest}
+    container_name: nvidia-ai-hub-comfyui-manager-preset-pack
+    ports:
+      - "${COMFYUI_PORT:-8188}:8188"
+    env_file:
+      - .env
+    environment:
+      CLI_ARGS: "${CLI_ARGS:---listen 0.0.0.0 --port 8188 --enable-manager}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+      COMFYUI_MANAGER_SECURITY_LEVEL: "${COMFYUI_MANAGER_SECURITY_LEVEL:-normal}"
+      COMFYUI_MANAGER_NETWORK_MODE: "${COMFYUI_MANAGER_NETWORK_MODE:-public}"
+      COMFYUI_MANAGER_FILE_LOGGING: "${COMFYUI_MANAGER_FILE_LOGGING:-True}"
+      COMFYUI_MANAGER_BYPASS_SSL: "${COMFYUI_MANAGER_BYPASS_SSL:-False}"
+      COMFYUI_MANAGER_USE_UV: "${COMFYUI_MANAGER_USE_UV:-False}"
+      COMFYUI_MANAGER_WINDOWS_SELECTOR_EVENT_LOOP_POLICY: "${COMFYUI_MANAGER_WINDOWS_SELECTOR_EVENT_LOOP_POLICY:-False}"
+      GITHUB_ENDPOINT: "${GITHUB_ENDPOINT:-}"
+      HF_ENDPOINT: "${HF_ENDPOINT:-}"
+    volumes:
+      - comfyui-manager-models:/app/ComfyUI/models
+      - comfyui-manager-output:/app/ComfyUI/output
+      - comfyui-manager-input:/app/ComfyUI/input
+      - comfyui-manager-custom-nodes:/app/ComfyUI/custom_nodes
+      - comfyui-manager-user:/app/ComfyUI/user
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  comfyui-manager-models:
+  comfyui-manager-output:
+  comfyui-manager-input:
+  comfyui-manager-custom-nodes:
+  comfyui-manager-user:

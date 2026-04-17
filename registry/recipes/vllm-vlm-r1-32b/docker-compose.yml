@@ -1,0 +1,38 @@
+services:
+  vllm:
+    image: ${VLLM_IMAGE}
+    container_name: nvidia-ai-hub-vllm-vlm-r1-32b
+    ports:
+      - "${VLLM_PORT}:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+    ipc: host
+    command:
+      - --model
+      - ${VLLM_MODEL}
+      - --port
+      - "8000"
+      - --max-model-len
+      - ${VLLM_MAX_MODEL_LEN}
+      - --limit-mm-per-prompt
+      - image=${VLLM_LIMIT_IMAGES}
+      - --trust-remote-code
+      - --enable-prefix-caching
+      - --gpu-memory-utilization
+      - ${VLLM_GPU_MEMORY_UTILIZATION}
+      - --served-model-name
+      - ${VLLM_SERVED_MODEL_NAME}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:

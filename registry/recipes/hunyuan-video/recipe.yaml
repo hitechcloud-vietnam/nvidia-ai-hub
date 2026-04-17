@@ -1,7 +1,7 @@
 name: "HunyuanVideo"
 slug: hunyuan-video
 version: "1.0.0"
-description: "Run the official HunyuanVideo Gradio server on DGX Spark for high-end text-to-video generation with persistent checkpoints, text encoders, and generated clip storage."
+description: "Run the official HunyuanVideo Gradio server on NVIDIA GPUs for high-end text-to-video generation with persistent checkpoints, text encoders, and generated clip storage."
 author: "Tencent Hunyuan"
 source: "official"
 website: "https://github.com/Tencent-Hunyuan/HunyuanVideo"

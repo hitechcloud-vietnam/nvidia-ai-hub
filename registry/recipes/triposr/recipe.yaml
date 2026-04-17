@@ -1,7 +1,7 @@
 name: "TripoSR"
 slug: triposr
 version: "1.0.0"
-description: "Run the official TripoSR Gradio demo on DGX Spark for single-image 3D reconstruction with persistent model cache and downloadable OBJ and GLB outputs."
+description: "Run the official TripoSR Gradio demo on NVIDIA GPUs for single-image 3D reconstruction with persistent model cache and downloadable OBJ and GLB outputs."
 author: "VAST-AI Research and Stability AI"
 source: "official"
 website: "https://github.com/VAST-AI-Research/TripoSR"

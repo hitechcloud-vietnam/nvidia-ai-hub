@@ -1,6 +1,6 @@
 # OpenHands
 
-Official image-based OpenHands recipe for DGX Spark.
+Official image-based OpenHands recipe for NVIDIA GPUs.
 
 ## What it provides
 

@@ -1,7 +1,7 @@
 name: "Llama 3.2 90B Vision Instruct"
 slug: vllm-llama32-90b-vision-instruct
 version: "1.0.0"
-description: "Meta Llama 3.2 90B Vision Instruct exposed through vLLM for high-end visual reasoning, captioning, document question answering, and image-grounded assistant workflows on DGX Spark."
+description: "Meta Llama 3.2 90B Vision Instruct exposed through vLLM for high-end visual reasoning, captioning, document question answering, and image-grounded assistant workflows on NVIDIA GPUs."
 author: "Meta"
 source: "official"
 website: "https://huggingface.co/meta-llama/Llama-3.2-90B-Vision-Instruct"

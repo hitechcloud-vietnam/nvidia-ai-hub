@@ -1,7 +1,7 @@
 name: "Parler TTS Studio"
 slug: parler-tts-studio
 version: "1.0.0"
-description: "Local Gradio studio for Parler-TTS promptable speech generation with speaker-style presets, custom voice descriptions, and persistent model cache on DGX Spark."
+description: "Local Gradio studio for Parler-TTS promptable speech generation with speaker-style presets, custom voice descriptions, and persistent model cache on NVIDIA GPUs."
 author: "Hugging Face"
 source: "official"
 website: "https://github.com/huggingface/parler-tts"

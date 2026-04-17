@@ -1,7 +1,7 @@
 name: "Granite 3.1 2B Instruct"
 slug: vllm-granite31-2b-instruct
 version: "1.0.0"
-description: "IBM Granite 3.1 2B Instruct served with vLLM for compact enterprise chat, extraction, RAG, and function-calling flows on DGX Spark."
+description: "IBM Granite 3.1 2B Instruct served with vLLM for compact enterprise chat, extraction, RAG, and function-calling flows on NVIDIA GPUs."
 author: "IBM"
 source: "official"
 website: "https://huggingface.co/ibm-granite/granite-3.1-2b-instruct"

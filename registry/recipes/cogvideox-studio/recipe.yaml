@@ -1,7 +1,7 @@
 name: "CogVideoX Studio"
 slug: cogvideox-studio
 version: "1.0.0"
-description: "Run the official CogVideoX composite Gradio demo on DGX Spark for text-to-video, image-to-video, and video-to-video workflows with optional super-resolution, frame interpolation, and persistent model caches."
+description: "Run the official CogVideoX composite Gradio demo on NVIDIA GPUs for text-to-video, image-to-video, and video-to-video workflows with optional super-resolution, frame interpolation, and persistent model caches."
 author: "THUDM"
 source: "official"
 website: "https://github.com/THUDM/CogVideo"

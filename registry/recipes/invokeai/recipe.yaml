@@ -1,7 +1,7 @@
 name: "InvokeAI"
 slug: invokeai
 version: "1.0.0"
-description: "Run InvokeAI on DGX Spark for node-based and canvas-driven image generation, inpainting, outpainting, and model management through the official web UI."
+description: "Run InvokeAI on NVIDIA GPUs for node-based and canvas-driven image generation, inpainting, outpainting, and model management through the official web UI."
 author: "InvokeAI"
 source: "official"
 website: "https://invoke-ai.github.io/InvokeAI/"

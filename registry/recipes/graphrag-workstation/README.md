@@ -1,6 +1,6 @@
 # GraphRAG Workstation
 
-Practical GraphRAG workstation for DGX Spark using a local Streamlit workbench and the official `graphrag` Python package.
+Practical GraphRAG workstation for NVIDIA GPUs using a local Streamlit workbench and the official `graphrag` Python package.
 
 ## What it provides
 

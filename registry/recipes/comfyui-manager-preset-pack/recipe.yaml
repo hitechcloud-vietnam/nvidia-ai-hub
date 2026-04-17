@@ -1,0 +1,48 @@
+name: "ComfyUI Manager Preset Pack"
+slug: comfyui-manager-preset-pack
+version: "1.0.0"
+description: "Run ComfyUI with the official ComfyUI-Manager extension enabled on NVIDIA GPUs so operators can install custom nodes, manage snapshots, and import or curate reusable component packs from one persistent visual workflow workspace."
+author: "ComfyAnonymous + ltdrdata"
+source: "official"
+website: "https://github.com/Comfy-Org/ComfyUI-Manager"
+upstream: "https://github.com/Comfy-Org/ComfyUI-Manager"
+fork: "https://github.com/Comfy-Org/ComfyUI"
+category: workflow
+categories:
+  - workflow
+  - image-gen
+  - video-gen
+  - 3d-gen
+tags:
+  - comfyui
+  - comfyui-manager
+  - custom-nodes
+  - workflow-packs
+  - snapshots
+  - components
+icon: "🧰"
+logo: "/logos/comfyui.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 40
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8188
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/comfyui-manager-preset-pack/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the ComfyUI Manager preset, install the official ComfyUI-Manager extension, and launch the manager-enabled workflow UI on port 8188 with persistent models, custom nodes, snapshots, and component packs."
+    command: "docker compose --env-file registry/recipes/comfyui-manager-preset-pack/.env -p nvidia-ai-hub-comfyui-manager-preset-pack -f registry/recipes/comfyui-manager-preset-pack/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the ComfyUI Manager preset while preserving models, inputs, outputs, custom nodes, manager config, snapshots, and imported component packs."
+    command: "docker compose --env-file registry/recipes/comfyui-manager-preset-pack/.env -p nvidia-ai-hub-comfyui-manager-preset-pack -f registry/recipes/comfyui-manager-preset-pack/docker-compose.yml down"

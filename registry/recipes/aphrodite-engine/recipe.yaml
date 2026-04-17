@@ -1,0 +1,53 @@
+name: "Aphrodite Engine"
+slug: aphrodite-engine
+version: "1.0.0"
+description: "Official Aphrodite OpenAI-compatible runtime baseline with chat and completions APIs, configurable memory controls, and persistent Hugging Face cache mounts for NVIDIA GPUs."
+author: "Aphrodite Engine Contributors"
+source: "official"
+website: "https://aphrodite.pygmalion.chat/"
+upstream: "https://github.com/aphrodite-engine/aphrodite-engine"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - aphrodite
+  - aphrodite-engine
+  - runtime
+  - openai-compatible
+  - inference
+  - gpu
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3100
+  path: "/v1/models"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3100/v1"
+  model_id: "Qwen/Qwen3-0.6B"
+  api_key: "Optional; if set, clients must send Bearer authentication"
+  max_context: "Configurable through model choice and optional max-model-len arguments"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:3100/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <APHRODITE_API_KEY>' -d '{\"model\":\"Qwen/Qwen3-0.6B\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+status: experimental
+runtime_env_path: "registry/recipes/aphrodite-engine/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official Aphrodite OpenAI-compatible runtime with GPU access, shared cache mounts, and configurable parallelism on port 3100."
+    command: "docker compose --env-file registry/recipes/aphrodite-engine/.env -p nvidia-ai-hub-aphrodite-engine -f registry/recipes/aphrodite-engine/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the Aphrodite runtime while preserving cache, model, and adapter data."
+    command: "docker compose --env-file registry/recipes/aphrodite-engine/.env -p nvidia-ai-hub-aphrodite-engine -f registry/recipes/aphrodite-engine/docker-compose.yml down"

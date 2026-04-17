@@ -1,7 +1,7 @@
 name: "Live VLM WebUI"
 slug: live-vlm-webui
 version: "0.4.0"
-description: "Run NVIDIA Live VLM WebUI on DGX Spark for real-time webcam and WebRTC vision-language workflows with local Ollama auto-detection and HTTPS access on port 8090."
+description: "Run NVIDIA Live VLM WebUI on NVIDIA GPUs for real-time webcam and WebRTC vision-language workflows with local Ollama auto-detection and HTTPS access on port 8090."
 author: "NVIDIA"
 source: "official"
 website: "https://github.com/NVIDIA-AI-IOT/live-vlm-webui"

@@ -1,0 +1,52 @@
+services:
+  tensorrt-llm-gateway:
+    image: ${TRTLLM_IMAGE}
+    container_name: tensorrt-llm-gateway
+    restart: unless-stopped
+    shm_size: ${TRTLLM_SHM_SIZE}
+    ports:
+      - "${TRTLLM_PORT}:${TRTLLM_INTERNAL_PORT}"
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      TRTLLM_NO_USAGE_STATS: ${TRTLLM_NO_USAGE_STATS}
+      TOKENIZERS_PARALLELISM: "false"
+      NCCL_P2P_LEVEL: SYS
+      NCCL_DEBUG: INFO
+      UCX_TLS: tcp,sm,self
+      UCX_MEMTYPE_CACHE: "n"
+    volumes:
+      - ./cache:/root/.cache
+      - ./models:/models
+      - ./logs:/workspace/logs
+      - ./extra-llm-api-config.yml:/workspace/extra-llm-api-config.yml:ro
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        set -euo pipefail
+        EXTRA_ARGS=""
+        if [ -n "${TRTLLM_TOKENIZER}" ]; then EXTRA_ARGS="$EXTRA_ARGS --tokenizer ${TRTLLM_TOKENIZER}"; fi
+        if [ -n "${TRTLLM_MAX_BATCH_SIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max_batch_size ${TRTLLM_MAX_BATCH_SIZE}"; fi
+        if [ -n "${TRTLLM_MAX_NUM_TOKENS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max_num_tokens ${TRTLLM_MAX_NUM_TOKENS}"; fi
+        if [ -n "${TRTLLM_MAX_SEQ_LEN}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max_seq_len ${TRTLLM_MAX_SEQ_LEN}"; fi
+        if [ -n "${TRTLLM_KV_CACHE_FREE_GPU_MEMORY_FRACTION}" ]; then EXTRA_ARGS="$EXTRA_ARGS --kv_cache_free_gpu_memory_fraction ${TRTLLM_KV_CACHE_FREE_GPU_MEMORY_FRACTION}"; fi
+        if [ -n "${TRTLLM_NUM_POSTPROCESS_WORKERS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --num_postprocess_workers ${TRTLLM_NUM_POSTPROCESS_WORKERS}"; fi
+        if [ -n "${TRTLLM_REASONING_PARSER}" ]; then EXTRA_ARGS="$EXTRA_ARGS --reasoning_parser ${TRTLLM_REASONING_PARSER}"; fi
+        if [ "${TRTLLM_TRUST_REMOTE_CODE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --trust_remote_code"; fi
+        if [ "${TRTLLM_ENABLE_ITER_PERF_STATS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --extra_llm_api_options /workspace/extra-llm-api-config.yml"; fi
+        exec trtllm-serve serve "${TRTLLM_MODEL}" \
+          --backend "${TRTLLM_BACKEND}" \
+          --host "${TRTLLM_HOST}" \
+          --port "${TRTLLM_INTERNAL_PORT}" \
+          --tp_size "${TRTLLM_TP_SIZE}" \
+          --pp_size "${TRTLLM_PP_SIZE}" \
+          --ep_size "${TRTLLM_EP_SIZE}" \
+          --log_level "${TRTLLM_LOG_LEVEL}" \
+          $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

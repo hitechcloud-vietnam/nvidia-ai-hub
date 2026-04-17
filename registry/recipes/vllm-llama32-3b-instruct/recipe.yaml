@@ -1,7 +1,7 @@
 name: "Llama 3.2 3B Instruct"
 slug: vllm-llama32-3b-instruct
 version: "1.0.0"
-description: "Meta Llama 3.2 3B Instruct exposed through vLLM for multilingual chat, summarization, and lightweight agent workflows on DGX Spark."
+description: "Meta Llama 3.2 3B Instruct exposed through vLLM for multilingual chat, summarization, and lightweight agent workflows on NVIDIA GPUs."
 author: "Meta"
 source: "official"
 website: "https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct"

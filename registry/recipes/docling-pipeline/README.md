@@ -1,6 +1,6 @@
 # Docling Pipeline
 
-Local document-conversion pipeline for DGX Spark using the official `docling` Python package and a lightweight FastAPI job API.
+Local document-conversion pipeline for NVIDIA GPUs using the official `docling` Python package and a lightweight FastAPI job API.
 
 ## What it provides
 

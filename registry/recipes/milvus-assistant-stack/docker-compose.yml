@@ -77,7 +77,7 @@ services:
         condition: service_started
     environment:
       MILVUS_ADDRESS: milvus:19530
-      MILVUS_NAME: ${MILVUS_NAME:-DGX Spark Milvus}
+      MILVUS_NAME: ${MILVUS_NAME:-NVIDIA GPUs Milvus}
       MILVUS_DATABASE: ${MILVUS_DATABASE:-default}
       MILVUS_USERNAME: ${MILVUS_USERNAME}
       MILVUS_PASSWORD: ${MILVUS_PASSWORD}

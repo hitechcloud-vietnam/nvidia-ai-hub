@@ -1,6 +1,6 @@
 # LibreChat
 
-Official image-based LibreChat stack for DGX Spark.
+Official image-based LibreChat stack for NVIDIA GPUs.
 
 ## What it provides
 

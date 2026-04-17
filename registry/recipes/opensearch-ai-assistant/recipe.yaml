@@ -1,7 +1,7 @@
 name: "OpenSearch AI Assistant"
 slug: opensearch-ai-assistant
 version: "1.0.0"
-description: "OpenSearch and OpenSearch Dashboards preset for local AI-assisted search, PPL query-assist experimentation, ML Commons agent bootstrap, and shared Ollama connectivity on DGX Spark."
+description: "OpenSearch and OpenSearch Dashboards preset for local AI-assisted search, PPL query-assist experimentation, ML Commons agent bootstrap, and shared Ollama connectivity on NVIDIA GPUs."
 author: "OpenSearch Project"
 source: "official"
 website: "https://opensearch.org/"

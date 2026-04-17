@@ -1,0 +1,53 @@
+name: "llama.cpp Server"
+slug: llamacpp-server
+version: "1.0.0"
+description: "Official llama.cpp HTTP server baseline with OpenAI-compatible APIs, GGUF model serving, optional Hugging Face pull-on-start, and persistent local cache mounts for NVIDIA GPUs."
+author: "ggml-org"
+source: "official"
+website: "https://github.com/ggml-org/llama.cpp"
+upstream: "https://github.com/ggml-org/llama.cpp"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - llama.cpp
+  - gguf
+  - runtime
+  - openai-compatible
+  - inference
+  - gpu
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3096
+  path: "/"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3096/v1"
+  model_id: "gemma-3-1b-it-q4-k-m"
+  api_key: "Optional; leave empty for trusted local networks only"
+  max_context: "Configurable through LLAMA_ARG_CTX_SIZE; default 8192"
+  max_output_tokens: "Configurable per request or server defaults"
+  curl_example: "curl http://<SPARK_IP>:3096/v1/models -H 'Authorization: Bearer <LLAMA_API_KEY>'"
+status: experimental
+runtime_env_path: "registry/recipes/llamacpp-server/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official CUDA-enabled llama.cpp server with persistent model, Hugging Face cache, and slot-cache directories."
+    command: "docker compose --env-file registry/recipes/llamacpp-server/.env -p nvidia-ai-hub-llamacpp-server -f registry/recipes/llamacpp-server/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the llama.cpp server while preserving downloaded models, cache files, and saved slots."
+    command: "docker compose --env-file registry/recipes/llamacpp-server/.env -p nvidia-ai-hub-llamacpp-server -f registry/recipes/llamacpp-server/docker-compose.yml down"

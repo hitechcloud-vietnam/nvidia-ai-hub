@@ -1,7 +1,7 @@
 name: "Qwen2.5-VL-7B NVFP4"
 slug: vllm-qwen25-vl-7b-nvfp4
 version: "1.0.0"
-description: "Qwen2.5-VL-7B Instruct, NVFP4 quantized by NVIDIA, for image-grounded chat and visual reasoning on DGX Spark through vLLM."
+description: "Qwen2.5-VL-7B Instruct, NVFP4 quantized by NVIDIA, for image-grounded chat and visual reasoning on NVIDIA GPUs through vLLM."
 author: "Alibaba Cloud / NVIDIA"
 source: "official"
 website: "https://build.nvidia.com/spark/vllm"

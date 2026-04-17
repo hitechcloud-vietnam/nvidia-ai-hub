@@ -1,7 +1,7 @@
 name: "Audio Agent Console"
 slug: audio-agent-console
 version: "1.0.0"
-description: "Run a browser-based voice agent console on DGX Spark with Pipecat SmallWebRTC transport, OpenAI speech services, and a prebuilt web client."
+description: "Run a browser-based voice agent console on NVIDIA GPUs with Pipecat SmallWebRTC transport, OpenAI speech services, and a prebuilt web client."
 author: "Pho Tue SoftWare Solutions JSC"
 source: "community"
 website: "https://github.com/pipecat-ai/pipecat"

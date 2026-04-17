@@ -1,0 +1,42 @@
+services:
+  tgi-runtime:
+    image: ${TGI_IMAGE}
+    container_name: tgi-runtime
+    restart: unless-stopped
+    shm_size: ${TGI_SHM_SIZE}
+    ports:
+      - "${TGI_PORT}:${TGI_INTERNAL_PORT}"
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      NCCL_SHM_DISABLE: "0"
+    volumes:
+      - ./data:/data
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: |
+      set -euo pipefail
+      EXTRA_ARGS=""
+      if [ -n "${TGI_QUANTIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --quantize ${TGI_QUANTIZE}"; fi
+      if [ -n "${TGI_MAX_INPUT_LENGTH}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-input-length ${TGI_MAX_INPUT_LENGTH}"; fi
+      if [ -n "${TGI_MAX_TOTAL_TOKENS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-total-tokens ${TGI_MAX_TOTAL_TOKENS}"; fi
+      if [ -n "${TGI_MAX_BATCH_PREFILL_TOKENS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-batch-prefill-tokens ${TGI_MAX_BATCH_PREFILL_TOKENS}"; fi
+      if [ -n "${TGI_CUDA_MEMORY_FRACTION}" ]; then EXTRA_ARGS="$EXTRA_ARGS --cuda-memory-fraction ${TGI_CUDA_MEMORY_FRACTION}"; fi
+      if [ -n "${TGI_CORS_ALLOW_ORIGIN}" ]; then EXTRA_ARGS="$EXTRA_ARGS --cors-allow-origin ${TGI_CORS_ALLOW_ORIGIN}"; fi
+      if [ -n "${TGI_OTLP_ENDPOINT}" ]; then EXTRA_ARGS="$EXTRA_ARGS --otlp-endpoint ${TGI_OTLP_ENDPOINT} --otlp-service-name ${TGI_OTLP_SERVICE_NAME}"; fi
+      if [ "${TGI_TRUST_REMOTE_CODE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --trust-remote-code"; fi
+      if [ "${TGI_DISABLE_CUSTOM_KERNELS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --disable-custom-kernels"; fi
+      if [ "${TGI_JSON_OUTPUT}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --json-output"; fi
+      exec text-generation-launcher \
+        --model-id "${TGI_MODEL_ID}" \
+        --hostname "${TGI_HOSTNAME}" \
+        --port "${TGI_INTERNAL_PORT}" \
+        --num-shard "${TGI_NUM_SHARD}" \
+        $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -17,7 +17,7 @@
 **NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC unifies these workflows** into a browsable catalog with one-click deployment, lifecycle controls, validation guardrails, and a clearer operational model for NVIDIA GPU environments.
 
 **Target platform scope:**
-- NVIDIA DGX platforms, including NVIDIA DGX Spark
+- NVIDIA DGX platforms, including NVIDIA NVIDIA GPUs
 - NVIDIA GPU workstations
 - NVIDIA GPU servers and lab systems
 - Linux hosts with supported NVIDIA GPUs and NVIDIA Container Toolkit

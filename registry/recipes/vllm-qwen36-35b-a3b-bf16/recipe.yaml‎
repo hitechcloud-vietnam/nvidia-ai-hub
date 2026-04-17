@@ -1,7 +1,7 @@
 name: "Qwen3.6-35B-A3B MoE"
 slug: vllm-qwen36-35b-a3b-bf16
 version: "1.0.0"
-description: "Qwen3.6-35B-A3B MoE with official vLLM reasoning parser and tool calling. BF16, optimized for DGX Spark."
+description: "Qwen3.6-35B-A3B MoE with official vLLM reasoning parser and tool calling. BF16, optimized for NVIDIA GPUs."
 author: "Alibaba Cloud"
 source: "official"
 website: "https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen3.6.html"

@@ -1,7 +1,7 @@
 name: "OCRFlux-3B"
 slug: vllm-ocrflux-3b
 version: "1.0.0"
-description: "ChatDOC OCRFlux-3B served through vLLM for document OCR, PDF-to-Markdown extraction, table recovery, and cross-page document understanding workflows on DGX Spark."
+description: "ChatDOC OCRFlux-3B served through vLLM for document OCR, PDF-to-Markdown extraction, table recovery, and cross-page document understanding workflows on NVIDIA GPUs."
 author: "ChatDOC"
 source: "official"
 website: "https://huggingface.co/ChatDOC/OCRFlux-3B"

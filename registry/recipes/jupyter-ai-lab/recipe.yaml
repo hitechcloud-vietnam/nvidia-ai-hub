@@ -1,7 +1,7 @@
 name: "Jupyter AI Lab"
 slug: jupyter-ai-lab
 version: "1.0.0"
-description: "JupyterLab workspace preset with Jupyter AI, scientific Python tooling, persistent notebooks, and shared Ollama connectivity for local notebook-centric experimentation on DGX Spark."
+description: "JupyterLab workspace preset with Jupyter AI, scientific Python tooling, persistent notebooks, and shared Ollama connectivity for local notebook-centric experimentation on NVIDIA GPUs."
 author: "Project Jupyter"
 source: "official"
 website: "https://jupyter.org/"

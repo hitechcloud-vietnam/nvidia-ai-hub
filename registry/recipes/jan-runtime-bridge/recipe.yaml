@@ -1,0 +1,59 @@
+name: "Jan Runtime Bridge"
+slug: jan-runtime-bridge
+version: "1.0.0"
+description: "Host-managed Jan local API bridge for NVIDIA GPUs using Jan Desktop or Jan CLI to expose an OpenAI-compatible local model server with explicit API key controls."
+author: "Jan Team"
+source: "official"
+website: "https://www.jan.ai/"
+upstream: "https://www.jan.ai/docs/desktop/api-server"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - jan
+  - jan-cli
+  - local-api-server
+  - runtime
+  - bridge
+  - openai-compatible
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 1337
+  path: "/v1/models"
+  health_path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:1337/v1"
+  model_id: "janhq/Jan-v3-4B-base-instruct-gguf"
+  api_key: "Required by Jan Local API Server; send as Bearer token"
+  max_context: "Configurable through Jan CLI flags or Jan Local API Server model/runtime settings"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:1337/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <JAN_API_KEY>' -d '{\"model\":\"janhq/Jan-v3-4B-base-instruct-gguf\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
+status: experimental
+runtime_env_path: "registry/recipes/jan-runtime-bridge/.env"
+requires_hf_token: false
+commands:
+  - label: "Launch Jan desktop"
+    description: "Launch Jan Desktop once so the shared data folder, runtime backends, and CLI integration are initialized on the host."
+    command: "jan"
+  - label: "Serve model with Jan CLI"
+    description: "Load the configured model and expose it as an OpenAI-compatible API on the configured port using Jan CLI."
+    command: "jan serve ${JAN_MODEL_ID:-janhq/Jan-v3-4B-base-instruct-gguf} --port ${JAN_SERVER_PORT:-1337} --ctx-size ${JAN_CONTEXT_LENGTH:-32768} --api-key ${JAN_API_KEY:-change-me}"
+  - label: "Serve model in background"
+    description: "Run the Jan local model server in the background and print the process ID for operator-managed lifecycle control."
+    command: "jan serve ${JAN_MODEL_ID:-janhq/Jan-v3-4B-base-instruct-gguf} --port ${JAN_SERVER_PORT:-1337} --ctx-size ${JAN_CONTEXT_LENGTH:-32768} --api-key ${JAN_API_KEY:-change-me} --detach"
+  - label: "List installed models"
+    description: "List models already available in Jan's shared data folder before selecting one for API serving."
+    command: "jan models list"

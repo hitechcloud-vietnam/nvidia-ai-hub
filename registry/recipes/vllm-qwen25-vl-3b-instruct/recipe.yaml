@@ -1,7 +1,7 @@
 name: "Qwen2.5-VL-3B Instruct"
 slug: vllm-qwen25-vl-3b-instruct
 version: "1.0.0"
-description: "Qwen2.5-VL-3B Instruct served through vLLM for image-grounded chat, document understanding, visual reasoning, and lightweight agentic vision workflows on DGX Spark."
+description: "Qwen2.5-VL-3B Instruct served through vLLM for image-grounded chat, document understanding, visual reasoning, and lightweight agentic vision workflows on NVIDIA GPUs."
 author: "Alibaba Cloud"
 source: "official"
 website: "https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct"

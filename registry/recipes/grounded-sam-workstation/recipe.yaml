@@ -1,7 +1,7 @@
 name: "Grounded SAM Workstation"
 slug: grounded-sam-workstation
 version: "1.0.0"
-description: "Run the official Grounded-Segment-Anything Gradio workstation on DGX Spark for open-vocabulary detection, segmentation, auto-labeling, and optional inpainting with persistent checkpoints, Hugging Face cache, and exported outputs."
+description: "Run the official Grounded-Segment-Anything Gradio workstation on NVIDIA GPUs for open-vocabulary detection, segmentation, auto-labeling, and optional inpainting with persistent checkpoints, Hugging Face cache, and exported outputs."
 author: "IDEA Research"
 source: "official"
 website: "https://github.com/IDEA-Research/Grounded-Segment-Anything"

@@ -1,7 +1,7 @@
 name: "InternVL 2.5 4B"
 slug: vllm-internvl25-4b
 version: "1.0.0"
-description: "OpenGVLab InternVL 2.5 4B served through vLLM for multilingual image understanding, OCR-heavy documents, chart analysis, and compact multimodal assistant workflows on DGX Spark."
+description: "OpenGVLab InternVL 2.5 4B served through vLLM for multilingual image understanding, OCR-heavy documents, chart analysis, and compact multimodal assistant workflows on NVIDIA GPUs."
 author: "OpenGVLab"
 source: "official"
 website: "https://huggingface.co/OpenGVLab/InternVL2_5-4B"

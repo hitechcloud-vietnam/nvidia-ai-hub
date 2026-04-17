@@ -1,7 +1,7 @@
 name: "MiniCPM-V 4"
 slug: vllm-minicpm-v4
 version: "1.0.0"
-description: "OpenBMB MiniCPM-V 4 served through vLLM for compact multilingual image understanding, OCR, multi-image comparison, and video-aware multimodal assistant workflows on DGX Spark."
+description: "OpenBMB MiniCPM-V 4 served through vLLM for compact multilingual image understanding, OCR, multi-image comparison, and video-aware multimodal assistant workflows on NVIDIA GPUs."
 author: "OpenBMB"
 source: "official"
 website: "https://huggingface.co/openbmb/MiniCPM-V-4"

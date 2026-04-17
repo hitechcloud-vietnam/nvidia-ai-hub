@@ -1,7 +1,7 @@
 name: "Nemotron-3 Super 120B-A12B NVFP4"
 slug: vllm-nemotron3-super-120b-nvfp4
 version: "1.0.0"
-description: "NVIDIA Nemotron-3 Super 120B-A12B (MoE, 12B active), NVFP4 quantized. Flagship reasoning and coding model optimized for DGX Spark."
+description: "NVIDIA Nemotron-3 Super 120B-A12B (MoE, 12B active), NVFP4 quantized. Flagship reasoning and coding model optimized for NVIDIA GPUs."
 author: "NVIDIA"
 source: "official"
 website: "https://build.nvidia.com/spark/vllm"

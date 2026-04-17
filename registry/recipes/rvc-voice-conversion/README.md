@@ -1,6 +1,6 @@
 # RVC Voice Conversion
 
-Run the official RVC training and inference WebUI locally on DGX Spark.
+Run the official RVC training and inference WebUI locally on NVIDIA GPUs.
 
 ## What it provides
 

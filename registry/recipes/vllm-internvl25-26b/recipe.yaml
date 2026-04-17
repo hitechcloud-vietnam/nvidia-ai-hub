@@ -1,7 +1,7 @@
 name: "InternVL 2.5 26B"
 slug: vllm-internvl25-26b
 version: "1.0.0"
-description: "OpenGVLab InternVL 2.5 26B served through vLLM for high-end multilingual image understanding, OCR-heavy documents, chart reasoning, multi-image comparison, and advanced multimodal assistant workflows on DGX Spark."
+description: "OpenGVLab InternVL 2.5 26B served through vLLM for high-end multilingual image understanding, OCR-heavy documents, chart reasoning, multi-image comparison, and advanced multimodal assistant workflows on NVIDIA GPUs."
 author: "OpenGVLab"
 source: "official"
 website: "https://huggingface.co/OpenGVLab/InternVL2_5-26B"

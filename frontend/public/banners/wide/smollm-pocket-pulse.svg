@@ -38,6 +38,6 @@
     <rect x="196" y="122" width="316" height="96" rx="28" fill="#11252E" stroke="#8DF7CA"/>
     <text x="236" y="183" fill="#E7FFF4" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700">SmolLM3</text>
     <text x="198" y="796" fill="#E8FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="76" font-weight="700">Small model, long context</text>
-    <text x="202" y="848" fill="#B8E8F8" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="500">Hybrid reasoning, tool use, and compact deployment for DGX Spark</text>
+    <text x="202" y="848" fill="#B8E8F8" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="500">Hybrid reasoning, tool use, and compact deployment for NVIDIA GPUs</text>
   </g>
 </svg>

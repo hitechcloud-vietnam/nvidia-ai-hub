@@ -1,7 +1,7 @@
 name: "Molmo 72B"
 slug: vllm-molmo-72b
 version: "1.0.0"
-description: "AllenAI Molmo 72B served through vLLM for frontier visual reasoning, OCR-heavy documents, chart analysis, and grounded image question answering on high-memory DGX Spark deployments."
+description: "AllenAI Molmo 72B served through vLLM for frontier visual reasoning, OCR-heavy documents, chart analysis, and grounded image question answering on high-memory NVIDIA GPUs deployments."
 author: "Allen Institute for AI"
 source: "official"
 website: "https://huggingface.co/allenai/Molmo-72B-0924"

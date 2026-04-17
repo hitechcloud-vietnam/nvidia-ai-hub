@@ -1,8 +1,8 @@
 name: "Gemma 4 31B FP8"
 slug: vllm-gemma4-31b-fp8
 version: "1.0.0"
-description: "Google Gemma 4 31B Instruct served from protoLabsAI's FP8 checkpoint. Flagship dense Gemma with multimodal reasoning in a lighter FP8 form factor for DGX Spark."
-description: "Google Gemma 4 31B Instruct served with vLLM FP8 quantization. This recipe follows protoLabsAI's published FP8 usage path for DGX Spark instead of loading the community checkpoint directly."
+description: "Google Gemma 4 31B Instruct served from protoLabsAI's FP8 checkpoint. Flagship dense Gemma with multimodal reasoning in a lighter FP8 form factor for NVIDIA GPUs."
+description: "Google Gemma 4 31B Instruct served with vLLM FP8 quantization. This recipe follows protoLabsAI's published FP8 usage path for NVIDIA GPUs instead of loading the community checkpoint directly."
 author: "Google"
 source: "our-vllm"
 website: "https://ai.google.dev/gemma/docs/core"

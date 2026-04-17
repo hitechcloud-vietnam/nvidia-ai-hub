@@ -1,6 +1,6 @@
 # Qdrant Assistant Stack
 
-Qdrant vector database preset for DGX Spark users who want a practical local assistant retrieval foundation with the official Qdrant service, persistent storage, snapshot support, and the built-in web UI exposed through the same HTTP endpoint.
+Qdrant vector database preset for NVIDIA GPUs users who want a practical local assistant retrieval foundation with the official Qdrant service, persistent storage, snapshot support, and the built-in web UI exposed through the same HTTP endpoint.
 
 ## What it provides
 

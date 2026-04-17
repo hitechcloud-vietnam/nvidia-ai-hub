@@ -1,6 +1,6 @@
-# Live VLM WebUI on DGX Spark
+# Live VLM WebUI on NVIDIA GPUs
 
-Live VLM WebUI provides a real-time webcam and WebRTC interface for vision-language models on DGX Spark. This NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC recipe runs the official NVIDIA container, exposes the HTTPS UI on port `8090`, and defaults to a local Ollama-compatible backend.
+Live VLM WebUI provides a real-time webcam and WebRTC interface for vision-language models on NVIDIA GPUs. This NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC recipe runs the official NVIDIA container, exposes the HTTPS UI on port `8090`, and defaults to a local Ollama-compatible backend.
 
 ## Access
 
@@ -18,7 +18,7 @@ The recipe starts with these defaults:
 - `LIVE_VLM_DEFAULT_MODEL=llama3.2-vision:11b`
 - `LIVE_VLM_PROCESS_EVERY=30`
 
-Because the container uses host networking, `localhost` resolves to DGX Spark services such as Ollama.
+Because the container uses host networking, `localhost` resolves to NVIDIA GPUs services such as Ollama.
 
 ## Configuration
 
@@ -32,5 +32,5 @@ Edit `registry/recipes/live-vlm-webui/.env` from the recipe configuration view i
 ## Notes
 
 - HTTPS is required for webcam access.
-- WebRTC works best when users connect directly to the DGX Spark IP instead of SSH port forwarding.
+- WebRTC works best when users connect directly to the NVIDIA GPUs IP instead of SSH port forwarding.
 - If no local backend is reachable, the upstream app can still be configured in-browser for remote APIs.

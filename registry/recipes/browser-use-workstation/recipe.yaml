@@ -1,7 +1,7 @@
 name: "Browser-Use Workstation"
 slug: browser-use-workstation
 version: "1.0.0"
-description: "Run the official browser-use WebUI on DGX Spark with Gradio controls, optional noVNC browser viewing, and persistent task artifacts."
+description: "Run the official browser-use WebUI on NVIDIA GPUs with Gradio controls, optional noVNC browser viewing, and persistent task artifacts."
 author: "browser-use"
 source: "official"
 website: "https://github.com/browser-use/web-ui"

@@ -1,7 +1,7 @@
 name: "Mochi 1 Preview"
 slug: mochi-1-preview
 version: "1.0.0"
-description: "Run the official Mochi 1 Preview Gradio app on DGX Spark for text-to-video generation with persistent local weights, Hugging Face cache, and configurable CPU offload for large-model inference."
+description: "Run the official Mochi 1 Preview Gradio app on NVIDIA GPUs for text-to-video generation with persistent local weights, Hugging Face cache, and configurable CPU offload for large-model inference."
 author: "Genmo"
 source: "official"
 website: "https://github.com/genmoai/mochi"

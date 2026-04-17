@@ -1,0 +1,36 @@
+services:
+  imagebind-demo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-imagebind-demo-app
+    ports:
+      - "${APP_PORT:-7868}:${PORT:-7860}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${PORT:-7860}"
+      OUTPUT_DIR: "${OUTPUT_DIR:-/data/output}"
+      HF_HOME: "${HF_HOME:-/data/hf-home}"
+      HUGGINGFACE_HUB_CACHE: "${HUGGINGFACE_HUB_CACHE:-/data/hf-home}"
+      TORCH_HOME: "${TORCH_HOME:-/data/torch-home}"
+      IMAGEBIND_MODEL: "${IMAGEBIND_MODEL:-imagebind_huge}"
+      MAX_TEXT_ITEMS: "${MAX_TEXT_ITEMS:-12}"
+      GRADIO_ANALYTICS_ENABLED: "${GRADIO_ANALYTICS_ENABLED:-False}"
+    volumes:
+      - imagebind-demo-hf-home:/data/hf-home
+      - imagebind-demo-torch-home:/data/torch-home
+      - imagebind-demo-output:/data/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  imagebind-demo-hf-home:
+  imagebind-demo-torch-home:
+  imagebind-demo-output:

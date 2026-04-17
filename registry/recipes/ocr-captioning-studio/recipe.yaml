@@ -1,7 +1,7 @@
 name: "OCR + Captioning Studio"
 slug: ocr-captioning-studio
 version: "1.0.0"
-description: "Run Microsoft Florence-2 Large FT as a local Gradio studio for OCR, OCR with quadrilateral regions, captioning, detailed captioning, and dense region captioning on DGX Spark with persistent Hugging Face cache and exported outputs."
+description: "Run Microsoft Florence-2 Large FT as a local Gradio studio for OCR, OCR with quadrilateral regions, captioning, detailed captioning, and dense region captioning on NVIDIA GPUs with persistent Hugging Face cache and exported outputs."
 author: "Microsoft"
 source: "official"
 website: "https://huggingface.co/microsoft/Florence-2-large-ft"

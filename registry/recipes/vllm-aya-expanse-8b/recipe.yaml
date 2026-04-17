@@ -1,7 +1,7 @@
 name: "Aya Expanse 8B"
 slug: vllm-aya-expanse-8b
 version: "1.0.0"
-description: "Cohere Aya Expanse 8B served with vLLM for multilingual chat, translation, summarization, and enterprise knowledge tasks on DGX Spark."
+description: "Cohere Aya Expanse 8B served with vLLM for multilingual chat, translation, summarization, and enterprise knowledge tasks on NVIDIA GPUs."
 author: "Cohere Labs"
 source: "official"
 website: "https://huggingface.co/CohereLabs/aya-expanse-8b"

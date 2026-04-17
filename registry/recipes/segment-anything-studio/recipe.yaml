@@ -1,0 +1,46 @@
+name: "Segment Anything Studio"
+slug: segment-anything-studio
+version: "1.0.0"
+description: "Run the official Segment Anything Model as a local Gradio studio on NVIDIA GPUs for promptable segmentation, automatic mask generation, and exported mask overlays with persistent checkpoints and outputs."
+author: "Meta AI"
+source: "official"
+website: "https://github.com/facebookresearch/segment-anything"
+upstream: "https://github.com/facebookresearch/segment-anything"
+category: image-understanding
+categories:
+  - image-understanding
+  - image-edit
+  - workflow
+tags:
+  - segment-anything
+  - sam
+  - segmentation
+  - masks
+  - gradio
+  - vision
+icon: "✂️"
+logo: ""
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 32
+  disk_gb: 35
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7869
+  path: "/"
+  health_path: "/"
+docker:
+  build: true
+  build_time_minutes: 15
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/segment-anything-studio/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the Segment Anything studio image, download the configured SAM checkpoint if missing, and launch the Gradio UI on port 7869."
+    command: "docker compose --env-file registry/recipes/segment-anything-studio/.env -p nvidia-ai-hub-segment-anything-studio -f registry/recipes/segment-anything-studio/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Segment Anything Studio while preserving checkpoints and exported segmentation outputs."
+    command: "docker compose --env-file registry/recipes/segment-anything-studio/.env -p nvidia-ai-hub-segment-anything-studio -f registry/recipes/segment-anything-studio/docker-compose.yml down"

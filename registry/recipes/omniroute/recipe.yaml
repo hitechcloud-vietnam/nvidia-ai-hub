@@ -1,0 +1,56 @@
+name: "OmniRoute"
+slug: omniroute
+version: "1.0.0"
+description: "Run the official OmniRoute AI gateway with an OpenAI-compatible `/v1` endpoint, dashboard, smart routing, retries, fallbacks, cache controls, rate-limit surfaces, and operational telemetry for multi-provider LLM access."
+author: "Diego Souza"
+source: "official"
+website: "https://omniroute.online/"
+upstream: "https://github.com/diegosouzapw/OmniRoute"
+category: llm
+categories:
+  - runtime
+  - workflow
+  - gateway
+tags:
+  - omniroute
+  - gateway
+  - openai-compatible
+  - routing
+  - fallback
+  - observability
+  - cache
+icon: "🛣️"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 20128
+  path: "/dashboard"
+  health_path: "/api/monitoring/health"
+  scheme: "http"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+integration:
+  api_url: "http://<SPARK_IP>:20129/v1"
+  model_id: "Configured provider/model alias, for example cc/claude-sonnet-4-20250514"
+  api_key: "Use an OmniRoute-managed API key from the dashboard; local development may accept any string until access controls are tightened"
+  max_context: "Depends on the selected upstream provider and model alias"
+  max_output_tokens: "Depends on the selected upstream provider and model alias"
+  curl_example: "curl http://<SPARK_IP>:20129/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer sk_omniroute_change_me' -d '{\"model\":\"cc/claude-sonnet-4-20250514\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active fallback policy.\"}]}'"
+status: experimental
+runtime_env_path: "registry/recipes/omniroute/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Start the official OmniRoute container with split dashboard and API ports, persistent local state, and provider-routing surfaces."
+    command: "docker compose --env-file registry/recipes/omniroute/.env -p nvidia-ai-hub-omniroute -f registry/recipes/omniroute/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop OmniRoute while preserving local database, cache, logs, and provider configuration under the mounted data directory."
+    command: "docker compose --env-file registry/recipes/omniroute/.env -p nvidia-ai-hub-omniroute -f registry/recipes/omniroute/docker-compose.yml down"

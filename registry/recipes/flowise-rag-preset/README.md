@@ -1,6 +1,6 @@
 # Flowise RAG Preset
 
-Official-image Flowise preset for DGX Spark users who want a practical starting point for document ingestion, chatflow-based RAG experiments, agent workflows, and shared Ollama connectivity without building a custom image.
+Official-image Flowise preset for NVIDIA GPUs users who want a practical starting point for document ingestion, chatflow-based RAG experiments, agent workflows, and shared Ollama connectivity without building a custom image.
 
 ## What it provides
 

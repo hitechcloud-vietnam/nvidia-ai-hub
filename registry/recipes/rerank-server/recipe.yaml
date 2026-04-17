@@ -1,0 +1,53 @@
+name: "Rerank Server"
+slug: rerank-server
+version: "1.0.0"
+description: "Dedicated Hugging Face TEI reranking server for NVIDIA GPUs with `/rerank`, Swagger docs, health checks, metrics, and optional Bearer-token auth."
+author: "Hugging Face"
+source: "official"
+website: "https://huggingface.co/docs/text-embeddings-inference/quick_tour"
+upstream: "https://github.com/huggingface/text-embeddings-inference"
+category: llm
+categories:
+  - runtime
+  - reranking
+  - model-serving
+tags:
+  - tei
+  - reranking
+  - cross-encoder
+  - text-embeddings-inference
+  - gpu
+icon: "🏁"
+logo: ""
+requirements:
+  min_memory_gb: 10
+  recommended_memory_gb: 20
+  disk_gb: 25
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3102
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3102"
+  model_id: "BAAI/bge-reranker-large"
+  api_key: "Optional; set TEI_API_KEY to require Bearer authentication"
+  max_context: "Bound by the selected reranker model and TEI batching configuration"
+  max_output_tokens: "Not applicable for reranking workloads"
+  curl_example: "curl http://<SPARK_IP>:3102/rerank -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"query\":\"What is Deep Learning?\",\"texts\":[\"Deep Learning is not...\",\"Deep learning is...\"]}'"
+status: experimental
+runtime_env_path: "registry/recipes/rerank-server/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Start the dedicated TEI reranking server with GPU access, persistent model cache, metrics, and HTTP APIs on port 3102."
+    command: "docker compose --env-file registry/recipes/rerank-server/.env -p nvidia-ai-hub-rerank-server -f registry/recipes/rerank-server/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the rerank server while preserving downloaded model data and cache artifacts."
+    command: "docker compose --env-file registry/recipes/rerank-server/.env -p nvidia-ai-hub-rerank-server -f registry/recipes/rerank-server/docker-compose.yml down"

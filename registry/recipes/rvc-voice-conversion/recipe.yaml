@@ -1,7 +1,7 @@
 name: "RVC Voice Conversion"
 slug: rvc-voice-conversion
 version: "1.0.0"
-description: "Run the official RVC WebUI on DGX Spark for voice conversion, dataset preprocessing, training, and UVR workflows with persistent assets and indexes."
+description: "Run the official RVC WebUI on NVIDIA GPUs for voice conversion, dataset preprocessing, training, and UVR workflows with persistent assets and indexes."
 author: "RVC Project"
 source: "official"
 website: "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI"

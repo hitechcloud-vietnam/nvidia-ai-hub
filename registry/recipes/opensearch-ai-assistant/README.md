@@ -1,6 +1,6 @@
 # OpenSearch AI Assistant
 
-OpenSearch and OpenSearch Dashboards preset for DGX Spark users who want a practical local foundation for AI-assisted search, PPL query assist, ML Commons experimentation, and shared Ollama connectivity without claiming a fully pre-wired agent deployment.
+OpenSearch and OpenSearch Dashboards preset for NVIDIA GPUs users who want a practical local foundation for AI-assisted search, PPL query assist, ML Commons experimentation, and shared Ollama connectivity without claiming a fully pre-wired agent deployment.
 
 ## What it provides
 

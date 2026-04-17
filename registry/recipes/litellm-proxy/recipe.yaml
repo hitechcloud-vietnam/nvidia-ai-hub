@@ -1,0 +1,54 @@
+name: "LiteLLM Proxy"
+slug: litellm-proxy
+version: "1.0.0"
+description: "Run the official LiteLLM proxy in front of multiple OpenAI-compatible vLLM backends so one shared endpoint can expose routed model aliases, health endpoints, and central API-key enforcement."
+author: "BerriAI"
+source: "official"
+website: "https://docs.litellm.ai/"
+upstream: "https://github.com/BerriAI/litellm"
+category: llm
+categories:
+  - runtime
+  - llm
+  - workflow
+tags:
+  - litellm
+  - proxy
+  - gateway
+  - openai-compatible
+  - runtime
+  - multi-model
+icon: "🧭"
+logo: ""
+requirements:
+  min_memory_gb: 32
+  recommended_memory_gb: 64
+  disk_gb: 80
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 4000
+  path: "/v1/models"
+  health_path: "/health/liveness"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+runtime_env_path: "registry/recipes/litellm-proxy/.env"
+requires_hf_token: true
+depends_on: []
+integration:
+  api_url: "http://<SPARK_IP>:4000/v1"
+  model_id: "qwen3-4b-instruct"
+  api_key: "change-me"
+  max_context: "Per backend model configuration"
+  max_output_tokens: "Per backend model configuration"
+  curl_example: "curl http://<SPARK_IP>:4000/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer change-me' -d '{\"model\":\"qwen3-4b-instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the current routing policy.\"}]}'"
+commands:
+  - label: "Install / launch"
+    description: "Start the official LiteLLM proxy, publish port 4000, and launch two dedicated vLLM backends behind it."
+    command: "docker compose --env-file registry/recipes/litellm-proxy/.env -p nvidia-ai-hub-litellm-proxy -f registry/recipes/litellm-proxy/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop LiteLLM and both vLLM backends while preserving cache data and local configuration files."
+    command: "docker compose --env-file registry/recipes/litellm-proxy/.env -p nvidia-ai-hub-litellm-proxy -f registry/recipes/litellm-proxy/docker-compose.yml down"

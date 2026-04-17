@@ -1,0 +1,66 @@
+name: "OpenRouter-Compatible Proxy"
+slug: openrouter-compatible-proxy
+version: "1.0.0"
+description: "Local OpenRouter relay baseline that exposes a small OpenAI-compatible proxy shim on a local port while forwarding requests to OpenRouter's hosted upstream API over HTTPS."
+author: "OpenRouter"
+source: "official"
+website: "https://openrouter.ai/"
+upstream: "https://openrouter.ai/docs/overview/models"
+category: llm
+categories:
+  - runtime
+  - gateway
+  - openai-compatible
+tags:
+  - openrouter
+  - proxy
+  - relay
+  - gateway
+  - openai-compatible
+  - multi-provider
+  - hosted-api
+icon: "🛰️"
+logo: ""
+requirements:
+  min_memory_gb: 1
+  recommended_memory_gb: 2
+  disk_gb: 2
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 3015
+  path: "/v1/models"
+  health_path: "/healthz"
+  scheme: "http"
+  insecure_skip_verify: false
+docker:
+  build: false
+  build_time_minutes: 2
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/openrouter-compatible-proxy/.env"
+requires_hf_token: false
+depends_on: []
+integration:
+  api_url: "http://<SPARK_IP>:3015/v1"
+  model_id: "openrouter/auto"
+  api_key: "Required OpenRouter API key sent as Bearer token"
+  max_context: "Varies by selected upstream model and provider routing policy"
+  max_output_tokens: "Varies by selected upstream model and provider routing policy"
+  curl_example: "curl http://<SPARK_IP>:3015/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <OPENROUTER_API_KEY>' -H 'HTTP-Referer: https://your-company.example' -H 'X-Title: NVIDIA AI Hub' -d '{\"model\":\"openrouter/auto\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active routing path.\"}]}'"
+commands:
+  - label: "Install / launch"
+    description: "Start the local NGINX relay shim on port 3015 so OpenAI-compatible clients can target one local endpoint while requests are forwarded to OpenRouter upstream."
+    command: "docker compose --env-file registry/recipes/openrouter-compatible-proxy/.env -p nvidia-ai-hub-openrouter-compatible-proxy -f registry/recipes/openrouter-compatible-proxy/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the local OpenRouter relay shim while preserving local operator configuration files and logs."
+    command: "docker compose --env-file registry/recipes/openrouter-compatible-proxy/.env -p nvidia-ai-hub-openrouter-compatible-proxy -f registry/recipes/openrouter-compatible-proxy/docker-compose.yml down"
+  - label: "List models"
+    description: "Query the local relay shim models endpoint and verify that the supplied OpenRouter API key can reach the hosted model registry through the proxy."
+    command: "curl http://localhost:${OPENROUTER_RELAY_PORT:-3015}/v1/models -H \"Authorization: Bearer ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}\""
+  - label: "Chat completion smoke test"
+    description: "Send a minimal OpenAI-compatible chat completion request through the local relay shim using the configured default model and optional attribution headers."
+    command: "curl http://localhost:${OPENROUTER_RELAY_PORT:-3015}/v1/chat/completions -H \"Content-Type: application/json\" -H \"Authorization: Bearer ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}\" -H \"HTTP-Referer: ${OPENROUTER_HTTP_REFERER:-https://your-company.example}\" -H \"X-Title: ${OPENROUTER_APP_TITLE:-NVIDIA AI Hub}\" -d \"{\\\"model\\\":\\\"${OPENROUTER_DEFAULT_MODEL:-openrouter/auto}\\\",\\\"messages\\\":[{\\\"role\\\":\\\"user\\\",\\\"content\\\":\\\"Hello from NVIDIA AI Hub.\\\"}]}\""
+  - label: "Model endpoints details"
+    description: "Inspect provider endpoint metadata for the configured default model through the relay shim to review available upstream variants and routing targets."
+    command: "curl http://localhost:${OPENROUTER_RELAY_PORT:-3015}/v1/models/${OPENROUTER_DEFAULT_MODEL:-openrouter/auto}/endpoints -H \"Authorization: Bearer ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}\""

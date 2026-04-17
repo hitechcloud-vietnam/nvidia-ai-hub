@@ -1,0 +1,110 @@
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    container_name: litellm-proxy
+    restart: unless-stopped
+    command:
+      - --config
+      - /app/config.yaml
+      - --host
+      - 0.0.0.0
+      - --port
+      - "4000"
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-change-me}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:-change-this-32-char-salt-value}
+      LITELLM_LOG: ${LITELLM_LOG_LEVEL:-INFO}
+      VLLM_MODEL_A_ALIAS: ${VLLM_MODEL_A_ALIAS:-qwen3-4b-instruct}
+      VLLM_MODEL_A_API_KEY: ${VLLM_MODEL_A_API_KEY:-backend-a-change-me}
+      VLLM_MODEL_B_ALIAS: ${VLLM_MODEL_B_ALIAS:-llama32-3b-instruct}
+      VLLM_MODEL_B_API_KEY: ${VLLM_MODEL_B_API_KEY:-backend-b-change-me}
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    depends_on:
+      - vllm-model-a
+      - vllm-model-b
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveness').read()"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  vllm-model-a:
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    container_name: litellm-vllm-model-a
+    restart: unless-stopped
+    ports:
+      - "${VLLM_MODEL_A_HOST_PORT:-9013}:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_API_KEY: ${VLLM_MODEL_A_API_KEY:-backend-a-change-me}
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    command:
+      - --model
+      - ${VLLM_MODEL_A:-Qwen/Qwen3-4B-Instruct-2507}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --served-model-name
+      - ${VLLM_MODEL_A_ALIAS:-qwen3-4b-instruct}
+      - --api-key
+      - ${VLLM_MODEL_A_API_KEY:-backend-a-change-me}
+      - --max-model-len
+      - ${VLLM_MODEL_A_MAX_MODEL_LEN:-16384}
+      - --gpu-memory-utilization
+      - ${VLLM_MODEL_A_GPU_MEMORY_UTILIZATION:-0.45}
+      - --enable-prefix-caching
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  vllm-model-b:
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    container_name: litellm-vllm-model-b
+    restart: unless-stopped
+    ports:
+      - "${VLLM_MODEL_B_HOST_PORT:-9014}:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_API_KEY: ${VLLM_MODEL_B_API_KEY:-backend-b-change-me}
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    command:
+      - --model
+      - ${VLLM_MODEL_B:-meta-llama/Llama-3.2-3B-Instruct}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --served-model-name
+      - ${VLLM_MODEL_B_ALIAS:-llama32-3b-instruct}
+      - --api-key
+      - ${VLLM_MODEL_B_API_KEY:-backend-b-change-me}
+      - --max-model-len
+      - ${VLLM_MODEL_B_MAX_MODEL_LEN:-16384}
+      - --gpu-memory-utilization
+      - ${VLLM_MODEL_B_GPU_MEMORY_UTILIZATION:-0.45}
+      - --enable-prefix-caching
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  huggingface-cache:

@@ -1,7 +1,7 @@
 name: "LocalAI"
 slug: localai
 version: "1.0.0"
-description: "Drop-in OpenAI API replacement. Run LLMs, generate images, audio, and more — all via REST API. CUDA 13 ARM64 build for DGX Spark."
+description: "Drop-in OpenAI API replacement. Run LLMs, generate images, audio, and more — all via REST API. CUDA 13 ARM64 build for NVIDIA GPUs."
 author: "mudler"
 source: "official"
 website: "https://localai.io/"

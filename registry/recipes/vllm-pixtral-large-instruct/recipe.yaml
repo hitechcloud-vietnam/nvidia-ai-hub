@@ -1,7 +1,7 @@
 name: "Pixtral Large Instruct"
 slug: vllm-pixtral-large-instruct
 version: "1.0.0"
-description: "Mistral Pixtral Large Instruct served through vLLM for frontier-scale document AI, chart reasoning, natural image understanding, and premium multimodal assistant workflows on DGX Spark."
+description: "Mistral Pixtral Large Instruct served through vLLM for frontier-scale document AI, chart reasoning, natural image understanding, and premium multimodal assistant workflows on NVIDIA GPUs."
 author: "Mistral AI"
 source: "official"
 website: "https://huggingface.co/mistralai/Pixtral-Large-Instruct-2411"

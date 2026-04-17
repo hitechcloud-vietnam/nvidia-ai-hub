@@ -1,6 +1,6 @@
 # VoiceCraft Lab
 
-Run the official VoiceCraft Gradio workflow locally on DGX Spark.
+Run the official VoiceCraft Gradio workflow locally on NVIDIA GPUs.
 
 ## What it provides
 

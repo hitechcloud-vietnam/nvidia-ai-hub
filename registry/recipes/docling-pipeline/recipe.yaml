@@ -1,7 +1,7 @@
 name: "Docling Pipeline"
 slug: docling-pipeline
 version: "1.0.0"
-description: "Run a local Docling document-conversion pipeline with upload APIs, batch processing, and persistent structured exports for Markdown, JSON, HTML, text, YAML, and DocTags workflows on DGX Spark."
+description: "Run a local Docling document-conversion pipeline with upload APIs, batch processing, and persistent structured exports for Markdown, JSON, HTML, text, YAML, and DocTags workflows on NVIDIA GPUs."
 author: "Docling Project"
 source: "official"
 website: "https://docling-project.github.io/docling/"

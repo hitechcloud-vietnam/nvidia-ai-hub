@@ -1,7 +1,7 @@
 name: "Diffusers Playground"
 slug: diffusers-playground
 version: "1.0.0"
-description: "Run a local Gradio playground powered by the official Hugging Face Diffusers library for text-to-image, image-to-image, and inpainting workflows on DGX Spark with persistent model cache and exported outputs."
+description: "Run a local Gradio playground powered by the official Hugging Face Diffusers library for text-to-image, image-to-image, and inpainting workflows on NVIDIA GPUs with persistent model cache and exported outputs."
 author: "Hugging Face"
 source: "official"
 website: "https://github.com/huggingface/diffusers"

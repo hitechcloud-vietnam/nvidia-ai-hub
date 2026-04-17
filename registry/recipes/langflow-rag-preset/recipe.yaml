@@ -1,7 +1,7 @@
 name: "Langflow RAG Preset"
 slug: langflow-rag-preset
 version: "1.0.0"
-description: "Official-image Langflow preset for local RAG and agent workflow prototyping with persistent config storage, API-key-ready access, and shared Ollama connectivity on DGX Spark."
+description: "Official-image Langflow preset for local RAG and agent workflow prototyping with persistent config storage, API-key-ready access, and shared Ollama connectivity on NVIDIA GPUs."
 author: "Langflow AI"
 source: "official"
 website: "https://langflow.org"

@@ -1,7 +1,7 @@
 name: "Kohya SS"
 slug: kohya-ss
 version: "1.0.0"
-description: "Run the official Kohya SS Docker stack on DGX Spark for LoRA, Dreambooth, SDXL, and diffusion fine-tuning workflows through the Gradio training UI with persistent datasets, models, outputs, logs, and configuration state."
+description: "Run the official Kohya SS Docker stack on NVIDIA GPUs for LoRA, Dreambooth, SDXL, and diffusion fine-tuning workflows through the Gradio training UI with persistent datasets, models, outputs, logs, and configuration state."
 author: "bmaltais"
 source: "official"
 website: "https://github.com/bmaltais/kohya_ss"

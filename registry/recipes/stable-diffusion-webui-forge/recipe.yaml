@@ -1,7 +1,7 @@
 name: "Stable Diffusion WebUI Forge"
 slug: stable-diffusion-webui-forge
 version: "1.0.0"
-description: "Build and run the official Stable Diffusion WebUI Forge project on DGX Spark with a persistent data directory for checkpoints, LoRAs, embeddings, configs, caches, and generated outputs through the Gradio web UI."
+description: "Build and run the official Stable Diffusion WebUI Forge project on NVIDIA GPUs with a persistent data directory for checkpoints, LoRAs, embeddings, configs, caches, and generated outputs through the Gradio web UI."
 author: "lllyasviel"
 source: "official"
 website: "https://github.com/lllyasviel/stable-diffusion-webui-forge"

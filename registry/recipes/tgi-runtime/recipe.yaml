@@ -1,0 +1,53 @@
+name: "TGI Runtime"
+slug: tgi-runtime
+version: "1.0.0"
+description: "Official Hugging Face Text Generation Inference runtime baseline with generation, chat-compatible, metrics, and Swagger endpoints for NVIDIA GPUs."
+author: "Hugging Face"
+source: "official"
+website: "https://huggingface.co/docs/text-generation-inference/main/en/index"
+upstream: "https://github.com/huggingface/text-generation-inference"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - tgi
+  - text-generation-inference
+  - hugging-face
+  - runtime
+  - openai-compatible
+  - gpu
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3099
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3099/v1"
+  model_id: "teknium/OpenHermes-2.5-Mistral-7B"
+  api_key: "Not required by default; protect the endpoint externally if needed"
+  max_context: "Configurable through TGI_MAX_INPUT_LENGTH and TGI_MAX_TOTAL_TOKENS"
+  max_output_tokens: "Configurable per request and model limits"
+  curl_example: "curl http://<SPARK_IP>:3099/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+status: experimental
+runtime_env_path: "registry/recipes/tgi-runtime/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official Text Generation Inference container with GPU access, shared memory sizing, persistent model cache, and HTTP APIs on port 3099."
+    command: "docker compose --env-file registry/recipes/tgi-runtime/.env -p nvidia-ai-hub-tgi-runtime -f registry/recipes/tgi-runtime/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the TGI runtime while preserving downloaded model data and cache artifacts."
+    command: "docker compose --env-file registry/recipes/tgi-runtime/.env -p nvidia-ai-hub-tgi-runtime -f registry/recipes/tgi-runtime/docker-compose.yml down"

@@ -1,7 +1,7 @@
 name: "Qdrant Assistant Stack"
 slug: qdrant-assistant-stack
 version: "1.0.0"
-description: "Qdrant vector database preset with built-in web UI, persistent local storage, snapshot mounts, and shared Ollama-ready integration points for DGX Spark assistant and retrieval workloads."
+description: "Qdrant vector database preset with built-in web UI, persistent local storage, snapshot mounts, and shared Ollama-ready integration points for NVIDIA GPUs assistant and retrieval workloads."
 author: "Qdrant"
 source: "official"
 website: "https://qdrant.tech/"

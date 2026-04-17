@@ -1,0 +1,54 @@
+name: "VLM-R1 7B"
+slug: vllm-vlm-r1-7b
+version: "1.0.0"
+description: "OpenBMB VLM-R1 7B served through vLLM for compact multimodal reasoning, OCR-heavy document understanding, chart analysis, and image-grounded chat workflows on NVIDIA GPUs."
+author: "OpenBMB"
+source: "official"
+website: "https://huggingface.co/openbmb/VLM-R1-7B"
+upstream: "https://huggingface.co/openbmb/VLM-R1-7B"
+category: llm
+categories:
+  - llm
+  - reasoning
+tags:
+  - llm
+  - multimodal
+  - vision
+  - vision-language
+  - reasoning
+  - ocr
+  - charts
+  - openbmb
+  - vllm
+logo: "/logos/openbmb.svg"
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 32
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: true
+status: experimental
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "openbmb/VLM-R1-7B"
+  api_key: "not-needed"
+  max_context: "32768"
+  max_output_tokens: "4096"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/VLM-R1-7B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and explain the key anomaly.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
+runtime_env_path: "registry/recipes/vllm-vlm-r1-7b/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Start the OpenBMB VLM-R1 7B OpenAI-compatible vLLM server with single-image multimodal chat support."
+    command: "docker compose --env-file registry/recipes/vllm-vlm-r1-7b/.env -p nvidia-ai-hub-vllm-vlm-r1-7b -f registry/recipes/vllm-vlm-r1-7b/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the VLM-R1 7B runtime while preserving the Hugging Face model cache volume."
+    command: "docker compose --env-file registry/recipes/vllm-vlm-r1-7b/.env -p nvidia-ai-hub-vllm-vlm-r1-7b -f registry/recipes/vllm-vlm-r1-7b/docker-compose.yml down"

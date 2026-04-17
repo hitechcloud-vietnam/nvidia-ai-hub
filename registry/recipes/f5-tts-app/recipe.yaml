@@ -1,7 +1,7 @@
 name: "F5 TTS App"
 slug: f5-tts-app
 version: "1.0.0"
-description: "Run the official F5-TTS Gradio app on DGX Spark for prompt-audio-conditioned speech generation, multi-style synthesis, and persistent Hugging Face cache storage."
+description: "Run the official F5-TTS Gradio app on NVIDIA GPUs for prompt-audio-conditioned speech generation, multi-style synthesis, and persistent Hugging Face cache storage."
 author: "SWivid"
 source: "official"
 website: "https://github.com/SWivid/F5-TTS"

@@ -1,7 +1,7 @@
 name: "Granite 3.1 8B Instruct"
 slug: vllm-granite31-8b-instruct
 version: "1.0.0"
-description: "IBM Granite 3.1 8B Instruct packaged with vLLM for enterprise retrieval, multilingual dialog, function calling, and long-context workflows on DGX Spark."
+description: "IBM Granite 3.1 8B Instruct packaged with vLLM for enterprise retrieval, multilingual dialog, function calling, and long-context workflows on NVIDIA GPUs."
 author: "IBM"
 source: "official"
 website: "https://huggingface.co/ibm-granite/granite-3.1-8b-instruct"

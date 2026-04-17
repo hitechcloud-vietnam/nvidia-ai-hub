@@ -1,0 +1,50 @@
+services:
+  sglang-runtime:
+    image: ${SGLANG_IMAGE}
+    container_name: sglang-runtime
+    restart: unless-stopped
+    ports:
+      - "${SGLANG_PORT}:${SGLANG_INTERNAL_PORT}"
+    environment:
+      HF_TOKEN: ${SGLANG_HF_TOKEN}
+    volumes:
+      - ./cache:/root/.cache/huggingface
+      - ./models:/models
+      - ./logs:/tmp/sglang-logs
+    shm_size: ${SGLANG_SHM_SIZE}
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        set -eu
+        EXTRA_ARGS=""
+        if [ -n "${SGLANG_SERVED_MODEL_NAME}" ]; then EXTRA_ARGS="$EXTRA_ARGS --served-model-name ${SGLANG_SERVED_MODEL_NAME}"; fi
+        if [ -n "${SGLANG_API_KEY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --api-key ${SGLANG_API_KEY}"; fi
+        if [ -n "${SGLANG_ADMIN_API_KEY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --admin-api-key ${SGLANG_ADMIN_API_KEY}"; fi
+        if [ -n "${SGLANG_CONTEXT_LENGTH}" ]; then EXTRA_ARGS="$EXTRA_ARGS --context-length ${SGLANG_CONTEXT_LENGTH}"; fi
+        if [ -n "${SGLANG_MEM_FRACTION_STATIC}" ]; then EXTRA_ARGS="$EXTRA_ARGS --mem-fraction-static ${SGLANG_MEM_FRACTION_STATIC}"; fi
+        if [ -n "${SGLANG_CHUNKED_PREFILL_SIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --chunked-prefill-size ${SGLANG_CHUNKED_PREFILL_SIZE}"; fi
+        if [ -n "${SGLANG_MAX_RUNNING_REQUESTS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-running-requests ${SGLANG_MAX_RUNNING_REQUESTS}"; fi
+        if [ -n "${SGLANG_SCHEDULE_POLICY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --schedule-policy ${SGLANG_SCHEDULE_POLICY}"; fi
+        if [ -n "${SGLANG_ATTENTION_BACKEND}" ]; then EXTRA_ARGS="$EXTRA_ARGS --attention-backend ${SGLANG_ATTENTION_BACKEND}"; fi
+        if [ -n "${SGLANG_SAMPLING_BACKEND}" ]; then EXTRA_ARGS="$EXTRA_ARGS --sampling-backend ${SGLANG_SAMPLING_BACKEND}"; fi
+        if [ "${SGLANG_TRUST_REMOTE_CODE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --trust-remote-code"; fi
+        if [ "${SGLANG_SKIP_SERVER_WARMUP}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --skip-server-warmup"; fi
+        if [ "${SGLANG_ENABLE_METRICS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --enable-metrics"; fi
+        if [ "${SGLANG_LOG_REQUESTS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --log-requests"; fi
+        exec sglang serve \
+          --model-path "${SGLANG_MODEL_PATH}" \
+          --host "${SGLANG_HOST}" \
+          --port "${SGLANG_INTERNAL_PORT}" \
+          --tp "${SGLANG_TENSOR_PARALLEL}" \
+          --dp "${SGLANG_DATA_PARALLEL}" \
+          --dtype "${SGLANG_DTYPE}" \
+          --log-level "${SGLANG_LOG_LEVEL}" \
+          $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

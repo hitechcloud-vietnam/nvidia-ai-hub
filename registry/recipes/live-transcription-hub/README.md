@@ -1,6 +1,6 @@
 # Live Transcription Hub
 
-Run a local real-time transcription service on DGX Spark with a Whisper-style WebSocket interface and an OpenAI-compatible audio upload endpoint.
+Run a local real-time transcription service on NVIDIA GPUs with a Whisper-style WebSocket interface and an OpenAI-compatible audio upload endpoint.
 
 ## What it provides
 
@@ -40,7 +40,7 @@ Uploaded audio and generated transcripts may contain sensitive data. Review moun
 
 ## Validation scope
 
-This recipe was added as a registry scaffold for DGX Spark. Validation should focus on recipe loading, YAML shape, Docker asset presence, and smoke-testing the HTTP/WebSocket endpoints in a Linux Docker environment.
+This recipe was added as a registry scaffold for NVIDIA GPUs. Validation should focus on recipe loading, YAML shape, Docker asset presence, and smoke-testing the HTTP/WebSocket endpoints in a Linux Docker environment.
 
 ## License notes
 

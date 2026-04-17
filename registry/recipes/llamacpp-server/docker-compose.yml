@@ -1,0 +1,58 @@
+services:
+  llamacpp-server:
+    image: ${LLAMA_CPP_IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda}
+    container_name: nvidia-ai-hub-llamacpp-server
+    env_file:
+      - .env
+    ports:
+      - "${LLAMA_CPP_PORT:-3096}:${LLAMA_SERVER_INTERNAL_PORT:-8080}"
+    volumes:
+      - ./models:/models
+      - ./cache:/root/.cache
+      - ./slots:/slots
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: >-
+      set -eu;
+      MODEL_ARG="";
+      if [ -n "${LLAMA_ARG_MODEL:-}" ]; then
+        MODEL_ARG="--model ${LLAMA_ARG_MODEL}";
+      elif [ -n "${LLAMA_ARG_HF_REPO:-}" ]; then
+        MODEL_ARG="--hf-repo ${LLAMA_ARG_HF_REPO}";
+      else
+        echo "Either LLAMA_ARG_MODEL or LLAMA_ARG_HF_REPO must be set.";
+        exit 1;
+      fi;
+      API_KEY_ARG="";
+      if [ -n "${LLAMA_API_KEY:-}" ]; then
+        API_KEY_ARG="--api-key ${LLAMA_API_KEY}";
+      fi;
+      exec llama-server
+      --host "${LLAMA_SERVER_HOST:-0.0.0.0}"
+      --port "${LLAMA_SERVER_INTERNAL_PORT:-8080}"
+      --alias "${LLAMA_MODEL_ALIAS:-gemma-3-1b-it-q4-k-m}"
+      --ctx-size "${LLAMA_ARG_CTX_SIZE:-8192}"
+      --parallel "${LLAMA_ARG_N_PARALLEL:-2}"
+      --n-gpu-layers "${LLAMA_ARG_N_GPU_LAYERS:-999}"
+      --threads-http "${LLAMA_ARG_THREADS_HTTP:-4}"
+      --timeout "${LLAMA_ARG_TIMEOUT:-600}"
+      --slot-save-path "${LLAMA_SLOT_SAVE_PATH:-/slots}"
+      --sleep-idle-seconds "${LLAMA_SLEEP_IDLE_SECONDS:--1}"
+      --jinja
+      --metrics
+      --slots
+      --cache-prompt
+      --cont-batching
+      ${MODEL_ARG}
+      ${API_KEY_ARG};
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

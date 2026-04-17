@@ -1,7 +1,7 @@
 name: "Live Transcription Hub"
 slug: live-transcription-hub
 version: "1.0.0"
-description: "Run a GPU-ready real-time transcription hub on DGX Spark with a WhisperLive-style WebSocket protocol, OpenAI-compatible upload API, and persistent model cache."
+description: "Run a GPU-ready real-time transcription hub on NVIDIA GPUs with a WhisperLive-style WebSocket protocol, OpenAI-compatible upload API, and persistent model cache."
 author: "Pho Tue SoftWare Solutions JSC"
 source: "community"
 website: "https://github.com/collabora/WhisperLive"

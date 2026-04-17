@@ -1,7 +1,7 @@
 name: "Meshy Workflow Bridge"
 slug: meshy-workflow-bridge
 version: "1.0.0"
-description: "Run ComfyUI with the ComfyUI-Meshy custom node bridge on DGX Spark so text-to-3D and image-to-3D Meshy API workflows can be authored visually while outputs remain in normal ComfyUI storage."
+description: "Run ComfyUI with the ComfyUI-Meshy custom node bridge on NVIDIA GPUs so text-to-3D and image-to-3D Meshy API workflows can be authored visually while outputs remain in normal ComfyUI storage."
 author: "ComfyAnonymous + Kazama-Suichiku"
 source: "community"
 website: "https://github.com/Kazama-Suichiku/ComfyUI-Meshy"

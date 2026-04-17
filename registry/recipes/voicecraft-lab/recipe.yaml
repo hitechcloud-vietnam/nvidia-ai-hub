@@ -1,7 +1,7 @@
 name: "VoiceCraft Lab"
 slug: voicecraft-lab
 version: "1.0.0"
-description: "Run the official VoiceCraft Gradio app on DGX Spark for zero-shot text-to-speech, speech editing, and long-form rerun workflows with persistent model and cache storage."
+description: "Run the official VoiceCraft Gradio app on NVIDIA GPUs for zero-shot text-to-speech, speech editing, and long-form rerun workflows with persistent model and cache storage."
 author: "Puyuan Peng"
 source: "official"
 website: "https://github.com/jasonppy/VoiceCraft"

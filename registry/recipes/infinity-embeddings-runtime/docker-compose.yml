@@ -1,0 +1,55 @@
+services:
+  infinity-embeddings-runtime:
+    image: ${INFINITY_IMAGE}
+    container_name: infinity-embeddings-runtime
+    restart: unless-stopped
+    ports:
+      - "${INFINITY_PORT}:${INFINITY_PORT}"
+    environment:
+      HF_HOME: ${HF_HOME}
+      HF_TOKEN: ${HF_TOKEN}
+    volumes:
+      - ./data:/app/.cache
+    shm_size: 1g
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: |
+      set -euo pipefail
+      EXTRA_ARGS=""
+      if [ -n "${INFINITY_MODEL_ID_2}" ]; then EXTRA_ARGS="$EXTRA_ARGS --model-id ${INFINITY_MODEL_ID_2}"; fi
+      if [ -n "${INFINITY_REVISION}" ]; then EXTRA_ARGS="$EXTRA_ARGS --revision ${INFINITY_REVISION}"; fi
+      if [ -n "${INFINITY_API_KEY}" ] && [ "${INFINITY_DISABLE_AUTH}" != "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --api-key ${INFINITY_API_KEY}"; fi
+      if [ -n "${INFINITY_ENGINE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --engine ${INFINITY_ENGINE}"; fi
+      if [ -n "${INFINITY_DTYPE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --dtype ${INFINITY_DTYPE}"; fi
+      if [ -n "${INFINITY_EMBEDDING_DTYPE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --embedding-dtype ${INFINITY_EMBEDDING_DTYPE}"; fi
+      if [ -n "${INFINITY_BATCH_SIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --batch-size ${INFINITY_BATCH_SIZE}"; fi
+      if [ -n "${INFINITY_BATCH_DELAY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --batch-delay ${INFINITY_BATCH_DELAY}"; fi
+      if [ "${INFINITY_BETTERTRANSFORMER}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --bettertransformer"; fi
+      if [ "${INFINITY_LENGTHS_VIA_TOKENIZE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --lengths-via-tokenize"; fi
+      if [ "${INFINITY_MODEL_WARMUP}" = "false" ]; then EXTRA_ARGS="$EXTRA_ARGS --model-warmup false"; fi
+      if [ -n "${INFINITY_ATTN_IMPLEMENTATION}" ]; then EXTRA_ARGS="$EXTRA_ARGS --attn-implementation ${INFINITY_ATTN_IMPLEMENTATION}"; fi
+      if [ -n "${INFINITY_DEVICE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --device ${INFINITY_DEVICE}"; fi
+      if [ -n "${INFINITY_VECTOR_DISK_CACHE_PATH}" ]; then EXTRA_ARGS="$EXTRA_ARGS --vector-disk-cache-path ${INFINITY_VECTOR_DISK_CACHE_PATH}"; fi
+      if [ "${INFINITY_PRELOAD_ONLY}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --preload-only"; fi
+      if [ "${INFINITY_PERMISSIVE_CORS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --permissive-cors"; fi
+      if [ "${INFINITY_JSON_LOGS}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --json-logs"; fi
+      if [ -n "${INFINITY_LOG_LEVEL}" ]; then EXTRA_ARGS="$EXTRA_ARGS --log-level ${INFINITY_LOG_LEVEL}"; fi
+      if [ "${INFINITY_NO_TELEMETRY}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --no-telemetry"; fi
+      if [ -n "${INFINITY_POOL_TIMEOUT}" ]; then EXTRA_ARGS="$EXTRA_ARGS --pool-timeout ${INFINITY_POOL_TIMEOUT}"; fi
+      if [ -n "${INFINITY_MAX_CLIENT_BATCH_SIZE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-client-batch-size ${INFINITY_MAX_CLIENT_BATCH_SIZE}"; fi
+      if [ -n "${INFINITY_MAX_INPUT_LENGTH}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-input-length ${INFINITY_MAX_INPUT_LENGTH}"; fi
+      if [ -n "${INFINITY_MAX_WORKERS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-workers ${INFINITY_MAX_WORKERS}"; fi
+      exec infinity_emb v2 \
+        --model-id "${INFINITY_MODEL_ID}" \
+        --host "${INFINITY_HOST}" \
+        --port "${INFINITY_PORT}" \
+        --url-prefix "${INFINITY_URL_PREFIX}" \
+        $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -1,7 +1,7 @@
 name: "NemoClaw"
 slug: nemoclaw
 version: "1.0.0"
-description: "Deploy NemoClaw on DGX Spark with a local Ollama-backed Nemotron profile and Telegram-ready channel wiring. This recipe builds the upstream sandbox image, persists writable state outside the container, and exports the dashboard token to a host file after the first launch."
+description: "Deploy NemoClaw on NVIDIA GPUs with a local Ollama-backed Nemotron profile and Telegram-ready channel wiring. This recipe builds the upstream sandbox image, persists writable state outside the container, and exports the dashboard token to a host file after the first launch."
 author: "NVIDIA"
 source: "official"
 website: "https://www.nvidia.com/nemoclaw"
@@ -34,7 +34,7 @@ ui:
   health_path: "/healthz"
 commands:
   - label: "Install / build"
-    description: "Build the DGX Spark-oriented NemoClaw image and start the dashboard with persisted state, local Ollama routing, and Telegram-ready wiring."
+    description: "Build the NVIDIA GPUs-oriented NemoClaw image and start the dashboard with persisted state, local Ollama routing, and Telegram-ready wiring."
     command: "docker compose -p nvidia-ai-hub-nemoclaw -f registry/recipes/nemoclaw/docker-compose.yml up -d --build"
   - label: "Stop"
     description: "Stop the NemoClaw stack while preserving config, state, snapshots, and exported token files."

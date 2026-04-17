@@ -1,7 +1,7 @@
 name: "Dify"
 slug: dify
 version: "1.0.0"
-description: "Practical self-hosted Dify stack with the official web, API, worker, sandbox, plugin daemon, PostgreSQL, Redis, and Weaviate services for workflows, agents, and RAG on DGX Spark."
+description: "Practical self-hosted Dify stack with the official web, API, worker, sandbox, plugin daemon, PostgreSQL, Redis, and Weaviate services for workflows, agents, and RAG on NVIDIA GPUs."
 author: "LangGenius"
 source: "official"
 website: "https://dify.ai/"

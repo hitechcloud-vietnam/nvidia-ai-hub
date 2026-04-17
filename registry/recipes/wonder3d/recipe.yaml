@@ -1,7 +1,7 @@
 name: "Wonder3D"
 slug: wonder3d
 version: "1.0.0"
-description: "Run the official Wonder3D Gradio multi-view demo on DGX Spark for single-image 3D preprocessing with persistent model cache, SAM weights, and generated normals or color output storage."
+description: "Run the official Wonder3D Gradio multi-view demo on NVIDIA GPUs for single-image 3D preprocessing with persistent model cache, SAM weights, and generated normals or color output storage."
 author: "Wonder3D Authors"
 source: "official"
 website: "https://github.com/xxlong0/Wonder3D"

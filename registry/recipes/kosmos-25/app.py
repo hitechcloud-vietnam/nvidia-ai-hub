@@ -81,7 +81,7 @@ def run_inference(image, task):
 
 with gr.Blocks(title="Kosmos-2.5") as demo:
     gr.Markdown(
-        "# Kosmos-2.5 Instruct\nUpload a text-rich image and run OCR or image-to-markdown extraction locally on DGX Spark."
+        "# Kosmos-2.5 Instruct\nUpload a text-rich image and run OCR or image-to-markdown extraction locally on NVIDIA GPUs."
     )
     with gr.Row():
         with gr.Column():

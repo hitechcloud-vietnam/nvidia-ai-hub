@@ -1,6 +1,6 @@
 # Milvus Assistant Stack
 
-Milvus standalone preset for DGX Spark users who want a practical local vector database foundation for assistant retrieval experiments, embedding-backed search, collection management, and shared Ollama-connected applications.
+Milvus standalone preset for NVIDIA GPUs users who want a practical local vector database foundation for assistant retrieval experiments, embedding-backed search, collection management, and shared Ollama-connected applications.
 
 ## What it provides
 

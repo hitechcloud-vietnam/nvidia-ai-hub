@@ -58,6 +58,6 @@
     <rect x="154" y="124" width="438" height="68" rx="34" fill="rgba(8,16,32,0.46)" stroke="rgba(230,255,248,0.18)"/>
     <text x="188" y="167" fill="#F4FFFD" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">Cohere multilingual families</text>
     <text x="160" y="770" fill="#D9FFF6" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="800">Aya Expanse · Command R</text>
-    <text x="160" y="822" fill="#C2F6EF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="500">Multilingual chat, tool use, RAG, and enterprise reasoning patterns for DGX Spark</text>
+    <text x="160" y="822" fill="#C2F6EF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="500">Multilingual chat, tool use, RAG, and enterprise reasoning patterns for NVIDIA GPUs</text>
   </g>
 </svg>

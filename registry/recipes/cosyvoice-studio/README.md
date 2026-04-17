@@ -1,6 +1,6 @@
 # CosyVoice Studio
 
-Run the official CosyVoice web demo locally on DGX Spark.
+Run the official CosyVoice web demo locally on NVIDIA GPUs.
 
 ## What it provides
 

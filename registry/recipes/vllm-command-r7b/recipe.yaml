@@ -1,7 +1,7 @@
 name: "Command R7B"
 slug: vllm-command-r7b
 version: "1.0.0"
-description: "Cohere Command R7B served with vLLM for multilingual enterprise chat, RAG, tool use, and code assistance on DGX Spark."
+description: "Cohere Command R7B served with vLLM for multilingual enterprise chat, RAG, tool use, and code assistance on NVIDIA GPUs."
 author: "Cohere Labs"
 source: "official"
 website: "https://huggingface.co/CohereLabs/c4ai-command-r7b-12-2024"

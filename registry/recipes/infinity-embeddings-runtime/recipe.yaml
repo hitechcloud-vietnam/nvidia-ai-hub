@@ -1,0 +1,54 @@
+name: "Infinity Embeddings Runtime"
+slug: infinity-embeddings-runtime
+version: "1.0.0"
+description: "Official Infinity v2 embedding and reranking runtime for NVIDIA GPUs with OpenAI-compatible embeddings APIs, model discovery, health checks, and optional API-key auth."
+author: "Michael Feil"
+source: "official"
+website: "https://michaelfeil.github.io/infinity/"
+upstream: "https://github.com/michaelfeil/infinity"
+category: llm
+categories:
+  - runtime
+  - embeddings
+  - reranking
+  - model-serving
+tags:
+  - infinity
+  - embeddings
+  - reranking
+  - openai-compatible
+  - gpu
+icon: "♾️"
+logo: ""
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7997
+  path: "/v1/docs"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:7997/v1"
+  model_id: "BAAI/bge-small-en-v1.5"
+  api_key: "Optional; set INFINITY_API_KEY to require Bearer authentication"
+  max_context: "Bound by the selected embedding or reranker model and Infinity runtime settings"
+  max_output_tokens: "Not applicable for embedding and reranking workloads"
+  curl_example: "curl http://<SPARK_IP>:7997/v1/embeddings -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <INFINITY_API_KEY>' -d '{\"input\":[\"What is Deep Learning?\"],\"model\":\"BAAI/bge-small-en-v1.5\"}'"
+status: experimental
+runtime_env_path: "registry/recipes/infinity-embeddings-runtime/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Start the Infinity v2 runtime with GPU access, persistent Hugging Face cache, OpenAI-compatible embeddings APIs, and optional reranking support on port 7997."
+    command: "docker compose --env-file registry/recipes/infinity-embeddings-runtime/.env -p nvidia-ai-hub-infinity-embeddings-runtime -f registry/recipes/infinity-embeddings-runtime/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the Infinity embeddings runtime while preserving downloaded model cache data."
+    command: "docker compose --env-file registry/recipes/infinity-embeddings-runtime/.env -p nvidia-ai-hub-infinity-embeddings-runtime -f registry/recipes/infinity-embeddings-runtime/docker-compose.yml down"

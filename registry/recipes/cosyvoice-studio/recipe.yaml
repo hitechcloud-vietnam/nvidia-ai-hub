@@ -1,7 +1,7 @@
 name: "CosyVoice Studio"
 slug: cosyvoice-studio
 version: "1.0.0"
-description: "Run the official CosyVoice web demo on DGX Spark for multilingual TTS, zero-shot voice cloning, cross-lingual synthesis, and instruct-style speech control with persistent model caches."
+description: "Run the official CosyVoice web demo on NVIDIA GPUs for multilingual TTS, zero-shot voice cloning, cross-lingual synthesis, and instruct-style speech control with persistent model caches."
 author: "FunAudioLLM"
 source: "official"
 website: "https://github.com/FunAudioLLM/CosyVoice"

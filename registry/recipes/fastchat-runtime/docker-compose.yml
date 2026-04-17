@@ -1,0 +1,91 @@
+services:
+  fastchat-controller:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${FASTCHAT_IMAGE}
+    container_name: fastchat-controller
+    restart: unless-stopped
+    ports:
+      - "${FASTCHAT_CONTROLLER_PORT}:${FASTCHAT_CONTROLLER_PORT}"
+    command:
+      - python
+      - -m
+      - fastchat.serve.controller
+      - --host
+      - 0.0.0.0
+      - --port
+      - "${FASTCHAT_CONTROLLER_PORT}"
+
+  fastchat-model-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${FASTCHAT_IMAGE}
+    container_name: fastchat-model-worker
+    restart: unless-stopped
+    depends_on:
+      - fastchat-controller
+    ports:
+      - "${FASTCHAT_WORKER_PORT}:${FASTCHAT_WORKER_PORT}"
+    environment:
+      HF_TOKEN: ${FASTCHAT_HF_TOKEN}
+      HUGGING_FACE_HUB_TOKEN: ${FASTCHAT_HF_TOKEN}
+      FASTCHAT_WORKER_API_TIMEOUT: ${FASTCHAT_WORKER_API_TIMEOUT}
+      NVIDIA_VISIBLE_DEVICES: ${FASTCHAT_VISIBLE_DEVICES}
+    volumes:
+      - ./cache:/root/.cache/huggingface
+      - ./models:/models
+      - ./logs:/logs
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        set -eu
+        EXTRA_ARGS=""
+        if [ -n "${FASTCHAT_WORKER_MODEL_NAMES}" ]; then EXTRA_ARGS="$EXTRA_ARGS --model-names ${FASTCHAT_WORKER_MODEL_NAMES}"; fi
+        if [ -n "${FASTCHAT_DEVICE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --device ${FASTCHAT_DEVICE}"; fi
+        if [ -n "${FASTCHAT_NUM_GPUS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --num-gpus ${FASTCHAT_NUM_GPUS}"; fi
+        if [ -n "${FASTCHAT_MAX_GPU_MEMORY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-gpu-memory ${FASTCHAT_MAX_GPU_MEMORY}"; fi
+        if [ "${FASTCHAT_LOAD_8BIT}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --load-8bit"; fi
+        if [ "${FASTCHAT_CPU_OFFLOADING}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --cpu-offloading"; fi
+        if [ "${FASTCHAT_TRUST_REMOTE_CODE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --trust-remote-code"; fi
+        exec python -m fastchat.serve.model_worker \
+          --host 0.0.0.0 \
+          --port "${FASTCHAT_WORKER_PORT}" \
+          --worker-address "http://fastchat-model-worker:${FASTCHAT_WORKER_PORT}" \
+          --controller-address "http://fastchat-controller:${FASTCHAT_CONTROLLER_PORT}" \
+          --model-path "${FASTCHAT_MODEL_PATH}" \
+          $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  fastchat-api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${FASTCHAT_IMAGE}
+    container_name: fastchat-api-server
+    restart: unless-stopped
+    depends_on:
+      - fastchat-controller
+      - fastchat-model-worker
+    ports:
+      - "${FASTCHAT_API_PORT}:${FASTCHAT_API_PORT}"
+    environment:
+      FASTCHAT_WORKER_API_TIMEOUT: ${FASTCHAT_WORKER_API_TIMEOUT}
+    command:
+      - python
+      - -m
+      - fastchat.serve.openai_api_server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "${FASTCHAT_API_PORT}"
+      - --controller-address
+      - http://fastchat-controller:${FASTCHAT_CONTROLLER_PORT}

@@ -1,7 +1,7 @@
 name: "Llama 3.1 70B Instruct FP8"
 slug: vllm-llama31-70b-instruct-fp8
 version: "1.0.0"
-description: "Meta Llama 3.1 70B Instruct, FP8 quantized by NVIDIA, served through vLLM as a long-context OpenAI-compatible endpoint for DGX Spark-class deployments."
+description: "Meta Llama 3.1 70B Instruct, FP8 quantized by NVIDIA, served through vLLM as a long-context OpenAI-compatible endpoint for NVIDIA GPUs-class deployments."
 author: "Meta / NVIDIA"
 source: "official"
 website: "https://build.nvidia.com/spark/vllm"

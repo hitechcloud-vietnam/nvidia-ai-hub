@@ -1,0 +1,54 @@
+name: "FastChat Runtime"
+slug: fastchat-runtime
+version: "1.0.0"
+description: "Official FastChat-style controller, model worker, and OpenAI-compatible API server baseline for self-hosted multi-model orchestration on NVIDIA GPUs."
+author: "LMSYS"
+source: "official"
+website: "https://github.com/lm-sys/FastChat"
+upstream: "https://github.com/lm-sys/FastChat"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - fastchat
+  - runtime
+  - openai-compatible
+  - controller
+  - model-worker
+  - gpu
+icon: "💬"
+logo: ""
+requirements:
+  min_memory_gb: 24
+  recommended_memory_gb: 48
+  disk_gb: 60
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 8000
+  path: "/v1/models"
+  health_path: "/v1/models"
+docker:
+  build: true
+  build_time_minutes: 12
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:8000/v1"
+  model_id: "vicuna-7b-v1.5"
+  api_key: "EMPTY"
+  max_context: "Depends on the selected model and FastChat worker settings"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"vicuna-7b-v1.5\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello from FastChat.\"}]}'"
+status: experimental
+runtime_env_path: "registry/recipes/fastchat-runtime/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Build the FastChat controller, model worker, and OpenAI-compatible API server stack, then publish the API on port 8000."
+    command: "docker compose --env-file registry/recipes/fastchat-runtime/.env -p nvidia-ai-hub-fastchat-runtime -f registry/recipes/fastchat-runtime/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the FastChat stack while preserving local model mounts and Hugging Face cache data."
+    command: "docker compose --env-file registry/recipes/fastchat-runtime/.env -p nvidia-ai-hub-fastchat-runtime -f registry/recipes/fastchat-runtime/docker-compose.yml down"

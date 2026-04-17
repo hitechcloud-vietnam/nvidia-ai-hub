@@ -1,0 +1,24 @@
+model_list:
+  - model_name: os.environ/VLLM_MODEL_A_ALIAS
+    litellm_params:
+      model: os.environ/VLLM_MODEL_A_ALIAS
+      custom_llm_provider: openai
+      api_base: http://vllm-model-a:8000/v1
+      api_key: os.environ/VLLM_MODEL_A_API_KEY
+    model_info:
+      mode: chat
+
+  - model_name: os.environ/VLLM_MODEL_B_ALIAS
+    litellm_params:
+      model: os.environ/VLLM_MODEL_B_ALIAS
+      custom_llm_provider: openai
+      api_base: http://vllm-model-b:8000/v1
+      api_key: os.environ/VLLM_MODEL_B_API_KEY
+    model_info:
+      mode: chat
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  background_health_checks: false
+  health_check_interval: 300
+  infer_model_from_keys: false

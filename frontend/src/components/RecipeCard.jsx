@@ -31,7 +31,7 @@ export default function RecipeCard({ recipe }) {
   return (
     <div
       onClick={() => selectRecipe(recipe.slug)}
-      className="relative overflow-hidden bg-surface rounded-2xl p-4 card-hover cursor-pointer group"
+      className="relative overflow-hidden rounded-xl border border-outline-dim bg-surface/90 p-3.5 card-hover cursor-pointer group shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
     >
       {/* Running indicator - top border */}
       {recipe.running && (
@@ -42,50 +42,50 @@ export default function RecipeCard({ recipe }) {
         }`} />
       )}
 
-      <div className="flex items-start gap-3.5">
+      <div className="flex items-start gap-3">
         {/* Icon */}
         {logoUrl && !logoFailed ? (
           <img
             src={logoUrl}
             alt={recipe.name}
-            className="w-14 h-14 rounded-xl object-contain bg-surface-high p-2 shrink-0 transition-transform group-hover:scale-105"
+            className="h-12 w-12 rounded-lg object-contain border border-outline-dim bg-surface-high p-1.5 shrink-0 transition-transform group-hover:scale-105"
             onError={() => setLogoFailed(true)}
           />
         ) : (
-          <div className="w-14 h-14 rounded-xl bg-surface-high flex items-center justify-center text-2xl shrink-0 transition-transform group-hover:scale-105">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-outline-dim bg-surface-high text-xl shrink-0 transition-transform group-hover:scale-105">
             {recipe.icon || '◻'}
           </div>
         )}
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm text-text leading-tight truncate m-0 font-display">
+          <h3 className="m-0 truncate font-display text-[13px] font-semibold leading-5 text-text">
             {recipe.name}
           </h3>
-          <p className="text-[11px] text-text-dim mt-0.5 m-0">{recipe.author}</p>
-          <p className="text-xs text-text-muted mt-1.5 m-0 line-clamp-1">{recipe.description}</p>
+          <p className="m-0 mt-0.5 text-[10px] uppercase tracking-[0.14em] text-text-dim font-label">{recipe.author}</p>
+          <p className="m-0 mt-1 text-[11px] leading-4 text-text-muted line-clamp-2">{recipe.description}</p>
 
           {/* Tags */}
-          <div className="flex items-center gap-1.5 mt-2">
-            <span className={`text-[10px] font-label px-2 py-0.5 rounded-full ${
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-label ${
               isNotebook ? 'text-primary bg-primary/10' : 'text-text-dim bg-surface-high'
             }`}>
               {getRecipeSurfaceLabel(recipe)}
             </span>
             <HardwareFitPill fit={hardwareFit} />
             {recipeCategories.slice(0, 2).map((cat) => (
-              <span key={cat} className="text-[10px] font-label text-secondary bg-secondary/10 px-2 py-0.5 rounded-full">
+              <span key={cat} className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-label text-secondary">
                 {cat}
               </span>
             ))}
             {!recipe.docker?.gpu && (
-              <span className="text-[10px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-full">CPU</span>
+              <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-label text-text-dim">CPU</span>
             )}
           </div>
         </div>
 
         {/* Action */}
-        <div className="shrink-0 flex flex-col items-end gap-1.5 mt-1">
+        <div className="mt-0.5 flex shrink-0 flex-col items-end gap-1.5">
           {isBuilding && (
             <span className="text-primary text-xs font-medium font-label animate-pulse">
               <span className="inline-block animate-spin">⟳</span> Building
@@ -102,7 +102,7 @@ export default function RecipeCard({ recipe }) {
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="btn-secondary px-3.5 py-1.5 text-[11px] font-semibold no-underline"
+              className="btn-secondary rounded-lg px-3 py-1.5 text-[11px] font-semibold no-underline"
             >
               {getRecipeOpenLabel(recipe)}
             </a>
@@ -111,12 +111,12 @@ export default function RecipeCard({ recipe }) {
             <span className="text-warning text-[11px] font-medium font-label animate-pulse">Starting...</span>
           )}
           {!isBusy && !recipe.running && !recipe.installed && (
-            <button onClick={handleInstall} className="btn-primary px-3.5 py-1.5 text-[11px] font-semibold">
+            <button onClick={handleInstall} className="btn-primary rounded-lg px-3 py-1.5 text-[11px] font-semibold">
               Install
             </button>
           )}
           {!isBusy && !recipe.running && !recipe.starting && recipe.installed && (
-            <span className="text-text-dim text-[11px] font-label bg-surface-high px-2.5 py-1 rounded-lg">Stopped</span>
+            <span className="rounded-lg bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">Stopped</span>
           )}
         </div>
       </div>
@@ -133,7 +133,7 @@ function HardwareFitPill({ fit }) {
   }
 
   return (
-    <span className={`text-[10px] font-label px-2 py-0.5 rounded-full ${toneMap[fit.tone] || toneMap.dim}`} title={fit.headline}>
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-label ${toneMap[fit.tone] || toneMap.dim}`} title={fit.headline}>
       Host {fit.label}
     </span>
   )

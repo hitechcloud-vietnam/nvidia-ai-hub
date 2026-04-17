@@ -1,0 +1,65 @@
+name: "LM Studio Bridge"
+slug: lm-studio-bridge
+version: "1.0.0"
+description: "Headless LM Studio bridge for NVIDIA GPUs using llmster and the lms CLI to expose OpenAI-compatible and native LM Studio HTTP APIs from a host-managed runtime."
+author: "LM Studio Team"
+source: "official"
+website: "https://lmstudio.ai/"
+upstream: "https://lmstudio.ai/docs/developer/core/headless"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - lm-studio
+  - llmster
+  - lms
+  - runtime
+  - bridge
+  - openai-compatible
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 1234
+  path: "/v1/models"
+  health_path: "/api/v0/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:1234/v1"
+  model_id: "openai/gpt-oss-20b"
+  api_key: "Optional LM Studio permission key if server authentication is enabled"
+  max_context: "Configurable at model load time through lms load options and per-model limits"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:1234/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <LM_STUDIO_API_KEY>' -d '{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+status: experimental
+runtime_env_path: "registry/recipes/lm-studio-bridge/.env"
+requires_hf_token: false
+commands:
+  - label: "Start llmster daemon"
+    description: "Start the LM Studio headless daemon on the host so CLI automation and server management commands are available without the desktop UI."
+    command: "lms daemon up"
+  - label: "Download model"
+    description: "Download the configured model into the LM Studio local model store before first use."
+    command: "lms get ${LM_STUDIO_MODEL:-openai/gpt-oss-20b}"
+  - label: "Load model"
+    description: "Load the configured model into memory with optional GPU offload and context settings before exposing the HTTP APIs."
+    command: "lms load ${LM_STUDIO_MODEL:-openai/gpt-oss-20b} --identifier=${LM_STUDIO_MODEL_ALIAS:-spark-lm-studio} --gpu=${LM_STUDIO_GPU_OFFLOAD:-max} --context-length=${LM_STUDIO_CONTEXT_LENGTH:-8192}"
+  - label: "Start server"
+    description: "Start the LM Studio local server on the configured port with optional CORS support for trusted local development workflows."
+    command: "lms server start --port ${LM_STUDIO_PORT:-1234}"
+  - label: "Stop server"
+    description: "Stop the LM Studio local server while preserving downloaded models and daemon-managed state."
+    command: "lms server stop"
+  - label: "Stop llmster daemon"
+    description: "Stop the headless LM Studio daemon if you no longer need CLI or API access."
+    command: "lms daemon down"

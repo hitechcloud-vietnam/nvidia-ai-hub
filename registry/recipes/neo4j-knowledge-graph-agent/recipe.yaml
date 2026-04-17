@@ -1,7 +1,7 @@
 name: "Neo4j Knowledge Graph Agent"
 slug: neo4j-knowledge-graph-agent
 version: "1.0.0"
-description: "Neo4j graph database preset with Neo4j Browser, APOC plugin bootstrap, persistent graph storage, and shared Ollama-adjacent integration points for local knowledge graph and graph-RAG experiments on DGX Spark."
+description: "Neo4j graph database preset with Neo4j Browser, APOC plugin bootstrap, persistent graph storage, and shared Ollama-adjacent integration points for local knowledge graph and graph-RAG experiments on NVIDIA GPUs."
 author: "Neo4j"
 source: "official"
 website: "https://neo4j.com/"

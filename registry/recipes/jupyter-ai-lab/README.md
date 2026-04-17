@@ -1,6 +1,6 @@
 # Jupyter AI Lab
 
-JupyterLab workspace preset for DGX Spark users who want a practical notebook-first environment with scientific Python packages, persistent notebook storage, and Jupyter AI installed for local experimentation against shared model runtimes.
+JupyterLab workspace preset for NVIDIA GPUs users who want a practical notebook-first environment with scientific Python packages, persistent notebook storage, and Jupyter AI installed for local experimentation against shared model runtimes.
 
 ## What it provides
 

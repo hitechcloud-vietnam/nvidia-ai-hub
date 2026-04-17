@@ -52,7 +52,7 @@ OPENAI_TTS_INSTRUCTIONS = os.getenv(
 OPENAI_STT_PROMPT = os.getenv("OPENAI_STT_PROMPT", "").strip() or None
 SYSTEM_PROMPT = os.getenv(
     "SYSTEM_PROMPT",
-    "You are a concise and helpful voice AI assistant for DGX Spark users. Keep answers short, practical, and easy to speak aloud.",
+    "You are a concise and helpful voice AI assistant for NVIDIA GPUs users. Keep answers short, practical, and easy to speak aloud.",
 ).strip()
 GREETING_TEXT = os.getenv(
     "GREETING_TEXT",

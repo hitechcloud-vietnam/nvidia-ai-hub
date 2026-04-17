@@ -1,7 +1,7 @@
 name: "MiniCPM-o 2.6 via vLLM"
 slug: vllm-minicpm-o-26
 version: "1.0.0"
-description: "OpenBMB MiniCPM-o 2.6 served through vLLM for compact API-first multimodal understanding across image, video, and audio inputs on DGX Spark."
+description: "OpenBMB MiniCPM-o 2.6 served through vLLM for compact API-first multimodal understanding across image, video, and audio inputs on NVIDIA GPUs."
 author: "OpenBMB"
 source: "official"
 website: "https://huggingface.co/openbmb/MiniCPM-o-2_6"

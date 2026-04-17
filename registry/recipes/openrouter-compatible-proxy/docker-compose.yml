@@ -1,0 +1,20 @@
+services:
+  openrouter-relay:
+    image: nginx:1.27-alpine
+    container_name: openrouter-compatible-proxy-relay
+    restart: unless-stopped
+    ports:
+      - "${OPENROUTER_RELAY_PORT}:80"
+    environment:
+      OPENROUTER_UPSTREAM_HOST: ${OPENROUTER_UPSTREAM_HOST}
+      OPENROUTER_UPSTREAM_SCHEME: ${OPENROUTER_UPSTREAM_SCHEME}
+    volumes:
+      - ./relay/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./logs:/var/log/nginx
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        set -eu
+        envsubst '$$OPENROUTER_UPSTREAM_HOST $$OPENROUTER_UPSTREAM_SCHEME' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+        exec nginx -g 'daemon off;'

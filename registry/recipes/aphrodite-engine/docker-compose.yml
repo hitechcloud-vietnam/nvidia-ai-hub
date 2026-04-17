@@ -1,0 +1,42 @@
+services:
+  aphrodite-engine:
+    image: ${APHRODITE_IMAGE}
+    container_name: aphrodite-engine
+    restart: unless-stopped
+    ipc: host
+    ports:
+      - "${APHRODITE_PORT}:${APHRODITE_INTERNAL_PORT}"
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      TOKENIZERS_PARALLELISM: "false"
+    volumes:
+      - ./cache:/root/.cache/huggingface
+      - ./models:/models
+      - ./adapters:/adapters
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: |
+      set -euo pipefail
+      EXTRA_ARGS=""
+      if [ -n "${APHRODITE_API_KEY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --api-keys ${APHRODITE_API_KEY}"; fi
+      if [ -n "${APHRODITE_ADMIN_KEY}" ]; then EXTRA_ARGS="$EXTRA_ARGS --admin-key ${APHRODITE_ADMIN_KEY}"; fi
+      if [ -n "${APHRODITE_MAX_MODEL_LEN}" ]; then EXTRA_ARGS="$EXTRA_ARGS --max-model-len ${APHRODITE_MAX_MODEL_LEN}"; fi
+      if [ -n "${APHRODITE_CHAT_TEMPLATE}" ]; then EXTRA_ARGS="$EXTRA_ARGS --chat-template ${APHRODITE_CHAT_TEMPLATE}"; fi
+      if [ -n "${APHRODITE_ALLOWED_ORIGINS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --allowed-origins ${APHRODITE_ALLOWED_ORIGINS}"; fi
+      if [ -n "${APHRODITE_ALLOWED_METHODS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --allowed-methods ${APHRODITE_ALLOWED_METHODS}"; fi
+      if [ -n "${APHRODITE_ALLOWED_HEADERS}" ]; then EXTRA_ARGS="$EXTRA_ARGS --allowed-headers ${APHRODITE_ALLOWED_HEADERS}"; fi
+      if [ "${APHRODITE_SINGLE_USER_MODE}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --single-user-mode"; fi
+      exec aphrodite run "${APHRODITE_MODEL}" \
+        --host "${APHRODITE_HOST}" \
+        --port "${APHRODITE_INTERNAL_PORT}" \
+        --tensor-parallel-size "${APHRODITE_TENSOR_PARALLEL}" \
+        --gpu-memory-utilization "${APHRODITE_GPU_MEMORY_UTILIZATION}" \
+        $EXTRA_ARGS
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

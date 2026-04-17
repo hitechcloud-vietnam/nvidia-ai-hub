@@ -1,7 +1,7 @@
 name: "RAGFlow"
 slug: ragflow
 version: "1.0.0"
-description: "Official image-based RAGFlow stack with the upstream web UI, API, Elasticsearch, MySQL, MinIO, and Redis services for self-hosted RAG and agent workflows on DGX Spark."
+description: "Official image-based RAGFlow stack with the upstream web UI, API, Elasticsearch, MySQL, MinIO, and Redis services for self-hosted RAG and agent workflows on NVIDIA GPUs."
 author: "InfiniFlow"
 source: "official"
 website: "https://ragflow.io/"

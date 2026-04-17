@@ -1,7 +1,7 @@
 name: "Ministral 8B Instruct"
 slug: vllm-ministral-8b-instruct
 version: "1.0.0"
-description: "Ministral 8B Instruct with vLLM for compact edge-style multilingual and function-calling workloads on DGX Spark."
+description: "Ministral 8B Instruct with vLLM for compact edge-style multilingual and function-calling workloads on NVIDIA GPUs."
 author: "Mistral AI"
 source: "official"
 website: "https://huggingface.co/mistralai/Ministral-8B-Instruct-2410"

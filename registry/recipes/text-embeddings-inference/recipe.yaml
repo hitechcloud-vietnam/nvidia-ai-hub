@@ -1,0 +1,54 @@
+name: "Text Embeddings Inference"
+slug: text-embeddings-inference
+version: "1.0.0"
+description: "Official Hugging Face Text Embeddings Inference baseline for NVIDIA GPUs with embedding, reranking, classification, metrics, and OpenAI-compatible endpoints."
+author: "Hugging Face"
+source: "official"
+website: "https://huggingface.co/docs/text-embeddings-inference/quick_tour"
+upstream: "https://github.com/huggingface/text-embeddings-inference"
+category: llm
+categories:
+  - runtime
+  - embeddings
+  - model-serving
+tags:
+  - tei
+  - text-embeddings-inference
+  - hugging-face
+  - embeddings
+  - reranking
+  - gpu
+icon: "🧲"
+logo: ""
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3101
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3101"
+  model_id: "Qwen/Qwen3-Embedding-0.6B"
+  api_key: "Optional; set TEI_API_KEY to require Bearer authentication"
+  max_context: "Bound by the selected model and TEI batching configuration"
+  max_output_tokens: "Not applicable for embedding workloads"
+  curl_example: "curl http://<SPARK_IP>:3101/embed -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"inputs\":\"What is Deep Learning?\"}'"
+status: experimental
+runtime_env_path: "registry/recipes/text-embeddings-inference/.env"
+requires_hf_token: false
+depends_on: []
+commands:
+  - label: "Install / launch"
+    description: "Start the official Text Embeddings Inference container with GPU access, persistent model cache, metrics, and HTTP APIs on port 3101."
+    command: "docker compose --env-file registry/recipes/text-embeddings-inference/.env -p nvidia-ai-hub-text-embeddings-inference -f registry/recipes/text-embeddings-inference/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the Text Embeddings Inference runtime while preserving downloaded model data and cache artifacts."
+    command: "docker compose --env-file registry/recipes/text-embeddings-inference/.env -p nvidia-ai-hub-text-embeddings-inference -f registry/recipes/text-embeddings-inference/docker-compose.yml down"

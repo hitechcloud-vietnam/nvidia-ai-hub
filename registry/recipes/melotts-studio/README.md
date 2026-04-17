@@ -1,6 +1,6 @@
 # MeloTTS Studio
 
-Local MeloTTS speech generation studio for DGX Spark.
+Local MeloTTS speech generation studio for NVIDIA GPUs.
 
 ## What it provides
 

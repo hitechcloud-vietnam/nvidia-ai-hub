@@ -1,7 +1,7 @@
 name: "SmolLM3 3B"
 slug: vllm-smollm3-3b
 version: "1.0.0"
-description: "Hugging Face SmolLM3 3B served with vLLM for small-footprint long-context reasoning, tool use, and multilingual assistant flows on DGX Spark."
+description: "Hugging Face SmolLM3 3B served with vLLM for small-footprint long-context reasoning, tool use, and multilingual assistant flows on NVIDIA GPUs."
 author: "Hugging Face"
 source: "official"
 website: "https://huggingface.co/HuggingFaceTB/SmolLM3-3B"

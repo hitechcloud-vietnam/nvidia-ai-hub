@@ -1,6 +1,6 @@
 # WhisperX Workstation
 
-Local WhisperX transcription workstation for DGX Spark.
+Local WhisperX transcription workstation for NVIDIA GPUs.
 
 ## What it provides
 

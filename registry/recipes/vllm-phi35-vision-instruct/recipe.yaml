@@ -1,7 +1,7 @@
 name: "Phi-3.5 Vision Instruct"
 slug: vllm-phi35-vision-instruct
 version: "1.0.0"
-description: "Microsoft Phi-3.5 Vision Instruct served through vLLM for lightweight image reasoning, OCR, chart and table understanding, multi-image comparison, and multimodal assistant workflows on DGX Spark."
+description: "Microsoft Phi-3.5 Vision Instruct served through vLLM for lightweight image reasoning, OCR, chart and table understanding, multi-image comparison, and multimodal assistant workflows on NVIDIA GPUs."
 author: "Microsoft"
 source: "official"
 website: "https://huggingface.co/microsoft/Phi-3.5-vision-instruct"

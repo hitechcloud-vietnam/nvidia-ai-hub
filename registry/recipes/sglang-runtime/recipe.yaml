@@ -1,0 +1,53 @@
+name: "SGLang Runtime"
+slug: sglang-runtime
+version: "1.0.0"
+description: "Official SGLang runtime baseline with OpenAI-compatible APIs, native generation endpoints, configurable model loading, and persistent Hugging Face cache mounts for NVIDIA GPUs."
+author: "SGLang Team"
+source: "official"
+website: "https://docs.sglang.io/"
+upstream: "https://github.com/sgl-project/sglang"
+category: llm
+categories:
+  - runtime
+  - model-serving
+  - openai-compatible
+tags:
+  - sglang
+  - runtime
+  - openai-compatible
+  - inference
+  - gpu
+  - vllm-alternative
+icon: ""
+logo: "/logos/nvidia.png"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 40
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3097
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: true
+integration:
+  api_url: "http://<SPARK_IP>:3097/v1"
+  model_id: "Qwen/Qwen2.5-0.5B-Instruct"
+  api_key: "Optional; leave empty for trusted local networks only"
+  max_context: "Configurable through SGLANG_CONTEXT_LENGTH or the model config"
+  max_output_tokens: "Configurable per request"
+  curl_example: "curl http://<SPARK_IP>:3097/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <SGLANG_API_KEY>' -d '{\"model\":\"Qwen/Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
+status: experimental
+runtime_env_path: "registry/recipes/sglang-runtime/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official SGLang runtime container with GPU access, shared memory sizing, persistent cache mounts, and OpenAI-compatible APIs on port 3097."
+    command: "docker compose --env-file registry/recipes/sglang-runtime/.env -p nvidia-ai-hub-sglang-runtime -f registry/recipes/sglang-runtime/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop the SGLang runtime while preserving downloaded model artifacts and local cache data."
+    command: "docker compose --env-file registry/recipes/sglang-runtime/.env -p nvidia-ai-hub-sglang-runtime -f registry/recipes/sglang-runtime/docker-compose.yml down"

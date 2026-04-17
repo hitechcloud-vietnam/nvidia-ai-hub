@@ -1,6 +1,6 @@
 # STT Server
 
-Local Faster-Whisper API server for DGX Spark.
+Local Faster-Whisper API server for NVIDIA GPUs.
 
 ## What it provides
 

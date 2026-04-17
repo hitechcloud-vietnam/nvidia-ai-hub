@@ -1,6 +1,6 @@
 # Audio Agent Console
 
-Run a browser-based voice agent console on DGX Spark with Pipecat SmallWebRTC transport, OpenAI speech services, and a prebuilt web client.
+Run a browser-based voice agent console on NVIDIA GPUs with Pipecat SmallWebRTC transport, OpenAI speech services, and a prebuilt web client.
 
 ## What it provides
 
@@ -42,7 +42,7 @@ If the browser connects but audio does not start, confirm the API key, model ava
 
 ## Validation scope
 
-This recipe was added as a registry scaffold for DGX Spark. Validation should focus on recipe loading, YAML shape, Docker asset presence, and smoke-testing the browser session plus signaling endpoints in a Linux Docker environment.
+This recipe was added as a registry scaffold for NVIDIA GPUs. Validation should focus on recipe loading, YAML shape, Docker asset presence, and smoke-testing the browser session plus signaling endpoints in a Linux Docker environment.
 
 ## License notes
 

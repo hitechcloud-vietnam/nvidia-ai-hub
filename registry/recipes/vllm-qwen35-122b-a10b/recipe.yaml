@@ -1,7 +1,7 @@
 name: "Qwen3.5-122B-A10B GPTQ-Int4"
 slug: vllm-qwen35-122b-a10b
 version: "1.0.0"
-description: "Qwen3.5-122B-A10B GPTQ-Int4 with official vLLM reasoning parser and tool calling. Optimized for DGX Spark."
+description: "Qwen3.5-122B-A10B GPTQ-Int4 with official vLLM reasoning parser and tool calling. Optimized for NVIDIA GPUs."
 author: "Alibaba Cloud"
 source: "official"
 website: "https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen3.5.html"

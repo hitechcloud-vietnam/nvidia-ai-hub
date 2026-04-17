@@ -1,6 +1,6 @@
 # Parler TTS Studio
 
-Local Parler-TTS voice generation studio for DGX Spark.
+Local Parler-TTS voice generation studio for NVIDIA GPUs.
 
 ## What it provides
 

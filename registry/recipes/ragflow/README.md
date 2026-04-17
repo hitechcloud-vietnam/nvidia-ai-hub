@@ -1,6 +1,6 @@
 # RAGFlow
 
-Official image-based RAGFlow stack for DGX Spark using the upstream CPU container together with Elasticsearch, MySQL, MinIO, and Redis.
+Official image-based RAGFlow stack for NVIDIA GPUs using the upstream CPU container together with Elasticsearch, MySQL, MinIO, and Redis.
 
 ## What it provides
 
