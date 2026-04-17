@@ -1,0 +1,55 @@
+name: "Qdrant Assistant Stack"
+slug: qdrant-assistant-stack
+version: "1.0.0"
+description: "Qdrant vector database preset with built-in web UI, persistent local storage, snapshot mounts, and shared Ollama-ready integration points for DGX Spark assistant and retrieval workloads."
+author: "Qdrant"
+source: "official"
+website: "https://qdrant.tech/"
+upstream: "https://github.com/qdrant/qdrant"
+category: llm
+categories:
+  - rag
+  - vector-db
+  - analytics
+tags:
+  - qdrant
+  - vector-database
+  - retrieval
+  - embeddings
+  - web-ui
+  - ollama
+icon: "📐"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3093
+  path: "/"
+  health_path: "/healthz"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/qdrant-assistant-stack/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:6333"
+  model_id: "Collections and embeddings are configured by the connected application"
+  api_key: "Set QDRANT_API_KEY if you want authenticated access"
+  max_context: "Depends on the application connected to Qdrant"
+  max_output_tokens: "Depends on the application connected to Qdrant"
+  curl_example: "curl http://<SPARK_IP>:6333/healthz"
+commands:
+  - label: "Install / launch"
+    description: "Start Qdrant with persistent storage, snapshots, and the built-in web UI for local assistant retrieval experiments."
+    command: "docker compose --env-file registry/recipes/qdrant-assistant-stack/.env -p nvidia-ai-hub-qdrant-assistant -f registry/recipes/qdrant-assistant-stack/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Qdrant while preserving local vector data, snapshots, and configuration."
+    command: "docker compose --env-file registry/recipes/qdrant-assistant-stack/.env -p nvidia-ai-hub-qdrant-assistant -f registry/recipes/qdrant-assistant-stack/docker-compose.yml down"
