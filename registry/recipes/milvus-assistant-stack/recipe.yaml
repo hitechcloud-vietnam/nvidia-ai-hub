@@ -1,0 +1,55 @@
+name: "Milvus Assistant Stack"
+slug: milvus-assistant-stack
+version: "1.0.0"
+description: "Milvus standalone vector database preset with etcd, MinIO, and Attu for local assistant retrieval experiments, collection management, and shared Ollama connectivity on DGX Spark."
+author: "Milvus Project"
+source: "official"
+website: "https://milvus.io/"
+upstream: "https://github.com/milvus-io/milvus"
+category: llm
+categories:
+  - rag
+  - vector-db
+  - analytics
+tags:
+  - milvus
+  - vector-database
+  - attu
+  - retrieval
+  - embeddings
+  - ollama
+icon: "🧬"
+logo: "/logos/milvus.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3092
+  path: "/"
+  health_path: "/"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/milvus-assistant-stack/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:19531"
+  model_id: "Collections and embeddings are configured by the connected application"
+  api_key: "Milvus root credentials or token if you enable authentication after launch"
+  max_context: "Depends on the application connected to Milvus"
+  max_output_tokens: "Depends on the application connected to Milvus"
+  curl_example: "curl http://<SPARK_IP>:9092/healthz"
+commands:
+  - label: "Install / launch"
+    description: "Start Milvus standalone with etcd, MinIO, and Attu using persistent local storage for assistant and retrieval experiments."
+    command: "docker compose --env-file registry/recipes/milvus-assistant-stack/.env -p nvidia-ai-hub-milvus-assistant -f registry/recipes/milvus-assistant-stack/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Milvus, Attu, etcd, and MinIO while preserving vector data and management state."
+    command: "docker compose --env-file registry/recipes/milvus-assistant-stack/.env -p nvidia-ai-hub-milvus-assistant -f registry/recipes/milvus-assistant-stack/docker-compose.yml down"
