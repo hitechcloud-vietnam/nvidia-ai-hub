@@ -1,0 +1,45 @@
+name: "GraphRAG Workstation"
+slug: graphrag-workstation
+version: "1.0.0"
+description: "Run a practical GraphRAG workstation with a local Streamlit workbench for dataset initialization, indexing, query comparisons, and community-report inspection on DGX Spark."
+author: "Microsoft"
+source: "official"
+website: "https://microsoft.github.io/graphrag/"
+upstream: "https://github.com/microsoft/graphrag"
+category: llm
+categories:
+  - rag
+  - workflow
+  - chat-ui
+tags:
+  - graphrag
+  - knowledge-graph
+  - streamlit
+  - enterprise
+  - indexing
+  - workstation
+icon: "🕸️"
+logo: ""
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3086
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/graphrag-workstation/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the local GraphRAG workstation image, expose the Streamlit workbench on port 3086, and mount persistent project datasets for indexing and query workflows."
+    command: "docker compose --env-file registry/recipes/graphrag-workstation/.env -p nvidia-ai-hub-graphrag-workstation -f registry/recipes/graphrag-workstation/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop GraphRAG Workstation while preserving mounted project datasets, generated prompts, and indexing outputs."
+    command: "docker compose --env-file registry/recipes/graphrag-workstation/.env -p nvidia-ai-hub-graphrag-workstation -f registry/recipes/graphrag-workstation/docker-compose.yml down"

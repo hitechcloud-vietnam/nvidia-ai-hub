@@ -5,20 +5,24 @@ __pycache__/
 
 # Node
 node_modules/
+
 # Ignore tất cả data
 data/
 
-# Nhưng cho phép riêng thư mục này
-!registry/recipes/llamaindex-starter/data/
-!registry/recipes/llamaindex-starter/data/**
+# Cho phép toàn bộ recipes
+!registry/recipes/
+!registry/recipes/**
+
+# ❌ Ẩn toàn bộ .env (quan trọng)
+.env
+*.env
+**/.env
+
 # Build output
 frontend/dist/
 
 # Local dev workspaces
 comfyui-src/
-
-# Generated recipe runtime env files
-registry/recipes/*/.env
 
 # OS
 .DS_Store

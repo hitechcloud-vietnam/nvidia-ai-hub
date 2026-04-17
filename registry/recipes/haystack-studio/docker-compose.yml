@@ -1,0 +1,63 @@
+services:
+  qdrant:
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:latest}
+    container_name: nvidia-ai-hub-haystack-studio-qdrant
+    ports:
+      - "${QDRANT_HTTP_HOST_PORT:-6339}:6333"
+      - "${QDRANT_GRPC_HOST_PORT:-6340}:6334"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    restart: unless-stopped
+
+  hayhooks:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${HAYHOOKS_IMAGE_NAME:-haystack-studio-hayhooks}
+    container_name: nvidia-ai-hub-haystack-studio-hayhooks
+    depends_on:
+      - qdrant
+    environment:
+      HAYHOOKS_HOST: ${HAYHOOKS_HOST:-0.0.0.0}
+      HAYHOOKS_PORT: ${HAYHOOKS_PORT_INTERNAL:-1416}
+      HAYHOOKS_MCP_PORT: ${HAYHOOKS_MCP_PORT_INTERNAL:-1417}
+      HAYHOOKS_PIPELINES_DIR: ${HAYHOOKS_PIPELINES_DIR:-/pipelines}
+      HAYHOOKS_ADDITIONAL_PYTHON_PATH: ${HAYHOOKS_ADDITIONAL_PYTHON_PATH:-/pipelines}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11435}
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-qwen3.5:4b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_INDEX: ${QDRANT_INDEX:-haystack_studio}
+      HAYSTACK_PIPELINE_NAME: ${HAYSTACK_PIPELINE_NAME:-haystack_rag}
+      TOP_K: ${TOP_K:-4}
+      MAX_DOCUMENTS: ${MAX_DOCUMENTS:-200}
+      CHUNK_SIZE: ${CHUNK_SIZE:-900}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-120}
+      SYSTEM_PROMPT: ${SYSTEM_PROMPT:-You are a helpful Haystack RAG assistant.}
+    ports:
+      - "${HAYHOOKS_PORT:-1416}:${HAYHOOKS_PORT_INTERNAL:-1416}"
+      - "${HAYHOOKS_MCP_PORT:-1417}:${HAYHOOKS_MCP_PORT_INTERNAL:-1417}"
+    volumes:
+      - ./pipelines:${HAYHOOKS_PIPELINES_DIR:-/pipelines}
+      - ./data/documents:/workspace/documents
+      - ./data/hayhooks:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  open-webui:
+    image: ${OPEN_WEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main}
+    container_name: nvidia-ai-hub-haystack-studio-open-webui
+    depends_on:
+      - hayhooks
+    environment:
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:-haystack-studio-local}
+      OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://hayhooks:1416/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-haystack-studio}
+    ports:
+      - "${HAYSTACK_STUDIO_PORT:-3085}:${OPEN_WEBUI_CONTAINER_PORT:-8080}"
+    volumes:
+      - ./data/open-webui:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

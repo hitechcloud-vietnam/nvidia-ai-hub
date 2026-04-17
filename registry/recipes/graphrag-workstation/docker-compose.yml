@@ -1,0 +1,26 @@
+services:
+  graphrag-workstation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nvidia-ai-hub-graphrag-workstation
+    env_file:
+      - .env
+    environment:
+      STREAMLIT_SERVER_PORT: ${STREAMLIT_SERVER_PORT:-8501}
+      PROJECTS_ROOT: ${PROJECTS_ROOT:-/workspace/projects}
+      DEFAULT_DATASET_NAME: ${DEFAULT_DATASET_NAME:-demo-graph-project}
+      DEFAULT_RESPONSE_TYPE: ${DEFAULT_RESPONSE_TYPE:-Multiple Paragraphs}
+      GRAPHRAG_MODEL_PROVIDER: ${GRAPHRAG_MODEL_PROVIDER:-openai}
+      GRAPHRAG_COMPLETION_MODEL: ${GRAPHRAG_COMPLETION_MODEL:-gpt-4.1-mini}
+      GRAPHRAG_EMBEDDING_MODEL: ${GRAPHRAG_EMBEDDING_MODEL:-text-embedding-3-small}
+      GRAPHRAG_API_KEY: ${GRAPHRAG_API_KEY:-}
+      GRAPHRAG_API_BASE: ${GRAPHRAG_API_BASE:-}
+      GRAPHRAG_API_VERSION: ${GRAPHRAG_API_VERSION:-}
+      GRAPHRAG_AZURE_CHAT_DEPLOYMENT: ${GRAPHRAG_AZURE_CHAT_DEPLOYMENT:-}
+      GRAPHRAG_AZURE_EMBEDDING_DEPLOYMENT: ${GRAPHRAG_AZURE_EMBEDDING_DEPLOYMENT:-}
+    ports:
+      - "${HOST_PORT:-3086}:${STREAMLIT_SERVER_PORT:-8501}"
+    volumes:
+      - ./workspace/projects:/workspace/projects
+    restart: unless-stopped

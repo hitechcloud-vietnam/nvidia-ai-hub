@@ -1,0 +1,54 @@
+name: "Haystack Studio"
+slug: haystack-studio
+version: "1.0.0"
+description: "Run an official Hayhooks-based Haystack studio with a starter RAG pipeline, local Qdrant storage, and Open WebUI connected to the shared Ollama runtime."
+author: "deepset"
+source: "official"
+website: "https://haystack.deepset.ai/"
+upstream: "https://github.com/deepset-ai/haystack"
+category: llm
+categories:
+  - rag
+  - workflow
+  - chat-ui
+tags:
+  - haystack
+  - hayhooks
+  - open-webui
+  - qdrant
+  - ollama
+  - starter
+icon: "🌾"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3085
+  path: "/"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/haystack-studio/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:1416/v1/chat/completions"
+  model_id: "haystack_rag"
+  api_key: "not required"
+  max_context: "Depends on the Ollama model selected"
+  max_output_tokens: "Depends on the Ollama model selected"
+  curl_example: "curl -X POST http://<SPARK_IP>:1416/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"haystack_rag\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the sample knowledge base.\"}]}'"
+commands:
+  - label: "Install / build / launch"
+    description: "Build the Hayhooks image, start Qdrant and Open WebUI, auto-deploy the starter Haystack pipeline, and publish the chat UI on port 3085."
+    command: "docker compose --env-file registry/recipes/haystack-studio/.env -p nvidia-ai-hub-haystack-studio -f registry/recipes/haystack-studio/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Haystack Studio while preserving Open WebUI state, Hayhooks data, starter pipeline files, and Qdrant storage."
+    command: "docker compose --env-file registry/recipes/haystack-studio/.env -p nvidia-ai-hub-haystack-studio -f registry/recipes/haystack-studio/docker-compose.yml down"

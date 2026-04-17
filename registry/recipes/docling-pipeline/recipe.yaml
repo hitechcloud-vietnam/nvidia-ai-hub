@@ -1,0 +1,46 @@
+name: "Docling Pipeline"
+slug: docling-pipeline
+version: "1.0.0"
+description: "Run a local Docling document-conversion pipeline with upload APIs, batch processing, and persistent structured exports for Markdown, JSON, HTML, text, YAML, and DocTags workflows on DGX Spark."
+author: "Docling Project"
+source: "official"
+website: "https://docling-project.github.io/docling/"
+upstream: "https://github.com/docling-project/docling"
+category: llm
+categories:
+  - rag
+  - workflow
+  - api
+tags:
+  - docling
+  - documents
+  - conversion
+  - ocr
+  - pipeline
+  - fastapi
+icon: "📄"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3087
+  path: "/docs"
+  health_path: "/health"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/docling-pipeline/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / build / launch"
+    description: "Build the local Docling pipeline image, expose the FastAPI docs on port 3087, and mount persistent workspace folders for uploads, outputs, and job manifests."
+    command: "docker compose --env-file registry/recipes/docling-pipeline/.env -p nvidia-ai-hub-docling-pipeline -f registry/recipes/docling-pipeline/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Docling Pipeline while preserving uploaded documents, exported artifacts, and job history."
+    command: "docker compose --env-file registry/recipes/docling-pipeline/.env -p nvidia-ai-hub-docling-pipeline -f registry/recipes/docling-pipeline/docker-compose.yml down"

@@ -1,0 +1,10 @@
+Haystack Studio starter sample knowledge base.
+
+This recipe combines Hayhooks, Haystack, Qdrant, Open WebUI, and an external Ollama runtime.
+
+Use it to test a simple retrieval-augmented workflow:
+- place additional .txt files in this folder
+- restart the recipe or rebuild the index by restarting the Hayhooks container
+- ask questions through Open WebUI or the Hayhooks OpenAI-compatible endpoint
+
+The default chat model is qwen3.5:4b and the default embedding model is nomic-embed-text.
