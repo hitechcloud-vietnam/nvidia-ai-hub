@@ -165,13 +165,13 @@ Shared local configuration is stored in the repository root `.env` file.
 
 Common settings include:
 
-- `SPARK_AI_HUB_HOST`
-- `SPARK_AI_HUB_PORT`
-- `SPARK_AI_HUB_NODE_MAJOR`
-- `SPARK_AI_HUB_FRONTEND_DIR`
-- `SPARK_AI_HUB_REGISTRY_PATH`
-- `SPARK_AI_HUB_DATA_DIR`
-- `SPARK_AI_HUB_DB_PATH`
+- `NVIDIA_AI_HUB_HOST`
+- `NVIDIA_AI_HUB_PORT`
+- `NVIDIA_AI_HUB_NODE_MAJOR`
+- `NVIDIA_AI_HUB_FRONTEND_DIR`
+- `NVIDIA_AI_HUB_REGISTRY_PATH`
+- `NVIDIA_AI_HUB_DATA_DIR`
+- `NVIDIA_AI_HUB_DB_PATH`
 
 Do not commit secrets or machine-specific credentials.
 

@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path(__file__).resolve().parent.parent / "data"
     db_path: Path = Path(__file__).resolve().parent.parent / "data" / "nvidia-ai-hub.db"
 
-    model_config = {"env_prefix": "SPARK_AI_HUB_"}
+    model_config = {"env_prefix": "NVIDIA_AI_HUB_"}
 
 
 settings = Settings()

@@ -11,18 +11,18 @@ spark_load_env() {
         set +a
     fi
 
-    SPARK_AI_HUB_ROOT="$root"
-    SPARK_AI_HUB_ENV_FILE="$env_file"
-    SPARK_AI_HUB_HOST="${SPARK_AI_HUB_HOST:-0.0.0.0}"
-    SPARK_AI_HUB_PORT="${SPARK_AI_HUB_PORT:-9000}"
-    SPARK_AI_HUB_NODE_MAJOR="${SPARK_AI_HUB_NODE_MAJOR:-22}"
-    SPARK_AI_HUB_FRONTEND_DIR_NAME="${SPARK_AI_HUB_FRONTEND_DIR:-frontend}"
-    SPARK_AI_HUB_FRONTEND_DIR="$root/$SPARK_AI_HUB_FRONTEND_DIR_NAME"
-    SPARK_AI_HUB_DIST_INDEX="$SPARK_AI_HUB_FRONTEND_DIR/dist/index.html"
+    NVIDIA_AI_HUB_ROOT="$root"
+    NVIDIA_AI_HUB_ENV_FILE="$env_file"
+    NVIDIA_AI_HUB_HOST="${NVIDIA_AI_HUB_HOST:-0.0.0.0}"
+    NVIDIA_AI_HUB_PORT="${NVIDIA_AI_HUB_PORT:-9000}"
+    NVIDIA_AI_HUB_NODE_MAJOR="${NVIDIA_AI_HUB_NODE_MAJOR:-22}"
+    NVIDIA_AI_HUB_FRONTEND_DIR_NAME="${NVIDIA_AI_HUB_FRONTEND_DIR:-frontend}"
+    NVIDIA_AI_HUB_FRONTEND_DIR="$root/$NVIDIA_AI_HUB_FRONTEND_DIR_NAME"
+    NVIDIA_AI_HUB_DIST_INDEX="$NVIDIA_AI_HUB_FRONTEND_DIR/dist/index.html"
 }
 
 spark_ensure_env_file() {
-    local root="${1:-${SPARK_AI_HUB_ROOT:-$PWD}}"
+    local root="${1:-${NVIDIA_AI_HUB_ROOT:-$PWD}}"
     local env_file="$root/.env"
     local env_example="$root/.env.example"
 
@@ -50,11 +50,11 @@ spark_validate_host() {
 spark_write_env_value() {
     local key="$1"
     local value="$2"
-    local env_file="${SPARK_AI_HUB_ENV_FILE:-$PWD/.env}"
+    local env_file="${NVIDIA_AI_HUB_ENV_FILE:-$PWD/.env}"
     local temp_file
 
     mkdir -p "$(dirname "$env_file")"
-    spark_ensure_env_file "${SPARK_AI_HUB_ROOT:-$PWD}"
+    spark_ensure_env_file "${NVIDIA_AI_HUB_ROOT:-$PWD}"
     touch "$env_file"
     temp_file="$(mktemp)"
 
@@ -67,7 +67,7 @@ spark_write_env_value() {
 
     mv "$temp_file" "$env_file"
     export "$key=$value"
-    spark_load_env "${SPARK_AI_HUB_ROOT:-$PWD}"
+    spark_load_env "${NVIDIA_AI_HUB_ROOT:-$PWD}"
 }
 
 spark_command_exists() {
@@ -84,27 +84,27 @@ spark_node_major_version() {
 }
 
 spark_frontend_needs_build() {
-    if [ ! -f "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ ! -f "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
 
-    if [ "$SPARK_AI_HUB_FRONTEND_DIR/package.json" -nt "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ "$NVIDIA_AI_HUB_FRONTEND_DIR/package.json" -nt "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
 
-    if [ -f "$SPARK_AI_HUB_FRONTEND_DIR/package-lock.json" ] && [ "$SPARK_AI_HUB_FRONTEND_DIR/package-lock.json" -nt "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/package-lock.json" ] && [ "$NVIDIA_AI_HUB_FRONTEND_DIR/package-lock.json" -nt "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
 
-    if [ -f "$SPARK_AI_HUB_FRONTEND_DIR/index.html" ] && [ "$SPARK_AI_HUB_FRONTEND_DIR/index.html" -nt "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/index.html" ] && [ "$NVIDIA_AI_HUB_FRONTEND_DIR/index.html" -nt "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
 
-    if [ -f "$SPARK_AI_HUB_FRONTEND_DIR/vite.config.js" ] && [ "$SPARK_AI_HUB_FRONTEND_DIR/vite.config.js" -nt "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/vite.config.js" ] && [ "$NVIDIA_AI_HUB_FRONTEND_DIR/vite.config.js" -nt "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
 
-    if find "$SPARK_AI_HUB_FRONTEND_DIR/src" "$SPARK_AI_HUB_FRONTEND_DIR/public" -type f -newer "$SPARK_AI_HUB_DIST_INDEX" 2>/dev/null | grep -q .; then
+    if find "$NVIDIA_AI_HUB_FRONTEND_DIR/src" "$NVIDIA_AI_HUB_FRONTEND_DIR/public" -type f -newer "$NVIDIA_AI_HUB_DIST_INDEX" 2>/dev/null | grep -q .; then
         return 0
     fi
 
@@ -116,19 +116,19 @@ spark_frontend_toolchain_ready() {
         return 1
     fi
 
-    [ "$(spark_node_major_version)" -ge "$SPARK_AI_HUB_NODE_MAJOR" ]
+    [ "$(spark_node_major_version)" -ge "$NVIDIA_AI_HUB_NODE_MAJOR" ]
 }
 
 spark_install_frontend_dependencies() {
-    if [ -f "$SPARK_AI_HUB_FRONTEND_DIR/package-lock.json" ]; then
-        (cd "$SPARK_AI_HUB_FRONTEND_DIR" && npm ci --no-fund --no-audit)
+    if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/package-lock.json" ]; then
+        (cd "$NVIDIA_AI_HUB_FRONTEND_DIR" && npm ci --no-fund --no-audit)
     else
-        (cd "$SPARK_AI_HUB_FRONTEND_DIR" && npm install --no-fund --no-audit)
+        (cd "$NVIDIA_AI_HUB_FRONTEND_DIR" && npm install --no-fund --no-audit)
     fi
 }
 
 spark_build_frontend() {
-    (cd "$SPARK_AI_HUB_FRONTEND_DIR" && npm run build)
+    (cd "$NVIDIA_AI_HUB_FRONTEND_DIR" && npm run build)
 }
 
 spark_load_env "$PWD"

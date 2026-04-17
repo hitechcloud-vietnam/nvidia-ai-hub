@@ -21,6 +21,7 @@ export default function App() {
   const [searchInput, setSearchInput] = useState('')
   const recipes = useStore((s) => s.recipes)
   const fetchRecipes = useStore((s) => s.fetchRecipes)
+  const fetchRegistryStatus = useStore((s) => s.fetchRegistryStatus)
   const selectedRecipe = useStore((s) => s.selectedRecipe)
   const clearRecipe = useStore((s) => s.clearRecipe)
   const theme = useStore((s) => s.theme)
@@ -44,14 +45,17 @@ export default function App() {
 
   useEffect(() => {
     fetchRecipes()
+    fetchRegistryStatus()
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchRecipes()
+        fetchRegistryStatus()
       }
     }, 10000)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchRecipes()
+        fetchRegistryStatus()
       }
     }
 
@@ -60,7 +64,7 @@ export default function App() {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [fetchRecipes])
+  }, [fetchRecipes, fetchRegistryStatus])
 
   const runningCount = recipes.filter((r) => r.running || r.starting).length
 
@@ -201,6 +205,14 @@ function PageSkeleton({ selectedRecipe }) {
 
 /* ─── About Page ─── */
 function About() {
+  const registryStatus = useStore((s) => s.registryStatus)
+  const syncingRegistry = useStore((s) => s.syncingRegistry)
+  const syncRegistry = useStore((s) => s.syncRegistry)
+
+  const handleSync = async () => {
+    await syncRegistry()
+  }
+
   return (
     <div className="px-6 py-6 pb-12 max-w-2xl mx-auto animate-fadeIn">
       <div className="flex items-center gap-4 mb-8">
@@ -217,6 +229,43 @@ function About() {
           <p className="text-sm text-text-muted m-0 leading-relaxed">
             NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC lets you install, run, and manage GPU-accelerated AI applications on your NVIDIA NVIDIA GPUs — all from a single web interface. No terminal required.
           </p>
+        </div>
+
+        <div className="bg-surface rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h3 className="font-semibold text-sm font-display m-0">Registry</h3>
+            <button
+              onClick={handleSync}
+              disabled={syncingRegistry || registryStatus?.can_sync === false}
+              className="px-4 py-2 bg-surface-high text-text border border-outline-dim rounded-xl text-xs font-semibold cursor-pointer hover:bg-surface-highest transition-all disabled:opacity-50"
+            >
+              {syncingRegistry ? 'Syncing...' : 'Sync recipes'}
+            </button>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InfoTile label="Branch" value={registryStatus?.branch || '—'} />
+            <InfoTile label="Recipes" value={typeof registryStatus?.recipe_count === 'number' ? String(registryStatus.recipe_count) : '—'} />
+            <InfoTile label="Commit" value={registryStatus?.head || '—'} />
+            <InfoTile label="Workspace" value={registryStatus?.dirty ? 'Local changes present' : 'Clean'} />
+          </div>
+
+          {(registryStatus?.head_subject || registryStatus?.last_updated) && (
+            <div className="mt-4 text-sm text-text-muted leading-relaxed">
+              {registryStatus?.head_subject ? <div><strong className="text-text">Latest:</strong> {registryStatus.head_subject}</div> : null}
+              {registryStatus?.last_updated ? <div><strong className="text-text">Updated:</strong> {formatRegistryDate(registryStatus.last_updated)}</div> : null}
+            </div>
+          )}
+
+          {registryStatus?.sync_error ? (
+            <div className="mt-4 rounded-xl bg-warning/10 text-warning px-3 py-2 text-xs font-medium">
+              {registryStatus.sync_error}
+            </div>
+          ) : null}
+
+          {registryStatus?.sync_output ? (
+            <pre className="mt-4 mb-0 rounded-xl bg-surface-high p-3 text-xs text-text-muted overflow-x-auto whitespace-pre-wrap">{registryStatus.sync_output}</pre>
+          ) : null}
         </div>
 
         <div className="bg-surface rounded-2xl p-5">
@@ -259,6 +308,21 @@ function About() {
       </div>
     </div>
   )
+}
+
+function InfoTile({ label, value }) {
+  return (
+    <div className="rounded-xl bg-surface-high px-3 py-3 border border-outline-dim/70">
+      <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{label}</div>
+      <div className="text-sm font-semibold text-text mt-1 break-all">{value}</div>
+    </div>
+  )
+}
+
+function formatRegistryDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString()
 }
 
 /* ─── Mini Gauge for sidebar ─── */

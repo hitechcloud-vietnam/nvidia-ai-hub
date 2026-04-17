@@ -5,11 +5,14 @@ import { getRecipeLaunchLabel, getRecipeOpenLabel, getRecipeSurfaceLabel, getRec
 
 export default function Running() {
   const recipes = useStore((s) => s.recipes)
+  const recipeMetrics = useStore((s) => s.recipeMetrics)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const launchRecipe = useStore((s) => s.launchRecipe)
   const stopRecipe = useStore((s) => s.stopRecipe)
   const restartRecipe = useStore((s) => s.restartRecipe)
+  const removeRecipe = useStore((s) => s.removeRecipe)
   const restarting = useStore((s) => s.restarting)
+  const removing = useStore((s) => s.removing)
 
   const running = recipes.filter((r) => r.running || r.starting)
   const installed = recipes.filter((r) => r.installed && !r.running && !r.starting)
@@ -39,10 +42,13 @@ export default function Running() {
             <RunningCard
               key={r.slug}
               recipe={r}
+              metrics={recipeMetrics?.[r.slug]}
               onSelect={selectRecipe}
               onStop={stopRecipe}
               onRestart={restartRecipe}
+              onRemove={removeRecipe}
               restarting={restarting === r.slug}
+              removing={removing === r.slug}
             />
           ))}
         </div>
@@ -57,7 +63,15 @@ export default function Running() {
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
             {installed.map((r) => (
-              <StoppedCard key={r.slug} recipe={r} onSelect={selectRecipe} onLaunch={launchRecipe} />
+              <StoppedCard
+                key={r.slug}
+                recipe={r}
+                metrics={recipeMetrics?.[r.slug]}
+                onSelect={selectRecipe}
+                onLaunch={launchRecipe}
+                onRemove={removeRecipe}
+                removing={removing === r.slug}
+              />
             ))}
           </div>
         </div>
@@ -66,9 +80,10 @@ export default function Running() {
   )
 }
 
-function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
+function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, restarting, removing }) {
   const [logoFailed, setLogoFailed] = useState(false)
   const [stopping, setStopping] = useState(false)
+  const [removingData, setRemovingData] = useState(false)
   const logoUrl = useThemedLogo(recipe.logo)
   const isReady = recipe.ready
   const borderColor = isReady ? 'border-l-primary' : 'border-l-warning'
@@ -84,6 +99,15 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
   const handleRestart = async (e) => {
     e.stopPropagation()
     await onRestart(recipe.slug)
+  }
+
+  const handleRemove = async (e) => {
+    e.stopPropagation()
+    const confirmed = window.confirm(`Remove ${recipe.name} and delete its local data?`)
+    if (!confirmed) return
+    setRemovingData(true)
+    await onRemove(recipe.slug, { deleteData: true })
+    setRemovingData(false)
   }
 
   return (
@@ -104,6 +128,23 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-base text-text font-display m-0 truncate">{recipe.name}</h3>
           <p className="text-xs text-text-dim m-0 mt-0.5">{recipe.author}</p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {recipe.ui?.port && (
+              <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
+                {getRecipeSurfaceLabel(recipe)} · :{recipe.ui.port}
+              </span>
+            )}
+            {metrics?.container_count > 0 && (
+              <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
+                {metrics.container_count} container{metrics.container_count > 1 ? 's' : ''}
+              </span>
+            )}
+            {metrics?.updated_at ? (
+              <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
+                Live telemetry
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {/* Status */}
@@ -122,13 +163,6 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
             )}
           </div>
 
-          {/* Port */}
-          {recipe.ui?.port && (
-            <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
-              {getRecipeSurfaceLabel(recipe)} · :{recipe.ui.port}
-            </span>
-          )}
-
           {/* Actions */}
           {isReady && (
             <a
@@ -138,32 +172,47 @@ function RunningCard({ recipe, onSelect, onStop, onRestart, restarting }) {
               onClick={(e) => e.stopPropagation()}
               className="btn-secondary px-4 py-1.5 text-xs font-semibold no-underline"
             >
-                {getRecipeOpenLabel(recipe)}
+              {getRecipeOpenLabel(recipe)}
             </a>
           )}
           <button
-            disabled={stopping || restarting}
+            disabled={stopping || restarting || removing || removingData}
             onClick={handleRestart}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
           >
             {restarting ? '...' : 'Restart'}
           </button>
           <button
-            disabled={stopping || restarting}
+            disabled={stopping || restarting || removing || removingData}
             onClick={handleStop}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
           >
             {stopping ? '...' : 'Stop'}
           </button>
+          <button
+            disabled={stopping || restarting || removing || removingData}
+            onClick={handleRemove}
+            className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-error/10 hover:text-error transition-all disabled:opacity-50"
+          >
+            {removing || removingData ? '...' : 'Remove'}
+          </button>
         </div>
+      </div>
+
+      <div className="grid gap-3 mt-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
+        <MetricChip label="CPU" value={formatPercent(metrics?.cpu_percent)} />
+        <MetricChip label="RAM" value={formatMemory(metrics?.memory_used_mb)} />
+        <MetricChip label="GPU" value={formatPercent(metrics?.gpu_utilization)} />
+        <MetricChip label="VRAM" value={formatMemory(metrics?.gpu_memory_used_mb)} />
       </div>
     </div>
   )
 }
 
-function StoppedCard({ recipe, onSelect, onLaunch }) {
+function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }) {
   const [logoFailed, setLogoFailed] = useState(false)
   const [launching, setLaunching] = useState(false)
+  const [removingData, setRemovingData] = useState(false)
   const logoUrl = useThemedLogo(recipe.logo)
 
   const handleLaunch = async (e) => {
@@ -181,6 +230,15 @@ function StoppedCard({ recipe, onSelect, onLaunch }) {
     setLaunching(false)
   }
 
+  const handleRemove = async (e) => {
+    e.stopPropagation()
+    const confirmed = window.confirm(`Remove ${recipe.name} and delete its local data?`)
+    if (!confirmed) return
+    setRemovingData(true)
+    await onRemove(recipe.slug, { deleteData: true })
+    setRemovingData(false)
+  }
+
   return (
     <div
       onClick={() => onSelect(recipe.slug)}
@@ -196,17 +254,58 @@ function StoppedCard({ recipe, onSelect, onLaunch }) {
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm text-text font-display m-0 truncate">{recipe.name}</h3>
           <span className="text-[11px] text-text-dim font-label">Stopped</span>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {recipe.ui?.port && (
+              <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
+                {getRecipeSurfaceLabel(recipe)} · :{recipe.ui.port}
+              </span>
+            )}
+            {metrics?.memory_used_mb > 0 && (
+              <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
+                Last RAM {formatMemory(metrics.memory_used_mb)}
+              </span>
+            )}
+          </div>
         </div>
 
-        <button
-          disabled={launching}
-          onClick={handleLaunch}
-          className="btn-primary px-4 py-1.5 text-xs font-semibold shrink-0"
-        >
-          {launching ? '...' : getRecipeLaunchLabel(recipe)}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            disabled={launching || removing || removingData}
+            onClick={handleLaunch}
+            className="btn-primary px-4 py-1.5 text-xs font-semibold shrink-0"
+          >
+            {launching ? '...' : getRecipeLaunchLabel(recipe)}
+          </button>
+          <button
+            disabled={launching || removing || removingData}
+            onClick={handleRemove}
+            className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-error/10 hover:text-error transition-all disabled:opacity-50"
+          >
+            {removing || removingData ? '...' : 'Remove'}
+          </button>
+        </div>
       </div>
     </div>
   )
+}
+
+function MetricChip({ label, value }) {
+  return (
+    <div className="bg-surface-high rounded-xl px-3 py-2 border border-outline-dim/70">
+      <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{label}</div>
+      <div className="text-sm font-semibold text-text mt-1">{value}</div>
+    </div>
+  )
+}
+
+function formatPercent(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '—'
+  return `${Math.round(value)}%`
+}
+
+function formatMemory(valueMb) {
+  if (typeof valueMb !== 'number' || Number.isNaN(valueMb) || valueMb <= 0) return '—'
+  if (valueMb >= 1024) return `${(valueMb / 1024).toFixed(1)} GB`
+  return `${Math.round(valueMb)} MB`
 }
 

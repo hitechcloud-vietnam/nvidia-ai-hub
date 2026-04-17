@@ -11,10 +11,13 @@ export const useStore = create((set, get) => ({
   recipesLoadedAt: 0,
   recipeDetails: {},
   recipeDetailStatus: {},
+  registryStatus: null,
+  syncingRegistry: false,
   metrics: null,
   recipeMetrics: {},
   metricHistory: [],
   buildLogs: {},
+  buildProgress: {},
   installing: null,
   updating: null,
   restarting: null,
@@ -44,6 +47,7 @@ export const useStore = create((set, get) => ({
       [slug]: { loading: false, error: null, loadedAt: Date.now() },
     },
   })),
+  setRegistryStatus: (registryStatus) => set({ registryStatus }),
   setMetrics: (metrics) => set((state) => {
     const gpuSeries = (Array.isArray(metrics?.gpus) ? metrics.gpus : []).reduce((acc, gpu) => {
       acc[`gpu_${gpu.index}`] = gpu.utilization ?? 0
@@ -151,6 +155,7 @@ export const useStore = create((set, get) => ({
 
   addBuildLine: (slug, line) => set((s) => {
     const prev = s.buildLogs[slug] || []
+    const nextProgress = inferBuildProgress([...(prev || []), line])
     // Match Docker layer progress: " <hash> Downloading/Extracting/Waiting/Pull complete"
     const layerMatch = line.match(/^\s*([0-9a-f]{12})\s+(Downloading|Extracting|Verifying|Waiting|Pull complete|Already exists|Download complete|Pulling fs layer)/)
     if (layerMatch) {
@@ -160,10 +165,16 @@ export const useStore = create((set, get) => ({
       if (idx >= 0) {
         const updated = [...prev]
         updated[idx] = line
-        return { buildLogs: { ...s.buildLogs, [slug]: updated } }
+        return {
+          buildLogs: { ...s.buildLogs, [slug]: updated },
+          buildProgress: { ...s.buildProgress, [slug]: inferBuildProgress(updated) },
+        }
       }
     }
-    return { buildLogs: { ...s.buildLogs, [slug]: [...prev, line] } }
+    return {
+      buildLogs: { ...s.buildLogs, [slug]: [...prev, line] },
+      buildProgress: { ...s.buildProgress, [slug]: nextProgress },
+    }
   }),
 
   fetchRecipes: async (options = {}) => {
@@ -192,6 +203,40 @@ export const useStore = create((set, get) => ({
 
     set({ _recipesPromise: request })
     return request
+  },
+
+  fetchRegistryStatus: async () => {
+    try {
+      const res = await fetch('/api/recipes/registry/status')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      set({ registryStatus: data })
+      return data
+    } catch (e) {
+      console.error('Failed to fetch registry status:', e)
+      return get().registryStatus
+    }
+  },
+
+  syncRegistry: async () => {
+    set({ syncingRegistry: true })
+    try {
+      const res = await fetch('/api/recipes/registry/sync', { method: 'POST' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      set({ registryStatus: data })
+      await get().fetchRecipes({ force: true })
+      const selectedRecipe = get().selectedRecipe
+      if (selectedRecipe) {
+        await get().fetchRecipeDetail(selectedRecipe, { force: true })
+      }
+      return data
+    } catch (e) {
+      console.error('Failed to sync registry:', e)
+      return { synced: false, sync_error: e.message || 'Registry sync failed' }
+    } finally {
+      set({ syncingRegistry: false })
+    }
   },
 
   fetchRecipeDetail: async (slug, options = {}) => {
@@ -250,7 +295,11 @@ export const useStore = create((set, get) => ({
   },
 
   installRecipe: async (slug) => {
-    set({ installing: slug, buildLogs: { ...get().buildLogs, [slug]: [] } })
+    set({
+      installing: slug,
+      buildLogs: { ...get().buildLogs, [slug]: [] },
+      buildProgress: { ...get().buildProgress, [slug]: inferBuildProgress([]) },
+    })
 
     try {
       const res = await fetch(`/api/recipes/${slug}/install`, { method: 'POST' })
@@ -269,7 +318,14 @@ export const useStore = create((set, get) => ({
 
     ws.onmessage = (e) => {
       if (e.data === '[done]') {
-        set({ installing: null, _ws: null })
+        set({
+          installing: null,
+          _ws: null,
+          buildProgress: {
+            ...get().buildProgress,
+            [slug]: { percent: 100, phase: 'Completed', detail: 'Build finished successfully.' },
+          },
+        })
         get().fetchRecipes({ force: true })
         get().fetchRecipeDetail(slug, { force: true })
         return
@@ -290,7 +346,11 @@ export const useStore = create((set, get) => ({
   },
 
   updateRecipe: async (slug) => {
-    set({ updating: slug, buildLogs: { ...get().buildLogs, [slug]: [] } })
+    set({
+      updating: slug,
+      buildLogs: { ...get().buildLogs, [slug]: [] },
+      buildProgress: { ...get().buildProgress, [slug]: inferBuildProgress([]) },
+    })
 
     try {
       const res = await fetch(`/api/recipes/${slug}/update`, { method: 'POST' })
@@ -308,7 +368,14 @@ export const useStore = create((set, get) => ({
 
     ws.onmessage = (e) => {
       if (e.data === '[done]') {
-        set({ updating: null, _ws: null })
+        set({
+          updating: null,
+          _ws: null,
+          buildProgress: {
+            ...get().buildProgress,
+            [slug]: { percent: 100, phase: 'Completed', detail: 'Update finished successfully.' },
+          },
+        })
         get().fetchRecipes({ force: true })
         get().fetchRecipeDetail(slug, { force: true })
         return
@@ -336,9 +403,16 @@ export const useStore = create((set, get) => ({
         const data = await res.json()
         set((s) => ({
           buildLogs: { ...s.buildLogs, [slug]: data.lines },
+          buildProgress: { ...s.buildProgress, [slug]: inferBuildProgress(data.lines || []) },
         }))
         if (data.status === 'done') {
-          set({ [stateKey]: null })
+          set((s) => ({
+            [stateKey]: null,
+            buildProgress: {
+              ...s.buildProgress,
+              [slug]: { percent: 100, phase: 'Completed', detail: 'Operation finished successfully.' },
+            },
+          }))
           get().fetchRecipes({ force: true })
           get().fetchRecipeDetail(slug, { force: true })
         } else {
@@ -447,3 +521,50 @@ export const useStore = create((set, get) => ({
     }
   },
 }))
+
+function inferBuildProgress(lines) {
+  const normalized = Array.isArray(lines) ? lines : []
+  if (normalized.length === 0) {
+    return { percent: 6, phase: 'Queued', detail: 'Waiting for build logs…' }
+  }
+
+  const latest = normalized[normalized.length - 1] || ''
+  const joined = normalized.join('\n').toLowerCase()
+
+  const explicitPercent = extractExplicitPercent(latest) ?? extractExplicitPercent(joined)
+
+  if (joined.includes('[error]') || joined.includes('traceback') || joined.includes('failed')) {
+    return { percent: explicitPercent ?? 100, phase: 'Failed', detail: latest }
+  }
+
+  if (joined.includes('exporting') || joined.includes('naming to') || joined.includes('writing image') || joined.includes('successfully built')) {
+    return { percent: Math.max(explicitPercent ?? 92, 92), phase: 'Finalizing', detail: latest }
+  }
+
+  if (joined.includes('pip install') || joined.includes('collecting ') || joined.includes('installing collected packages') || joined.includes('npm install')) {
+    return { percent: explicitPercent ?? 62, phase: 'Installing dependencies', detail: latest }
+  }
+
+  if (joined.includes('extracting') || joined.includes('pull complete') || joined.includes('downloading') || joined.includes('pulling fs layer')) {
+    return { percent: explicitPercent ?? 36, phase: 'Pulling base layers', detail: latest }
+  }
+
+  if (joined.includes('step ') || joined.includes('building') || joined.includes('load build definition') || joined.includes('load metadata')) {
+    return { percent: explicitPercent ?? 18, phase: 'Preparing build', detail: latest }
+  }
+
+  if (joined.includes('done')) {
+    return { percent: 100, phase: 'Completed', detail: latest }
+  }
+
+  return { percent: explicitPercent ?? 24, phase: 'Processing logs', detail: latest }
+}
+
+function extractExplicitPercent(text) {
+  if (typeof text !== 'string') return null
+  const match = text.match(/(\d{1,3})%/)
+  if (!match) return null
+  const value = Number(match[1])
+  if (Number.isNaN(value)) return null
+  return Math.max(0, Math.min(100, value))
+}

@@ -9,7 +9,9 @@ export default function RecipeCard({ recipe }) {
   const installing = useStore((s) => s.installing)
   const updating = useStore((s) => s.updating)
   const installRecipe = useStore((s) => s.installRecipe)
+  const updateRecipe = useStore((s) => s.updateRecipe)
   const metrics = useStore((s) => s.metrics)
+  const registryStatus = useStore((s) => s.registryStatus)
   const [logoFailed, setLogoFailed] = useState(false)
 
   const logoUrl = useThemedLogo(recipe.logo)
@@ -18,6 +20,8 @@ export default function RecipeCard({ recipe }) {
   const isBusy = isBuilding || isUpdating
   const isNotebook = isNotebookRecipe(recipe)
   const hardwareFit = getRecipeHardwareFit(recipe, metrics)
+  const registryChanged = Boolean(registryStatus?.registry_changed)
+  const updateCount = Number(registryStatus?.behind || 0)
 
   const handleInstall = (e) => {
     e.stopPropagation()
@@ -81,6 +85,11 @@ export default function RecipeCard({ recipe }) {
             {!recipe.docker?.gpu && (
               <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-label text-text-dim">CPU</span>
             )}
+            {registryChanged && recipe.installed && !recipe.running && (
+              <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-label text-warning">
+                Registry changed{updateCount > 0 ? ` · ${updateCount}` : ''}
+              </span>
+            )}
           </div>
         </div>
 
@@ -116,7 +125,20 @@ export default function RecipeCard({ recipe }) {
             </button>
           )}
           {!isBusy && !recipe.running && !recipe.starting && recipe.installed && (
-            <span className="rounded-lg bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">Stopped</span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="rounded-lg bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">Stopped</span>
+              {registryChanged && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    updateRecipe(recipe.slug)
+                  }}
+                  className="rounded-lg bg-warning/10 px-2.5 py-1 text-[10px] font-semibold text-warning border-none cursor-pointer hover:bg-warning/15"
+                >
+                  Update available
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

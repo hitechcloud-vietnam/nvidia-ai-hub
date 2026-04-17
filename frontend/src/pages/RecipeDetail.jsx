@@ -49,8 +49,10 @@ export default function RecipeDetail() {
   const purging = useStore((s) => s.purging)
   const purgeRecipe = useStore((s) => s.purgeRecipe)
   const buildLogs = useStore((s) => s.buildLogs)
+  const buildProgress = useStore((s) => s.buildProgress)
   const containerLogs = useStore((s) => s.containerLogs)
   const recipeMetrics = useStore((s) => s.recipeMetrics)
+  const registryStatus = useStore((s) => s.registryStatus)
   const connectLogs = useStore((s) => s.connectLogs)
   const disconnectLogs = useStore((s) => s.disconnectLogs)
   const fetchRecipeDetail = useStore((s) => s.fetchRecipeDetail)
@@ -172,8 +174,10 @@ export default function RecipeDetail() {
   const isNotebook = isNotebookRecipe(recipe)
   const cLogs = containerLogs[recipe.slug] || []
   const logLines = isBusy ? (buildLogs[recipe.slug] || []) : cLogs
+  const progressState = buildProgress[recipe.slug] || null
   const runtimeMetrics = recipeMetrics[recipe.slug] || null
   const showAppMonitor = Boolean(isBusy || recipe.running || recipe.starting)
+  const registryChanged = Boolean(registryStatus?.registry_changed)
 
   const handleRemove = () => {
     setShowUninstallModal(true)
@@ -354,6 +358,11 @@ export default function RecipeDetail() {
                 <button disabled={launching || isRemoving} onClick={() => updateRecipe(recipe.slug)} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:text-primary hover:bg-surface-highest disabled:opacity-50">
                   ↻ Update
                 </button>
+                {registryChanged && (
+                  <span className="px-3 py-2 bg-warning/10 text-warning rounded-xl text-xs font-semibold font-label">
+                    Registry changed
+                  </span>
+                )}
                 <button disabled={isRemoving} onClick={handleRemove} className="px-4 py-2.5 bg-error-surface text-error border-none rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50">
                   {isRemoving ? '...' : 'Uninstall'}
                 </button>
@@ -435,6 +444,7 @@ export default function RecipeDetail() {
                   isRunning={recipe.running || recipe.starting}
                   isReady={isReady}
                   hasLogs={cLogs.length > 0}
+                  progressState={progressState}
                   scrollRef={scrollRef}
                   wide
                 />
@@ -613,10 +623,13 @@ function RelatedRecipeCard({ recipe, onSelect }) {
 
 function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
   const recipes = useStore((s) => s.recipes)
+  const registryStatus = useStore((s) => s.registryStatus)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
   const sourceUrl = recipe.upstream || recipe.fork || ''
   const isNotebook = isNotebookRecipe(recipe)
+  const registryChanged = Boolean(registryStatus?.registry_changed)
+  const recentCommits = Array.isArray(registryStatus?.recent_commits) ? registryStatus.recent_commits : []
   const relatedRecipes = (recipe.depends_on || [])
     .map((slug) => recipes.find((item) => item.slug === slug))
     .filter(Boolean)
@@ -720,6 +733,28 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
                     </pre>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {registryChanged && recentCommits.length > 0 && (
+            <div className="space-y-4 pt-5 border-t border-outline-dim">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Registry updates available</div>
+                <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                  The local recipe registry is behind upstream. Review the latest upstream changes, then run Update when you are ready.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {recentCommits.map((commit) => (
+                  <div key={`${commit.sha}-${commit.date}`} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-text font-display">{commit.subject}</div>
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{commit.sha}</div>
+                    </div>
+                    <div className="text-xs text-text-dim mt-2">{commit.date}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -869,7 +904,7 @@ function ConfigWorkspaceSkeleton({ inline = false }) {
   )
 }
 
-function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasLogs, scrollRef, wide = false }) {
+function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasLogs, progressState, scrollRef, wide = false }) {
   const [autoScroll, setAutoScroll] = useState(true)
 
   useEffect(() => {
@@ -905,6 +940,24 @@ function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasL
           {!isBuilding && isRunning && !isReady && <span className="text-[10px] text-amber-400 animate-pulse font-mono">● starting</span>}
         </div>
       </div>
+
+      {isBuilding && progressState && (
+        <div className="shrink-0 border-b border-[#1a1a2a] bg-[#0B0B12] px-4 py-3">
+          <div className="flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-[0.16em] text-gray-400">
+            <span>{progressState.phase}</span>
+            <span>{Math.round(progressState.percent || 0)}%</span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/5">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${progressState.phase === 'Failed' ? 'bg-red-400' : 'bg-primary'}`}
+              style={{ width: `${Math.max(4, Math.min(100, progressState.percent || 0))}%` }}
+            />
+          </div>
+          {progressState.detail && (
+            <div className="mt-2 text-[10px] text-gray-500 font-mono truncate">{progressState.detail}</div>
+          )}
+        </div>
+      )}
 
       <div
         ref={scrollRef}

@@ -2,7 +2,7 @@ import asyncio
 from fastapi import APIRouter, HTTPException
 
 from daemon.models.recipe import Recipe, RecipeSummary
-from daemon.services.registry_service import get_recipes, get_recipe, get_recipe_dir
+from daemon.services.registry_service import get_recipes, get_recipe, get_recipe_dir, get_registry_delta, sync_registry
 from daemon.services.docker_service import (
     get_installed_slugs,
     get_running_recipe_slugs,
@@ -14,6 +14,16 @@ from daemon.services.docker_service import (
 )
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
+
+
+@router.get("/registry/status")
+async def registry_status():
+    return get_registry_delta()
+
+
+@router.post("/registry/sync")
+async def registry_sync():
+    return sync_registry()
 
 
 def _set_runtime_env_path(recipe: Recipe) -> None:

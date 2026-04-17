@@ -54,7 +54,7 @@ check_python() {
 }
 
 check_frontend() {
-    if [ -f "$SPARK_AI_HUB_DIST_INDEX" ]; then
+    if [ -f "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         if spark_frontend_needs_build; then
             warn "Frontend bundle exists but is outdated"
         else
@@ -68,10 +68,10 @@ check_frontend() {
         if spark_command_exists node; then
             local major
             major="$(spark_node_major_version)"
-            if [ "$major" -ge "$SPARK_AI_HUB_NODE_MAJOR" ]; then
+            if [ "$major" -ge "$NVIDIA_AI_HUB_NODE_MAJOR" ]; then
                 pass "Node.js is available for frontend rebuilds: $(node --version 2>/dev/null)"
             else
-                fail "Node.js ${SPARK_AI_HUB_NODE_MAJOR}.x or newer is required, found $(node --version 2>/dev/null || echo unknown)"
+                fail "Node.js ${NVIDIA_AI_HUB_NODE_MAJOR}.x or newer is required, found $(node --version 2>/dev/null || echo unknown)"
             fi
         else
             fail "Node.js is required because the frontend needs to be rebuilt"
@@ -133,7 +133,7 @@ check_files() {
         fail "daemon/main.py is missing"
     fi
 
-    if [ -f "$SPARK_AI_HUB_FRONTEND_DIR/package.json" ]; then
+    if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/package.json" ]; then
         pass "Frontend package manifest is present"
     else
         fail "frontend/package.json is missing"
@@ -151,7 +151,7 @@ check_port() {
         return
     fi
 
-    if python3 - "$SPARK_AI_HUB_PORT" <<'PY'
+    if python3 - "$NVIDIA_AI_HUB_PORT" <<'PY'
 import socket
 import sys
 
@@ -165,9 +165,9 @@ finally:
     sock.close()
 PY
     then
-        pass "Port $SPARK_AI_HUB_PORT is available"
+        pass "Port $NVIDIA_AI_HUB_PORT is available"
     else
-        fail "Port $SPARK_AI_HUB_PORT is already in use"
+        fail "Port $NVIDIA_AI_HUB_PORT is already in use"
     fi
 }
 
