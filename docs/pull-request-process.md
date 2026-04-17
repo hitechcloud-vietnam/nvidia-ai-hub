@@ -21,7 +21,7 @@ Apply these protections to `main`:
 - Recipe changes should identify the affected recipe(s) and any smoke-test evidence.
 - Script or installer changes should specify operating system and shell validation.
 - Deployment documentation changes should state whether Linux service, reverse proxy, TLS, or exposure guidance was reviewed.
-- Governance and licensing changes should identify every synchronized document updated in the same pull request.
+- Governance and licensing changes should identify every synchronized document updated in the same pull request, including `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, and `docs/legal-notice.md` when applicable.
 
 ## Labels and Ownership
 

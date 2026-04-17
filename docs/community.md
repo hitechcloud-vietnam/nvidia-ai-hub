@@ -18,6 +18,7 @@ This document is the central index for repository governance, contribution workf
 - License: [`../LICENSE`](../LICENSE)
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
 - Licensing guide: [`./licensing.md`](./licensing.md)
+- Legal notice: [`./legal-notice.md`](./legal-notice.md)
 - Notice: [`../NOTICE`](../NOTICE)
 
 ## Document Purpose Matrix
@@ -36,6 +37,7 @@ This document is the central index for repository governance, contribution workf
 | `../CODE_OF_CONDUCT.md` | collaboration and behavior expectations | all participants |
 | `../SUPPORT.md` | support routing and usage questions | users and triagers |
 | `./licensing.md` | licensing model and commercial-use interpretation | users and maintainers |
+| `./legal-notice.md` | trademark attribution, ownership notice, and legal naming clarification | users, maintainers, legal reviewers |
 
 ## When to Use What
 
@@ -100,6 +102,13 @@ This document is the central index for repository governance, contribution workf
 - support triage expectations
 - commercial support boundary clarification
 
+### Use `legal-notice.md` for
+
+- consolidated trademark attribution
+- ownership and naming clarification
+- no-endorsement wording
+- legal review references for documentation and distribution
+
 ### Use `LICENSE` and `COMMERCIAL-LICENSE.md` for
 
 - non-commercial use rights
@@ -134,6 +143,8 @@ Repository governance and licensing should remain consistent across:
 - `NOTICE`
 - `LICENSE`
 - `COMMERCIAL-LICENSE.md`
+- `docs/licensing.md`
+- `docs/legal-notice.md`
 - `.github/CODEOWNERS`
 - `.github/dependabot.yml`
 - `.github/labeler.yml`
@@ -142,4 +153,4 @@ Repository governance and licensing should remain consistent across:
 
 When changing governance or licensing language, update all affected documents in the same pull request.
 
-Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, and `docs/licensing.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.
+Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, and `docs/legal-notice.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.

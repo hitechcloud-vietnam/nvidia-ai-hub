@@ -92,7 +92,7 @@ No statement in this repository should be interpreted as:
 
 All other trade names, trademarks, service marks, logos, and brand features mentioned in this repository remain the property of their respective owners.
 
-For controlling legal terms, review [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), and [`docs/licensing.md`](./docs/licensing.md).
+For controlling legal terms, review [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), [`docs/licensing.md`](./docs/licensing.md), and [`docs/legal-notice.md`](./docs/legal-notice.md).
 
 ## Quick install
 

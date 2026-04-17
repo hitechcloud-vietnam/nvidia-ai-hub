@@ -12,6 +12,7 @@ It complements:
 - [`./pull-request-process.md`](./pull-request-process.md)
 - [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 - [`./community.md`](./community.md)
+- [`./legal-notice.md`](./legal-notice.md)
 
 ## Maintenance Areas
 
@@ -104,6 +105,7 @@ When changing repository maintenance controls, confirm:
 - optional workflows are still gated unless intentionally enabled
 - Dependabot remains paused unless maintainers explicitly allow new update pull requests
 - related docs were updated in the same pull request
+- legal notice and trademark wording remain synchronized where applicable
 
 ## Reviewer Notes
 
