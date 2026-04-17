@@ -14,6 +14,8 @@ If this guide and the license text ever differ, the license text controls.
 
 `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is source-available under a strictly non-commercial license.
 
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
 Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
 
 This means:
@@ -89,6 +91,16 @@ Permitted redistribution must:
 The license does not grant general trademark rights.
 
 Do not assume permission to use brand names, logos, or branding outside reasonable attribution.
+
+In particular:
+
+- `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and other NVIDIA product or ecosystem names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates in the United States and other countries.
+- References to NVIDIA hardware, software, drivers, container runtimes, or accelerator platforms in this project are descriptive only and are included to explain compatibility, system requirements, or operational behavior.
+- Such references do not, by themselves, create any sponsorship, endorsement, approval, partnership, certification, or agency relationship with NVIDIA Corporation.
+- The project name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` identifies this solution as offered by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** and does not transfer any ownership in third-party marks.
+- All other trademarks, service marks, logos, product names, and company names mentioned in this repository are the property of their respective owners.
+
+Any use of project branding, company branding, or third-party brand assets beyond fair attribution should be separately reviewed for legal authorization.
 
 ## Commercial Rights Path
 

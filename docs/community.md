@@ -141,3 +141,5 @@ Repository governance and licensing should remain consistent across:
 - issue and pull request templates
 
 When changing governance or licensing language, update all affected documents in the same pull request.
+
+Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, and `docs/licensing.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.

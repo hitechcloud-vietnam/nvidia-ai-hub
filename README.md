@@ -74,6 +74,26 @@ For repository automation, governance maintenance, and review routing, use:
 - Repository maintenance guide: [`docs/maintenance.md`](./docs/maintenance.md)
 - Pull request process: [`docs/pull-request-process.md`](./docs/pull-request-process.md)
 
+## Legal Notice and Trademark Attribution
+
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC`, related repository branding, and associated product presentation in this repository are proprietary identifiers used for this solution.
+
+`NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and other NVIDIA product or program names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates in the United States and other countries.
+
+Any reference to NVIDIA hardware, software, platforms, runtimes, or ecosystem technologies in this repository is provided solely to describe compatibility, deployment requirements, or integration context.
+
+No statement in this repository should be interpreted as:
+
+- granting any license to use NVIDIA trademarks except for lawful nominative reference;
+- implying sponsorship, endorsement, certification, partnership, or approval by NVIDIA Corporation, unless such relationship is expressly stated in writing; or
+- transferring any ownership in the names, logos, trade dress, or brand assets of Pho Tue SoftWare And Technology Solutions Joint Stock Company, NVIDIA Corporation, or any other third party.
+
+All other trade names, trademarks, service marks, logos, and brand features mentioned in this repository remain the property of their respective owners.
+
+For controlling legal terms, review [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), and [`docs/licensing.md`](./docs/licensing.md).
+
 ## Quick install
 
 ```bash

@@ -77,6 +77,18 @@ service mark, logo, or brand feature of Nguyen Thanh An, Pho Tue SoftWare
 Solutions JSC, or this repository, except as required for reasonable and
 customary attribution.
 
+For clarity:
+
+- `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names and
+	marks are trademarks and/or registered trademarks of NVIDIA Corporation and
+	its affiliates in the United States and other countries;
+- references to NVIDIA technologies in the Software are descriptive only and
+	do not imply sponsorship, endorsement, certification, approval, or
+	affiliation unless expressly stated in writing; and
+- no license is granted under this license to use any third-party trademark,
+	service mark, logo, trade dress, or brand feature except to the limited
+	extent required for lawful nominative reference or customary attribution.
+
 7. No Warranty
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

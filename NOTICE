@@ -1,6 +1,15 @@
 NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC
 Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
 
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by Pho Tue SoftWare And Technology Solutions Joint Stock Company.
+
+Trademark attribution and reservation:
+- `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names and marks are trademarks and/or registered trademarks of NVIDIA Corporation and its affiliates in the United States and other countries.
+- References to NVIDIA products, GPU platforms, drivers, container runtimes, or ecosystem technologies are used solely for identification, compatibility, and descriptive purposes.
+- No use of third-party names or marks in this repository implies sponsorship, endorsement, certification, approval, or affiliation unless expressly stated in writing.
+- Except for reasonable and customary attribution or other lawful nominative use, no trademark license is granted by this repository.
+- All other trademarks, service marks, logos, and trade names mentioned in this repository are the property of their respective owners.
+
 This repository is source-available under the terms in `LICENSE`.
 
 Summary:
