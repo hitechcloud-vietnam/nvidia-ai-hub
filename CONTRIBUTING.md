@@ -4,6 +4,17 @@ Thank you for contributing to NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
 This document defines the expected workflow for code, documentation, and recipe contributions.
 
+## Legal Identity and Trademark Attribution
+
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
+When contributing to this repository:
+
+- preserve all legal notices, copyright notices, and trademark attributions;
+- do not add wording, assets, or metadata that imply NVIDIA sponsorship, endorsement, certification, or affiliation unless expressly authorized in writing;
+- treat `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names as trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates; and
+- preserve attribution for all other third-party marks, logos, and product names used in documentation, recipes, or UI assets.
+
 ## Scope
 
 Contributions are welcome for:

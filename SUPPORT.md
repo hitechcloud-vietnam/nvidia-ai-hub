@@ -4,6 +4,10 @@
 
 This document explains where to ask questions, where to report problems, and how to request commercial assistance for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
+`NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates in the United States and other countries. References to NVIDIA technologies in this repository are descriptive only and do not imply endorsement or sponsorship unless expressly stated in writing.
+
 ## Support Channels
 
 ### Questions and Usage Help

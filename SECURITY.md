@@ -4,6 +4,10 @@
 
 Security fixes are applied on a best-effort basis to the active default branch of this repository.
 
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
+`NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA product or platform names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates. Their mention in this repository is solely for descriptive and compatibility purposes and does not imply endorsement or affiliation unless expressly stated in writing.
+
 If you need a security fix, reproduce the issue against the latest `main` branch before reporting it.
 
 ## Reporting a Vulnerability
