@@ -1,7 +1,7 @@
 # Development Execution Plan
 
 ## Purpose
-This plan turns the product blueprint into a practical delivery backlog for the current `spark-ai-hub` repository. It is meant to guide iterative implementation across backend, frontend, registry, installer, and operations workstreams.
+This plan turns the product blueprint into a practical delivery backlog for the current `nvidia-ai-hub` repository. It is meant to guide iterative implementation across backend, frontend, registry, installer, and operations workstreams.
 
 ## Current Repository Baseline
 The repository already includes a usable foundation:

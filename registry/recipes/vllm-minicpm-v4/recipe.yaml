@@ -38,8 +38,8 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "openbmb/MiniCPM-V-4"
   api_key: "not-needed"
   max_context: "4096"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/MiniCPM-V-4\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the figures in the two screenshots and summarize the key differences.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/screenshot-a.png\"}}]}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/MiniCPM-V-4\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the figures in the two screenshots and summarize the key differences.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/screenshot-a.png\"}}]}]}'"

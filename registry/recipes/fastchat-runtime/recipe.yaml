@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 12
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:8000/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:8000/v1"
   model_id: "vicuna-7b-v1.5"
   api_key: "EMPTY"
   max_context: "Depends on the selected model and FastChat worker settings"
   max_output_tokens: "Configurable per request"
-  curl_example: "curl http://<SPARK_IP>:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"vicuna-7b-v1.5\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello from FastChat.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"vicuna-7b-v1.5\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello from FastChat.\"}]}'"
 status: experimental
 runtime_env_path: "registry/recipes/fastchat-runtime/.env"
 requires_hf_token: false

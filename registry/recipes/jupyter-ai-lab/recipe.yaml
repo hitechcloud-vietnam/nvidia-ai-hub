@@ -41,12 +41,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:3095/lab"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3095/lab"
   model_id: "Configure Jupyter AI providers and notebook magics after launch"
   api_key: "Use the Jupyter token from the recipe environment file"
   max_context: "Depends on the configured Jupyter AI provider and model"
   max_output_tokens: "Depends on the configured Jupyter AI provider and model"
-  curl_example: "curl -I http://<SPARK_IP>:3095/lab"
+  curl_example: "curl -I http://<NVIDIA_AI_HUB_IP>:3095/lab"
 commands:
   - label: "Install / build / launch"
     description: "Build the custom Jupyter AI image, start JupyterLab with persistent notebooks, and expose the lab UI on port 3095."

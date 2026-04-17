@@ -40,8 +40,8 @@ docker:
 status: experimental
 requires_hf_token: true
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "CohereLabs/c4ai-command-r7b-12-2024"
   api_key: "not-needed"
   max_context: "128000"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/c4ai-command-r7b-12-2024\", \"messages\": [{\"role\": \"user\", \"content\": \"Create a short RAG answer with two grounded bullet points.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/c4ai-command-r7b-12-2024\", \"messages\": [{\"role\": \"user\", \"content\": \"Create a short RAG answer with two grounded bullet points.\"}]}'"

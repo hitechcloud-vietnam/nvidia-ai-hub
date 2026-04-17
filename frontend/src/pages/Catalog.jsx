@@ -229,7 +229,7 @@ export default function Catalog({ search = '' }) {
   const [category, setCategory] = useState('all')
   const [activeBannerSlug, setActiveBannerSlug] = useState(null)
   const [itemsPerPage, setItemsPerPage] = useState(24)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSelections, setPageSelections] = useState({})
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const searchMatchedRecipes = useMemo(() => recipes.filter((r) => {
@@ -267,15 +267,15 @@ export default function Catalog({ search = '' }) {
 
   const totalPages = Math.max(1, Math.ceil(orderedRecipes.length / itemsPerPage))
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [category, search, itemsPerPage])
+  const paginationScope = `${category}::${search}::${itemsPerPage}`
+  const currentPage = Math.min(pageSelections[paginationScope] ?? 1, totalPages)
 
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages)
-    }
-  }, [currentPage, totalPages])
+  const updateCurrentPage = (nextPage) => {
+    setPageSelections((previous) => ({
+      ...previous,
+      [paginationScope]: Math.max(1, Math.min(totalPages, nextPage)),
+    }))
+  }
 
   const paginatedRecipes = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -370,13 +370,11 @@ export default function Catalog({ search = '' }) {
 
   const handleCategorySelect = (nextCategory) => {
     setCategory(nextCategory)
-    setCurrentPage(1)
     setMobileMenuOpen(false)
   }
 
   const handleResetCategory = () => {
     setCategory('all')
-    setCurrentPage(1)
     setMobileMenuOpen(false)
   }
 
@@ -610,7 +608,7 @@ export default function Catalog({ search = '' }) {
                     <h3 className="m-0 mt-1.5 text-xl font-bold tracking-tight text-text font-display">{activeCategoryMeta.label}</h3>
                     <p className="m-0 mt-1 text-xs text-text-dim leading-5">
                       {search
-                        ? `Filtered by \"${search}\" across ${activeCategoryMeta.label.toLowerCase()} apps.`
+                        ? `Filtered by "${search}" across ${activeCategoryMeta.label.toLowerCase()} apps.`
                         : `Showing curated apps for ${activeCategoryMeta.label.toLowerCase()}.`}
                     </p>
                   </div>
@@ -677,7 +675,7 @@ export default function Catalog({ search = '' }) {
                 <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
                   <button
                     type="button"
-                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    onClick={() => updateCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
                     className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
                   >
@@ -687,7 +685,7 @@ export default function Catalog({ search = '' }) {
                     <button
                       key={page}
                       type="button"
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => updateCurrentPage(page)}
                       className={`min-w-9 rounded-lg border px-2.5 py-1.5 text-sm font-semibold transition-all ${
                         currentPage === page
                           ? 'border-primary bg-primary/12 text-primary'
@@ -699,7 +697,7 @@ export default function Catalog({ search = '' }) {
                   ))}
                   <button
                     type="button"
-                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    onClick={() => updateCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
                   >

@@ -39,12 +39,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:3090/api/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3090/api/v1"
   model_id: "Configured inside Langflow flows"
   api_key: "Set LANGFLOW_API_KEY or create one in the running instance"
   max_context: "Depends on the Ollama model selected in each flow"
   max_output_tokens: "Depends on the Ollama model selected in each flow"
-  curl_example: "curl -X GET http://<SPARK_IP>:3090/api/v1/flows -H 'x-api-key: <LANGFLOW_API_KEY>'"
+  curl_example: "curl -X GET http://<NVIDIA_AI_HUB_IP>:3090/api/v1/flows -H 'x-api-key: <LANGFLOW_API_KEY>'"
 commands:
   - label: "Install / launch"
     description: "Start Langflow with persistent config storage, local authentication defaults, and shared Ollama access for RAG and agent flow prototyping."

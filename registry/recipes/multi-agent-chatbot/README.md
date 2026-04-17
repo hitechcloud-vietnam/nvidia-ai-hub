@@ -22,8 +22,8 @@ The first launch is heavy:
 
 After the stack becomes healthy, open:
 
-- `http://<SPARK_IP>:3000` for the chatbot UI
-- `http://<SPARK_IP>:8000` for the backend API
+- `http://<NVIDIA_AI_HUB_IP>:3000` for the chatbot UI
+- `http://<NVIDIA_AI_HUB_IP>:8000` for the backend API
 
 If you connect over SSH, forward both ports:
 

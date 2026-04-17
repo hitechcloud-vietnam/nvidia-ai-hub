@@ -46,7 +46,7 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:8000"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:8000"
   model_id: "gpt-oss-120b"
   api_key: "not-required"
-  curl_example: "curl http://<SPARK_IP>:8000/available_models"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:8000/available_models"

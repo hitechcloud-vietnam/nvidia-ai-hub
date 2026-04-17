@@ -38,8 +38,8 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "meta-llama/Llama-3.3-70B-Instruct"
   api_key: "not-needed"
   max_context: "128000"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the incident timeline and next actions.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the incident timeline and next actions.\"}]}'"

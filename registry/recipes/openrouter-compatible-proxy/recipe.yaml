@@ -42,12 +42,12 @@ runtime_env_path: "registry/recipes/openrouter-compatible-proxy/.env"
 requires_hf_token: false
 depends_on: []
 integration:
-  api_url: "http://<SPARK_IP>:3015/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3015/v1"
   model_id: "openrouter/auto"
   api_key: "Required OpenRouter API key sent as Bearer token"
   max_context: "Varies by selected upstream model and provider routing policy"
   max_output_tokens: "Varies by selected upstream model and provider routing policy"
-  curl_example: "curl http://<SPARK_IP>:3015/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <OPENROUTER_API_KEY>' -H 'HTTP-Referer: https://your-company.example' -H 'X-Title: NVIDIA AI Hub' -d '{\"model\":\"openrouter/auto\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active routing path.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3015/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <OPENROUTER_API_KEY>' -H 'HTTP-Referer: https://your-company.example' -H 'X-Title: NVIDIA AI Hub' -d '{\"model\":\"openrouter/auto\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active routing path.\"}]}'"
 commands:
   - label: "Install / launch"
     description: "Start the local NGINX relay shim on port 3015 so OpenAI-compatible clients can target one local endpoint while requests are forwarded to OpenRouter upstream."

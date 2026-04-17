@@ -707,7 +707,7 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
                 )}
               </div>
               <div className="space-y-2.5">
-                <Field label="API URL" value={recipe.integration.api_url.replace('<SPARK_IP>', location.hostname)} />
+                <Field label="API URL" value={recipe.integration.api_url.replace('<NVIDIA_AI_HUB_IP>', location.hostname)} />
                 <Field label="Model ID" value={recipe.integration.model_id} />
                 <Field label="API Key" value={recipe.integration.api_key} />
                 {recipe.integration.max_context && <Field label="Max Context" value={recipe.integration.max_context} />}
@@ -716,7 +716,7 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
                   <div className="pt-2">
                     <span className="text-[10px] text-text-dim font-label block mb-1">curl example</span>
                     <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">
-                      {recipe.integration.curl_example.replace(/<SPARK_IP>/g, location.hostname)}
+                      {recipe.integration.curl_example.replace(/<NVIDIA_AI_HUB_IP>/g, location.hostname)}
                     </pre>
                   </div>
                 )}

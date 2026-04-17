@@ -37,8 +37,8 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "mistralai/Pixtral-Large-Instruct-2411"
   api_key: "not-needed"
   max_context: "131072"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Pixtral-Large-Instruct-2411\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the dashboard and summarize the three most important anomalies.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Pixtral-Large-Instruct-2411\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Compare the dashboard and summarize the three most important anomalies.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"

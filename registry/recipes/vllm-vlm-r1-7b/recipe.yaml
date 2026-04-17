@@ -36,12 +36,12 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "openbmb/VLM-R1-7B"
   api_key: "not-needed"
   max_context: "32768"
   max_output_tokens: "4096"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/VLM-R1-7B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and explain the key anomaly.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"openbmb/VLM-R1-7B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and explain the key anomaly.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
 runtime_env_path: "registry/recipes/vllm-vlm-r1-7b/.env"
 requires_hf_token: false
 depends_on: []

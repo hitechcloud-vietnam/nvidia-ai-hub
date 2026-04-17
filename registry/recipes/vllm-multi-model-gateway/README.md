@@ -21,11 +21,11 @@ This recipe keeps that upstream behavior honest by running:
 
 ## Default access
 
-- Gateway base URL: `http://<SPARK_IP>:9010/v1`
-- Model catalog: `http://<SPARK_IP>:9010/v1/models`
-- Gateway health: `http://<SPARK_IP>:9010/healthz`
-- Backend A direct URL: `http://<SPARK_IP>:9011/v1`
-- Backend B direct URL: `http://<SPARK_IP>:9012/v1`
+- Gateway base URL: `http://<NVIDIA_AI_HUB_IP>:9010/v1`
+- Model catalog: `http://<NVIDIA_AI_HUB_IP>:9010/v1/models`
+- Gateway health: `http://<NVIDIA_AI_HUB_IP>:9010/healthz`
+- Backend A direct URL: `http://<NVIDIA_AI_HUB_IP>:9011/v1`
+- Backend B direct URL: `http://<NVIDIA_AI_HUB_IP>:9012/v1`
 
 All gateway requests require `Authorization: Bearer <GATEWAY_API_KEY>` when `GATEWAY_API_KEY` is set.
 

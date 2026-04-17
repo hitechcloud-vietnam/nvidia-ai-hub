@@ -37,12 +37,12 @@ docker:
   build_time_minutes: 6
   gpu: false
 integration:
-  api_url: "http://<SPARK_IP>:20129/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:20129/v1"
   model_id: "Configured provider/model alias, for example cc/claude-sonnet-4-20250514"
   api_key: "Use an OmniRoute-managed API key from the dashboard; local development may accept any string until access controls are tightened"
   max_context: "Depends on the selected upstream provider and model alias"
   max_output_tokens: "Depends on the selected upstream provider and model alias"
-  curl_example: "curl http://<SPARK_IP>:20129/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer sk_omniroute_change_me' -d '{\"model\":\"cc/claude-sonnet-4-20250514\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active fallback policy.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:20129/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer sk_omniroute_change_me' -d '{\"model\":\"cc/claude-sonnet-4-20250514\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active fallback policy.\"}]}'"
 status: experimental
 runtime_env_path: "registry/recipes/omniroute/.env"
 requires_hf_token: false

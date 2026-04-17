@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 5
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:1337/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:1337/v1"
   model_id: "janhq/Jan-v3-4B-base-instruct-gguf"
   api_key: "Required by Jan Local API Server; send as Bearer token"
   max_context: "Configurable through Jan CLI flags or Jan Local API Server model/runtime settings"
   max_output_tokens: "Configurable per request"
-  curl_example: "curl http://<SPARK_IP>:1337/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <JAN_API_KEY>' -d '{\"model\":\"janhq/Jan-v3-4B-base-instruct-gguf\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:1337/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <JAN_API_KEY>' -d '{\"model\":\"janhq/Jan-v3-4B-base-instruct-gguf\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
 status: experimental
 runtime_env_path: "registry/recipes/jan-runtime-bridge/.env"
 requires_hf_token: false

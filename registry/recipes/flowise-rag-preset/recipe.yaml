@@ -39,12 +39,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:3089/api/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3089/api/v1"
   model_id: "Configured inside Flowise chatflows"
   api_key: "Create in Settings -> API Keys if you need programmatic access"
   max_context: "Depends on the Ollama model selected in each flow"
   max_output_tokens: "Depends on the Ollama model selected in each flow"
-  curl_example: "curl -X GET http://<SPARK_IP>:3089/api/v1/chatflows -H 'Authorization: Bearer <FLOWISE_API_KEY>'"
+  curl_example: "curl -X GET http://<NVIDIA_AI_HUB_IP>:3089/api/v1/chatflows -H 'Authorization: Bearer <FLOWISE_API_KEY>'"
 commands:
   - label: "Install / launch"
     description: "Start Flowise with persistent local database, logs, encryption secrets, uploads, and shared Ollama access for RAG and workflow prototyping."

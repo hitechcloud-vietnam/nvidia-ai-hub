@@ -33,7 +33,7 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "nvidia/Phi-4-multimodal-instruct-NVFP4"
   api_key: "not-needed"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Phi-4-multimodal-instruct-NVFP4\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the attached audio and image.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"nvidia/Phi-4-multimodal-instruct-NVFP4\", \"messages\": [{\"role\": \"user\", \"content\": \"Summarize the attached audio and image.\"}]}'"

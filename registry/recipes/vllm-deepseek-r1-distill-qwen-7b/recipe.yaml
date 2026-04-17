@@ -31,7 +31,7 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
   api_key: "not-needed"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"deepseek-ai/DeepSeek-R1-Distill-Qwen-7B\", \"messages\": [{\"role\": \"user\", \"content\": \"Please reason step by step and explain 37*48.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"deepseek-ai/DeepSeek-R1-Distill-Qwen-7B\", \"messages\": [{\"role\": \"user\", \"content\": \"Please reason step by step and explain 37*48.\"}]}'"

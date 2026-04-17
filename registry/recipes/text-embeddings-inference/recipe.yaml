@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 4
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3101"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3101"
   model_id: "Qwen/Qwen3-Embedding-0.6B"
   api_key: "Optional; set TEI_API_KEY to require Bearer authentication"
   max_context: "Bound by the selected model and TEI batching configuration"
   max_output_tokens: "Not applicable for embedding workloads"
-  curl_example: "curl http://<SPARK_IP>:3101/embed -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"inputs\":\"What is Deep Learning?\"}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3101/embed -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"inputs\":\"What is Deep Learning?\"}'"
 status: experimental
 runtime_env_path: "registry/recipes/text-embeddings-inference/.env"
 requires_hf_token: false

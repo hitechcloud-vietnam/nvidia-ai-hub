@@ -30,7 +30,7 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "mistralai/Mistral-7B-Instruct-v0.3"
   api_key: "not-needed"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Mistral-7B-Instruct-v0.3\", \"messages\": [{\"role\": \"user\", \"content\": \"Create a function-call schema for weather lookup.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Mistral-7B-Instruct-v0.3\", \"messages\": [{\"role\": \"user\", \"content\": \"Create a function-call schema for weather lookup.\"}]}'"

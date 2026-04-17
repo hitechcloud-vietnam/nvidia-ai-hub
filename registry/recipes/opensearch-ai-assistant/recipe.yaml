@@ -39,12 +39,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:9201"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9201"
   model_id: "Create ML Commons connectors, models, and agents after first launch"
   api_key: "Use basic authentication with the OpenSearch admin credentials from the recipe environment file"
   max_context: "Depends on the remote model and ML Commons agent configuration"
   max_output_tokens: "Depends on the remote model and ML Commons agent configuration"
-  curl_example: "curl -u admin:<OPENSEARCH_INITIAL_ADMIN_PASSWORD> http://<SPARK_IP>:9201/_cluster/health?pretty"
+  curl_example: "curl -u admin:<OPENSEARCH_INITIAL_ADMIN_PASSWORD> http://<NVIDIA_AI_HUB_IP>:9201/_cluster/health?pretty"
 commands:
   - label: "Install / launch"
     description: "Start OpenSearch and OpenSearch Dashboards with persistent local storage, ML Commons settings, and shared-host access for manual Ollama connector setup."

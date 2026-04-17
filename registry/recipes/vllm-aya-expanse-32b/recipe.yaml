@@ -37,8 +37,8 @@ docker:
 status: experimental
 requires_hf_token: true
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "CohereLabs/aya-expanse-32b"
   api_key: "not-needed"
   max_context: "128000"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/aya-expanse-32b\", \"messages\": [{\"role\": \"user\", \"content\": \"Draft a multilingual customer support reply in English, Arabic, and Vietnamese.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"CohereLabs/aya-expanse-32b\", \"messages\": [{\"role\": \"user\", \"content\": \"Draft a multilingual customer support reply in English, Arabic, and Vietnamese.\"}]}'"

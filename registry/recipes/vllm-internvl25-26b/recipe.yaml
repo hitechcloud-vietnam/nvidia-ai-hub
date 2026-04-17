@@ -38,8 +38,8 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "OpenGVLab/InternVL2_5-26B"
   api_key: "not-needed"
   max_context: "8192"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"OpenGVLab/InternVL2_5-26B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and summarize the main KPI anomalies.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"OpenGVLab/InternVL2_5-26B\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Review this dashboard screenshot and summarize the main KPI anomalies.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/dashboard.png\"}}]}]}'"

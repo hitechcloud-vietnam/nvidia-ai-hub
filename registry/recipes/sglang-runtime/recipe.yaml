@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 4
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3097/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3097/v1"
   model_id: "Qwen/Qwen2.5-0.5B-Instruct"
   api_key: "Optional; leave empty for trusted local networks only"
   max_context: "Configurable through SGLANG_CONTEXT_LENGTH or the model config"
   max_output_tokens: "Configurable per request"
-  curl_example: "curl http://<SPARK_IP>:3097/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <SGLANG_API_KEY>' -d '{\"model\":\"Qwen/Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3097/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <SGLANG_API_KEY>' -d '{\"model\":\"Qwen/Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
 status: experimental
 runtime_env_path: "registry/recipes/sglang-runtime/.env"
 requires_hf_token: false

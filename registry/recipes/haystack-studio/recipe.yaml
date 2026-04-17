@@ -39,12 +39,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:1416/v1/chat/completions"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:1416/v1/chat/completions"
   model_id: "haystack_rag"
   api_key: "not required"
   max_context: "Depends on the Ollama model selected"
   max_output_tokens: "Depends on the Ollama model selected"
-  curl_example: "curl -X POST http://<SPARK_IP>:1416/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"haystack_rag\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the sample knowledge base.\"}]}'"
+  curl_example: "curl -X POST http://<NVIDIA_AI_HUB_IP>:1416/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"haystack_rag\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the sample knowledge base.\"}]}'"
 commands:
   - label: "Install / build / launch"
     description: "Build the Hayhooks image, start Qdrant and Open WebUI, auto-deploy the starter Haystack pipeline, and publish the chat UI on port 3085."

@@ -40,12 +40,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "bolt://<SPARK_IP>:7688"
+  api_url: "bolt://<NVIDIA_AI_HUB_IP>:7688"
   model_id: "Graph schema, extraction pipelines, and LLM orchestration are configured by the connected application"
   api_key: "Use the Neo4j username and password from the recipe environment file"
   max_context: "Depends on the graph-RAG application connected to Neo4j"
   max_output_tokens: "Depends on the graph-RAG application connected to Neo4j"
-  curl_example: "curl -u neo4j:<NEO4J_PASSWORD> http://<SPARK_IP>:7475/browser/"
+  curl_example: "curl -u neo4j:<NEO4J_PASSWORD> http://<NVIDIA_AI_HUB_IP>:7475/browser/"
 commands:
   - label: "Install / launch"
     description: "Start Neo4j Community with Browser, APOC plugin bootstrap, persistent graph storage, and local import directories for knowledge graph experiments."

@@ -47,8 +47,8 @@ status: experimental
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:11434/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:11434/v1"
   model_id: "llama3.2-vision:11b"
   api_key: "EMPTY"
-  curl_example: "curl http://<SPARK_IP>:11434/v1/models"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:11434/v1/models"
 runtime_env_path: "registry/recipes/live-vlm-webui/.env"

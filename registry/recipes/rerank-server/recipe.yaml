@@ -34,12 +34,12 @@ docker:
   build_time_minutes: 4
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3102"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3102"
   model_id: "BAAI/bge-reranker-large"
   api_key: "Optional; set TEI_API_KEY to require Bearer authentication"
   max_context: "Bound by the selected reranker model and TEI batching configuration"
   max_output_tokens: "Not applicable for reranking workloads"
-  curl_example: "curl http://<SPARK_IP>:3102/rerank -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"query\":\"What is Deep Learning?\",\"texts\":[\"Deep Learning is not...\",\"Deep learning is...\"]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3102/rerank -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"query\":\"What is Deep Learning?\",\"texts\":[\"Deep Learning is not...\",\"Deep learning is...\"]}'"
 status: experimental
 runtime_env_path: "registry/recipes/rerank-server/.env"
 requires_hf_token: false

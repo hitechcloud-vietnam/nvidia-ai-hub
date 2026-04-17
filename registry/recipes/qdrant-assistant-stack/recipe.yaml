@@ -40,12 +40,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:6333"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:6333"
   model_id: "Collections and embeddings are configured by the connected application"
   api_key: "Set QDRANT_API_KEY if you want authenticated access"
   max_context: "Depends on the application connected to Qdrant"
   max_output_tokens: "Depends on the application connected to Qdrant"
-  curl_example: "curl http://<SPARK_IP>:6333/healthz"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:6333/healthz"
 commands:
   - label: "Install / launch"
     description: "Start Qdrant with persistent storage, snapshots, and the built-in web UI for local assistant retrieval experiments."

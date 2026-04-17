@@ -223,7 +223,7 @@ function About() {
           <h3 className="font-semibold text-sm font-display m-0 mb-3">Links</h3>
           <div className="flex flex-col gap-2.5">
             <a
-              href="https://github.com/hitechcloud-vietnam/spark-ai-hub"
+              href="https://github.com/hitechcloud-vietnam/nvidia-ai-hub"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 text-sm text-text hover:text-primary transition-colors no-underline"

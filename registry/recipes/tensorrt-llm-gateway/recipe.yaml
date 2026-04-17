@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 5
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3098/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3098/v1"
   model_id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
   api_key: "TensorRT-LLM examples commonly use a placeholder key; this baseline leaves the endpoint unauthenticated"
   max_context: "Configurable through TRTLLM_MAX_SEQ_LEN or the model defaults"
   max_output_tokens: "Configurable per request"
-  curl_example: "curl http://<SPARK_IP>:3098/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"TinyLlama/TinyLlama-1.1B-Chat-v1.0\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3098/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"TinyLlama/TinyLlama-1.1B-Chat-v1.0\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
 runtime_env_path: "registry/recipes/tensorrt-llm-gateway/.env"
 requires_hf_token: false

@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 3
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3096/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3096/v1"
   model_id: "gemma-3-1b-it-q4-k-m"
   api_key: "Optional; leave empty for trusted local networks only"
   max_context: "Configurable through LLAMA_ARG_CTX_SIZE; default 8192"
   max_output_tokens: "Configurable per request or server defaults"
-  curl_example: "curl http://<SPARK_IP>:3096/v1/models -H 'Authorization: Bearer <LLAMA_API_KEY>'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3096/v1/models -H 'Authorization: Bearer <LLAMA_API_KEY>'"
 status: experimental
 runtime_env_path: "registry/recipes/llamacpp-server/.env"
 requires_hf_token: false

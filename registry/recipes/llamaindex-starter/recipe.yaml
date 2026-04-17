@@ -41,12 +41,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:3084/api/query"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3084/api/query"
   model_id: "qwen3.5:4b"
   api_key: "not required"
   max_context: "Depends on the Ollama model selected"
   max_output_tokens: "Depends on the Ollama model selected"
-  curl_example: "curl -X POST http://<SPARK_IP>:3084/api/query -H 'Content-Type: application/json' -d '{\"query\":\"What is in my indexed documents?\"}'"
+  curl_example: "curl -X POST http://<NVIDIA_AI_HUB_IP>:3084/api/query -H 'Content-Type: application/json' -d '{\"query\":\"What is in my indexed documents?\"}'"
 commands:
   - label: "Install / build / launch"
     description: "Build the local LlamaIndex starter app, start Qdrant, connect to the shared Ollama runtime, and publish the web UI on port 3084."

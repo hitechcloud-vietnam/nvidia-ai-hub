@@ -32,7 +32,7 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "mistralai/Mixtral-8x7B-Instruct-v0.1"
   api_key: "not-needed"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Mixtral-8x7B-Instruct-v0.1\", \"messages\": [{\"role\": \"user\", \"content\": \"Compare two rollout plans with pros and cons.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"mistralai/Mixtral-8x7B-Instruct-v0.1\", \"messages\": [{\"role\": \"user\", \"content\": \"Compare two rollout plans with pros and cons.\"}]}'"

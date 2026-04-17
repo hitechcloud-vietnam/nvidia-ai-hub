@@ -38,8 +38,8 @@ docker:
   gpu: true
 status: experimental
 integration:
-  api_url: "http://<SPARK_IP>:9001/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "microsoft/Phi-3.5-vision-instruct"
   api_key: "not-needed"
   max_context: "4096"
-  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"microsoft/Phi-3.5-vision-instruct\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Read the slide and summarize the key points.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/slide.png\"}}]}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"microsoft/Phi-3.5-vision-instruct\", \"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Read the slide and summarize the key points.\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/slide.png\"}}]}]}'"

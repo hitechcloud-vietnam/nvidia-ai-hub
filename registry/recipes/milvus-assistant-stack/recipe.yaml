@@ -40,12 +40,12 @@ requires_hf_token: false
 depends_on:
   - ollama-runtime
 integration:
-  api_url: "http://<SPARK_IP>:19531"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:19531"
   model_id: "Collections and embeddings are configured by the connected application"
   api_key: "Milvus root credentials or token if you enable authentication after launch"
   max_context: "Depends on the application connected to Milvus"
   max_output_tokens: "Depends on the application connected to Milvus"
-  curl_example: "curl http://<SPARK_IP>:9092/healthz"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:9092/healthz"
 commands:
   - label: "Install / launch"
     description: "Start Milvus standalone with etcd, MinIO, and Attu using persistent local storage for assistant and retrieval experiments."

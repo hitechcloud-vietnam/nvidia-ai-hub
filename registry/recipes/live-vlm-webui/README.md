@@ -6,7 +6,7 @@ Live VLM WebUI provides a real-time webcam and WebRTC interface for vision-langu
 
 After launch, open:
 
-- `https://<SPARK_IP>:8090`
+- `https://<NVIDIA_AI_HUB_IP>:8090`
 
 Your browser will warn about the self-signed certificate on first access. Accept the certificate to enable webcam permissions.
 

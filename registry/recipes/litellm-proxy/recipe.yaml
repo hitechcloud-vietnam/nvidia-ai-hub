@@ -39,12 +39,12 @@ runtime_env_path: "registry/recipes/litellm-proxy/.env"
 requires_hf_token: true
 depends_on: []
 integration:
-  api_url: "http://<SPARK_IP>:4000/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:4000/v1"
   model_id: "qwen3-4b-instruct"
   api_key: "change-me"
   max_context: "Per backend model configuration"
   max_output_tokens: "Per backend model configuration"
-  curl_example: "curl http://<SPARK_IP>:4000/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer change-me' -d '{\"model\":\"qwen3-4b-instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the current routing policy.\"}]}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:4000/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer change-me' -d '{\"model\":\"qwen3-4b-instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the current routing policy.\"}]}'"
 commands:
   - label: "Install / launch"
     description: "Start the official LiteLLM proxy, publish port 4000, and launch two dedicated vLLM backends behind it."

@@ -34,12 +34,12 @@ docker:
   build_time_minutes: 4
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:11435"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:11435"
   model_id: "qwen3.5:4b"
   api_key: "not required"
   max_context: "Depends on the Ollama model selected"
   max_output_tokens: "Depends on the Ollama model selected"
-  curl_example: "curl http://<SPARK_IP>:11435/api/tags"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:11435/api/tags"
 status: experimental
 runtime_env_path: "registry/recipes/ollama-runtime/.env"
 requires_hf_token: false

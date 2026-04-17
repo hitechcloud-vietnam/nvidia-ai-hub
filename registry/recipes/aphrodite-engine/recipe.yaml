@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 6
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3100/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3100/v1"
   model_id: "Qwen/Qwen3-0.6B"
   api_key: "Optional; if set, clients must send Bearer authentication"
   max_context: "Configurable through model choice and optional max-model-len arguments"
   max_output_tokens: "Configurable per request"
-  curl_example: "curl http://<SPARK_IP>:3100/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <APHRODITE_API_KEY>' -d '{\"model\":\"Qwen/Qwen3-0.6B\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3100/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <APHRODITE_API_KEY>' -d '{\"model\":\"Qwen/Qwen3-0.6B\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
 runtime_env_path: "registry/recipes/aphrodite-engine/.env"
 requires_hf_token: false

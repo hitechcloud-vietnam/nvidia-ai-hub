@@ -35,12 +35,12 @@ docker:
   build_time_minutes: 5
   gpu: true
 integration:
-  api_url: "http://<SPARK_IP>:3099/v1"
+  api_url: "http://<NVIDIA_AI_HUB_IP>:3099/v1"
   model_id: "teknium/OpenHermes-2.5-Mistral-7B"
   api_key: "Not required by default; protect the endpoint externally if needed"
   max_context: "Configurable through TGI_MAX_INPUT_LENGTH and TGI_MAX_TOTAL_TOKENS"
   max_output_tokens: "Configurable per request and model limits"
-  curl_example: "curl http://<SPARK_IP>:3099/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
+  curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3099/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
 runtime_env_path: "registry/recipes/tgi-runtime/.env"
 requires_hf_token: false
