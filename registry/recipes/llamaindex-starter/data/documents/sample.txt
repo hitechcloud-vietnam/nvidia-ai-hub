@@ -1,0 +1,10 @@
+LlamaIndex Starter Sample Document
+
+This starter recipe indexes files from the local documents folder.
+
+Add your own text, Markdown, PDF, or other supported files into this directory, then call the reindex endpoint or restart the recipe to refresh the vector index.
+
+The default configuration expects:
+- Ollama chat model: qwen3.5:4b
+- Ollama embedding model: nomic-embed-text
+- Qdrant collection: llamaindex_starter

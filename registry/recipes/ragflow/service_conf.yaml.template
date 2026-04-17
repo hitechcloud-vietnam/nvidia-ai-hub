@@ -1,0 +1,41 @@
+es:
+  hosts: 'http://${ES_HOST:-es01}:9200'
+  username: 'elastic'
+  password: '${ELASTIC_PASSWORD:-infini_rag_flow}'
+redis:
+  db: 1
+  username: '${REDIS_USERNAME:-}'
+  password: '${REDIS_PASSWORD:-infini_rag_flow}'
+  host: '${REDIS_HOST:-redis}:6379'
+ragflow:
+  host: ${RAGFLOW_HOST:-0.0.0.0}
+  http_port: 9380
+admin:
+  host: ${RAGFLOW_HOST:-0.0.0.0}
+  http_port: 9381
+mysql:
+  name: '${MYSQL_DBNAME:-rag_flow}'
+  user: '${MYSQL_USER:-root}'
+  password: '${MYSQL_PASSWORD:-infini_rag_flow}'
+  host: '${MYSQL_HOST:-mysql}'
+  port: ${MYSQL_PORT:-3306}
+  max_connections: 900
+  stale_timeout: 300
+  max_allowed_packet: ${MYSQL_MAX_PACKET:-1073741824}
+minio:
+  user: '${MINIO_USER:-rag_flow}'
+  password: '${MINIO_PASSWORD:-infini_rag_flow}'
+  host: '${MINIO_HOST:-minio}:9000'
+  bucket: '${MINIO_BUCKET:-}'
+  prefix_path: '${MINIO_PREFIX_PATH:-}'
+  secure: ${MINIO_SECURE:-false}
+  verify: ${MINIO_VERIFY:-true}
+# user_default_llm:
+#   factory: 'OpenAI'
+#   api_key: 'replace-me'
+#   base_url: 'https://api.openai.com/v1'
+#   default_models:
+#     chat_model:
+#       name: 'gpt-4o-mini'
+#     embedding_model:
+#       name: 'text-embedding-3-small'

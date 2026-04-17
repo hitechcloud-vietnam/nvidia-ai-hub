@@ -1,0 +1,46 @@
+name: "RAGFlow"
+slug: ragflow
+version: "1.0.0"
+description: "Official image-based RAGFlow stack with the upstream web UI, API, Elasticsearch, MySQL, MinIO, and Redis services for self-hosted RAG and agent workflows on DGX Spark."
+author: "InfiniFlow"
+source: "official"
+website: "https://ragflow.io/"
+upstream: "https://github.com/infiniflow/ragflow"
+category: multi-modal
+categories:
+  - rag
+  - workflow
+  - agent
+tags:
+  - ragflow
+  - rag
+  - agents
+  - workflow
+  - elasticsearch
+  - minio
+  - mysql
+  - redis
+icon: "📚"
+requirements:
+  min_memory_gb: 16
+  recommended_memory_gb: 24
+  disk_gb: 50
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3082
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: official
+runtime_env_path: "registry/recipes/ragflow/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official RAGFlow CPU stack with Elasticsearch, MySQL, MinIO, Redis, and the upstream web/API container."
+    command: "docker compose --env-file registry/recipes/ragflow/.env -p nvidia-ai-hub-ragflow -f registry/recipes/ragflow/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop RAGFlow while preserving local Elasticsearch, MySQL, MinIO, Redis, and application logs."
+    command: "docker compose --env-file registry/recipes/ragflow/.env -p nvidia-ai-hub-ragflow -f registry/recipes/ragflow/docker-compose.yml down"

@@ -1,0 +1,56 @@
+name: "LlamaIndex Starter"
+slug: llamaindex-starter
+version: "1.0.0"
+description: "Run a practical LlamaIndex starter app with a local FastAPI chat UI, Qdrant vector storage, and an external Ollama runtime for document-grounded RAG workflows."
+author: "LlamaIndex"
+source: "official"
+website: "https://www.llamaindex.ai/"
+upstream: "https://github.com/run-llama/llama_index"
+category: llm
+categories:
+  - rag
+  - workflow
+  - documents
+tags:
+  - llamaindex
+  - rag
+  - qdrant
+  - ollama
+  - fastapi
+  - vector-db
+  - starter
+icon: "🦙"
+logo: ""
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3084
+  path: "/"
+  health_path: "/health"
+docker:
+  build: true
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/llamaindex-starter/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:3084/api/query"
+  model_id: "qwen3.5:4b"
+  api_key: "not required"
+  max_context: "Depends on the Ollama model selected"
+  max_output_tokens: "Depends on the Ollama model selected"
+  curl_example: "curl -X POST http://<SPARK_IP>:3084/api/query -H 'Content-Type: application/json' -d '{\"query\":\"What is in my indexed documents?\"}'"
+commands:
+  - label: "Install / build / launch"
+    description: "Build the local LlamaIndex starter app, start Qdrant, connect to the shared Ollama runtime, and publish the web UI on port 3084."
+    command: "docker compose --env-file registry/recipes/llamaindex-starter/.env -p nvidia-ai-hub-llamaindex-starter -f registry/recipes/llamaindex-starter/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop LlamaIndex Starter while preserving uploaded documents, local storage metadata, and Qdrant data."
+    command: "docker compose --env-file registry/recipes/llamaindex-starter/.env -p nvidia-ai-hub-llamaindex-starter -f registry/recipes/llamaindex-starter/docker-compose.yml down"

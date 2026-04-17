@@ -1,0 +1,46 @@
+name: "Open WebUI RAG Preset"
+slug: openwebui-rag-preset
+version: "1.0.0"
+description: "Official-image Open WebUI preset for document chat and local RAG with a bundled Qdrant vector database plus easy pairing with the Ollama runtime recipe on DGX Spark."
+author: "Open WebUI"
+source: "official"
+website: "https://openwebui.com/"
+upstream: "https://github.com/open-webui/open-webui"
+category: llm
+categories:
+  - rag
+  - chat-ui
+tags:
+  - open-webui
+  - rag
+  - qdrant
+  - documents
+  - vector-db
+  - ollama
+icon: "📄"
+logo: "/logos/openwebui.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3083
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/openwebui-rag-preset/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+commands:
+  - label: "Install / launch"
+    description: "Start Open WebUI with a local Qdrant vector database for document indexing and RAG workflows."
+    command: "docker compose --env-file registry/recipes/openwebui-rag-preset/.env -p nvidia-ai-hub-openwebui-rag -f registry/recipes/openwebui-rag-preset/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Open WebUI and Qdrant while preserving uploaded files, settings, cache, and vector data."
+    command: "docker compose --env-file registry/recipes/openwebui-rag-preset/.env -p nvidia-ai-hub-openwebui-rag -f registry/recipes/openwebui-rag-preset/docker-compose.yml down"

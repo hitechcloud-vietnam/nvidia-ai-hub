@@ -5,10 +5,12 @@ __pycache__/
 
 # Node
 node_modules/
-
-# Data
+# Ignore tất cả data
 data/
 
+# Nhưng cho phép riêng thư mục này
+!registry/recipes/llamaindex-starter/data/
+!registry/recipes/llamaindex-starter/data/**
 # Build output
 frontend/dist/
 
