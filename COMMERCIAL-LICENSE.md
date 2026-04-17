@@ -3,9 +3,17 @@
 `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is available to individuals, companies, and organizations for
 strictly non-commercial use under the terms of [`LICENSE`](LICENSE).
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
 
-Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
+
+Copyright (c) 2026 Pho Tue SoftWare And Technology Solutions Joint Stock Company (including the HiTechCloud brand)
 
 ## Trademark and brand notice
 
@@ -13,11 +21,15 @@ Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
 
 Any use of NVIDIA-related names in this repository is for identification, interoperability, deployment, compatibility, or descriptive reference only.
 
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific legal instrument states otherwise.
+
 No content in this repository or in any related commercial discussion grants:
 
 - a right to use NVIDIA trademarks beyond lawful nominative reference;
 - a right to use the names, logos, or brand assets of Pho Tue SoftWare And Technology Solutions Joint Stock Company except as separately authorized in writing; or
 - any implication of NVIDIA sponsorship, endorsement, partnership, certification, or approval unless expressly documented in writing.
+
+Any customer-facing, reseller, partner, bid, proposal, or commercialization document that uses the project name together with third-party marks should be reviewed for trademark, attribution, and unfair-competition compliance before use.
 
 All other trademarks, service marks, logos, and trade names referenced in or alongside this project remain the property of their respective owners.
 
@@ -49,7 +61,8 @@ strictly non-commercial purposes such as:
 ## Contact for licensing
 
 To request commercial rights or a custom commercial agreement, contact
-HiTechCloud by Pho Tue SoftWare Solutions JSC as the copyright holder.
+Pho Tue SoftWare And Technology Solutions Joint Stock Company (including the
+HiTechCloud brand) as the copyright holder.
 
 Until such permission is granted in writing, all commercial rights remain
 reserved.

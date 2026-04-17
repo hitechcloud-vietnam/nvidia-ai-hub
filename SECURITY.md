@@ -4,9 +4,21 @@
 
 Security fixes are applied on a best-effort basis to the active default branch of this repository.
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
+
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific written instrument expressly distinguishes them.
 
 `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA product or platform names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates. Their mention in this repository is solely for descriptive and compatibility purposes and does not imply endorsement or affiliation unless expressly stated in writing.
+
+Any external publication, advisory, customer notification, or remediation communication that uses the project name together with third-party marks should be reviewed for trademark, attribution, and unfair-competition compliance before distribution.
 
 If you need a security fix, reproduce the issue against the latest `main` branch before reporting it.
 

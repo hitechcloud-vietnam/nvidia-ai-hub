@@ -14,9 +14,19 @@ If this guide and the license text ever differ, the license text controls.
 
 `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is source-available under a strictly non-commercial license.
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
 
-Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
+
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific written instrument expressly distinguishes them.
+
+Copyright (c) 2026 Pho Tue SoftWare And Technology Solutions Joint Stock Company (including the HiTechCloud brand)
 
 This means:
 
@@ -98,9 +108,12 @@ In particular:
 - References to NVIDIA hardware, software, drivers, container runtimes, or accelerator platforms in this project are descriptive only and are included to explain compatibility, system requirements, or operational behavior.
 - Such references do not, by themselves, create any sponsorship, endorsement, approval, partnership, certification, or agency relationship with NVIDIA Corporation.
 - The project name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` identifies this solution as offered by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** and does not transfer any ownership in third-party marks.
+- No person or entity may register, claim, oppose, challenge, or otherwise assert rights in a confusingly similar mark, trade name, domain name, social identity, or branding element derived from the project name, company name, or third-party marks referenced in this repository without an independent lawful basis.
 - All other trademarks, service marks, logos, product names, and company names mentioned in this repository are the property of their respective owners.
 
 Any use of project branding, company branding, or third-party brand assets beyond fair attribution should be separately reviewed for legal authorization.
+
+Any customer-facing material, reseller communication, proposal, external publication, or commercialization document that uses the project name together with third-party marks should be reviewed for trademark, attribution, and unfair-competition compliance before distribution.
 
 ## Commercial Rights Path
 

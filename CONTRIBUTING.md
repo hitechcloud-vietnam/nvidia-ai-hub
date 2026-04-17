@@ -6,7 +6,15 @@ This document defines the expected workflow for code, documentation, and recipe 
 
 ## Legal Identity and Trademark Attribution
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
 
 When contributing to this repository:
 
@@ -14,6 +22,12 @@ When contributing to this repository:
 - do not add wording, assets, or metadata that imply NVIDIA sponsorship, endorsement, certification, or affiliation unless expressly authorized in writing;
 - treat `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names as trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates; and
 - preserve attribution for all other third-party marks, logos, and product names used in documentation, recipes, or UI assets.
+
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific written instrument expressly distinguishes them.
+
+Do not introduce or support any confusingly similar mark, trade name, domain name, social identity, or branding element derived from the project name, company name, or third-party marks referenced in this repository without an independent lawful basis.
+
+Any customer-facing material, reseller communication, proposal, external publication, or commercialization document that uses the project name together with third-party marks should be reviewed for trademark, attribution, and unfair-competition compliance before distribution.
 
 ## Scope
 

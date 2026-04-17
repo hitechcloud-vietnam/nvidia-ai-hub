@@ -19,6 +19,7 @@ This document is the central index for repository governance, contribution workf
 - Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
 - Licensing guide: [`./licensing.md`](./licensing.md)
 - Legal notice: [`./legal-notice.md`](./legal-notice.md)
+- Legal notice (Vietnamese reference): [`./legal-vi.md`](./legal-vi.md)
 - Notice: [`../NOTICE`](../NOTICE)
 
 ## Document Purpose Matrix
@@ -38,6 +39,7 @@ This document is the central index for repository governance, contribution workf
 | `../SUPPORT.md` | support routing and usage questions | users and triagers |
 | `./licensing.md` | licensing model and commercial-use interpretation | users and maintainers |
 | `./legal-notice.md` | trademark attribution, ownership notice, and legal naming clarification | users, maintainers, legal reviewers |
+| `./legal-vi.md` | Vietnamese legal reference for internal/legal/commercial review | internal teams, maintainers, legal reviewers |
 
 ## When to Use What
 
@@ -109,6 +111,12 @@ This document is the central index for repository governance, contribution workf
 - no-endorsement wording
 - legal review references for documentation and distribution
 
+### Use `legal-vi.md` for
+
+- Vietnamese legal reference wording
+- internal communication and dossier support
+- reviewer alignment for Vietnamese-language legal interpretation
+
 ### Use `LICENSE` and `COMMERCIAL-LICENSE.md` for
 
 - non-commercial use rights
@@ -145,6 +153,7 @@ Repository governance and licensing should remain consistent across:
 - `COMMERCIAL-LICENSE.md`
 - `docs/licensing.md`
 - `docs/legal-notice.md`
+- `docs/legal-vi.md`
 - `.github/CODEOWNERS`
 - `.github/dependabot.yml`
 - `.github/labeler.yml`
@@ -153,4 +162,8 @@ Repository governance and licensing should remain consistent across:
 
 When changing governance or licensing language, update all affected documents in the same pull request.
 
-Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, and `docs/legal-notice.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.
+Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, `docs/legal-notice.md`, and `docs/legal-vi.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.
+
+For English-language legal and governance materials, use the registered address format `128 Binh My Street, Binh My Commune, Ho Chi Minh City`. For Vietnamese-language legal materials, use `128 Đường Bình Mỹ, xã Bình Mỹ, Thành phố Hồ Chí Minh`.
+
+Where repository governance or support materials mention the product name, treat `NVIDIA AI Hub` and `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` as the same software solution unless a specific written instrument expressly distinguishes them.

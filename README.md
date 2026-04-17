@@ -76,7 +76,15 @@ For repository automation, governance maintenance, and review routing, use:
 
 ## Legal Notice and Trademark Attribution
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+
+Company information:
+
+- Legal entity: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
 
 `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC`, related repository branding, and associated product presentation in this repository are proprietary identifiers used for this solution.
 
@@ -90,9 +98,11 @@ No statement in this repository should be interpreted as:
 - implying sponsorship, endorsement, certification, partnership, or approval by NVIDIA Corporation, unless such relationship is expressly stated in writing; or
 - transferring any ownership in the names, logos, trade dress, or brand assets of Pho Tue SoftWare And Technology Solutions Joint Stock Company, NVIDIA Corporation, or any other third party.
 
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` both refer to the same software solution described in this repository.
+
 All other trade names, trademarks, service marks, logos, and brand features mentioned in this repository remain the property of their respective owners.
 
-For controlling legal terms, review [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), [`docs/licensing.md`](./docs/licensing.md), and [`docs/legal-notice.md`](./docs/legal-notice.md).
+For controlling legal terms, review [`LICENSE`](./LICENSE), [`NOTICE`](./NOTICE), [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), [`docs/licensing.md`](./docs/licensing.md), [`docs/legal-notice.md`](./docs/legal-notice.md), and the Vietnamese reference notice [`docs/legal-vi.md`](./docs/legal-vi.md).
 
 ## Quick install
 

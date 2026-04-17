@@ -1,6 +1,18 @@
-Pho Tue SoftWare Solutions Non-Commercial Use License v1.0
+Pho Tue SoftWare And Technology Solutions Non-Commercial Use License v1.0
 
-Copyright (c) 2026 HiTechCloud by Pho Tue SoftWare Solutions JSC
+Copyright (c) 2026 Pho Tue SoftWare And Technology Solutions Joint Stock Company (including the HiTechCloud brand)
+
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
+
+For purposes of this license, the short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific written instrument expressly distinguishes them.
 
 This repository and all associated source code, scripts, configuration files,
 documentation, website assets, and related materials (collectively, the
@@ -46,9 +58,10 @@ commercial use are forbidden.
 3. Exclusive Commercial Rights Reservation
 
 All commercial rights are reserved exclusively to the copyright holder,
-HiTechCloud by Pho Tue SoftWare Solutions JSC, including the owner of this
-repository. Only the copyright holder or an expressly authorized licensee may
-commercialize the Software.
+Pho Tue SoftWare And Technology Solutions Joint Stock Company (including the
+HiTechCloud brand), including the owner of this repository. Only the
+copyright holder or an expressly authorized licensee may commercialize the
+Software.
 
 4. Redistribution Conditions
 
@@ -73,9 +86,9 @@ your rights under this license immediately.
 6. No Trademark License
 
 This license does not grant any right to use any trade name, trademark,
-service mark, logo, or brand feature of Nguyen Thanh An, Pho Tue SoftWare
-Solutions JSC, or this repository, except as required for reasonable and
-customary attribution.
+service mark, logo, or brand feature of Pho Tue SoftWare And Technology
+Solutions Joint Stock Company (including the HiTechCloud brand), or this
+repository, except as required for reasonable and customary attribution.
 
 For clarity:
 
@@ -88,6 +101,17 @@ For clarity:
 - no license is granted under this license to use any third-party trademark,
 	service mark, logo, trade dress, or brand feature except to the limited
 	extent required for lawful nominative reference or customary attribution.
+
+No person or entity may register, claim, oppose, challenge, or otherwise
+assert rights in a confusingly similar mark, trade name, domain name, social
+identity, or branding element derived from the product name, company name, or
+third-party marks referenced in the Software without an independent lawful
+basis.
+
+Any external publication, customer-facing material, reseller communication,
+proposal, or commercialization document that uses the product name together
+with third-party marks should be reviewed for trademark, attribution, and
+unfair-competition compliance before distribution.
 
 7. No Warranty
 

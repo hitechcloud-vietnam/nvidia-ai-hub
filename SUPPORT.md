@@ -4,7 +4,17 @@
 
 This document explains where to ask questions, where to report problems, and how to request commercial assistance for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+
+Official company details:
+
+- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
+- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
+- Tax code: `0318222903`
+- D-U-N-S Number: `557339920`
+- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
+
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific legal or commercial document states otherwise.
 
 `NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates in the United States and other countries. References to NVIDIA technologies in this repository are descriptive only and do not imply endorsement or sponsorship unless expressly stated in writing.
 
