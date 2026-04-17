@@ -1,0 +1,54 @@
+name: "Langflow RAG Preset"
+slug: langflow-rag-preset
+version: "1.0.0"
+description: "Official-image Langflow preset for local RAG and agent workflow prototyping with persistent config storage, API-key-ready access, and shared Ollama connectivity on DGX Spark."
+author: "Langflow AI"
+source: "official"
+website: "https://langflow.org"
+upstream: "https://github.com/langflow-ai/langflow"
+category: llm
+categories:
+  - rag
+  - workflow
+  - chat-ui
+tags:
+  - langflow
+  - rag
+  - workflow
+  - ollama
+  - agents
+  - visual-ide
+icon: "🧭"
+logo: "/logos/langflow.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3090
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/langflow-rag-preset/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:3090/api/v1"
+  model_id: "Configured inside Langflow flows"
+  api_key: "Set LANGFLOW_API_KEY or create one in the running instance"
+  max_context: "Depends on the Ollama model selected in each flow"
+  max_output_tokens: "Depends on the Ollama model selected in each flow"
+  curl_example: "curl -X GET http://<SPARK_IP>:3090/api/v1/flows -H 'x-api-key: <LANGFLOW_API_KEY>'"
+commands:
+  - label: "Install / launch"
+    description: "Start Langflow with persistent config storage, local authentication defaults, and shared Ollama access for RAG and agent flow prototyping."
+    command: "docker compose --env-file registry/recipes/langflow-rag-preset/.env -p nvidia-ai-hub-langflow-rag -f registry/recipes/langflow-rag-preset/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Langflow while preserving flows, variables, uploads, logs, API keys, and local runtime state."
+    command: "docker compose --env-file registry/recipes/langflow-rag-preset/.env -p nvidia-ai-hub-langflow-rag -f registry/recipes/langflow-rag-preset/docker-compose.yml down"

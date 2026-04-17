@@ -1,0 +1,54 @@
+name: "OpenSearch AI Assistant"
+slug: opensearch-ai-assistant
+version: "1.0.0"
+description: "OpenSearch and OpenSearch Dashboards preset for local AI-assisted search, PPL query-assist experimentation, ML Commons agent bootstrap, and shared Ollama connectivity on DGX Spark."
+author: "OpenSearch Project"
+source: "official"
+website: "https://opensearch.org/"
+upstream: "https://github.com/opensearch-project/OpenSearch"
+category: llm
+categories:
+  - rag
+  - search
+  - analytics
+tags:
+  - opensearch
+  - dashboards
+  - search
+  - ml-commons
+  - query-assist
+  - ollama
+icon: "🔎"
+logo: "/logos/opensearch.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3091
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/opensearch-ai-assistant/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:9201"
+  model_id: "Create ML Commons connectors, models, and agents after first launch"
+  api_key: "Use basic authentication with the OpenSearch admin credentials from the recipe environment file"
+  max_context: "Depends on the remote model and ML Commons agent configuration"
+  max_output_tokens: "Depends on the remote model and ML Commons agent configuration"
+  curl_example: "curl -u admin:<OPENSEARCH_INITIAL_ADMIN_PASSWORD> http://<SPARK_IP>:9201/_cluster/health?pretty"
+commands:
+  - label: "Install / launch"
+    description: "Start OpenSearch and OpenSearch Dashboards with persistent local storage, ML Commons settings, and shared-host access for manual Ollama connector setup."
+    command: "docker compose --env-file registry/recipes/opensearch-ai-assistant/.env -p nvidia-ai-hub-opensearch-ai -f registry/recipes/opensearch-ai-assistant/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop OpenSearch and Dashboards while preserving cluster data and local configuration."
+    command: "docker compose --env-file registry/recipes/opensearch-ai-assistant/.env -p nvidia-ai-hub-opensearch-ai -f registry/recipes/opensearch-ai-assistant/docker-compose.yml down"

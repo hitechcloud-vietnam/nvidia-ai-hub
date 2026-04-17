@@ -1,0 +1,19 @@
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:v1.12.0
+    container_name: nvidia-ai-hub-anythingllm-enterprise
+    cap_add:
+      - SYS_ADMIN
+    env_file:
+      - .env
+    environment:
+      STORAGE_DIR: ${STORAGE_DIR:-/app/server/storage}
+      SERVER_PORT: ${CONTAINER_PORT:-3001}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${HOST_PORT:-3088}:${CONTAINER_PORT:-3001}"
+    volumes:
+      - ./data/storage:/app/server/storage
+      - ./.env:/app/server/.env
+    restart: unless-stopped

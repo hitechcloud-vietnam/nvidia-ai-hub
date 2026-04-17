@@ -1,0 +1,13 @@
+server.host: 0.0.0.0
+opensearch.hosts: ["http://opensearch:9200"]
+opensearch.username: ${DASHBOARDS_USERNAME}
+opensearch.password: ${DASHBOARDS_PASSWORD}
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersAllowlist: ["securitytenant", "Authorization"]
+data_source.enabled: true
+queryEnhancements.enabled: true
+queryEnhancements.queryAssist.supportedLanguages:
+  - language: PPL
+    agentConfig: ${QUERY_ASSIST_AGENT_CONFIG}
+    timeRangeParserAgentConfig: ${QUERY_ASSIST_TIME_RANGE_AGENT_CONFIG}
+queryEnhancements.queryAssist.summary.enabled: false

@@ -1,0 +1,54 @@
+name: "Flowise RAG Preset"
+slug: flowise-rag-preset
+version: "1.0.0"
+description: "Official-image Flowise preset for local RAG prototyping with persistent Flowise state, shared Ollama connectivity, and practical defaults for document ingestion and chatflow building on DGX Spark."
+author: "FlowiseAI"
+source: "official"
+website: "https://flowiseai.com/"
+upstream: "https://github.com/FlowiseAI/Flowise"
+category: llm
+categories:
+  - rag
+  - workflow
+  - chat-ui
+tags:
+  - flowise
+  - rag
+  - workflow
+  - ollama
+  - document-ingestion
+  - chatflows
+icon: "🌊"
+logo: "/logos/flowise.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3089
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/flowise-rag-preset/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:3089/api/v1"
+  model_id: "Configured inside Flowise chatflows"
+  api_key: "Create in Settings -> API Keys if you need programmatic access"
+  max_context: "Depends on the Ollama model selected in each flow"
+  max_output_tokens: "Depends on the Ollama model selected in each flow"
+  curl_example: "curl -X GET http://<SPARK_IP>:3089/api/v1/chatflows -H 'Authorization: Bearer <FLOWISE_API_KEY>'"
+commands:
+  - label: "Install / launch"
+    description: "Start Flowise with persistent local database, logs, encryption secrets, uploads, and shared Ollama access for RAG and workflow prototyping."
+    command: "docker compose --env-file registry/recipes/flowise-rag-preset/.env -p nvidia-ai-hub-flowise-rag -f registry/recipes/flowise-rag-preset/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Flowise while preserving flows, credentials, uploaded files, logs, and local SQLite state."
+    command: "docker compose --env-file registry/recipes/flowise-rag-preset/.env -p nvidia-ai-hub-flowise-rag -f registry/recipes/flowise-rag-preset/docker-compose.yml down"

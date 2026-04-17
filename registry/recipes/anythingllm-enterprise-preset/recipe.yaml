@@ -1,0 +1,48 @@
+name: "AnythingLLM Enterprise Preset"
+slug: anythingllm-enterprise-preset
+version: "1.0.0"
+description: "Enterprise-oriented AnythingLLM preset using the official Docker image with persistent local storage, strong secret placeholders, multi-user enablement guidance, and default pairing to the shared Ollama runtime."
+author: "Mintplex Labs"
+source: "official"
+website: "https://anythingllm.com"
+upstream: "https://github.com/Mintplex-Labs/anything-llm"
+category: llm
+categories:
+  - rag
+  - agents
+  - chat-ui
+tags:
+  - anythingllm
+  - enterprise
+  - multi-user
+  - rag
+  - agents
+  - ollama
+icon: "📚"
+logo: "/logos/anythingllm.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3088
+  path: "/"
+  health_path: "/api/ping"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/anythingllm-enterprise-preset/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+commands:
+  - label: "Install / launch"
+    description: "Start AnythingLLM with persistent storage, official image defaults, and host access to the shared Ollama runtime."
+    command: "docker compose --env-file registry/recipes/anythingllm-enterprise-preset/.env -p nvidia-ai-hub-anythingllm-enterprise -f registry/recipes/anythingllm-enterprise-preset/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop AnythingLLM while preserving local application state, documents, vector cache, flows, plugins, and embedded database files."
+    command: "docker compose --env-file registry/recipes/anythingllm-enterprise-preset/.env -p nvidia-ai-hub-anythingllm-enterprise -f registry/recipes/anythingllm-enterprise-preset/docker-compose.yml down"
