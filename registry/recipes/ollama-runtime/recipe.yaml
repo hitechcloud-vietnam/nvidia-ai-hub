@@ -1,24 +1,28 @@
 name: "Ollama Runtime"
 slug: ollama-runtime
 version: "1.0.0"
-description: "Run a local Ollama server with a ready-to-use starter model, then use it across compatible apps like Open WebUI and Onyx."
+description: "Official Ollama runtime baseline with a lightweight management UI, persistent local model storage, configurable starter-model bootstrap, and a shared endpoint for DGX Spark applications."
 author: "NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC"
 source: "nvidia-ai-hub"
 website: "https://ollama.com/"
 upstream: "https://github.com/ollama/ollama"
 category: llm
+categories:
+  - runtime
+  - model-serving
 tags:
   - ollama
+  - runtime
   - local-llm
-  - model-runtime
   - model-management
+  - gpu
   - starter-model
 icon: ""
 logo: "/logos/ollama-official.png"
 requirements:
   min_memory_gb: 8
   recommended_memory_gb: 16
-  disk_gb: 16
+  disk_gb: 24
   cuda_compute: "12.1"
 ui:
   type: web
@@ -33,5 +37,16 @@ integration:
   api_url: "http://<SPARK_IP>:11435"
   model_id: "qwen3.5:4b"
   api_key: "not required"
+  max_context: "Depends on the Ollama model selected"
+  max_output_tokens: "Depends on the Ollama model selected"
   curl_example: "curl http://<SPARK_IP>:11435/api/tags"
 status: experimental
+runtime_env_path: "registry/recipes/ollama-runtime/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Build the lightweight management UI, start the official Ollama runtime with GPU access, and publish the shared API endpoint on port 11435."
+    command: "docker compose --env-file registry/recipes/ollama-runtime/.env -p nvidia-ai-hub-ollama-runtime -f registry/recipes/ollama-runtime/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop the Ollama runtime and management UI while preserving downloaded models and local state."
+    command: "docker compose --env-file registry/recipes/ollama-runtime/.env -p nvidia-ai-hub-ollama-runtime -f registry/recipes/ollama-runtime/docker-compose.yml down"
