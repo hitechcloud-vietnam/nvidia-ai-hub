@@ -1,0 +1,32 @@
+services:
+  neo4j:
+    image: ${NEO4J_IMAGE:-neo4j:5-community}
+    container_name: nvidia-ai-hub-neo4j-knowledge-graph
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+      NEO4J_PLUGINS: ${NEO4J_PLUGINS:-["apoc"]}
+      NEO4J_server_memory_heap_initial__size: ${NEO4J_server_memory_heap_initial__size:-1G}
+      NEO4J_server_memory_heap_max__size: ${NEO4J_server_memory_heap_max__size:-1G}
+      NEO4J_server_memory_pagecache_size: ${NEO4J_server_memory_pagecache_size:-512M}
+      NEO4J_dbms_security_procedures_unrestricted: ${NEO4J_dbms_security_procedures_unrestricted:-apoc.*}
+      NEO4J_dbms_security_procedures_allowlist: ${NEO4J_dbms_security_procedures_allowlist:-apoc.*}
+      NEO4J_apoc_export_file_enabled: ${NEO4J_apoc_export_file_enabled:-true}
+      NEO4J_apoc_import_file_enabled: ${NEO4J_apoc_import_file_enabled:-true}
+      NEO4J_apoc_import_file_use__neo4j__config: ${NEO4J_apoc_import_file_use__neo4j__config:-true}
+    ports:
+      - "3094:7474"
+      - "${NEO4J_HTTP_PORT:-7475}:7474"
+      - "${NEO4J_BOLT_PORT:-7688}:7687"
+    volumes:
+      - ./data:/data
+      - ./logs:/logs
+      - ./import:/import
+      - ./plugins:/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:7474/browser/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
