@@ -1,0 +1,56 @@
+name: "Jupyter AI Lab"
+slug: jupyter-ai-lab
+version: "1.0.0"
+description: "JupyterLab workspace preset with Jupyter AI, scientific Python tooling, persistent notebooks, and shared Ollama connectivity for local notebook-centric experimentation on DGX Spark."
+author: "Project Jupyter"
+source: "official"
+website: "https://jupyter.org/"
+upstream: "https://github.com/jupyterlab/jupyter-ai"
+category: llm
+categories:
+  - notebook
+  - agentic
+  - experimentation
+tags:
+  - jupyterlab
+  - jupyter-ai
+  - notebook
+  - ollama
+  - python
+  - data-science
+  - lab
+icon: "📓"
+logo: ""
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3095
+  path: "/lab"
+  health_path: "/lab"
+docker:
+  build: true
+  build_time_minutes: 10
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/jupyter-ai-lab/.env"
+requires_hf_token: false
+depends_on:
+  - ollama-runtime
+integration:
+  api_url: "http://<SPARK_IP>:3095/lab"
+  model_id: "Configure Jupyter AI providers and notebook magics after launch"
+  api_key: "Use the Jupyter token from the recipe environment file"
+  max_context: "Depends on the configured Jupyter AI provider and model"
+  max_output_tokens: "Depends on the configured Jupyter AI provider and model"
+  curl_example: "curl -I http://<SPARK_IP>:3095/lab"
+commands:
+  - label: "Install / build / launch"
+    description: "Build the custom Jupyter AI image, start JupyterLab with persistent notebooks, and expose the lab UI on port 3095."
+    command: "docker compose --env-file registry/recipes/jupyter-ai-lab/.env -p nvidia-ai-hub-jupyter-ai-lab -f registry/recipes/jupyter-ai-lab/docker-compose.yml up -d --build"
+  - label: "Stop"
+    description: "Stop Jupyter AI Lab while preserving notebooks, settings, caches, and local workspace assets."
+    command: "docker compose --env-file registry/recipes/jupyter-ai-lab/.env -p nvidia-ai-hub-jupyter-ai-lab -f registry/recipes/jupyter-ai-lab/docker-compose.yml down"

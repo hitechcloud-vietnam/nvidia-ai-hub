@@ -1,0 +1,32 @@
+services:
+  jupyter-ai-lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${JUPYTER_IMAGE:-jupyter-ai-lab:local}
+    container_name: nvidia-ai-hub-jupyter-ai-lab
+    env_file:
+      - .env
+    environment:
+      DOCKER_STACKS_JUPYTER_CMD: ${DOCKER_STACKS_JUPYTER_CMD:-lab}
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-ChangeMe-JupyterToken123!}
+      NOTEBOOK_ARGS: ${NOTEBOOK_ARGS:-} --IdentityProvider.token=${JUPYTER_TOKEN:-ChangeMe-JupyterToken123!}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11435}
+      OPENAI_API_BASE: ${OPENAI_API_BASE:-http://host.docker.internal:11435/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-ollama}
+      JUPYTERLAB_SETTINGS_DIR: ${JUPYTERLAB_SETTINGS_DIR:-/home/jovyan/.jupyter/lab/user-settings}
+      JUPYTERLAB_WORKSPACES_DIR: ${JUPYTERLAB_WORKSPACES_DIR:-/home/jovyan/.jupyter/lab/workspaces}
+    ports:
+      - "${JUPYTER_PORT:-3095}:8888"
+    volumes:
+      - ./workspace:/home/jovyan/work
+      - ./jupyter-config:/home/jovyan/.jupyter
+      - ./cache:/home/jovyan/.cache
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/lab >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
