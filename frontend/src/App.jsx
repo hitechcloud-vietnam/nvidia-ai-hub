@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useStore } from './store'
 import { useMetrics } from './hooks/useMetrics'
 import { useRecipeMetrics } from './hooks/useRecipeMetrics'
+import { resolveStaticAssetUrl } from './desktopRuntime'
 import ThemeToggle from './components/ThemeToggle'
 import Catalog from './pages/Catalog'
 import { SUPPORTED_LANGUAGES } from './i18n'
@@ -101,6 +102,7 @@ export default function App() {
 
   const runningCount = recipes.filter((r) => r.running || r.starting).length
   const updatesCount = recipes.filter((r) => r.registry_changed).length || registryStatus?.changed_recipe_slugs?.length || 0
+  const brandMarkUrl = resolveStaticAssetUrl('/brand/spark-ai-hub-mark.svg')
 
   return (
     <div className="bg-bg text-text flex h-screen overflow-hidden transition-colors duration-300">
@@ -112,7 +114,7 @@ export default function App() {
           className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] flex items-center justify-center border-none cursor-pointer shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow mb-6 p-1.5"
           title={t('appName')}
         >
-          <img src="/brand/spark-ai-hub-mark.svg" alt={t('appName')} className="w-full h-full" />
+          <img src={brandMarkUrl} alt={t('appName')} className="w-full h-full" />
         </button>
 
         {/* Nav */}
@@ -270,6 +272,7 @@ function About() {
   const featureFlags = useStore((s) => s.featureFlags)
   const modelManagerAvailable = useStore((s) => s.modelManagerAvailable)
   const setFeatureFlag = useStore((s) => s.setFeatureFlag)
+  const brandMarkUrl = resolveStaticAssetUrl('/brand/spark-ai-hub-mark.svg')
 
   const handleSync = async () => {
     await syncRegistry()
@@ -278,7 +281,7 @@ function About() {
   return (
     <div className="px-6 py-6 pb-12 animate-fadeIn">
       <div className="flex items-center gap-4 mb-8">
-        <img src="/brand/spark-ai-hub-mark.svg" alt={t('appName')} className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] p-2.5" />
+        <img src={brandMarkUrl} alt={t('appName')} className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] p-2.5" />
         <div>
           <h1 className="text-2xl font-bold tracking-tight font-display m-0">{t('appName')}</h1>
           <p className="text-sm text-text-dim m-0 mt-1">{t('about.subtitle')}</p>

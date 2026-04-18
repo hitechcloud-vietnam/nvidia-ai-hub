@@ -10,6 +10,17 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+release/**
+!release/*.exe
+!release/*.msi
+!release/*.dmg
+!release/*.AppImage
+!release/*.deb
+!release/*.rpm
+!release/*.pkg
+!release/*.zip
+!release/*.tar.gz
+!release/*.blockmap
 *.local
 
 # Editor directories and files

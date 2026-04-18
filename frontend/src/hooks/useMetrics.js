@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { resolveWebSocketUrl } from '../desktopRuntime'
 import { useStore } from '../store'
 
 export function useMetrics() {
@@ -6,9 +7,9 @@ export function useMetrics() {
 
   useEffect(() => {
     let ws
+    let reconnectTimer
     function connect() {
-      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-      ws = new WebSocket(`${proto}//${location.host}/ws/metrics`)
+      ws = new WebSocket(resolveWebSocketUrl('/ws/metrics'))
       ws.onmessage = (e) => {
         try {
           setMetrics(JSON.parse(e.data))
@@ -16,10 +17,15 @@ export function useMetrics() {
           console.warn('Failed to parse metrics payload', error)
         }
       }
-      ws.onclose = () => setTimeout(connect, 3000)
+      ws.onclose = () => {
+        reconnectTimer = window.setTimeout(connect, 3000)
+      }
       ws.onerror = () => ws.close()
     }
     connect()
-    return () => ws?.close()
+    return () => {
+      window.clearTimeout(reconnectTimer)
+      ws?.close()
+    }
   }, [setMetrics])
 }

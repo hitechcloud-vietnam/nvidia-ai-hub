@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
+import { resolveStaticAssetUrl } from '../desktopRuntime'
+import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
 
@@ -370,6 +372,8 @@ export default function Catalog({ search = '' }) {
 
   const featured = recipesWithBanners.find((recipe) => recipe.slug === featuredSlug) || recipesWithBanners[0] || null
   const bannerConf = featured ? getBanner(featured.slug) : null
+  const bannerImageUrl = bannerConf ? resolveStaticAssetUrl(bannerConf.img) : ''
+  const featuredLogoUrl = useThemedLogo(featured?.logo)
   const featuredIsNotebook = isNotebookRecipe(featured)
   const featuredHardwareFit = featured ? getRecipeHardwareFit(featured, metrics) : null
   const showHero = Boolean(featured && bannerConf && !search && category === 'all')
@@ -397,7 +401,7 @@ export default function Catalog({ search = '' }) {
           onClick={() => selectRecipe(featured.slug)}
         >
           <img
-            src={bannerConf.img}
+            src={bannerImageUrl}
             alt=""
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -405,9 +409,9 @@ export default function Catalog({ search = '' }) {
           <div className="absolute inset-0" style={{ background: 'var(--hero-overlay-bottom)' }} />
 
           <div className="relative flex h-full items-center gap-5 px-8">
-            {featured.logo ? (
+            {featuredLogoUrl ? (
               <img
-                src={featured.logo}
+                src={featuredLogoUrl}
                 alt={featured.name}
                 className="h-16 w-16 shrink-0 rounded-xl border border-glass-border bg-surface/70 object-contain p-2.5 shadow-2xl backdrop-blur-md"
               />

@@ -14,6 +14,18 @@ function resolveHttpUrl(input) {
   return `${apiBaseUrl}${input}`
 }
 
+function resolveStaticAssetUrl(input) {
+  if (!runtimeConfig.isDesktop || typeof input !== 'string' || !input.startsWith('/')) {
+    return input
+  }
+
+  if (input.startsWith('/api/') || input.startsWith('/ws/')) {
+    return input
+  }
+
+  return `.${input}`
+}
+
 function resolveWebSocketUrl(input) {
   if (!wsBaseUrl || typeof input !== 'string' || !input.includes('/ws/')) {
     return input
@@ -57,4 +69,4 @@ if (runtimeConfig.isDesktop) {
   }
 }
 
-export { apiBaseUrl, isRelativeApiPath, resolveHttpUrl, resolveWebSocketUrl }
+export { apiBaseUrl, isRelativeApiPath, resolveHttpUrl, resolveStaticAssetUrl, resolveWebSocketUrl }

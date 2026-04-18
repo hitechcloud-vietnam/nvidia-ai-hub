@@ -17,14 +17,25 @@ data/
 .env
 *.env
 **/.env
-**/frontend/release
 
 # Build output
 frontend/dist/
 frontend/build-assets/*
 !frontend/build-assets/.gitkeep
 frontend/electron/backend-dist/
-# Keep desktop release artifacts trackable
+frontend/release/**
+!frontend/release/*.exe
+!frontend/release/*.msi
+!frontend/release/*.dmg
+!frontend/release/*.AppImage
+!frontend/release/*.deb
+!frontend/release/*.rpm
+!frontend/release/*.pkg
+!frontend/release/*.zip
+!frontend/release/*.tar.gz
+!frontend/release/*.blockmap
+
+# Keep desktop installer artifacts trackable
 # Local dev workspaces
 comfyui-src/
 

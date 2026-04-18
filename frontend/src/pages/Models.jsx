@@ -390,7 +390,7 @@ export default function Models() {
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               <StatusTile label={t('models.recipe')} value={modelOverview?.recipe_name || t('models.runtimeDefaultName')} tone={modelOverview?.installed ? 'success' : 'neutral'} />
-              <StatusTile label={t('models.runtimeState')} value={getRuntimeStateLabel(modelOverview)} tone={modelOverview?.ready ? 'success' : modelOverview?.starting ? 'warning' : 'neutral'} />
+              <StatusTile label={t('models.runtimeState')} value={getRuntimeStateLabel(modelOverview, t)} tone={modelOverview?.ready ? 'success' : modelOverview?.starting ? 'warning' : 'neutral'} />
               <StatusTile label={t('models.starterModel')} value={modelRuntime?.starter_display_name || modelRuntime?.starter_model || '—'} tone={modelRuntime?.starter_ready ? 'success' : 'warning'} />
             </div>
 

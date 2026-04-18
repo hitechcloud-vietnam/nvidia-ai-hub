@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { resolveWebSocketUrl } from './desktopRuntime'
 import i18n, { persistLanguage } from './i18n'
 
 const tStore = (key, options) => i18n.t(`store.${key}`, options)
@@ -197,8 +198,7 @@ export const useStore = create((set, get) => ({
     const existing = get()._logWs[slug]
     if (existing && existing.readyState <= 1) return
 
-    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${wsProto}//${location.host}/ws/logs/${slug}`)
+    const ws = new WebSocket(resolveWebSocketUrl(`/ws/logs/${slug}`))
     set({
       _logWs: { ...get()._logWs, [slug]: ws },
       containerLogs: reset
@@ -969,8 +969,7 @@ export const useStore = create((set, get) => ({
     }
 
     // Connect WebSocket for live log streaming
-    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${wsProto}//${location.host}/ws/build/${slug}`)
+    const ws = new WebSocket(resolveWebSocketUrl(`/ws/build/${slug}`))
     set({ _ws: ws })
 
     ws.onmessage = (e) => {
@@ -1019,8 +1018,7 @@ export const useStore = create((set, get) => ({
       return
     }
 
-    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${wsProto}//${location.host}/ws/build/${slug}`)
+    const ws = new WebSocket(resolveWebSocketUrl(`/ws/build/${slug}`))
     set({ _ws: ws })
 
     ws.onmessage = (e) => {

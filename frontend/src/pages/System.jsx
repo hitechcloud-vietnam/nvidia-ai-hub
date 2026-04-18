@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { resolveStaticAssetUrl } from '../desktopRuntime'
 import { useStore } from '../store'
 
 const SystemGpuChartsSection = lazy(() => import('../components/system/SystemCharts'))
@@ -262,7 +263,7 @@ export default function System() {
                   <tr key={r.slug} className="border-b border-outline-dim last:border-0">
                     <td className="py-2.5 flex items-center gap-2">
                       {r.logo ? (
-                        <img src={r.logo} alt="" className="w-6 h-6 rounded-md object-contain bg-surface-high p-0.5" />
+                        <img src={resolveStaticAssetUrl(r.logo)} alt="" className="w-6 h-6 rounded-md object-contain bg-surface-high p-0.5" />
                       ) : (
                         <span className="text-sm">{r.icon || '◻'}</span>
                       )}

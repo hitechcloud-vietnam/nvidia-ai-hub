@@ -67,6 +67,15 @@ def _load_hf_queue() -> list[dict]:
         return []
 
 
+def _load_json_file(path: Path, fallback):
+    if not path.is_file():
+        return fallback
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return fallback
+
+
 def _save_hf_queue(items: list[dict]) -> None:
     path = _hf_queue_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -527,9 +536,21 @@ async def models_runtime():
 
 @router.get("/installed")
 async def installed_models():
-    data = await _proxy_ollama_runtime("/api/models")
     inventory_path = settings.data_dir / "models" / "ollama-installed.json"
     inventory_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        data = await _proxy_ollama_runtime("/api/models")
+    except HTTPException as exc:
+        cached = _load_json_file(inventory_path, {"models": []})
+        if exc.status_code == 502:
+            if not isinstance(cached, dict):
+                cached = {"models": []}
+            cached.setdefault("models", [])
+            cached["degraded"] = True
+            cached["detail"] = str(exc.detail or "Failed to reach Ollama Runtime management API")
+            return cached
+        raise
+
     inventory_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     return data
 
