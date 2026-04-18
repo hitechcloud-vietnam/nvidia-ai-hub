@@ -4,7 +4,7 @@ __pycache__/
 .venv/
 
 # Node
-node_modules/
+node_modules/*
 
 # Ignore tất cả data
 data/
@@ -17,12 +17,14 @@ data/
 .env
 *.env
 **/.env
+**/frontend/release
 
 # Build output
 frontend/dist/
 frontend/build-assets/*
 !frontend/build-assets/.gitkeep
-
+frontend/electron/backend-dist/
+# Keep desktop release artifacts trackable
 # Local dev workspaces
 comfyui-src/
 
