@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 import RecipeCard from '../components/RecipeCard'
 import { getRecipeFeaturedLabel, getRecipeOpenLabelWithArrow, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
@@ -78,49 +79,49 @@ function getBanner(slug) {
 }
 
 const CATEGORIES = [
-  { id: 'all', label: 'All', icon: 'grid' },
-  { id: 'dgx-spark', label: 'DGX Spark', icon: 'spark' },
-  { id: 'llm', label: 'LLMs', icon: 'brain' },
-  { id: 'vllm', label: 'vLLMs', icon: 'server' },
-  { id: 'image-gen', label: 'Image Gen', icon: 'image' },
-  { id: 'video-gen', label: 'Video Gen', icon: 'video' },
-  { id: '3d-gen', label: '3D Gen', icon: 'cube' },
-  { id: 'multi-modal', label: 'Multi-Modal', icon: 'multimodal' },
-  { id: 'vision-language', label: 'Vision-Language', icon: 'eye' },
-  { id: 'image-understanding', label: 'Image Understanding', icon: 'scan' },
-  { id: 'reasoning', label: 'Reasoning', icon: 'reasoning' },
-  { id: 'code-gen', label: 'Code Gen', icon: 'code' },
-  { id: 'speech', label: 'Speech', icon: 'mic' },
-  { id: 'rag', label: 'RAG', icon: 'database' },
-  { id: 'nemoclaw', label: 'NemoClaw', icon: 'shield' },
+  { id: 'all', labelKey: 'catalog.categoryLabels.all', icon: 'grid' },
+  { id: 'dgx-spark', labelKey: 'catalog.categoryLabels.dgxSpark', icon: 'spark' },
+  { id: 'llm', labelKey: 'catalog.categoryLabels.llm', icon: 'brain' },
+  { id: 'vllm', labelKey: 'catalog.categoryLabels.vllm', icon: 'server' },
+  { id: 'image-gen', labelKey: 'catalog.categoryLabels.imageGen', icon: 'image' },
+  { id: 'video-gen', labelKey: 'catalog.categoryLabels.videoGen', icon: 'video' },
+  { id: '3d-gen', labelKey: 'catalog.categoryLabels.threeDGen', icon: 'cube' },
+  { id: 'multi-modal', labelKey: 'catalog.categoryLabels.multiModal', icon: 'multimodal' },
+  { id: 'vision-language', labelKey: 'catalog.categoryLabels.visionLanguage', icon: 'eye' },
+  { id: 'image-understanding', labelKey: 'catalog.categoryLabels.imageUnderstanding', icon: 'scan' },
+  { id: 'reasoning', labelKey: 'catalog.categoryLabels.reasoning', icon: 'reasoning' },
+  { id: 'code-gen', labelKey: 'catalog.categoryLabels.codeGen', icon: 'code' },
+  { id: 'speech', labelKey: 'catalog.categoryLabels.speech', icon: 'mic' },
+  { id: 'rag', labelKey: 'catalog.categoryLabels.rag', icon: 'database' },
+  { id: 'nemoclaw', labelKey: 'catalog.categoryLabels.nemoclaw', icon: 'shield' },
 ]
 
 const CATALOG_SECTIONS = [
   {
     id: 'multi-modal',
-    label: 'Multi-Modal',
-    subtitle: 'Voice, vision, webcam, speech, and agent experiences curated first on the catalog.',
+    labelKey: 'catalog.sectionLabels.multiModal',
+    subtitleKey: 'catalog.sectionSubtitles.multiModal',
     icon: 'multimodal',
     match: (_recipe, categories) => categories.includes('multi-modal'),
   },
   {
     id: 'vllm',
-    label: 'vLLMs',
-    subtitle: 'OpenAI-compatible NVIDIA GPUs model endpoints served through vLLM on port 9001.',
+    labelKey: 'catalog.sectionLabels.vllm',
+    subtitleKey: 'catalog.sectionSubtitles.vllm',
     icon: 'models',
     match: (_recipe, categories) => categories.includes('vllm'),
   },
   {
     id: 'nvidia-ai-hub',
-    label: 'Spark-Optimized',
-    subtitle: 'Built & tested for NVIDIA GPUs',
+    labelKey: 'catalog.sectionLabels.sparkOptimized',
+    subtitleKey: 'catalog.sectionSubtitles.sparkOptimized',
     icon: 'spark',
     match: (recipe) => (recipe.source || 'community') === 'nvidia-ai-hub',
   },
   {
     id: 'official',
-    label: 'Official Apps',
-    subtitle: 'Published by original developers',
+    labelKey: 'catalog.sectionLabels.officialApps',
+    subtitleKey: 'catalog.sectionSubtitles.officialApps',
     icon: 'official',
     match: () => true,
   },
@@ -224,6 +225,7 @@ function getRecipeCategories(recipe) {
 }
 
 export default function Catalog({ search = '' }) {
+  const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installRecipe = useStore((s) => s.installRecipe)
@@ -372,6 +374,7 @@ export default function Catalog({ search = '' }) {
   const featuredHardwareFit = featured ? getRecipeHardwareFit(featured, metrics) : null
   const showHero = Boolean(featured && bannerConf && !search && category === 'all')
   const activeCategoryMeta = CATEGORIES.find((item) => item.id === category) || CATEGORIES[0]
+  const activeCategoryLabel = t(activeCategoryMeta.labelKey)
   const startItem = orderedRecipes.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endItem = orderedRecipes.length === 0 ? 0 : Math.min(currentPage * itemsPerPage, orderedRecipes.length)
 
@@ -425,7 +428,7 @@ export default function Catalog({ search = '' }) {
               </span>
               {featuredHardwareFit && (
                 <span className={`mb-2 ml-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] font-label ${getHardwareFitBannerClass(featuredHardwareFit)}`}>
-                  Host {featuredHardwareFit.label}
+                  {t('catalog.hostLabel', { label: featuredHardwareFit.label })}
                 </span>
               )}
               <h1 className="m-0 text-[28px] font-bold tracking-tight text-text drop-shadow-md font-display">
@@ -455,21 +458,21 @@ export default function Catalog({ search = '' }) {
                     onClick={(e) => { e.stopPropagation(); installRecipe(featured.slug) }}
                     className="btn-primary rounded-lg px-5 py-2 text-sm font-bold"
                   >
-                    Install
+                    {t('catalog.install')}
                   </button>
                 ) : (
                   <button
                     onClick={(e) => { e.stopPropagation(); selectRecipe(featured.slug) }}
                     className="btn-primary rounded-lg px-5 py-2 text-sm font-bold"
                   >
-                    View Details
+                    {t('catalog.viewDetails')}
                   </button>
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); selectRecipe(featured.slug) }}
                   className="cursor-pointer rounded-lg border border-glass-border bg-surface/40 px-4 py-2 text-sm font-medium text-text backdrop-blur transition-all hover:bg-surface/60"
                 >
-                  Learn More
+                  {t('catalog.learnMore')}
                 </button>
               </div>
             </div>
@@ -485,10 +488,10 @@ export default function Catalog({ search = '' }) {
             className="flex items-center gap-2 rounded-xl border border-outline-dim bg-surface/80 px-3.5 py-2.5 text-sm font-semibold text-text shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm"
           >
             <CategoryIcon kind={activeCategoryMeta.icon} active />
-            Categories
+            {t('catalog.categories')}
           </button>
           <div className="rounded-xl border border-outline-dim bg-surface/80 px-3.5 py-2.5 text-sm text-text-dim shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm">
-            {activeCategoryMeta.label} · {orderedRecipes.length}
+            {activeCategoryLabel} · {orderedRecipes.length}
           </div>
         </div>
 
@@ -496,22 +499,22 @@ export default function Catalog({ search = '' }) {
           <div className="fixed inset-0 z-40 xl:hidden">
             <button
               type="button"
-              aria-label="Close category menu"
+              aria-label={t('catalog.close')}
               onClick={() => setMobileMenuOpen(false)}
               className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
             />
             <div className="absolute inset-y-0 left-0 w-[86vw] max-w-[340px] overflow-y-auto border-r border-outline-dim bg-bg/95 p-4 shadow-[0_18px_48px_rgba(0,0,0,0.42)] backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Categories</div>
-                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">Browse apps</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('catalog.categories')}</div>
+                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">{t('catalog.browseApps')}</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
                   className="rounded-xl border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text"
                 >
-                  Close
+                  {t('catalog.close')}
                 </button>
               </div>
 
@@ -534,8 +537,8 @@ export default function Catalog({ search = '' }) {
                           <CategoryIcon kind={c.icon} active={active} />
                         </span>
                         <span>
-                          <span className="block text-[13px] font-semibold font-display leading-5">{c.label}</span>
-                          <span className="mt-0.5 block text-[10px] uppercase tracking-[0.14em] text-text-dim font-label">{categoryCounts[c.id] || 0} apps</span>
+                          <span className="block text-[13px] font-semibold font-display leading-5">{t(c.labelKey)}</span>
+                          <span className="mt-0.5 block text-[10px] uppercase tracking-[0.14em] text-text-dim font-label">{t('catalog.appsCount', { count: categoryCounts[c.id] || 0 })}</span>
                         </span>
                       </span>
                       <span className="rounded-full border border-outline-dim bg-surface-high/70 px-2 py-0.5 text-[10px] font-label text-text-dim">
@@ -551,7 +554,7 @@ export default function Catalog({ search = '' }) {
                 onClick={handleResetCategory}
                 className="mt-4 w-full rounded-xl border border-outline-dim bg-surface-high/60 px-3 py-2.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high"
               >
-                Reset to all
+                {t('catalog.resetToAll')}
               </button>
             </div>
           </div>
@@ -562,12 +565,12 @@ export default function Catalog({ search = '' }) {
             <div className="rounded-2xl border border-outline-dim bg-surface/80 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.16)] backdrop-blur-sm">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Categories</div>
-                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">Explore apps</h2>
-                  <p className="m-0 text-xs leading-5 text-text-dim">Quick category filter.</p>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('catalog.categories')}</div>
+                  <h2 className="mt-1.5 mb-0.5 text-base font-bold text-text font-display">{t('catalog.exploreApps')}</h2>
+                  <p className="m-0 text-xs leading-5 text-text-dim">{t('catalog.quickCategoryFilter')}</p>
                 </div>
                 <div className="rounded-xl border border-outline-dim bg-surface-high/70 px-2.5 py-1.5 text-right">
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Showing</div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('catalog.showing')}</div>
                   <div className="text-sm font-bold text-text font-display">{filtered.length}</div>
                 </div>
               </div>
@@ -590,9 +593,9 @@ export default function Catalog({ search = '' }) {
                           <CategoryIcon kind={c.icon} active={active} />
                         </span>
                         <span>
-                          <span className="block text-[13px] font-semibold font-display leading-5">{c.label}</span>
+                          <span className="block text-[13px] font-semibold font-display leading-5">{t(c.labelKey)}</span>
                           <span className={`mt-0.5 hidden text-[10px] uppercase tracking-[0.14em] font-label xl:block ${active ? 'text-primary' : 'text-text-dim group-hover:text-text-muted'}`}>
-                            {categoryCounts[c.id] || 0} apps
+                            {t('catalog.appsCount', { count: categoryCounts[c.id] || 0 })}
                           </span>
                         </span>
                       </span>
@@ -611,19 +614,19 @@ export default function Catalog({ search = '' }) {
               <div className="rounded-2xl border border-outline-dim bg-surface/70 px-4 py-3.5 backdrop-blur-sm">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Current category</div>
-                    <h3 className="m-0 mt-1.5 text-xl font-bold tracking-tight text-text font-display">{activeCategoryMeta.label}</h3>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('catalog.currentCategory')}</div>
+                    <h3 className="m-0 mt-1.5 text-xl font-bold tracking-tight text-text font-display">{activeCategoryLabel}</h3>
                     <p className="m-0 mt-1 text-xs text-text-dim leading-5">
                       {search
-                        ? `Filtered by "${search}" across ${activeCategoryMeta.label.toLowerCase()} apps.`
-                        : `Showing curated apps for ${activeCategoryMeta.label.toLowerCase()}.`}
+                        ? t('catalog.filteredBy', { search, category: activeCategoryLabel.toLowerCase() })
+                        : t('catalog.showingCurated', { category: activeCategoryLabel.toLowerCase() })}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs font-label text-text-dim">
-                    <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{filtered.length} apps</span>
+                    <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{t('catalog.appsCount', { count: filtered.length })}</span>
                     <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{startItem}-{endItem}</span>
-                    {recipesWithUpdates.length > 0 && <span className="rounded-full border border-warning/20 bg-warning/10 px-3 py-1.5 text-warning">{recipesWithUpdates.length} updates available</span>}
-                    {search && <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">Search active</span>}
+                    {recipesWithUpdates.length > 0 && <span className="rounded-full border border-warning/20 bg-warning/10 px-3 py-1.5 text-warning">{t('running.updatesAvailable', { count: recipesWithUpdates.length })}</span>}
+                    {search && <span className="rounded-full border border-outline-dim bg-surface-high/60 px-3 py-1.5">{t('catalog.searchActive')}</span>}
                   </div>
                 </div>
               </div>
@@ -633,10 +636,10 @@ export default function Catalog({ search = '' }) {
               <div className="rounded-2xl border border-warning/20 bg-warning/5 px-4 py-4 backdrop-blur-sm animate-fadeIn">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.16em] text-warning font-label">Updates</div>
-                    <h3 className="m-0 mt-1 text-lg font-bold tracking-tight text-text font-display">Recipe updates available</h3>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-warning font-label">{t('catalog.updates')}</div>
+                    <h3 className="m-0 mt-1 text-lg font-bold tracking-tight text-text font-display">{t('catalog.recipeUpdatesAvailable')}</h3>
                     <p className="m-0 mt-1 text-sm text-text-dim leading-6">
-                      {recipesWithUpdates.length} installed or catalog recipes changed in the upstream registry. Review changelogs and rebuild where needed.
+                      {t('catalog.recipeUpdatesBody', { count: recipesWithUpdates.length })}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -670,9 +673,9 @@ export default function Catalog({ search = '' }) {
                       <SectionIcon kind={section.icon} />
                       <div>
                         <h2 className="text-base font-bold text-text tracking-tight font-display m-0">
-                          {section.label}
+                          {t(section.labelKey)}
                         </h2>
-                        <p className="text-[11px] text-text-dim mt-0.5 m-0 leading-4">{section.subtitle}</p>
+                        <p className="text-[11px] text-text-dim mt-0.5 m-0 leading-4">{t(section.subtitleKey)}</p>
                       </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -686,8 +689,8 @@ export default function Catalog({ search = '' }) {
               {((category === 'all' && paginatedRecipes.length === 0) || (category !== 'all' && grouped.length === 0)) && (
                 <div className="text-center py-20 text-text-dim animate-fadeIn">
                   <div className="text-4xl mb-3">🔍</div>
-                  <div className="text-base font-semibold font-display">No apps found</div>
-                  <div className="text-sm mt-1">Try a different search or category</div>
+                  <div className="text-base font-semibold font-display">{t('catalog.noAppsFound')}</div>
+                  <div className="text-sm mt-1">{t('catalog.tryDifferent')}</div>
                 </div>
               )}
             </div>
@@ -695,7 +698,7 @@ export default function Catalog({ search = '' }) {
             {orderedRecipes.length > 0 && (
               <div className="flex flex-col gap-4 rounded-2xl border border-outline-dim bg-surface/70 px-4 py-3.5 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-2 text-sm text-text-dim">
-                  <span className="font-label">Items per page</span>
+                  <span className="font-label">{t('catalog.itemsPerPage')}</span>
                   <select
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -714,7 +717,7 @@ export default function Catalog({ search = '' }) {
                     disabled={currentPage === 1}
                     className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
                   >
-                    Prev
+                    {t('catalog.prev')}
                   </button>
                   {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
                     <button
@@ -736,7 +739,15 @@ export default function Catalog({ search = '' }) {
                     disabled={currentPage === totalPages}
                     className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
                   >
-                    Next
+                    {t('catalog.next')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="rounded-lg border border-outline-dim bg-surface-high/60 px-3 py-1.5 text-sm font-semibold text-text transition-all hover:border-outline hover:bg-surface-high disabled:opacity-50"
+                  >
+                    {t('catalog.next')}
                   </button>
                 </div>
               </div>

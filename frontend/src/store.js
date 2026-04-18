@@ -1,4 +1,7 @@
 import { create } from 'zustand'
+import i18n, { persistLanguage } from './i18n'
+
+const tStore = (key, options) => i18n.t(`store.${key}`, options)
 
 const getInitialTheme = () => {
   const saved = localStorage.getItem('nvidia-ai-hub-theme')
@@ -7,6 +10,12 @@ const getInitialTheme = () => {
 }
 
 const FEATURE_FLAGS_STORAGE_KEY = 'nvidia-ai-hub-feature-flags'
+const LANGUAGE_STORAGE_KEY = 'nvidia-ai-hub-language'
+
+const getInitialLanguage = () => {
+  const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY)
+  return saved || i18n.resolvedLanguage || i18n.language || 'en'
+}
 
 const getInitialFeatureFlags = () => {
   try {
@@ -81,6 +90,7 @@ export const useStore = create((set, get) => ({
   modelAction: '',
   _logWs: {},
   theme: getInitialTheme(),
+  language: getInitialLanguage(),
   featureFlags: getInitialFeatureFlags(),
 
   toggleTheme: () => {
@@ -88,6 +98,12 @@ export const useStore = create((set, get) => ({
     localStorage.setItem('nvidia-ai-hub-theme', next)
     document.documentElement.setAttribute('data-theme', next)
     set({ theme: next })
+  },
+
+  setLanguage: async (language) => {
+    await i18n.changeLanguage(language)
+    persistLanguage(language)
+    set({ language })
   },
 
   setFeatureFlag: (key, enabled) => {
@@ -217,7 +233,7 @@ export const useStore = create((set, get) => ({
     }
 
     ws.onerror = () => {
-      console.warn('Container log WebSocket error')
+      console.warn(tStore('logs.containerSocketError'))
     }
 
     ws.onclose = () => {
@@ -322,14 +338,14 @@ export const useStore = create((set, get) => ({
     try {
       const currentState = get()
       const requestDefinitions = [
-        { key: 'modelOverview', label: 'Overview', url: '/api/models/overview', fallback: currentState.modelOverview, required: true },
-        { key: 'modelRuntime', label: 'Runtime', url: '/api/models/runtime', fallback: currentState.modelRuntime || { reachable: false } },
-        { key: 'installedModels', label: 'Installed models', url: '/api/models/installed', fallback: currentState.installedModels || { models: [] } },
-        { key: 'modelCatalog', label: 'Catalog', url: '/api/models/catalog', fallback: currentState.modelCatalog || { models: [] } },
-        { key: 'modelDownloads', label: 'Downloads', url: '/api/models/downloads', fallback: currentState.modelDownloads || { downloads: [] } },
-        { key: 'modelSources', label: 'Sources', url: '/api/models/sources', fallback: currentState.modelSources || { sources: [] } },
-        { key: 'hfIntakeQueue', label: 'Hugging Face intake', url: '/api/models/intake', fallback: currentState.hfIntakeQueue || { items: [] } },
-        { key: 'hfInventory', label: 'Hugging Face inventory', url: '/api/models/huggingface', fallback: currentState.hfInventory || { snapshots: [] } },
+        { key: 'modelOverview', label: tStore('requestLabels.overview'), url: '/api/models/overview', fallback: currentState.modelOverview, required: true },
+        { key: 'modelRuntime', label: tStore('requestLabels.runtime'), url: '/api/models/runtime', fallback: currentState.modelRuntime || { reachable: false } },
+        { key: 'installedModels', label: tStore('requestLabels.installedModels'), url: '/api/models/installed', fallback: currentState.installedModels || { models: [] } },
+        { key: 'modelCatalog', label: tStore('requestLabels.catalog'), url: '/api/models/catalog', fallback: currentState.modelCatalog || { models: [] } },
+        { key: 'modelDownloads', label: tStore('requestLabels.downloads'), url: '/api/models/downloads', fallback: currentState.modelDownloads || { downloads: [] } },
+        { key: 'modelSources', label: tStore('requestLabels.sources'), url: '/api/models/sources', fallback: currentState.modelSources || { sources: [] } },
+        { key: 'hfIntakeQueue', label: tStore('requestLabels.hfIntake'), url: '/api/models/intake', fallback: currentState.hfIntakeQueue || { items: [] } },
+        { key: 'hfInventory', label: tStore('requestLabels.hfInventory'), url: '/api/models/huggingface', fallback: currentState.hfInventory || { snapshots: [] } },
       ]
 
       const parseResponse = async (res) => {
@@ -358,7 +374,7 @@ export const useStore = create((set, get) => ({
           return
         }
 
-        const message = result.reason?.message || 'Request failed'
+        const message = result.reason?.message || tStore('errors.requestFailed')
         modelSectionErrors[request.key] = message
 
         if (request.required && !request.fallback) {
@@ -377,9 +393,9 @@ export const useStore = create((set, get) => ({
 
       let modelsError = null
       if (runtimeUnavailable && modelOverview?.installed) {
-        modelsError = 'Ollama Runtime is installed, but its management API is currently unreachable. Runtime tabs may fail while Hugging Face tabs still work.'
+        modelsError = tStore('errors.runtimeUnreachable')
       } else if (degradedRuntimeAreas.length > 0) {
-        modelsError = `Some model sections are temporarily unavailable: ${degradedRuntimeAreas.join(', ')}.`
+        modelsError = tStore('errors.degradedSections', { sections: degradedRuntimeAreas.join(', ') })
       }
 
       set({
@@ -393,7 +409,7 @@ export const useStore = create((set, get) => ({
       return nextState
     } catch (e) {
       console.error('Failed to fetch model manager data:', e)
-      set({ modelsError: e.message || 'Failed to load model manager data' })
+      set({ modelsError: e.message || tStore('errors.loadModelManager') })
       return null
     } finally {
       if (!silent) {
@@ -417,7 +433,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to pull model:', e)
-      set({ modelsError: e.message || 'Failed to pull model' })
+      set({ modelsError: e.message || tStore('errors.pullModel') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -438,7 +454,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to delete model:', e)
-      set({ modelsError: e.message || 'Failed to delete model' })
+      set({ modelsError: e.message || tStore('errors.deleteModel') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -460,7 +476,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to queue Hugging Face model intake:', e)
-      set({ modelsError: e.message || 'Failed to queue Hugging Face model intake' })
+      set({ modelsError: e.message || tStore('errors.queueHfModel') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -478,7 +494,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to cancel Hugging Face queue item:', e)
-      set({ modelsError: e.message || 'Failed to cancel Hugging Face queue item' })
+      set({ modelsError: e.message || tStore('errors.cancelHfQueueItem') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -496,7 +512,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to retry Hugging Face queue item:', e)
-      set({ modelsError: e.message || 'Failed to retry Hugging Face queue item' })
+      set({ modelsError: e.message || tStore('errors.retryHfQueueItem') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -514,7 +530,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to delete Hugging Face snapshot:', e)
-      set({ modelsError: e.message || 'Failed to delete Hugging Face snapshot' })
+      set({ modelsError: e.message || tStore('errors.deleteHfSnapshot') })
       return null
     } finally {
       set({ modelAction: '' })
@@ -536,7 +552,7 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to sync registry:', e)
-      return { synced: false, sync_error: e.message || 'Registry sync failed' }
+      return { synced: false, sync_error: e.message || tStore('errors.registrySyncFailed') }
     } finally {
       set({ syncingRegistry: false })
     }
@@ -726,7 +742,7 @@ export const useStore = create((set, get) => ({
         set((state) => ({
           recipeDetailStatus: {
             ...state.recipeDetailStatus,
-            [slug]: { loading: false, error: e.message || 'Failed to load recipe', loadedAt: status?.loadedAt || 0 },
+            [slug]: { loading: false, error: e.message || tStore('errors.loadRecipe'), loadedAt: status?.loadedAt || 0 },
           },
         }))
         return get().recipeDetails[slug] || null
@@ -947,7 +963,7 @@ export const useStore = create((set, get) => ({
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Install POST failed:', e)
-      get().addBuildLine(slug, `[error] ${e.message || 'Install request failed'}`)
+      get().addBuildLine(slug, `[error] ${e.message || tStore('errors.installRequestFailed')}`)
       set({ installing: null })
       return
     }
@@ -964,7 +980,7 @@ export const useStore = create((set, get) => ({
           _ws: null,
           buildProgress: {
             ...get().buildProgress,
-            [slug]: { percent: 100, phase: 'Completed', detail: 'Build finished successfully.' },
+            [slug]: { percent: 100, phase: tStore('build.completedPhase'), detail: tStore('build.buildFinishedSuccessfully') },
           },
         })
         get().fetchRecipes({ force: true })
@@ -975,7 +991,7 @@ export const useStore = create((set, get) => ({
     }
 
     ws.onerror = () => {
-      console.warn('Build WebSocket error, falling back to polling')
+      console.warn(tStore('logs.buildSocketFallback'))
       get()._pollBuildStatus(slug)
     }
 
@@ -998,7 +1014,7 @@ export const useStore = create((set, get) => ({
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Update POST failed:', e)
-      get().addBuildLine(slug, `[error] ${e.message || 'Update request failed'}`)
+      get().addBuildLine(slug, `[error] ${e.message || tStore('errors.updateRequestFailed')}`)
       set({ updating: null })
       return
     }
@@ -1014,7 +1030,7 @@ export const useStore = create((set, get) => ({
           _ws: null,
           buildProgress: {
             ...get().buildProgress,
-            [slug]: { percent: 100, phase: 'Completed', detail: 'Update finished successfully.' },
+            [slug]: { percent: 100, phase: tStore('build.completedPhase'), detail: tStore('build.updateFinishedSuccessfully') },
           },
         })
         get().fetchRecipes({ force: true })
@@ -1025,7 +1041,7 @@ export const useStore = create((set, get) => ({
     }
 
     ws.onerror = () => {
-      console.warn('Update WebSocket error, falling back to polling')
+      console.warn(tStore('logs.updateSocketFallback'))
       get()._pollBuildStatus(slug, 'updating')
     }
 
@@ -1051,7 +1067,7 @@ export const useStore = create((set, get) => ({
             [stateKey]: null,
             buildProgress: {
               ...s.buildProgress,
-              [slug]: { percent: 100, phase: 'Completed', detail: 'Operation finished successfully.' },
+              [slug]: { percent: 100, phase: tStore('build.completedPhase'), detail: tStore('build.operationFinishedSuccessfully') },
             },
           }))
           get().fetchRecipes({ force: true })
@@ -1170,7 +1186,7 @@ export const useStore = create((set, get) => ({
 function inferBuildProgress(lines) {
   const normalized = Array.isArray(lines) ? lines : []
   if (normalized.length === 0) {
-    return { percent: 6, phase: 'Queued', detail: 'Waiting for build logs…' }
+    return { percent: 6, phase: tStore('build.queuedPhase'), detail: tStore('build.waitingForLogs') }
   }
 
   const latest = normalized[normalized.length - 1] || ''
@@ -1179,30 +1195,30 @@ function inferBuildProgress(lines) {
   const explicitPercent = extractExplicitPercent(latest) ?? extractExplicitPercent(joined)
 
   if (joined.includes('[error]') || joined.includes('traceback') || joined.includes('failed')) {
-    return { percent: explicitPercent ?? 100, phase: 'Failed', detail: latest }
+    return { percent: explicitPercent ?? 100, phase: tStore('build.failedPhase'), detail: latest }
   }
 
   if (joined.includes('exporting') || joined.includes('naming to') || joined.includes('writing image') || joined.includes('successfully built')) {
-    return { percent: Math.max(explicitPercent ?? 92, 92), phase: 'Finalizing', detail: latest }
+    return { percent: Math.max(explicitPercent ?? 92, 92), phase: tStore('build.finalizingPhase'), detail: latest }
   }
 
   if (joined.includes('pip install') || joined.includes('collecting ') || joined.includes('installing collected packages') || joined.includes('npm install')) {
-    return { percent: explicitPercent ?? 62, phase: 'Installing dependencies', detail: latest }
+    return { percent: explicitPercent ?? 62, phase: tStore('build.installingDependenciesPhase'), detail: latest }
   }
 
   if (joined.includes('extracting') || joined.includes('pull complete') || joined.includes('downloading') || joined.includes('pulling fs layer')) {
-    return { percent: explicitPercent ?? 36, phase: 'Pulling base layers', detail: latest }
+    return { percent: explicitPercent ?? 36, phase: tStore('build.pullingBaseLayersPhase'), detail: latest }
   }
 
   if (joined.includes('step ') || joined.includes('building') || joined.includes('load build definition') || joined.includes('load metadata')) {
-    return { percent: explicitPercent ?? 18, phase: 'Preparing build', detail: latest }
+    return { percent: explicitPercent ?? 18, phase: tStore('build.preparingBuildPhase'), detail: latest }
   }
 
   if (joined.includes('done')) {
-    return { percent: 100, phase: 'Completed', detail: latest }
+    return { percent: 100, phase: tStore('build.completedPhase'), detail: latest }
   }
 
-  return { percent: explicitPercent ?? 24, phase: 'Processing logs', detail: latest }
+  return { percent: explicitPercent ?? 24, phase: tStore('build.processingLogsPhase'), detail: latest }
 }
 
 function extractExplicitPercent(text) {

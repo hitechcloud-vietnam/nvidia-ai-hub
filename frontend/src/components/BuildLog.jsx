@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 
 export default function BuildLog() {
+  const { t } = useTranslation()
   const installing = useStore((s) => s.installing)
   const updating = useStore((s) => s.updating)
   const buildLogs = useStore((s) => s.buildLogs)
@@ -9,7 +11,7 @@ export default function BuildLog() {
   const scrollRef = useRef(null)
 
   const activeSlug = installing || updating
-  const mode = updating ? 'Update' : 'Build'
+  const mode = updating ? t('buildLog.update') : t('buildLog.build')
   const lines = activeSlug ? (buildLogs[activeSlug] || []) : []
   const progress = activeSlug ? buildProgress[activeSlug] : null
 
@@ -24,8 +26,8 @@ export default function BuildLog() {
   return (
     <div className="fixed bottom-0 left-0 right-0 h-56 bg-[#0c0c10] border-t border-spark/30 font-mono text-[11px] p-4 overflow-auto z-50" ref={scrollRef}>
       <div className="flex justify-between mb-2">
-        <span className="text-spark font-bold text-xs">{mode.toUpperCase()} LOG — {activeSlug}</span>
-        <span className="text-text-dim">⟳ {mode}ing...</span>
+        <span className="text-spark font-bold text-xs">{t('buildLog.logTitle', { mode: mode.toUpperCase(), slug: activeSlug })}</span>
+        <span className="text-text-dim">⟳ {t('buildLog.inProgress', { mode })}</span>
       </div>
       {progress && (
         <div className="mb-3 rounded-xl border border-spark/20 bg-white/5 p-3">

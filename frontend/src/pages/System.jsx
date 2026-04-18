@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 
 const SystemGpuChartsSection = lazy(() => import('../components/system/SystemCharts'))
@@ -45,6 +46,7 @@ function CircularGauge({ value, max, label, sublabel, unit, color = 'var(--terti
 }
 
 export default function System() {
+  const { t } = useTranslation()
   const metrics = useStore((s) => s.metrics)
   const topology = useStore((s) => s.systemTopology)
   const fetchSystemTopology = useStore((s) => s.fetchSystemTopology)
@@ -66,7 +68,7 @@ export default function System() {
     return (
       <div className="p-6 text-center text-text-dim py-20 animate-fadeIn">
         <div className="text-4xl mb-3">📊</div>
-        <div className="text-base font-semibold font-display">Waiting for metrics...</div>
+        <div className="text-base font-semibold font-display">{t('system.waitingMetrics')}</div>
       </div>
     )
   }
@@ -85,9 +87,9 @@ export default function System() {
   return (
     <div className="px-6 py-6 pb-12">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold tracking-tight font-display m-0">System Monitor</h2>
+        <h2 className="text-2xl font-bold tracking-tight font-display m-0">{t('system.title')}</h2>
         <p className="text-sm text-text-dim m-0 mt-1 font-label">
-          {metrics.platform || 'System'} — {metrics.hostname || 'localhost'}
+          {metrics.platform || t('topbar.systemFallback')} — {metrics.hostname || 'localhost'}
         </p>
       </div>
 
@@ -95,37 +97,37 @@ export default function System() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <CircularGauge
           value={metrics.cpu_percent} max={100}
-          label="CPU" sublabel={`${metrics.cpu_cores_logical || 0} threads`}
+          label={t('system.cpu')} sublabel={t('system.threads', { count: metrics.cpu_cores_logical || 0 })}
           unit="%" color="var(--primary)"
         />
         <CircularGauge
           value={metrics.gpu_utilization} max={100}
-          label="GPU" sublabel={metrics.gpu_count > 0 ? `${metrics.gpu_count} device${metrics.gpu_count > 1 ? 's' : ''}` : 'No GPU telemetry'}
+          label={t('system.gpu')} sublabel={metrics.gpu_count > 0 ? t('system.devices', { count: metrics.gpu_count }) : t('system.noGpuTelemetry')}
           unit="%" color="var(--tertiary)"
         />
         <CircularGauge
           value={metrics.ram_used_gb} max={metrics.ram_total_gb}
-          label="RAM" sublabel={`of ${metrics.ram_total_gb} GB`}
+          label={t('system.ram')} sublabel={t('system.ofGb', { value: metrics.ram_total_gb })}
           unit="GB" color="var(--tertiary)"
         />
         <CircularGauge
           value={systemTemp} max={100}
-          label="Temperature" sublabel={hasTemperature ? (systemTemp > 80 ? 'Warning' : 'Normal') : 'Waiting for sensor'}
+          label={t('system.temperature')} sublabel={hasTemperature ? (systemTemp > 80 ? t('system.warning') : t('system.normal')) : t('system.waitingSensor')}
           unit="°C" color={tempColor}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <MetricCard label="GPU memory" value={`${metrics.gpu_memory_used_mb || 0} / ${metrics.gpu_memory_total_mb || 0} MB`} hint={metrics.gpu_name ? (metrics.gpu_temperature_source || 'GPU telemetry available') : 'Unavailable on this host'} badge={metrics.gpu_temperature_source || ''} />
-        <MetricCard label="Disk" value={`${metrics.disk_used_gb} / ${metrics.disk_total_gb} GB`} hint={`${metrics.disk_free_gb} GB free · ${metrics.disk_percent}% used`} />
-        <MetricCard label="CPU frequency" value={metrics.cpu_frequency_mhz > 0 ? `${(metrics.cpu_frequency_mhz / 1000).toFixed(2)} GHz` : 'Unavailable'} hint={`${metrics.cpu_cores_physical || metrics.cpu_cores_logical || 0} physical cores`} />
-        <MetricCard label="Uptime" value={`${uptimeHours} h`} hint={temperatureHint || `RAM ${metrics.ram_percent}% used`} badge={temperatureHint.split(' • ')[0] || ''} />
+        <MetricCard label={t('system.gpuMemory')} value={`${metrics.gpu_memory_used_mb || 0} / ${metrics.gpu_memory_total_mb || 0} MB`} hint={metrics.gpu_name ? (metrics.gpu_temperature_source || t('system.gpuTelemetryAvailable')) : t('system.unavailableHost')} badge={metrics.gpu_temperature_source || ''} />
+        <MetricCard label={t('system.disk')} value={`${metrics.disk_used_gb} / ${metrics.disk_total_gb} GB`} hint={`${metrics.disk_free_gb} GB free · ${metrics.disk_percent}% used`} />
+        <MetricCard label={t('system.cpuFrequency')} value={metrics.cpu_frequency_mhz > 0 ? `${(metrics.cpu_frequency_mhz / 1000).toFixed(2)} GHz` : t('system.unavailable')} hint={t('system.physicalCores', { count: metrics.cpu_cores_physical || metrics.cpu_cores_logical || 0 })} />
+        <MetricCard label={t('system.uptime')} value={`${uptimeHours} h`} hint={temperatureHint || t('system.ramUsedPercent', { value: metrics.ram_percent })} badge={temperatureHint.split(' • ')[0] || ''} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
-        <MetricCard label="CPU temperature" value={metrics.cpu_temperature > 0 ? `${metrics.cpu_temperature.toFixed(1)} °C` : 'Unavailable'} hint={metrics.cpu_temperature_source || 'No CPU sensor found'} badge={metrics.cpu_temperature_source || ''} />
-        <MetricCard label="GPU temperature" value={metrics.gpu_temperature > 0 ? `${metrics.gpu_temperature.toFixed(1)} °C` : 'Unavailable'} hint={metrics.gpu_temperature_source || 'nvidia-smi not available'} badge={metrics.gpu_temperature_source || ''} />
-        <MetricCard label="GPU devices" value={`${metrics.gpu_count || gpuList.length}`} hint={metrics.gpu_name || 'No discrete GPU detected'} />
+        <MetricCard label={t('system.cpuTemperature')} value={metrics.cpu_temperature > 0 ? `${metrics.cpu_temperature.toFixed(1)} °C` : t('system.unavailable')} hint={metrics.cpu_temperature_source || t('system.noCpuSensorFound')} badge={metrics.cpu_temperature_source || ''} />
+        <MetricCard label={t('system.gpuTemperature')} value={metrics.gpu_temperature > 0 ? `${metrics.gpu_temperature.toFixed(1)} °C` : t('system.unavailable')} hint={metrics.gpu_temperature_source || t('system.nvidiaSmiUnavailable')} badge={metrics.gpu_temperature_source || ''} />
+        <MetricCard label={t('system.gpuDevices')} value={`${metrics.gpu_count || gpuList.length}`} hint={metrics.gpu_name || t('system.noDiscreteGpuDetected')} />
       </div>
 
       {gpuList.length > 0 && chartsVisible && (
@@ -144,28 +146,28 @@ export default function System() {
 
           <div className="bg-surface rounded-2xl p-5 card-hover mb-8">
             <div className="mb-4">
-              <h3 className="text-sm font-semibold font-display text-text m-0">GPU Devices</h3>
-              <p className="text-[11px] text-text-dim font-label m-0 mt-0.5">Per-GPU telemetry with Linux and Windows host enrichment</p>
+              <h3 className="text-sm font-semibold font-display text-text m-0">{t('system.gpuDevicesTitle')}</h3>
+              <p className="text-[11px] text-text-dim font-label m-0 mt-0.5">{t('system.gpuDevicesSubtitle')}</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-[11px] text-text-dim font-label border-b border-outline-dim">
-                    <th className="text-left pb-2 font-medium">GPU</th>
-                    <th className="text-right pb-2 font-medium">Util</th>
-                    <th className="text-right pb-2 font-medium">Memory</th>
-                    <th className="text-right pb-2 font-medium">Temp</th>
-                    <th className="text-right pb-2 font-medium">Power</th>
+                    <th className="text-left pb-2 font-medium">{t('system.gpu')}</th>
+                    <th className="text-right pb-2 font-medium">{t('system.util')}</th>
+                    <th className="text-right pb-2 font-medium">{t('system.memory')}</th>
+                    <th className="text-right pb-2 font-medium">{t('system.temp')}</th>
+                    <th className="text-right pb-2 font-medium">{t('system.power')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {gpuList.map((gpu) => (
                     <tr key={`${gpu.index}-${gpu.uuid || gpu.name}`} className="border-b border-outline-dim last:border-0">
                       <td className="py-2.5">
-                        <div className="font-medium text-text">{gpu.name || `GPU ${gpu.index}`}</div>
+                        <div className="font-medium text-text">{gpu.name || t('system.gpuLabel', { index: gpu.index })}</div>
                         <div className="text-[11px] text-text-dim font-label flex flex-wrap items-center gap-1.5">
-                          {gpu.vendor || 'Unknown vendor'}
-                          {gpu.driver_version ? ` • Driver ${gpu.driver_version}` : ''}
+                          {gpu.vendor || t('system.unknownVendor')}
+                          {gpu.driver_version ? ` • ${t('system.driverVersion', { value: gpu.driver_version })}` : ''}
                           {gpu.utilization_source ? <SourceBadge label={gpu.utilization_source} /> : null}
                           {gpu.temperature_source ? <SourceBadge label={gpu.temperature_source} /> : null}
                         </div>
@@ -183,22 +185,22 @@ export default function System() {
 
           <div className="bg-surface rounded-2xl p-5 card-hover mb-8">
             <div className="mb-4">
-              <h3 className="text-sm font-semibold font-display text-text m-0">GPU Topology Planning</h3>
-              <p className="text-[11px] text-text-dim font-label m-0 mt-0.5">Multi-GPU link awareness for local and cluster-ready rollouts</p>
+              <h3 className="text-sm font-semibold font-display text-text m-0">{t('system.gpuTopologyTitle')}</h3>
+              <p className="text-[11px] text-text-dim font-label m-0 mt-0.5">{t('system.gpuTopologySubtitle')}</p>
             </div>
             {topology?.detected ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <MetricCard label="Multi-GPU" value={topology.multi_gpu ? 'Yes' : 'No'} hint="More than one GPU detected on this host" />
-                  <MetricCard label="Peer-to-peer" value={topology.peer_to_peer_capable ? 'Available' : 'Unknown'} hint="Derived from the NVIDIA topology matrix" />
-                  <MetricCard label="NVLink pairs" value={`${topology.nvlink_pairs || 0}`} hint={topology.source || 'nvidia-smi topo -m'} />
+                  <MetricCard label={t('system.multiGpu')} value={topology.multi_gpu ? t('common.yes') : t('common.no')} hint={t('system.moreThanOneGpu')} />
+                  <MetricCard label={t('system.peerToPeer')} value={topology.peer_to_peer_capable ? t('system.available') : t('system.unknown')} hint={t('system.derivedFromTopologyMatrix')} />
+                  <MetricCard label={t('system.nvlinkPairs')} value={`${topology.nvlink_pairs || 0}`} hint={topology.source || 'nvidia-smi topo -m'} />
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-[11px] text-text-dim font-label border-b border-outline-dim">
-                        <th className="text-left pb-2 font-medium">GPU</th>
-                        <th className="text-left pb-2 font-medium">Links</th>
+                        <th className="text-left pb-2 font-medium">{t('system.gpu')}</th>
+                        <th className="text-left pb-2 font-medium">{t('system.links')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -222,7 +224,7 @@ export default function System() {
               </div>
             ) : (
               <div className="text-sm text-text-dim leading-6">
-                {topology?.notes?.[0] || 'Topology data will appear here when multiple NVIDIA GPUs are available and `nvidia-smi topo -m` is supported.'}
+                {topology?.notes?.[0] || t('system.topologyUnavailableMessage')}
               </div>
             )}
           </div>
@@ -245,14 +247,14 @@ export default function System() {
       {/* Running Processes */}
       {runningApps.length > 0 && (
         <div className="bg-surface rounded-2xl p-5 card-hover">
-          <h3 className="text-sm font-semibold font-display text-text m-0 mb-4">Active Processes</h3>
+          <h3 className="text-sm font-semibold font-display text-text m-0 mb-4">{t('system.activeProcesses')}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[11px] text-text-dim font-label border-b border-outline-dim">
-                  <th className="text-left pb-2 font-medium">App</th>
-                  <th className="text-right pb-2 font-medium">Port</th>
-                  <th className="text-right pb-2 font-medium">Status</th>
+                  <th className="text-left pb-2 font-medium">{t('system.app')}</th>
+                  <th className="text-right pb-2 font-medium">{t('system.port')}</th>
+                  <th className="text-right pb-2 font-medium">{t('system.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -269,9 +271,9 @@ export default function System() {
                     <td className="text-right text-text-dim font-label">{r.ui?.port || '—'}</td>
                     <td className="text-right">
                       {r.ready ? (
-                        <span className="text-success text-xs font-label">Running</span>
+                        <span className="text-success text-xs font-label">{t('running.runningStatus')}</span>
                       ) : (
-                        <span className="text-warning text-xs font-label animate-pulse">Starting</span>
+                        <span className="text-warning text-xs font-label animate-pulse">{t('running.starting')}</span>
                       )}
                     </td>
                   </tr>

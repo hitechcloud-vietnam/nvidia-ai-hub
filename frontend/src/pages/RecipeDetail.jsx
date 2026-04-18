@@ -1,4 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import {
@@ -18,20 +20,21 @@ function hasDedicatedConfigTab(recipe) {
 }
 
 function getDetailTabs(recipe) {
-  const tabs = [{ id: 'details', label: 'Overview' }]
+  const tabs = [{ id: 'details', labelKey: 'recipe.overview' }]
 
-  tabs.push({ id: 'community', label: 'Community' })
+  tabs.push({ id: 'community', labelKey: 'recipe.community' })
 
   if (hasDedicatedConfigTab(recipe)) {
-    tabs.push({ id: 'config', label: 'Configuration' })
+    tabs.push({ id: 'config', labelKey: 'recipe.configuration' })
   }
 
-  tabs.push({ id: 'logs', label: 'Logs' })
-  tabs.push({ id: 'shell', label: 'Terminal' })
+  tabs.push({ id: 'logs', labelKey: 'recipe.logs' })
+  tabs.push({ id: 'shell', labelKey: 'recipe.terminal' })
   return tabs
 }
 
 export default function RecipeDetail() {
+  const { t } = useTranslation()
   const selectedRecipe = useStore((s) => s.selectedRecipe)
   const recipes = useStore((s) => s.recipes)
   const recipeDetails = useStore((s) => s.recipeDetails)
@@ -172,9 +175,9 @@ export default function RecipeDetail() {
     return (
       <div className="p-8 animate-fadeIn">
         <button onClick={clearRecipe} className="text-primary bg-transparent border-none cursor-pointer text-sm font-semibold font-display">
-          ← Back
+          ← {t('common.back')}
         </button>
-        <p className="text-text-muted mt-4">Recipe not found.</p>
+        <p className="text-text-muted mt-4">{t('recipe.notFound')}</p>
       </div>
     )
   }
@@ -183,7 +186,7 @@ export default function RecipeDetail() {
     return (
       <div className="p-8 animate-fadeIn">
         <button onClick={clearRecipe} className="text-primary bg-transparent border-none cursor-pointer text-sm font-semibold font-display">
-          ← Back
+          ← {t('common.back')}
         </button>
         <div className="mt-6 rounded-3xl border border-outline-dim bg-surface p-6">
           <div className="animate-pulse">
@@ -249,14 +252,14 @@ export default function RecipeDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: hfToken.trim() }),
       })
-      if (!res.ok) throw new Error('Failed to save token')
+      if (!res.ok) throw new Error(t('recipe.hfSaveFailed'))
       setShowHfModal(false)
       setHfToken('')
       setLaunching(true)
       await launchRecipe(recipe.slug, deploymentSelection)
       setLaunching(false)
     } catch {
-      setHfError('Failed to save token. Please try again.')
+      setHfError(t('recipe.hfSaveFailed'))
     } finally {
       setHfSaving(false)
     }
@@ -295,12 +298,12 @@ export default function RecipeDetail() {
       } else {
         setExecHistory((prev) => [
           ...prev,
-          ...(Array.isArray(payload.lines) && payload.lines.length > 0 ? payload.lines : ['[nvidia-ai-hub] Command completed with no output']),
+          ...(Array.isArray(payload.lines) && payload.lines.length > 0 ? payload.lines : [t('recipe.commandCompleted')]),
           `[exit ${payload.exit_code ?? 0}]`,
         ])
       }
     } catch (error) {
-      setExecHistory((prev) => [...prev, `[error] ${error?.message || 'Command failed'}`])
+      setExecHistory((prev) => [...prev, `[error] ${error?.message || t('recipe.commandFailed')}`])
     } finally {
       setExecCommand('')
       setExecRunning(false)
@@ -323,7 +326,7 @@ export default function RecipeDetail() {
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          Back
+          {t('common.back')}
         </button>
 
         <div className="flex items-center gap-5">
@@ -345,47 +348,47 @@ export default function RecipeDetail() {
               {recipeCategories.map((cat) => (
                 <span key={cat} className="text-[10px] font-label text-secondary bg-secondary/10 px-2 py-0.5 rounded-full">{cat}</span>
               ))}
-              {isBuilding && <StatusPill color="primary" pulse>Building...</StatusPill>}
-              {isUpdating && <StatusPill color="primary" pulse>Updating...</StatusPill>}
-              {isRestarting && <StatusPill color="warning" pulse>Restarting...</StatusPill>}
-              {!isBusy && recipe.running && isReady && <StatusPill color="success">Running</StatusPill>}
-              {!isBusy && recipe.starting && <StatusPill color="warning" pulse>Starting...</StatusPill>}
-              {!isBusy && !recipe.running && !recipe.starting && recipe.installed && <StatusPill color="dim">Stopped</StatusPill>}
-              <StatusPill color={hardwareFit.tone}>{`Host ${hardwareFit.label}`}</StatusPill>
+              {isBuilding && <StatusPill color="primary" pulse>{t('recipe.building')}</StatusPill>}
+              {isUpdating && <StatusPill color="primary" pulse>{t('recipe.updating')}</StatusPill>}
+              {isRestarting && <StatusPill color="warning" pulse>{t('running.restarting')}</StatusPill>}
+              {!isBusy && recipe.running && isReady && <StatusPill color="success">{t('running.runningStatus')}</StatusPill>}
+              {!isBusy && recipe.starting && <StatusPill color="warning" pulse>{t('running.starting')}</StatusPill>}
+              {!isBusy && !recipe.running && !recipe.starting && recipe.installed && <StatusPill color="dim">{t('running.stopped')}</StatusPill>}
+              <StatusPill color={hardwareFit.tone}>{t('common.hostLabel', { label: hardwareFit.label })}</StatusPill>
               {deploymentSelection?.profile && <StatusPill color="primary">{deploymentSelection.profile}</StatusPill>}
             </div>
           </div>
 
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <SpecBadge label="Memory" value={`${recipe.requirements?.min_memory_gb ?? 8}–${recipe.requirements?.recommended_memory_gb ?? recipe.requirements?.min_memory_gb ?? 8} GB`} />
-            <SpecBadge label="Disk" value={`${recipe.requirements?.disk_gb ?? 10} GB`} />
-            <SpecBadge label="Build" value={`~${recipe.docker?.build_time_minutes ?? 5} min`} />
+            <SpecBadge label={t('recipe.memory')} value={`${recipe.requirements?.min_memory_gb ?? 8}–${recipe.requirements?.recommended_memory_gb ?? recipe.requirements?.min_memory_gb ?? 8} GB`} />
+            <SpecBadge label={t('recipe.disk')} value={`${recipe.requirements?.disk_gb ?? 10} GB`} />
+            <SpecBadge label={t('recipe.build')} value={`~${recipe.docker?.build_time_minutes ?? 5} min`} />
           </div>
 
           <div className="shrink-0 flex items-center gap-2">
             {!recipe.installed && !isBusy && !isRemoving && (
               <button onClick={() => installRecipe(recipe.slug, deploymentSelection)} className="btn-primary px-6 py-2.5 text-sm font-bold">
-                Install
+                {t('catalog.install')}
               </button>
             )}
             {isBuilding && (
               <div className="px-5 py-2.5 bg-primary/10 rounded-xl text-sm text-primary font-semibold font-label">
-                <span className="inline-block animate-spin mr-1">⟳</span>Building
+                <span className="inline-block animate-spin mr-1">⟳</span>{t('recipe.building')}
               </div>
             )}
             {isUpdating && (
               <div className="px-5 py-2.5 bg-primary/10 rounded-xl text-sm text-primary font-semibold font-label">
-                <span className="inline-block animate-spin mr-1">⟳</span>Updating
+                <span className="inline-block animate-spin mr-1">⟳</span>{t('recipe.updating')}
               </div>
             )}
             {isRestarting && (
               <div className="px-5 py-2.5 bg-warning/10 rounded-xl text-sm text-warning font-semibold font-label">
-                <span className="inline-block animate-spin mr-1">⟳</span>Restarting
+                <span className="inline-block animate-spin mr-1">⟳</span>{t('running.restarting')}
               </div>
             )}
             {isRemoving && (
               <div className="px-5 py-2.5 bg-error-surface rounded-xl text-sm text-error font-semibold font-label">
-                <span className="inline-block animate-spin mr-1">⟳</span>Uninstalling
+                <span className="inline-block animate-spin mr-1">⟳</span>{t('recipe.uninstalling')}
               </div>
             )}
             {recipe.installed && !recipe.running && !recipe.starting && !isBusy && !isRemoving && (
@@ -394,15 +397,15 @@ export default function RecipeDetail() {
                   {launching ? '...' : `▶ ${getRecipeLaunchLabel(recipe)}`}
                 </button>
                 <button disabled={launching || isRemoving} onClick={() => updateRecipe(recipe.slug)} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:text-primary hover:bg-surface-highest disabled:opacity-50">
-                  ↻ Update
+                  ↻ {t('recipe.update')}
                 </button>
                 {registryChanged && (
                   <span className="px-3 py-2 bg-warning/10 text-warning rounded-xl text-xs font-semibold font-label">
-                    Registry changed{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
+                    {t('recipe.registryChanged')}{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
                   </span>
                 )}
                 <button disabled={isRemoving} onClick={handleRemove} className="px-4 py-2.5 bg-error-surface text-error border-none rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50">
-                  {isRemoving ? '...' : 'Uninstall'}
+                  {isRemoving ? '...' : t('recipe.uninstall')}
                 </button>
               </>
             )}
@@ -415,13 +418,13 @@ export default function RecipeDetail() {
                   </a>
                 )}
                 <button disabled={stopping} onClick={handleStop} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50">
-                  {stopping ? '...' : '■ Stop'}
+                  {stopping ? '...' : `■ ${t('running.stop')}`}
                 </button>
                 <button disabled={isRestarting || stopping} onClick={handleRestart} className="px-4 py-2.5 bg-surface-high text-text-muted border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50">
-                  {isRestarting ? '...' : '↻ Restart'}
+                  {isRestarting ? '...' : `↻ ${t('running.restart')}`}
                 </button>
                 <button disabled={isRemoving} onClick={handleRemove} className="px-4 py-2.5 bg-error-surface text-error border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50">
-                  Uninstall
+                  {t('recipe.uninstall')}
                 </button>
               </>
             )}
@@ -443,7 +446,7 @@ export default function RecipeDetail() {
                     : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             )
           })}
@@ -477,8 +480,8 @@ export default function RecipeDetail() {
               />
             </div>
           ) : (
-            <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,50rem)_minmax(24rem,1fr)]">
-              <div className="overflow-y-auto border-b border-outline-dim xl:border-b-0 xl:border-r bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
+            <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
+              <div>
                 <AboutTab
                   recipe={recipe}
                   hardwareFit={hardwareFit}
@@ -502,9 +505,11 @@ export default function RecipeDetail() {
                 />
               </div>
 
-              <Suspense fallback={<ConfigWorkspaceSkeleton inline />}>
-                <InlineConfigWorkspace recipe={recipe} />
-              </Suspense>
+              <div className="border-t border-outline-dim">
+                <Suspense fallback={<ConfigWorkspaceSkeleton inline />}>
+                  <InlineConfigWorkspace recipe={recipe} />
+                </Suspense>
+              </div>
             </div>
           )
         ) : activeTab === 'community' ? (
@@ -542,7 +547,7 @@ export default function RecipeDetail() {
               {showAppMonitor ? (
                 <RecipeMonitorPanel recipe={recipe} metrics={runtimeMetrics} />
               ) : (
-                <div className="px-5 py-5 text-sm text-text-dim">Launch or build the app to see live resource telemetry.</div>
+                <div className="px-5 py-5 text-sm text-text-dim">{t('recipe.liveResourceTelemetry')}</div>
               )}
             </div>
           </div>
@@ -563,17 +568,16 @@ export default function RecipeDetail() {
       {showHfModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-surface-high rounded-2xl p-6 w-full max-w-md shadow-2xl border border-outline-dim">
-            <h3 className="text-lg font-bold text-text font-display m-0">HuggingFace Token Required</h3>
+            <h3 className="text-lg font-bold text-text font-display m-0">{t('recipe.hfTokenRequired')}</h3>
             <p className="text-sm text-text-dim mt-2 mb-4 leading-relaxed">
-              This model uses gated assets on HuggingFace. Paste your access token below to continue.
-              You can create one at{' '}
+              {t('recipe.hfTokenBody')}{' '}
               <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary hover:underline">
                 huggingface.co/settings/tokens
               </a>.
             </p>
             <input
               type="password"
-              placeholder="hf_..."
+              placeholder={t('models.hf.tokenPlaceholder')}
               value={hfToken}
               onChange={(e) => setHfToken(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleHfSubmit()}
@@ -586,14 +590,14 @@ export default function RecipeDetail() {
                 onClick={() => { setShowHfModal(false); setHfToken(''); setHfError('') }}
                 className="px-4 py-2 bg-transparent text-text-muted border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:text-text transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleHfSubmit}
                 disabled={!hfToken.trim() || hfSaving}
                 className="px-5 py-2 bg-primary text-white border-none rounded-xl text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-default"
               >
-                {hfSaving ? 'Saving...' : 'Save & Launch'}
+                {hfSaving ? t('recipe.saving') : t('recipe.saveAndLaunch')}
               </button>
             </div>
           </div>
@@ -603,9 +607,9 @@ export default function RecipeDetail() {
       {showUninstallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-surface-high rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-outline-dim">
-            <h3 className="text-lg font-bold text-text font-display m-0">Uninstall {recipe.name}</h3>
+            <h3 className="text-lg font-bold text-text font-display m-0">{t('recipe.uninstallTitle', { name: recipe.name })}</h3>
             <p className="text-sm text-text-dim mt-2 mb-5 leading-relaxed">
-              Choose whether to keep the mounted config and data files, or remove everything created for this recipe.
+              {t('recipe.uninstallBody')}
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -614,9 +618,9 @@ export default function RecipeDetail() {
                 disabled={isRemoving}
                 className="text-left rounded-2xl border border-outline-dim bg-surface-low px-4 py-4 cursor-pointer hover:border-primary transition-colors disabled:opacity-50"
               >
-                <div className="text-sm font-semibold text-text">Uninstall giữ data</div>
+                <div className="text-sm font-semibold text-text">{t('recipe.uninstallKeepData')}</div>
                 <div className="text-xs text-text-dim mt-1 leading-5">
-                  Remove containers, images, and volumes only. Keep local bind-mounted data and config files.
+                  {t('recipe.uninstallKeepDataBody')}
                 </div>
               </button>
 
@@ -625,9 +629,9 @@ export default function RecipeDetail() {
                 disabled={isRemoving}
                 className="text-left rounded-2xl border border-error/40 bg-error-surface px-4 py-4 cursor-pointer hover:border-error transition-colors disabled:opacity-50"
               >
-                <div className="text-sm font-semibold text-error">Uninstall xóa sạch data</div>
+                <div className="text-sm font-semibold text-error">{t('recipe.uninstallDeleteData')}</div>
                 <div className="text-xs text-text-dim mt-1 leading-5">
-                  Remove containers, images, volumes, and local bind-mounted data/config created under this recipe.
+                  {t('recipe.uninstallDeleteDataBody')}
                 </div>
               </button>
             </div>
@@ -638,7 +642,7 @@ export default function RecipeDetail() {
                 disabled={isRemoving}
                 className="px-4 py-2 bg-transparent text-text-muted border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:text-text transition-colors disabled:opacity-40"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -649,6 +653,7 @@ export default function RecipeDetail() {
 }
 
 function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
+  const { t } = useTranslation()
   const community = recipe.community || {}
   const tips = Array.isArray(community.tips) ? community.tips : []
   const [submittingVerify, setSubmittingVerify] = useState(false)
@@ -666,9 +671,9 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     setFeedback('')
     try {
       await onVerify(recipe.slug)
-      setFeedback('Verification recorded for this host profile.')
+      setFeedback(t('recipe.feedbackVerificationRecorded'))
     } catch (e) {
-      setError(e?.message || 'Failed to record verification')
+      setError(e?.message || t('recipe.feedbackFailedVerification'))
     } finally {
       setSubmittingVerify(false)
     }
@@ -680,9 +685,9 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     setFeedback('')
     try {
       await onRate(recipe.slug, score)
-      setFeedback(`Saved ${score}-star rating.`)
+      setFeedback(t('recipe.feedbackSavedRating', { score }))
     } catch (e) {
-      setError(e?.message || 'Failed to save rating')
+      setError(e?.message || t('recipe.feedbackFailedRating'))
     } finally {
       setSubmittingRating(0)
     }
@@ -692,7 +697,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     event.preventDefault()
     const content = tipContent.trim()
     if (content.length < 4) {
-      setError('Tip content must be at least 4 characters.')
+      setError(t('recipe.feedbackTipTooShort'))
       return
     }
 
@@ -701,14 +706,14 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     setFeedback('')
     try {
       await onAddTip(recipe.slug, {
-        author: tipAuthor.trim() || 'Anonymous operator',
+        author: tipAuthor.trim() || t('recipe.communityAnonymous'),
         content,
       })
       setTipContent('')
       setTipAuthor('')
-      setFeedback('Community tip submitted.')
+      setFeedback(t('recipe.feedbackTipSubmitted'))
     } catch (e) {
-      setError(e?.message || 'Failed to submit tip')
+      setError(e?.message || t('recipe.feedbackFailedTip'))
     } finally {
       setTipSaving(false)
     }
@@ -720,9 +725,9 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     setFeedback('')
     try {
       const result = await onExport(recipe.slug)
-      setFeedback(`Community YAML exported to ${result.path}`)
+      setFeedback(t('recipe.feedbackExportedYaml', { path: result.path }))
     } catch (e) {
-      setError(e?.message || 'Failed to export community YAML')
+      setError(e?.message || t('recipe.feedbackFailedExport'))
     } finally {
       setExporting(false)
     }
@@ -732,18 +737,18 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
     <div className="w-full px-6 py-6">
       <div className="max-w-[56rem] space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
-          <CommunityMetricCard label="Average rating" value={community.rating_count ? `${community.rating_average.toFixed(1)} / 5` : 'Unrated'} hint={`${community.rating_count || 0} ratings`} />
-          <CommunityMetricCard label="Verified systems" value={String(community.verified_count || 0)} hint="Operators confirmed this recipe ran on their host" />
-          <CommunityMetricCard label="Shared tips" value={String(community.tips_count || 0)} hint="Short operational notes from the field" />
-          <CommunityMetricCard label="Submit recipe" value="Open PR flow" hint="Starts a GitHub contribution draft for this recipe" />
+          <CommunityMetricCard label={t('recipe.communityAverageRating')} value={community.rating_count ? `${community.rating_average.toFixed(1)} / 5` : t('recipe.communityUnrated')} hint={t('recipe.communityRatings', { count: community.rating_count || 0 })} />
+          <CommunityMetricCard label={t('recipe.communityVerifiedSystems')} value={String(community.verified_count || 0)} hint={t('recipe.communityVerifiedHint')} />
+          <CommunityMetricCard label={t('recipe.communitySharedTips')} value={String(community.tips_count || 0)} hint={t('recipe.communitySharedTipsHint')} />
+          <CommunityMetricCard label={t('recipe.communitySubmitRecipe')} value={t('recipe.communityOpenPrFlow')} hint={t('recipe.communityOpenPrHint')} />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <div className="rounded-3xl border border-outline-dim bg-surface p-5 space-y-5">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Verification</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.communityVerification')}</div>
               <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                Confirm that this recipe worked on your current NVIDIA GPU host. This is lightweight operational evidence, not a formal certification.
+                {t('recipe.communityVerificationBody')}
               </p>
             </div>
             <button
@@ -751,12 +756,12 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
               disabled={submittingVerify}
               className="w-full px-4 py-3 bg-primary text-primary-on border-none rounded-2xl text-sm font-semibold cursor-pointer disabled:opacity-50"
             >
-              {submittingVerify ? 'Recording verification...' : 'Verified on my system'}
+              {submittingVerify ? t('recipe.communityRecordingVerification') : t('recipe.communityVerifiedOnMySystem')}
             </button>
 
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Rating</div>
-              <p className="text-sm text-text-dim leading-6 m-0 mt-2">Score the overall deployment experience for this recipe.</p>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.communityRating')}</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">{t('recipe.communityRatingBody')}</p>
               <div className="mt-3 flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((score) => {
                   const filled = score <= Math.round(community.rating_average || 0)
@@ -770,7 +775,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
                           ? 'border-primary/30 bg-primary/10 text-primary'
                           : 'border-outline-dim bg-surface-high text-text-dim hover:text-text'
                       } disabled:opacity-50`}
-                      title={`Rate ${score} out of 5`}
+                      title={t('recipe.communityRateOutOfFive', { score })}
                     >
                       ★
                     </button>
@@ -780,9 +785,9 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
             </div>
 
             <div className="rounded-2xl border border-outline-dim bg-surface-low/60 p-4">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Submit Recipe</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.communitySubmitRecipe')}</div>
               <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                Open a prefilled GitHub contribution draft to propose a new recipe, improvements, or validation notes for this one.
+                {t('recipe.communityContributionBody')}
               </p>
               <a
                 href={community.submit_recipe_url || 'https://github.com/hitechcloud-vietnam/nvidia-ai-hub/compare/main...main?expand=1'}
@@ -790,14 +795,14 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
                 rel="noreferrer"
                 className="mt-3 inline-flex items-center gap-2 text-primary no-underline font-semibold hover:text-primary/80"
               >
-                Open contribution draft
+                {t('recipe.communityOpenContributionDraft')}
               </a>
               <button
                 onClick={handleExport}
                 disabled={exporting}
                 className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-surface-high text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:border-primary hover:text-primary disabled:opacity-50"
               >
-                {exporting ? 'Exporting...' : 'Export community YAML'}
+                {exporting ? t('recipe.communityExporting') : t('recipe.communityExportYaml')}
               </button>
             </div>
 
@@ -813,9 +818,9 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
             <div className="rounded-3xl border border-outline-dim bg-surface p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Comments & tips</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.communityCommentsTips')}</div>
                   <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                    Capture deployment notes, hardware caveats, or operator shortcuts. Keep entries concise and actionable.
+                    {t('recipe.communityCommentsTipsBody')}
                   </p>
                 </div>
               </div>
@@ -826,7 +831,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
                   value={tipAuthor}
                   onChange={(e) => setTipAuthor(e.target.value)}
                   maxLength={80}
-                  placeholder="Name or team (optional)"
+                  placeholder={t('recipe.communityNamePlaceholder')}
                   className="w-full px-4 py-3 bg-surface-high rounded-2xl text-text text-sm outline-none border border-outline-dim focus:border-primary/40"
                 />
                 <textarea
@@ -834,7 +839,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
                   onChange={(e) => setTipContent(e.target.value)}
                   rows={5}
                   maxLength={1200}
-                  placeholder="Example: Works reliably on Ubuntu 24.04 with the latest NVIDIA Container Toolkit, but first launch takes ~8 minutes while the model cache warms up."
+                  placeholder={t('recipe.communityTipPlaceholder')}
                   className="w-full px-4 py-3 bg-surface-high rounded-2xl text-text text-sm outline-none border border-outline-dim focus:border-primary/40 resize-y"
                 />
                 <div className="flex items-center justify-between gap-3">
@@ -844,7 +849,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
                     disabled={tipSaving || tipContent.trim().length < 4}
                     className="px-4 py-2.5 bg-primary text-primary-on border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50"
                   >
-                    {tipSaving ? 'Submitting...' : 'Share tip'}
+                    {tipSaving ? t('recipe.communitySubmitting') : t('recipe.communityShareTip')}
                   </button>
                 </div>
               </form>
@@ -854,14 +859,14 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
               {tips.length > 0 ? tips.map((tip) => (
                 <div key={tip.id} className="rounded-3xl border border-outline-dim bg-surface p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-semibold text-text font-display">{tip.author || 'Anonymous operator'}</div>
+                    <div className="text-sm font-semibold text-text font-display">{tip.author || t('recipe.communityAnonymous')}</div>
                     <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{formatCommunityTimestamp(tip.created_at)}</div>
                   </div>
                   <p className="text-sm text-text-dim leading-6 m-0 mt-3 whitespace-pre-wrap">{tip.content}</p>
                 </div>
               )) : (
                 <div className="rounded-3xl border border-dashed border-outline-dim bg-surface p-6 text-sm text-text-dim">
-                  No community tips yet. Add the first deployment note for this recipe.
+                  {t('recipe.communityNoTips')}
                 </div>
               )}
             </div>
@@ -883,7 +888,7 @@ function CommunityMetricCard({ label, value, hint }) {
 }
 
 function formatCommunityTimestamp(value) {
-  if (!value) return 'Recent'
+  if (!value) return i18n.t('common.recent')
   const normalized = value.includes('T') ? value : value.replace(' ', 'T')
   const parsed = new Date(normalized)
   if (Number.isNaN(parsed.getTime())) return value
@@ -924,6 +929,7 @@ function SpecBadge({ label, value }) {
 }
 
 function RelatedRecipeCard({ recipe, onSelect }) {
+  const { t } = useTranslation()
   const logoUrl = useThemedLogo(recipe.logo)
   const [logoFailed, setLogoFailed] = useState(false)
 
@@ -951,13 +957,14 @@ function RelatedRecipeCard({ recipe, onSelect }) {
         onClick={() => onSelect(recipe.slug)}
         className="px-4 py-2.5 bg-surface-highest text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shrink-0"
       >
-        View
+        {t('common.view')}
       </button>
     </div>
   )
 }
 
 function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deploymentPlan, deploymentSelection, setDeploymentSelection, deploymentSaving, saveDeploymentSelection, systemTopology }) {
+  const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
@@ -981,8 +988,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
     : [
         {
           key: 'metadata',
-          label: 'Portable metadata',
-          description: 'Structured metadata for external launchers or inventory systems.',
+          label: t('recipe.portableMetadata'),
+          description: t('recipe.portableMetadataBody'),
           value: platformExports.metadata,
           filename: `${recipe.slug}-metadata.json`,
           mimeType: 'application/json;charset=utf-8',
@@ -990,8 +997,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
         },
         {
           key: 'deploymentProfiles',
-          label: 'Deployment profiles',
-          description: 'Portable environment presets for workstation, lab, server, and DGX rollout planning.',
+          label: t('recipe.deploymentProfiles'),
+          description: t('recipe.deploymentProfilesBody'),
           value: platformExports.deploymentProfiles,
           filename: `${recipe.slug}-deployment-profiles.json`,
           mimeType: 'application/json;charset=utf-8',
@@ -999,8 +1006,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
         },
         {
           key: 'syncScript',
-          label: 'NVIDIA Sync custom script',
-          description: 'Drop-in shell snippet for a custom script integration surface.',
+          label: t('recipe.syncCustomScript'),
+          description: t('recipe.syncCustomScriptBody'),
           value: platformExports.syncScript,
           filename: `${recipe.slug}-nvidia-sync.sh`,
           mimeType: 'text/x-shellscript;charset=utf-8',
@@ -1008,8 +1015,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
         },
         {
           key: 'sshCommand',
-          label: 'SSH remote launch',
-          description: 'Bootstrap the recipe on a remote supported NVIDIA Linux host over SSH.',
+          label: t('recipe.sshRemoteLaunch'),
+          description: t('recipe.sshRemoteLaunchBody'),
           value: platformExports.sshCommand,
           filename: `${recipe.slug}-ssh-launch.sh`,
           mimeType: 'text/x-shellscript;charset=utf-8',
@@ -1017,8 +1024,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
         },
         {
           key: 'endpointSummary',
-          label: 'Launch endpoint',
-          description: 'Resolved endpoint and runtime hints for downstream tooling.',
+          label: t('recipe.launchEndpoint'),
+          description: t('recipe.launchEndpointBody'),
           value: platformExports.endpointSummary,
           filename: `${recipe.slug}-endpoint.txt`,
           mimeType: 'text/plain;charset=utf-8',
@@ -1027,33 +1034,37 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
       ].filter((item) => item.visible)
 
   return (
-    <div className="w-full px-6 py-6">
-      <div className="max-w-[44rem]">
-        <div className="space-y-7">
-          <p className="text-[15px] text-text-muted leading-7 m-0">{recipe.description}</p>
+    <div className="w-full px-4 py-5 sm:px-6 sm:py-6 xl:px-8">
+      <div className="w-full max-w-none">
+        <div className="space-y-6">
+          <OverviewSection>
+            <div className="space-y-5">
+              <p className="text-[15px] text-text-muted leading-7 m-0">{recipe.description}</p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm">
-            {officialUrl && (
-              <a href={officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary no-underline hover:text-primary/80 transition-colors font-medium">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                Website
-              </a>
-            )}
-            {sourceUrl && (
-              <a href={sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-text-dim no-underline hover:text-text transition-colors font-medium">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-                Source
-              </a>
-            )}
-          </div>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm">
+                {officialUrl && (
+                  <a href={officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary no-underline hover:text-primary/80 transition-colors font-medium">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    {t('recipe.website')}
+                  </a>
+                )}
+                {sourceUrl && (
+                  <a href={sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-text-dim no-underline hover:text-text transition-colors font-medium">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    {t('recipe.source')}
+                  </a>
+                )}
+              </div>
 
-          {recipe.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {recipe.tags.map((t) => (
-                <span key={t} className="bg-surface-high/70 text-text-dim px-2.5 py-1 rounded-full text-[11px] font-label">{t}</span>
-              ))}
+              {recipe.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {recipe.tags.map((t) => (
+                    <span key={t} className="bg-surface-high/70 text-text-dim px-2.5 py-1 rounded-full text-[11px] font-label">{t}</span>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </OverviewSection>
 
           <HostFitPanel fit={hardwareFit} />
 
@@ -1067,11 +1078,11 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
           />
 
           {relatedRecipes.length > 0 && (
-            <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <OverviewSection>
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Suggested Add-On</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.suggestedAddOn')}</div>
                 <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                  For quick local testing, install a shared Ollama runtime and connect this app to its default endpoint.
+                  {t('recipe.suggestedAddOnBody')}
                 </p>
               </div>
               <div className="space-y-3">
@@ -1079,29 +1090,29 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                   <RelatedRecipeCard key={item.slug} recipe={item} onSelect={selectRecipe} />
                 ))}
               </div>
-            </div>
+            </OverviewSection>
           )}
 
           {recipe.runtime_env_path && (
-            <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <OverviewSection>
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Advanced Configuration</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.advancedConfiguration')}</div>
                 <p className="text-sm text-text-dim leading-6 m-0 mt-2">
                   {isNotebook
-                    ? 'This notebook blueprint creates a local runtime env file on first install. Review it before launch if you need to supply NVIDIA API credentials or VIAVI endpoint details.'
-                    : 'This app creates a local runtime config file on first install. Most users should leave it alone. If you know what you are doing, you can edit it manually and relaunch the app.'}
+                    ? t('recipe.advancedConfigNotebook')
+                    : t('recipe.advancedConfigApp')}
                 </p>
               </div>
-              <Field label="Runtime env file" value={recipe.runtime_env_path} />
-            </div>
+              <Field label={t('recipe.runtimeEnvFile')} value={recipe.runtime_env_path} />
+            </OverviewSection>
           )}
 
           {recipe.commands?.length > 0 && (
-            <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <OverviewSection>
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Execution Commands</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.executionCommands')}</div>
                 <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                  Use these commands from the repository root if you want to install or operate this recipe manually outside the UI.
+                  {t('recipe.executionCommandsBody')}
                 </p>
               </div>
               <div className="space-y-3">
@@ -1109,40 +1120,40 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                   <CommandBlock key={`${recipe.slug}-${item.label}`} item={item} />
                 ))}
               </div>
-            </div>
+            </OverviewSection>
           )}
 
           {recipe.integration && (
-            <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <OverviewSection>
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">API Integration</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.apiIntegration')}</div>
                 {recipe.tags?.includes('vllm') && (
-                  <div className="text-[10px] text-text-muted mt-1">All vLLM models are served on port 9001</div>
+                  <div className="text-[10px] text-text-muted mt-1">{t('recipe.vllmPortHint')}</div>
                 )}
               </div>
-              <div className="space-y-2.5">
-                <Field label="API URL" value={recipe.integration.api_url.replace('<NVIDIA_AI_HUB_IP>', location.hostname)} />
-                <Field label="Model ID" value={recipe.integration.model_id} />
-                <Field label="API Key" value={recipe.integration.api_key} />
-                {recipe.integration.max_context && <Field label="Max Context" value={recipe.integration.max_context} />}
-                {recipe.integration.max_output_tokens && <Field label="Max Output" value={recipe.integration.max_output_tokens} />}
+              <div className="grid gap-3 xl:grid-cols-2">
+                <Field label={t('recipe.apiUrl')} value={recipe.integration.api_url.replace('<NVIDIA_AI_HUB_IP>', location.hostname)} />
+                <Field label={t('recipe.modelId')} value={recipe.integration.model_id} />
+                <Field label={t('recipe.apiKey')} value={recipe.integration.api_key} />
+                {recipe.integration.max_context && <Field label={t('recipe.maxContext')} value={recipe.integration.max_context} />}
+                {recipe.integration.max_output_tokens && <Field label={t('recipe.maxOutput')} value={recipe.integration.max_output_tokens} />}
                 {recipe.integration.curl_example && (
-                  <div className="pt-2">
-                    <span className="text-[10px] text-text-dim font-label block mb-1">curl example</span>
+                  <div className="pt-2 xl:col-span-2">
+                    <span className="text-[10px] text-text-dim font-label block mb-1">{t('recipe.curlExample')}</span>
                     <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">
                       {recipe.integration.curl_example.replace(/<NVIDIA_AI_HUB_IP>/g, location.hostname)}
                     </pre>
                   </div>
                 )}
               </div>
-            </div>
+            </OverviewSection>
           )}
 
-          <div className="space-y-4 pt-5 border-t border-outline-dim">
+          <OverviewSection>
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Platform Integration Export</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.platformIntegrationExport')}</div>
               <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                Copy portable launch metadata, bootstrap snippets, and SSH-friendly commands for workstation, lab, server, or DGX deployment flows.
+                {t('recipe.platformIntegrationExportBody')}
               </p>
             </div>
 
@@ -1151,14 +1162,14 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                 <ExportBlock key={item.key} label={item.label} description={item.description} value={item.value} filename={item.filename} mimeType={item.mimeType} />
               ))}
             </div>
-          </div>
+          </OverviewSection>
 
           {registryChanged && recentCommits.length > 0 && (
-            <div className="space-y-4 pt-5 border-t border-outline-dim">
+            <OverviewSection>
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Registry updates available</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.registryUpdatesAvailable')}</div>
                 <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-                  The local recipe registry is behind upstream. Review the latest upstream changes, then run Update when you are ready.
+                  {t('recipe.registryUpdatesBody')}
                 </p>
               </div>
               <div className="space-y-3">
@@ -1172,23 +1183,25 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                   </div>
                 ))}
               </div>
-            </div>
+            </OverviewSection>
           )}
         </div>
 
         {!recipe.installed && !isBuilding && recipe.has_leftovers && (
-          <div className="mt-12 pt-6 border-t border-outline-dim space-y-3">
+          <div className="mt-6">
+            <OverviewSection>
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Cleanup</div>
-              <p className="text-sm text-text-dim leading-6 m-0 mt-2">Remove leftover images or volumes from a previous uninstall. This is destructive and should only be used when you want to free all remaining app data.</p>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.cleanup')}</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">{t('recipe.cleanupBody')}</p>
             </div>
             <button
               disabled={purging === recipe.slug}
-              onClick={() => { if (window.confirm(`Wipe all data for ${recipe.name}?`)) purgeRecipe(recipe.slug) }}
+              onClick={() => { if (window.confirm(t('recipe.wipeConfirm', { name: recipe.name }))) purgeRecipe(recipe.slug) }}
               className="px-4 py-2.5 bg-warning/10 text-warning border border-warning/20 rounded-xl text-sm font-semibold cursor-pointer hover:bg-warning/15 transition-all disabled:opacity-50"
             >
-              {purging === recipe.slug ? 'Wiping cached data...' : 'Wipe cached data'}
+              {purging === recipe.slug ? t('recipe.wipingCachedData') : t('recipe.wipeCachedData')}
             </button>
+            </OverviewSection>
           </div>
         )}
       </div>
@@ -1196,7 +1209,16 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
   )
 }
 
+function OverviewSection({ children, className = '' }) {
+  return (
+    <section className={`w-full rounded-3xl border border-outline-dim bg-surface/70 p-5 sm:p-6 ${className}`.trim()}>
+      <div className="space-y-4">{children}</div>
+    </section>
+  )
+}
+
 function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, systemTopology }) {
+  const { t } = useTranslation()
   if (!plan) return null
 
   const recommendations = Array.isArray(plan.recommendations) ? plan.recommendations : []
@@ -1205,9 +1227,9 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
   return (
     <div className="space-y-4 pt-5 border-t border-outline-dim">
       <div>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Deployment planner</div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.deploymentPlanner')}</div>
         <p className="text-sm text-text-dim leading-6 m-0 mt-2">
-          Match this recipe to a single-GPU workstation, a multi-GPU host, or a cluster-ready rollout profile before install or launch.
+          {t('recipe.deploymentPlannerBody')}
         </p>
       </div>
 
@@ -1234,11 +1256,11 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="text-sm font-semibold text-text font-display">{item.label}</div>
-                {item.recommended ? <span className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Recommended</span> : null}
+                {item.recommended ? <span className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">{t('recipe.recommended')}</span> : null}
               </div>
               <p className="m-0 mt-2 text-sm text-text-dim leading-6">{item.rationale}</p>
               <div className="mt-3 text-[11px] text-text-dim font-label">
-                {item.supported ? `${item.gpu_count || 0} GPU target` : 'Not currently supported on this host'}
+                {item.supported ? t('recipe.gpuTarget', { count: item.gpu_count || 0 }) : t('recipe.notSupportedOnHost')}
               </div>
             </button>
           )
@@ -1248,61 +1270,61 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
       {activeProfile && (
         <div className="rounded-2xl border border-outline-dim bg-surface-high/30 p-4 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Launch strategy" value={activeProfile.strategy || selection?.strategy || 'local-ui'} />
-            <Field label="Target GPUs" value={(selection?.target_gpu_indices || []).length ? selection.target_gpu_indices.join(', ') : 'Automatic'} />
+            <Field label={t('recipe.launchStrategy')} value={activeProfile.strategy || selection?.strategy || 'local-ui'} />
+            <Field label={t('recipe.targetGpus')} value={(selection?.target_gpu_indices || []).length ? selection.target_gpu_indices.join(', ') : t('recipe.automatic')} />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-sm text-text">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Target hosts</span>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.targetHosts')}</span>
               <input
                 value={(selection?.target_hosts || []).join(', ')}
                 onChange={(event) => onChange({ ...selection, target_hosts: event.target.value.split(',').map((item) => item.trim()).filter(Boolean) })}
                 className="rounded-xl border border-outline-dim bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-primary"
-                placeholder="host-a, host-b"
+                placeholder={t('recipe.targetHostsPlaceholder')}
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-text">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Shared storage path</span>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.sharedStoragePath')}</span>
               <input
                 value={selection?.shared_storage_path || ''}
                 onChange={(event) => onChange({ ...selection, shared_storage_path: event.target.value })}
                 className="rounded-xl border border-outline-dim bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-primary"
-                placeholder="/mnt/models/shared"
+                placeholder={t('recipe.sharedStoragePlaceholder')}
               />
             </label>
           </div>
 
           <label className="flex flex-col gap-2 text-sm text-text">
-            <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Planner notes</span>
+            <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.plannerNotes')}</span>
             <textarea
               value={selection?.notes || ''}
               onChange={(event) => onChange({ ...selection, notes: event.target.value })}
               className="min-h-[88px] rounded-2xl border border-outline-dim bg-surface px-3 py-3 text-sm text-text outline-none focus:border-primary resize-y"
-              placeholder="Document scheduler, host affinity, or storage assumptions for this recipe."
+              placeholder={t('recipe.plannerNotesPlaceholder')}
             />
           </label>
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-2xl bg-surface px-4 py-3 border border-outline-dim">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Host readiness</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.hostReadiness')}</div>
               <div className="mt-2 text-sm text-text-dim leading-6">
-                {plan.available_gpu_count} GPU(s) detected · Network metadata {plan.network_ready ? 'configured' : 'not configured'} · Shared storage {plan.shared_storage_ready ? 'configured' : 'not configured'}
+                {t('recipe.hostReadinessBody', { gpuCount: plan.available_gpu_count, networkStatus: plan.network_ready ? t('recipe.configured') : t('recipe.notConfigured'), storageStatus: plan.shared_storage_ready ? t('recipe.configured') : t('recipe.notConfigured') })}
               </div>
             </div>
             <div className="rounded-2xl bg-surface px-4 py-3 border border-outline-dim">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Topology</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.topology')}</div>
               <div className="mt-2 text-sm text-text-dim leading-6">
                 {plan.topology?.detected
-                  ? `${plan.topology.nvlink_pairs || 0} NVLink pair(s) detected${plan.topology.peer_to_peer_capable ? ' with local peer-to-peer paths.' : '.'}`
-                  : (systemTopology?.notes?.[0] || plan.topology?.notes?.[0] || 'Topology data unavailable.')}
+                  ? t('recipe.topologyDetected', { count: plan.topology.nvlink_pairs || 0, suffix: plan.topology.peer_to_peer_capable ? t('recipe.topologyP2pSuffix') : t('recipe.topologyNoP2pSuffix') })
+                  : (systemTopology?.notes?.[0] || plan.topology?.notes?.[0] || t('recipe.topologyUnavailable'))}
               </div>
             </div>
           </div>
 
           {Array.isArray(activeProfile.caveats) && activeProfile.caveats.length > 0 && (
             <div className="rounded-2xl border border-warning/20 bg-warning/8 px-4 py-3">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-warning font-label">Reviewer notes</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-warning font-label">{t('recipe.reviewerNotes')}</div>
               <ul className="m-0 mt-2 pl-5 text-sm text-text-dim space-y-1.5">
                 {activeProfile.caveats.map((item) => <li key={item}>{item}</li>)}
               </ul>
@@ -1311,7 +1333,7 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
 
           {Array.isArray(plan.warnings) && plan.warnings.length > 0 && (
             <div className="rounded-2xl border border-error/20 bg-error/8 px-4 py-3">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-error font-label">Operational warnings</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-error font-label">{t('recipe.operationalWarnings')}</div>
               <ul className="m-0 mt-2 pl-5 text-sm text-text-dim space-y-1.5">
                 {plan.warnings.map((item) => <li key={item}>{item}</li>)}
               </ul>
@@ -1320,10 +1342,10 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
 
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={onSave} type="button" className="px-4 py-2.5 rounded-xl bg-surface text-text border border-outline-dim text-sm font-semibold hover:border-primary/40" disabled={saving || !selection}>
-              {saving ? 'Saving profile...' : 'Save deployment profile'}
+              {saving ? t('recipe.savingProfile') : t('recipe.saveDeploymentProfile')}
             </button>
             <span className="text-xs text-text-dim">
-              Saved profiles are written into the recipe runtime env so install and launch flows reuse the same deployment intent.
+              {t('recipe.saveDeploymentProfileBody')}
             </span>
           </div>
         </div>
@@ -1333,6 +1355,7 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
 }
 
 function ExportBlock({ label, description, value, filename, mimeType }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const copy = () => {
@@ -1367,11 +1390,11 @@ function ExportBlock({ label, description, value, filename, mimeType }) {
         </div>
         <div className="flex items-center gap-2">
           {filename && (
-            <button onClick={download} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Download export">
+            <button onClick={download} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={t('recipe.downloadExport')}>
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
           )}
-          <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Copy export">
+          <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={t('recipe.copyExport')}>
             {copied ? (
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             ) : (
@@ -1525,6 +1548,7 @@ function buildPlatformExports(recipe) {
 }
 
 function HostFitPanel({ fit }) {
+  const { t } = useTranslation()
   const panelClass = fit.tone === 'success'
     ? 'border-success/20 bg-success/5'
     : fit.tone === 'warning'
@@ -1536,7 +1560,7 @@ function HostFitPanel({ fit }) {
   return (
     <div className="space-y-4 pt-5 border-t border-outline-dim">
       <div>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Host Fit Check</div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.hostFitCheck')}</div>
         <p className="text-sm text-text-dim leading-6 m-0 mt-2">
           {fit.headline}
         </p>
@@ -1544,7 +1568,7 @@ function HostFitPanel({ fit }) {
 
       <div className={`rounded-2xl border p-4 ${panelClass}`}>
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <StatusPill color={fit.tone}>{`Host ${fit.label}`}</StatusPill>
+          <StatusPill color={fit.tone}>{t('common.hostLabel', { label: fit.label })}</StatusPill>
         </div>
         <div className="space-y-2.5">
           {fit.checks.map((check) => (
@@ -1554,7 +1578,7 @@ function HostFitPanel({ fit }) {
                 <div className="text-xs text-text-dim leading-5 mt-1">{check.message}</div>
               </div>
               <StatusPill color={check.status === 'critical' ? 'error' : check.status === 'warning' ? 'warning' : check.status === 'good' ? 'success' : 'dim'}>
-                {check.status === 'critical' ? 'Action needed' : check.status === 'warning' ? 'Review' : check.status === 'good' ? 'OK' : 'Unknown'}
+                {check.status === 'critical' ? t('recipe.actionNeeded') : check.status === 'warning' ? t('recipe.review') : check.status === 'good' ? t('recipe.ok') : t('recipe.unknown')}
               </StatusPill>
             </div>
           ))}
@@ -1565,6 +1589,7 @@ function HostFitPanel({ fit }) {
 }
 
 function CommandBlock({ item }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const copy = () => {
@@ -1584,7 +1609,7 @@ function CommandBlock({ item }) {
           <div className="text-sm font-semibold text-text font-display">{item.label}</div>
           {item.description && <p className="text-sm text-text-dim leading-6 m-0 mt-1">{item.description}</p>}
         </div>
-        <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Copy command">
+        <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={t('recipe.copyCommand')}>
           {copied ? (
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           ) : (
@@ -1598,6 +1623,7 @@ function CommandBlock({ item }) {
 }
 
 function Field({ label, value }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const copy = () => {
     const text = String(value)
@@ -1614,7 +1640,7 @@ function Field({ label, value }) {
         <span className="text-[10px] text-text-dim font-label block">{label}</span>
         <code className="text-xs text-text-muted font-mono break-all">{String(value)}</code>
       </div>
-      <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title="Copy">
+      <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={t('recipe.copy')}>
         {copied ? (
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         ) : (
@@ -1649,6 +1675,7 @@ function ConfigWorkspaceSkeleton({ inline = false }) {
 }
 
 function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasLogs, progressState, scrollRef, wide = false }) {
+  const { t } = useTranslation()
   const [autoScroll, setAutoScroll] = useState(true)
 
   useEffect(() => {
@@ -1675,13 +1702,13 @@ function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasL
             <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]/70" />
           </div>
           <span className="text-[10px] text-gray-500 font-mono">
-            {isUpdating ? 'update' : isBuilding ? 'build' : 'container'} - logs
+            {t('recipe.terminalLogMode', { mode: isUpdating ? t('recipe.terminalModeUpdate') : isBuilding ? t('recipe.terminalModeBuild') : t('recipe.terminalModeContainer') })}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {isBuilding && <span className="text-[10px] text-primary animate-pulse font-mono">{isUpdating ? '● updating' : '● building'}</span>}
-          {!isBuilding && isRunning && isReady && <span className="text-[10px] text-emerald-400 font-mono">● running</span>}
-          {!isBuilding && isRunning && !isReady && <span className="text-[10px] text-amber-400 animate-pulse font-mono">● starting</span>}
+          {isBuilding && <span className="text-[10px] text-primary animate-pulse font-mono">{isUpdating ? t('recipe.terminalUpdating') : t('recipe.terminalBuilding')}</span>}
+          {!isBuilding && isRunning && isReady && <span className="text-[10px] text-emerald-400 font-mono">{t('recipe.terminalRunning')}</span>}
+          {!isBuilding && isRunning && !isReady && <span className="text-[10px] text-amber-400 animate-pulse font-mono">{t('recipe.terminalStarting')}</span>}
         </div>
       </div>
 
@@ -1709,7 +1736,7 @@ function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasL
         className="flex-1 overflow-y-auto p-4 font-mono text-[11px] leading-5 selection:bg-primary/30"
       >
         {showEmpty && (
-          <div className="text-gray-600 italic">No logs. Launch the app to see output here.</div>
+          <div className="text-gray-600 italic">{t('recipe.noLogs')}</div>
         )}
         {lines.map((l, i) => (
           <div
@@ -1734,41 +1761,42 @@ function TerminalPanel({ lines, isBuilding, isUpdating, isRunning, isReady, hasL
 }
 
 function RecipeMonitorPanel({ recipe, metrics }) {
+  const { t } = useTranslation()
   const rows = [
     {
-      label: 'CPU',
+      label: t('recipe.cpu'),
       value: `${Math.round(metrics?.cpu_percent ?? 0)}%`,
-      hint: metrics?.running ? `${metrics.container_count || 0} container${(metrics?.container_count || 0) > 1 ? 's' : ''}` : 'Waiting for live telemetry',
+      hint: metrics?.running ? `${metrics.container_count || 0} container${(metrics?.container_count || 0) > 1 ? 's' : ''}` : t('recipe.waitingForLiveTelemetry'),
     },
     {
-      label: 'RAM',
+      label: t('recipe.ram'),
       value: metrics?.memory_used_mb ? `${formatMb(metrics.memory_used_mb)} / ${formatMb(metrics.memory_limit_mb)}` : '—',
-      hint: metrics?.memory_percent ? `${metrics.memory_percent}% used` : 'No memory data yet',
+      hint: metrics?.memory_percent ? `${metrics.memory_percent}% used` : t('recipe.noMemoryDataYet'),
     },
     {
-      label: 'GPU',
+      label: t('recipe.gpu'),
       value: `${metrics?.gpu_utilization ?? 0}%`,
-      hint: metrics?.gpu_name || 'No GPU telemetry',
+      hint: metrics?.gpu_name || t('recipe.noGpuTelemetry'),
     },
     {
-      label: 'GPU RAM',
+      label: t('recipe.gpuRam'),
       value: metrics?.gpu_memory_total_mb ? `${metrics.gpu_memory_used_mb || 0} / ${metrics.gpu_memory_total_mb} MB` : '—',
-      hint: metrics?.telemetry_source || 'Shared host telemetry',
+      hint: metrics?.telemetry_source || t('recipe.sharedHostTelemetry'),
     },
     {
-      label: 'Temperature',
+      label: t('recipe.temperatureLabel'),
       value: metrics?.temperature ? `${Number(metrics.temperature).toFixed(1)} °C` : '—',
-      hint: metrics?.temperature_source || 'No sensor data',
+      hint: metrics?.temperature_source || t('recipe.noSensorData'),
     },
   ]
 
   return (
     <div className="px-5 py-5 space-y-4">
       <div>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">App Monitor</div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('recipe.appMonitor')}</div>
         <h3 className="text-base font-semibold text-text font-display mt-2 mb-1">{recipe.name}</h3>
         <p className="text-sm text-text-dim leading-6 m-0">
-          Live resource snapshot for this app. The panel appears while install, build, startup, or runtime activity is active.
+          {t('recipe.appMonitorBody')}
         </p>
       </div>
 
@@ -1792,6 +1820,7 @@ function RecipeMonitorPanel({ recipe, metrics }) {
 }
 
 function CommandTerminalPanel({ recipe, lines, command, setCommand, onSubmit, running }) {
+  const { t } = useTranslation()
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -1811,16 +1840,16 @@ function CommandTerminalPanel({ recipe, lines, command, setCommand, onSubmit, ru
             <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/70" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]/70" />
           </div>
-          <span className="text-[10px] text-gray-500 font-mono">interactive - container shell</span>
+          <span className="text-[10px] text-gray-500 font-mono">{t('recipe.interactiveContainerShell')}</span>
         </div>
         <div className="text-[10px] font-mono text-text-dim">
-          {recipe?.running ? (running ? 'executing...' : 'ready') : 'container offline'}
+          {recipe?.running ? (running ? t('recipe.executing') : t('recipe.ready')) : t('recipe.containerOffline')}
         </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-5">
         {lines.length === 0 ? (
-          <div className="text-gray-600 italic">Type a shell command to run inside the container.</div>
+          <div className="text-gray-600 italic">{t('recipe.typeShellCommand')}</div>
         ) : (
           lines.map((line, index) => (
             <div
@@ -1847,7 +1876,7 @@ function CommandTerminalPanel({ recipe, lines, command, setCommand, onSubmit, ru
             type="text"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            placeholder={recipe?.running ? 'e.g. ls -la /workspace' : 'Start the app to use container shell'}
+            placeholder={recipe?.running ? t('recipe.shellPlaceholder') : t('recipe.shellDisabledPlaceholder')}
             disabled={disabled}
             className="flex-1 rounded-xl border border-outline-dim bg-[#0B0B12] px-3 py-2 text-sm font-mono text-text focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
@@ -1856,7 +1885,7 @@ function CommandTerminalPanel({ recipe, lines, command, setCommand, onSubmit, ru
             disabled={disabled || !command.trim()}
             className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-on disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {running ? 'Run...' : 'Run'}
+            {running ? t('recipe.runningWithDots') : t('recipe.run')}
           </button>
         </div>
       </form>

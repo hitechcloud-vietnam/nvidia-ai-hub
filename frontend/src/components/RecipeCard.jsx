@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
 
 export default function RecipeCard({ recipe }) {
+  const { t } = useTranslation()
   const selectRecipe = useStore((s) => s.selectRecipe)
   const installing = useStore((s) => s.installing)
   const updating = useStore((s) => s.updating)
@@ -84,18 +86,18 @@ export default function RecipeCard({ recipe }) {
               </span>
             ))}
             {!recipe.docker?.gpu && (
-              <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-label text-text-dim">CPU</span>
+              <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-label text-text-dim">{t('recipeCard.cpu')}</span>
             )}
             {registryChanged && recipe.installed && !recipe.running && (
               <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-label text-warning">
-                Registry changed{updateCount > 0 ? ` · ${updateCount}` : ''}
+                {t('recipeCard.registryChanged')}{updateCount > 0 ? ` · ${updateCount}` : ''}
               </span>
             )}
             {hasCommunitySignal && (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-label text-primary">
                 {(community.verified_count || 0) > 0
-                  ? `${community.verified_count} verified`
-                  : `${Number(community.rating_average || 0).toFixed(1)}/5 community`}
+                  ? t('recipeCard.verifiedCount', { count: community.verified_count })
+                  : t('recipeCard.communityRating', { rating: Number(community.rating_average || 0).toFixed(1) })}
               </span>
             )}
           </div>
@@ -105,12 +107,12 @@ export default function RecipeCard({ recipe }) {
         <div className="mt-0.5 flex shrink-0 flex-col items-end gap-1.5">
           {isBuilding && (
             <span className="text-primary text-xs font-medium font-label animate-pulse">
-              <span className="inline-block animate-spin">⟳</span> Building
+              <span className="inline-block animate-spin">⟳</span> {t('recipeCard.building')}
             </span>
           )}
           {isUpdating && (
             <span className="text-primary text-xs font-medium font-label animate-pulse">
-              <span className="inline-block animate-spin">⟳</span> Updating
+              <span className="inline-block animate-spin">⟳</span> {t('recipeCard.updating')}
             </span>
           )}
           {!isBusy && recipe.running && recipe.ready && (
@@ -125,16 +127,16 @@ export default function RecipeCard({ recipe }) {
             </a>
           )}
           {!isBusy && recipe.starting && (
-            <span className="text-warning text-[11px] font-medium font-label animate-pulse">Starting...</span>
+            <span className="text-warning text-[11px] font-medium font-label animate-pulse">{t('recipeCard.starting')}</span>
           )}
           {!isBusy && !recipe.running && !recipe.installed && (
             <button onClick={handleInstall} className="btn-primary rounded-lg px-3 py-1.5 text-[11px] font-semibold">
-              Install
+              {t('recipeCard.install')}
             </button>
           )}
           {!isBusy && !recipe.running && !recipe.starting && recipe.installed && (
             <div className="flex flex-col items-end gap-1">
-              <span className="rounded-lg bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">Stopped</span>
+              <span className="rounded-lg bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">{t('recipeCard.stopped')}</span>
               {registryChanged && (
                 <button
                   onClick={(e) => {
@@ -143,7 +145,7 @@ export default function RecipeCard({ recipe }) {
                   }}
                   className="rounded-lg bg-warning/10 px-2.5 py-1 text-[10px] font-semibold text-warning border-none cursor-pointer hover:bg-warning/15"
                 >
-                  Update available
+                  {t('recipeCard.updateAvailable')}
                 </button>
               )}
             </div>
@@ -155,6 +157,7 @@ export default function RecipeCard({ recipe }) {
 }
 
 function HardwareFitPill({ fit }) {
+  const { t } = useTranslation()
   const toneMap = {
     success: 'text-success bg-success/10',
     warning: 'text-warning bg-warning/10',
@@ -164,7 +167,7 @@ function HardwareFitPill({ fit }) {
 
   return (
     <span className={`rounded-full px-2 py-0.5 text-[10px] font-label ${toneMap[fit.tone] || toneMap.dim}`} title={fit.headline}>
-      Host {fit.label}
+      {t('common.hostLabel', { label: fit.label })}
     </span>
   )
 }

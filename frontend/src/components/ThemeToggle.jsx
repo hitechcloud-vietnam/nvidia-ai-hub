@@ -1,14 +1,16 @@
 import { useStore } from '../store'
+import { useTranslation } from 'react-i18next'
 
 export default function ThemeToggle() {
   const theme = useStore((s) => s.theme)
   const toggleTheme = useStore((s) => s.toggleTheme)
+  const { t } = useTranslation()
 
   return (
     <button
       onClick={toggleTheme}
       className="w-9 h-9 rounded-xl bg-surface-high flex items-center justify-center cursor-pointer border-none transition-all duration-300 hover:bg-surface-highest"
-      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      title={t('theme.switchTo', { mode: theme === 'dark' ? t('theme.light') : t('theme.dark') })}
     >
       <svg
         className={`absolute w-4 h-4 transition-all duration-500 ${

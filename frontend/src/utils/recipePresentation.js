@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 export function isNotebookRecipe(recipe) {
   if (!recipe) return false
 
@@ -18,25 +20,25 @@ export function getRecipeUrl(recipe) {
 }
 
 export function getRecipeSurfaceLabel(recipe) {
-  return isNotebookRecipe(recipe) ? 'Notebook' : 'Web App'
+  return isNotebookRecipe(recipe) ? i18n.t('recipe.notebook') : i18n.t('recipe.webApp')
 }
 
 export function getRecipeOpenLabel(recipe) {
-  return isNotebookRecipe(recipe) ? 'Open Notebook' : 'Open'
+  return isNotebookRecipe(recipe) ? i18n.t('recipe.openNotebook') : i18n.t('recipe.open')
 }
 
 export function getRecipeOpenLabelWithArrow(recipe) {
-  return isNotebookRecipe(recipe) ? 'Open Notebook ↗' : 'Open ↗'
+  return `${getRecipeOpenLabel(recipe)} ↗`
 }
 
 export function getRecipeLaunchLabel(recipe) {
-  return isNotebookRecipe(recipe) ? 'Launch Notebook' : 'Launch'
+  return isNotebookRecipe(recipe) ? i18n.t('recipe.launchNotebook') : i18n.t('recipe.launch')
 }
 
 export function getRecipeFeaturedLabel(recipe) {
   if (recipe?.running || recipe?.starting) {
-    return isNotebookRecipe(recipe) ? 'Notebook Active' : 'Now Running'
+    return isNotebookRecipe(recipe) ? i18n.t('recipe.notebookActive') : i18n.t('recipe.nowRunning')
   }
 
-  return isNotebookRecipe(recipe) ? 'Featured Notebook' : 'Featured'
+  return isNotebookRecipe(recipe) ? i18n.t('recipe.featuredNotebook') : i18n.t('recipe.featured')
 }

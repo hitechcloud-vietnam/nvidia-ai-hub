@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeLaunchLabel, getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl } from '../utils/recipePresentation'
 
 export default function Updates() {
+  const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const updateRecipe = useStore((s) => s.updateRecipe)
@@ -37,15 +39,15 @@ export default function Updates() {
       <div className="rounded-3xl border border-warning/20 bg-warning/5 p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.16em] text-warning font-label">P2.1 · Recipe Updates</div>
-            <h1 className="m-0 mt-2 text-2xl font-bold tracking-tight text-text font-display">Updates Center</h1>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-warning font-label">{t('updates.eyebrow')}</div>
+            <h1 className="m-0 mt-2 text-2xl font-bold tracking-tight text-text font-display">{t('updates.title')}</h1>
             <p className="m-0 mt-2 max-w-2xl text-sm leading-6 text-text-dim">
-              Review upstream recipe changes, inspect lightweight changelogs, and rebuild installed apps in one place.
+              {t('updates.subtitle')}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <InfoTile label="Changed recipes" value={String(recipesWithUpdates.length)} />
-            <InfoTile label="Upstream commits" value={String(registryStatus?.behind ?? 0)} />
+            <InfoTile label={t('updates.changedRecipes')} value={String(recipesWithUpdates.length)} />
+            <InfoTile label={t('updates.upstreamCommits')} value={String(registryStatus?.behind ?? 0)} />
           </div>
         </div>
       </div>
@@ -53,8 +55,8 @@ export default function Updates() {
       {recipesWithUpdates.length === 0 ? (
         <div className="mt-6 rounded-3xl border border-outline-dim bg-surface p-10 text-center text-text-dim">
           <div className="text-4xl">✅</div>
-          <div className="mt-3 text-lg font-semibold text-text font-display">Everything is up to date</div>
-          <div className="mt-1 text-sm">No recipe updates are currently waiting in the registry.</div>
+          <div className="mt-3 text-lg font-semibold text-text font-display">{t('updates.upToDateTitle')}</div>
+          <div className="mt-1 text-sm">{t('updates.upToDateBody')}</div>
         </div>
       ) : (
         <div className="mt-6 grid gap-4 xl:grid-cols-2">
@@ -76,6 +78,7 @@ export default function Updates() {
 }
 
 function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching }) {
+  const { t } = useTranslation()
   const [logoFailed, setLogoFailed] = useState(false)
   const logoUrl = useThemedLogo(recipe.logo)
   const recentUpdates = Array.isArray(recipe.registry_updates) ? recipe.registry_updates.slice(0, 3) : []
@@ -96,12 +99,12 @@ function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching 
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="m-0 truncate text-lg font-bold tracking-tight text-text font-display">{recipe.name}</h2>
             {recipe.installed ? (
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">Installed</span>
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">{t('updates.installed')}</span>
             ) : (
-              <span className="rounded-full bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">Catalog only</span>
+              <span className="rounded-full bg-surface-high px-2.5 py-1 text-[10px] font-label text-text-dim">{t('updates.catalogOnly')}</span>
             )}
             <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">
-              {recipe.registry_update_count || recentUpdates.length || 1} change{(recipe.registry_update_count || recentUpdates.length || 1) > 1 ? 's' : ''}
+              {t('updates.changes', { count: recipe.registry_update_count || recentUpdates.length || 1 })}
             </span>
           </div>
           <p className="m-0 mt-1 text-sm text-text-dim leading-6 line-clamp-2">{recipe.description}</p>
@@ -130,18 +133,18 @@ function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching 
       </div>
 
       <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Recent changelog</div>
+        <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('updates.recentChangelog')}</div>
         {recentUpdates.length === 0 ? (
-          <div className="mt-2 text-sm text-text-dim">Upstream registry reported a recipe change, but no commit summary is available yet.</div>
+          <div className="mt-2 text-sm text-text-dim">{t('updates.noSummary')}</div>
         ) : (
           <div className="mt-3 space-y-2.5">
             {recentUpdates.map((entry) => (
               <div key={`${recipe.slug}-${entry.sha}`} className="rounded-2xl bg-surface px-3 py-2.5">
                 <div className="flex items-center justify-between gap-3 text-[11px] text-text-dim font-label">
-                  <span>{entry.sha?.slice(0, 7) || 'commit'}</span>
-                  <span>{entry.date || 'Unknown date'}</span>
+                  <span>{entry.sha?.slice(0, 7) || t('updates.commit')}</span>
+                  <span>{entry.date || t('updates.unknownDate')}</span>
                 </div>
-                <div className="mt-1 text-sm font-medium text-text">{entry.subject || 'Recipe update'}</div>
+                <div className="mt-1 text-sm font-medium text-text">{entry.subject || t('updates.recipeUpdate')}</div>
               </div>
             ))}
           </div>
@@ -157,7 +160,7 @@ function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching 
           }}
           className="rounded-xl border border-outline-dim bg-surface-high/60 px-4 py-2 text-sm font-semibold text-text cursor-pointer hover:bg-surface-high"
         >
-          View details
+          {t('updates.viewDetails')}
         </button>
         {recipe.installed && (
           <button
@@ -169,7 +172,7 @@ function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching 
             }}
             className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
           >
-            {updating ? 'Updating...' : 'Update now'}
+            {updating ? t('updates.updating') : t('updates.updateNow')}
           </button>
         )}
         {recipe.installed && !recipe.running && !recipe.starting && (
@@ -182,7 +185,7 @@ function UpdateCard({ recipe, onSelect, onUpdate, onLaunch, updating, launching 
             }}
             className="rounded-xl border border-outline-dim bg-surface-high/60 px-4 py-2 text-sm font-semibold text-text cursor-pointer hover:bg-surface-high disabled:opacity-50"
           >
-            {launching ? 'Launching...' : getRecipeLaunchLabel(recipe)}
+            {launching ? t('updates.launching') : getRecipeLaunchLabel(recipe)}
           </button>
         )}
       </div>

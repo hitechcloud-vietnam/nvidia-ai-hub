@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeLaunchLabel, getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl } from '../utils/recipePresentation'
 
 export default function Running() {
+  const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const recipeMetrics = useStore((s) => s.recipeMetrics)
   const selectRecipe = useStore((s) => s.selectRecipe)
@@ -22,11 +24,11 @@ export default function Running() {
     <div className="px-6 py-6 pb-12">
       {/* Running Section */}
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight font-display m-0">Running</h2>
+        <h2 className="text-2xl font-bold tracking-tight font-display m-0">{t('running.title')}</h2>
         {running.length > 0 && (
           <span className="flex items-center gap-1.5 text-xs font-medium font-label text-success bg-success/10 px-2.5 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-            {running.length} app{running.length > 1 ? 's' : ''} active
+            {t('running.activeApps', { count: running.length })}
           </span>
         )}
       </div>
@@ -34,8 +36,8 @@ export default function Running() {
       {running.length === 0 ? (
         <div className="text-center py-16 text-text-dim animate-fadeIn">
           <div className="text-4xl mb-3">💤</div>
-          <div className="text-base font-semibold font-display">No apps running</div>
-          <div className="text-sm mt-1">Install and launch apps from the Store</div>
+          <div className="text-base font-semibold font-display">{t('running.noAppsTitle')}</div>
+          <div className="text-sm mt-1">{t('running.noAppsBody')}</div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 mb-10 animate-fadeIn">
@@ -59,11 +61,11 @@ export default function Running() {
       {installed.length > 0 && (
         <div className="animate-fadeIn">
           <div className="flex items-center gap-3 mb-4 mt-6">
-            <h2 className="text-xl font-bold tracking-tight font-display m-0">Installed</h2>
-            <span className="text-xs font-label text-text-dim">{installed.length} stopped</span>
+            <h2 className="text-xl font-bold tracking-tight font-display m-0">{t('running.installedTitle')}</h2>
+            <span className="text-xs font-label text-text-dim">{t('running.stoppedCount', { count: installed.length })}</span>
             {installedWithUpdates.length > 0 && (
               <span className="text-xs font-medium font-label text-warning bg-warning/10 px-2.5 py-1 rounded-full">
-                {installedWithUpdates.length} update{installedWithUpdates.length > 1 ? 's' : ''} available
+                {t('running.updatesAvailable', { count: installedWithUpdates.length })}
               </span>
             )}
           </div>
@@ -87,6 +89,7 @@ export default function Running() {
 }
 
 function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, restarting, removing }) {
+  const { t } = useTranslation()
   const [logoFailed, setLogoFailed] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [removingData, setRemovingData] = useState(false)
@@ -109,7 +112,7 @@ function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, r
 
   const handleRemove = async (e) => {
     e.stopPropagation()
-    const confirmed = window.confirm(`Remove ${recipe.name} and delete its local data?`)
+    const confirmed = window.confirm(t('running.confirmRemove', { name: recipe.name }))
     if (!confirmed) return
     setRemovingData(true)
     await onRemove(recipe.slug, { deleteData: true })
@@ -142,17 +145,17 @@ function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, r
             )}
             {metrics?.container_count > 0 && (
               <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
-                {metrics.container_count} container{metrics.container_count > 1 ? 's' : ''}
+                {t('running.containers', { count: metrics.container_count })}
               </span>
             )}
             {metrics?.updated_at ? (
               <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
-                Live telemetry
+                {t('running.liveTelemetry')}
               </span>
             ) : null}
             {recipe.registry_changed && (
               <span className="text-[11px] font-label text-warning bg-warning/10 px-2 py-0.5 rounded-md">
-                Update available{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
+                {t('running.updateAvailable')}{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
               </span>
             )}
           </div>
@@ -164,12 +167,12 @@ function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, r
             {isReady ? (
               <span className="flex items-center gap-1.5 text-xs font-medium font-label text-success bg-success/10 px-2.5 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                Running
+                {t('running.runningStatus')}
               </span>
             ) : (
               <span className="flex items-center gap-1.5 text-xs font-medium font-label text-warning bg-warning/10 px-2.5 py-1 rounded-full animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-warning" />
-                {restarting ? 'Restarting' : 'Starting'}
+                {restarting ? t('running.restarting') : t('running.starting')}
               </span>
             )}
           </div>
@@ -191,36 +194,37 @@ function RunningCard({ recipe, metrics, onSelect, onStop, onRestart, onRemove, r
             onClick={handleRestart}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
           >
-            {restarting ? '...' : 'Restart'}
+            {restarting ? t('running.processing') : t('running.restart')}
           </button>
           <button
             disabled={stopping || restarting || removing || removingData}
             onClick={handleStop}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-surface-highest hover:text-text transition-all disabled:opacity-50"
           >
-            {stopping ? '...' : 'Stop'}
+            {stopping ? t('running.processing') : t('running.stop')}
           </button>
           <button
             disabled={stopping || restarting || removing || removingData}
             onClick={handleRemove}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-error/10 hover:text-error transition-all disabled:opacity-50"
           >
-            {removing || removingData ? '...' : 'Remove'}
+            {removing || removingData ? t('running.processing') : t('running.remove')}
           </button>
         </div>
       </div>
 
       <div className="grid gap-3 mt-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
-        <MetricChip label="CPU" value={formatPercent(metrics?.cpu_percent)} />
-        <MetricChip label="RAM" value={formatMemory(metrics?.memory_used_mb)} />
-        <MetricChip label="GPU" value={formatPercent(metrics?.gpu_utilization)} />
-        <MetricChip label="VRAM" value={formatMemory(metrics?.gpu_memory_used_mb)} />
+        <MetricChip label={t('running.cpu')} value={formatPercent(metrics?.cpu_percent)} />
+        <MetricChip label={t('running.ram')} value={formatMemory(metrics?.memory_used_mb)} />
+        <MetricChip label={t('running.gpu')} value={formatPercent(metrics?.gpu_utilization)} />
+        <MetricChip label={t('running.vram')} value={formatMemory(metrics?.gpu_memory_used_mb)} />
       </div>
     </div>
   )
 }
 
 function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }) {
+  const { t } = useTranslation()
   const [logoFailed, setLogoFailed] = useState(false)
   const [launching, setLaunching] = useState(false)
   const [removingData, setRemovingData] = useState(false)
@@ -243,7 +247,7 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
 
   const handleRemove = async (e) => {
     e.stopPropagation()
-    const confirmed = window.confirm(`Remove ${recipe.name} and delete its local data?`)
+    const confirmed = window.confirm(t('running.confirmRemove', { name: recipe.name }))
     if (!confirmed) return
     setRemovingData(true)
     await onRemove(recipe.slug, { deleteData: true })
@@ -264,7 +268,7 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
 
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm text-text font-display m-0 truncate">{recipe.name}</h3>
-          <span className="text-[11px] text-text-dim font-label">Stopped</span>
+          <span className="text-[11px] text-text-dim font-label">{t('running.stopped')}</span>
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {recipe.ui?.port && (
               <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
@@ -273,12 +277,12 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
             )}
             {metrics?.memory_used_mb > 0 && (
               <span className="text-[11px] font-label text-text-dim bg-surface-high px-2 py-0.5 rounded-md">
-                Last RAM {formatMemory(metrics.memory_used_mb)}
+                {t('running.lastRam', { value: formatMemory(metrics.memory_used_mb) })}
               </span>
             )}
             {recipe.registry_changed && (
               <span className="text-[11px] font-label text-warning bg-warning/10 px-2 py-0.5 rounded-md">
-                Update available{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
+                {t('running.updateAvailable')}{recipe.registry_update_count ? ` · ${recipe.registry_update_count}` : ''}
               </span>
             )}
           </div>
@@ -290,14 +294,14 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
             onClick={handleLaunch}
             className="btn-primary px-4 py-1.5 text-xs font-semibold shrink-0"
           >
-            {launching ? '...' : getRecipeLaunchLabel(recipe)}
+            {launching ? t('running.processing') : getRecipeLaunchLabel(recipe)}
           </button>
           <button
             disabled={launching || removing || removingData}
             onClick={handleRemove}
             className="px-3 py-1.5 bg-surface-high text-text-muted border border-outline-dim rounded-xl text-xs font-medium cursor-pointer hover:bg-error/10 hover:text-error transition-all disabled:opacity-50"
           >
-            {removing || removingData ? '...' : 'Remove'}
+            {removing || removingData ? t('running.processing') : t('running.remove')}
           </button>
         </div>
       </div>

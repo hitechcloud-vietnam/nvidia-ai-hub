@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { isNotebookRecipe } from '../../utils/recipePresentation'
 import { useStore } from '../../store'
 
@@ -54,6 +55,7 @@ function DiffSideCell({ line, tone = 'context', lineNumber = null, align = 'righ
 }
 
 function DiffCollapsedContext({ hiddenCount, onExpand, compact = false }) {
+  const { t } = useTranslation()
   const toneClass = {
     context: 'text-gray-300 bg-surface-low/40',
   }.context
@@ -65,7 +67,7 @@ function DiffCollapsedContext({ hiddenCount, onExpand, compact = false }) {
     >
       <div className="px-3 border-r border-outline-dim/60" />
       {!compact && <div className="px-3 border-r border-outline-dim/60" />}
-      <div className="px-4 py-1 text-text-dim">Show {hiddenCount} unchanged lines</div>
+      <div className="px-4 py-1 text-text-dim">{t('configWorkspace.showUnchangedLines', { count: hiddenCount })}</div>
     </button>
   )
 }
@@ -197,22 +199,23 @@ function buildDiffRenderItems(diffText, fileKey) {
 }
 
 export default function RecipeConfigTab({ recipe }) {
+  const { t } = useTranslation()
   const isNotebook = isNotebookRecipe(recipe)
   const tabs = useMemo(() => [
-    { id: 'compose', label: 'Compose' },
-    ...(recipe.runtime_env_path ? [{ id: 'env', label: 'Environment' }] : []),
-  ], [recipe.runtime_env_path])
+    { id: 'compose', label: t('configWorkspace.tabs.compose') },
+    ...(recipe.runtime_env_path ? [{ id: 'env', label: t('configWorkspace.tabs.environment') }] : []),
+  ], [recipe.runtime_env_path, t])
   const [activeConfigTab, setActiveConfigTab] = useState(tabs[0]?.id || 'compose')
 
   return (
     <div className="h-full min-h-0 flex flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]">
       <div className="shrink-0 px-6 py-5 border-b border-outline-dim bg-surface-low/40">
         <div className="max-w-4xl">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Configuration Workspace</div>
+          <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.title')}</div>
           <p className="text-sm text-text-dim leading-6 m-0 mt-2">
             {isNotebook
-              ? 'This notebook blueprint separates container settings from runtime environment values so reviewers can check launch wiring without losing the main workflow overview.'
-              : 'OpenClaw, NemoClaw, MiniCPM-o, Live VLM WebUI, and the Multi-Agent Chatbot expose advanced runtime files. Their compose and environment editors are separated here to keep the main overview cleaner.'}
+              ? t('configWorkspace.notebookDescription')
+              : t('configWorkspace.appDescription')}
           </p>
           <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim mt-4">
             {tabs.map((tab) => {
@@ -262,6 +265,7 @@ export function InlineConfigWorkspace({ recipe }) {
 }
 
 export function ComposeEditor({ slug }) {
+  const { t } = useTranslation()
   const getRecipeForkStatus = useStore((s) => s.getRecipeForkStatus)
   const saveRecipeFork = useStore((s) => s.saveRecipeFork)
   const activateRecipeFork = useStore((s) => s.activateRecipeFork)
@@ -312,7 +316,7 @@ export function ComposeEditor({ slug }) {
         setOriginal(data.content)
         setDefaultContent(data.default_content || data.content)
       } catch {
-        if (!cancelled) setError('Failed to load docker-compose.yml')
+        if (!cancelled) setError(t('configWorkspace.errors.loadCompose'))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -320,7 +324,7 @@ export function ComposeEditor({ slug }) {
 
     load()
     return () => { cancelled = true }
-  }, [slug])
+  }, [slug, t])
 
   useEffect(() => {
     let cancelled = false
@@ -408,14 +412,14 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to save docker-compose.yml')
+      setError(t('configWorkspace.errors.saveCompose'))
     } finally {
       setSaving(false)
     }
   }
 
   const resetToDefault = async () => {
-    if (!window.confirm('Reset docker-compose.yml to the default recipe version?')) return
+    if (!window.confirm(t('configWorkspace.confirmResetCompose'))) return
     setResetting(true)
     setError('')
     try {
@@ -428,7 +432,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to reset docker-compose.yml')
+      setError(t('configWorkspace.errors.resetCompose'))
     } finally {
       setResetting(false)
     }
@@ -451,7 +455,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to save recipe fork')
+      setError(t('configWorkspace.errors.saveFork'))
     } finally {
       setForkSaving(false)
     }
@@ -489,7 +493,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError(`Failed to ${forkActive ? 'deactivate' : 'activate'} recipe fork`)
+      setError(forkActive ? t('configWorkspace.errors.deactivateFork') : t('configWorkspace.errors.activateFork'))
     } finally {
       setForkToggling(false)
     }
@@ -497,7 +501,7 @@ export function ComposeEditor({ slug }) {
 
   const handleForkDelete = async () => {
     if (!forkInfo?.exists) return
-    if (!window.confirm('Delete this local fork workspace and return to the registry version?')) return
+    if (!window.confirm(t('configWorkspace.confirmDeleteFork'))) return
     setForkDeleting(true)
     setError('')
     try {
@@ -515,7 +519,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to delete recipe fork')
+      setError(t('configWorkspace.errors.deleteFork'))
     } finally {
       setForkDeleting(false)
     }
@@ -535,7 +539,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to export recipe fork bundle')
+      setError(t('configWorkspace.errors.exportForkBundle'))
     } finally {
       setBundleExporting(false)
     }
@@ -550,7 +554,7 @@ export function ComposeEditor({ slug }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to copy markdown summary')
+      setError(t('configWorkspace.errors.copySummary'))
     } finally {
       setCopyingMarkdown(false)
     }
@@ -561,22 +565,22 @@ export function ComposeEditor({ slug }) {
       <div className="shrink-0 px-5 py-4 border-b border-outline-dim bg-surface-low/60">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-bold text-text font-display m-0">Compose Configuration</h2>
-            <p className="text-sm text-text-dim mt-1 mb-0 leading-relaxed">Edit the live `docker-compose.yml` for this recipe. Save keeps your custom version; restore brings back the default file from the registry.</p>
+            <h2 className="text-sm font-bold text-text font-display m-0">{t('configWorkspace.compose.title')}</h2>
+            <p className="text-sm text-text-dim mt-1 mb-0 leading-relaxed">{t('configWorkspace.compose.description')}</p>
             {forkInfo?.exists && forkInfo?.fork_dir && (
-              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">Fork workspace: {forkInfo.fork_dir}</p>
+              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{t('configWorkspace.compose.forkWorkspace', { path: forkInfo.fork_dir })}</p>
             )}
             {forkActive && (
-              <p className="text-xs text-primary mt-2 mb-0 font-label">Active fork mode is enabled for this recipe. Install, launch, and update now read from the fork workspace.</p>
+              <p className="text-xs text-primary mt-2 mb-0 font-label">{t('configWorkspace.compose.activeForkMode')}</p>
             )}
             {forkInfo?.exists && !forkActive && (
-              <p className="text-xs text-text-dim mt-2 mb-0 font-label">A local fork exists but runtime actions are currently using the registry version.</p>
+              <p className="text-xs text-text-dim mt-2 mb-0 font-label">{t('configWorkspace.compose.localForkInactive')}</p>
             )}
             {bundleInfo?.bundle_path && (
-              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">Latest fork bundle: {bundleInfo.bundle_path}</p>
+              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{t('configWorkspace.compose.latestForkBundle', { path: bundleInfo.bundle_path })}</p>
             )}
             {bundleInfo?.manifest_path && (
-              <p className="text-xs text-text-dim mt-1 mb-0 font-mono break-all">Bundle manifest: {bundleInfo.manifest_path}</p>
+              <p className="text-xs text-text-dim mt-1 mb-0 font-mono break-all">{t('configWorkspace.compose.bundleManifest', { path: bundleInfo.manifest_path })}</p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -585,68 +589,70 @@ export function ComposeEditor({ slug }) {
               onClick={saveAsFork}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              {forkSaving ? 'Saving Fork...' : 'Save as My Fork'}
+              {forkSaving ? t('configWorkspace.actions.savingFork') : t('configWorkspace.actions.saveAsMyFork')}
             </button>
             <button
               disabled={!forkInfo?.exists || forkToggling || loading}
               onClick={handleForkToggle}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              {forkToggling ? (forkActive ? 'Disabling Fork...' : 'Enabling Fork...') : (forkActive ? 'Use Registry Version' : 'Use My Fork')}
+              {forkToggling
+                ? (forkActive ? t('configWorkspace.actions.disablingFork') : t('configWorkspace.actions.enablingFork'))
+                : (forkActive ? t('configWorkspace.actions.useRegistryVersion') : t('configWorkspace.actions.useMyFork'))}
             </button>
             <button
               disabled={!forkInfo?.exists || forkDeleting || loading}
               onClick={handleForkDelete}
               className="px-4 py-2 bg-error/10 text-error border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:bg-error/15 disabled:opacity-40 disabled:cursor-default"
             >
-              {forkDeleting ? 'Deleting Fork...' : 'Delete Fork'}
+              {forkDeleting ? t('configWorkspace.actions.deletingFork') : t('configWorkspace.actions.deleteFork')}
             </button>
             <button
               disabled={!forkInfo?.exists || bundleExporting || loading}
               onClick={handleBundleExport}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              {bundleExporting ? 'Exporting Bundle...' : 'Export Fork Bundle'}
+              {bundleExporting ? t('configWorkspace.actions.exportingBundle') : t('configWorkspace.actions.exportForkBundle')}
             </button>
             <a
               href={forkInfo?.exists ? getRecipeForkDownloadUrl(slug) : undefined}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${forkInfo?.exists && !loading ? 'bg-surface text-text border border-outline-dim hover:border-primary hover:text-primary' : 'bg-surface text-text-dim border border-outline-dim opacity-40 pointer-events-none'}`}
             >
-              Download Bundle
+              {t('configWorkspace.actions.downloadBundle')}
             </a>
             <button
               disabled={!forkInfo?.exists || loading}
               onClick={() => setShowFullDiff((value) => !value)}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              {showFullDiff ? 'Hide Full Diff' : 'View Full Diff'}
+              {showFullDiff ? t('configWorkspace.actions.hideFullDiff') : t('configWorkspace.actions.viewFullDiff')}
             </button>
             <button
               disabled={!manifestMarkdown || copyingMarkdown || loading}
               onClick={handleCopyMarkdown}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              {copyingMarkdown ? 'Copying...' : 'Copy PR Summary'}
+              {copyingMarkdown ? t('configWorkspace.actions.copying') : t('configWorkspace.actions.copyPrSummary')}
             </button>
             <a
               href={forkInfo?.exists ? getRecipeForkManifestMarkdownDownloadUrl(slug) : undefined}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${forkInfo?.exists && !loading ? 'bg-surface text-text border border-outline-dim hover:border-primary hover:text-primary' : 'bg-surface text-text-dim border border-outline-dim opacity-40 pointer-events-none'}`}
             >
-              Download .md Summary
+              {t('configWorkspace.actions.downloadMarkdownSummary')}
             </a>
             <button
               disabled={!canReset || resetting || loading}
               onClick={resetToDefault}
               className="px-4 py-2 bg-warning/10 text-warning border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:bg-warning/15 disabled:opacity-40 disabled:cursor-default"
             >
-              {resetting ? 'Restoring...' : 'Restore Default'}
+              {resetting ? t('configWorkspace.actions.restoring') : t('configWorkspace.actions.restoreDefault')}
             </button>
             <button
               disabled={!dirty || saving || loading}
               onClick={save}
               className="px-4 py-2 bg-primary text-white border-none rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-40 disabled:cursor-default"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.loading') : t('configWorkspace.actions.saveChanges')}
             </button>
           </div>
         </div>
@@ -655,7 +661,7 @@ export function ComposeEditor({ slug }) {
       <div className="flex-1 min-h-0 p-5 flex flex-col">
         {loading ? (
           <div className="h-full rounded-2xl bg-[#08080F] border border-outline-dim flex items-center justify-center text-sm text-text-dim">
-            Loading docker-compose.yml...
+            {t('configWorkspace.compose.loading')}
           </div>
         ) : (
           <textarea
@@ -667,12 +673,12 @@ export function ComposeEditor({ slug }) {
         )}
 
         <div className="flex flex-wrap items-center gap-3 mt-3 text-xs min-h-[20px]">
-          {saved && <span className="text-success font-label">Saved. Relaunch or reinstall to apply.</span>}
-          {dirty && !saved && <span className="text-warning font-label">Unsaved changes</span>}
-          {!dirty && canReset && !saved && <span className="text-text-dim font-label">Using a customized compose file.</span>}
-          {forkActive && !dirty && !saved && <span className="text-primary font-label">Runtime actions use the fork overlay.</span>}
-          {forkInfo?.exists && !forkActive && !dirty && !saved && <span className="text-text-dim font-label">Fork saved locally but inactive.</span>}
-          {bundleInfo?.bundle_path && !saved && <span className="text-text-dim font-label">Fork bundle ready for manual review or PR packaging.</span>}
+          {saved && <span className="text-success font-label">{t('configWorkspace.status.saved')}</span>}
+          {dirty && !saved && <span className="text-warning font-label">{t('configWorkspace.status.unsavedChanges')}</span>}
+          {!dirty && canReset && !saved && <span className="text-text-dim font-label">{t('configWorkspace.compose.customizedFile')}</span>}
+          {forkActive && !dirty && !saved && <span className="text-primary font-label">{t('configWorkspace.status.forkOverlayActive')}</span>}
+          {forkInfo?.exists && !forkActive && !dirty && !saved && <span className="text-text-dim font-label">{t('configWorkspace.status.forkSavedInactive')}</span>}
+          {bundleInfo?.bundle_path && !saved && <span className="text-text-dim font-label">{t('configWorkspace.status.bundleReady')}</span>}
           {error && <span className="text-error font-label">{error}</span>}
         </div>
 
@@ -680,13 +686,13 @@ export function ComposeEditor({ slug }) {
           <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
             <div className="flex flex-wrap items-center gap-3 justify-between">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Registry vs Fork Diff Summary</div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.diff.summaryTitle')}</div>
                 <p className="text-sm text-text-dim mt-2 mb-0">
-                  {diffInfo.summary.changed_files} of {diffInfo.summary.total_files} tracked files differ from the registry baseline.
+                  {t('configWorkspace.diff.summaryBody', { changed: diffInfo.summary.changed_files, total: diffInfo.summary.total_files })}
                 </p>
               </div>
               <div className="text-xs text-text-dim font-label">
-                {diffInfo.summary.active ? 'Fork overlay active' : 'Fork overlay inactive'}
+                {diffInfo.summary.active ? t('configWorkspace.diff.overlayActive') : t('configWorkspace.diff.overlayInactive')}
               </div>
             </div>
 
@@ -700,11 +706,11 @@ export function ComposeEditor({ slug }) {
                     </span>
                   </div>
                   <div className="mt-3 space-y-1 text-xs text-text-dim">
-                    <div>+{file.added_lines} added lines</div>
-                    <div>-{file.removed_lines} removed lines</div>
-                    <div>{file.changed_lines} changed line pairs</div>
-                    <div>{file.registry_exists ? 'Registry file present' : 'No registry baseline'}</div>
-                    <div>{file.fork_exists ? 'Fork file present' : 'Missing in fork'}</div>
+                    <div>{t('configWorkspace.diff.addedLines', { count: file.added_lines })}</div>
+                    <div>{t('configWorkspace.diff.removedLines', { count: file.removed_lines })}</div>
+                    <div>{t('configWorkspace.diff.changedLinePairs', { count: file.changed_lines })}</div>
+                    <div>{file.registry_exists ? t('configWorkspace.diff.registryPresent') : t('configWorkspace.diff.noRegistryBaseline')}</div>
+                    <div>{file.fork_exists ? t('configWorkspace.diff.forkPresent') : t('configWorkspace.diff.missingInFork')}</div>
                   </div>
                 </div>
               ))}
@@ -716,21 +722,21 @@ export function ComposeEditor({ slug }) {
           <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Full Unified Diff</div>
-                <p className="text-sm text-text-dim mt-2 mb-0">Review the exact registry-to-fork patch before packaging the bundle.</p>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.diff.fullTitle')}</div>
+                <p className="text-sm text-text-dim mt-2 mb-0">{t('configWorkspace.diff.fullDescription')}</p>
               </div>
               <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim">
                 <button
                   onClick={() => setDiffMode('unified')}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${diffMode === 'unified' ? 'bg-primary text-primary-on shadow-lg shadow-primary/20' : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'}`}
                 >
-                  Unified
+                  {t('configWorkspace.diff.unified')}
                 </button>
                 <button
                   onClick={() => setDiffMode('side-by-side')}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${diffMode === 'side-by-side' ? 'bg-primary text-primary-on shadow-lg shadow-primary/20' : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'}`}
                 >
-                  Side by Side
+                  {t('configWorkspace.diff.sideBySide')}
                 </button>
               </div>
             </div>
@@ -743,22 +749,22 @@ export function ComposeEditor({ slug }) {
                       <button
                         onClick={() => toggleDiffFile(file.key)}
                         className="w-8 h-8 rounded-lg border border-outline-dim bg-surface text-text cursor-pointer hover:border-primary hover:text-primary transition-all"
-                        aria-label={collapsedDiffFiles[file.key] ? `Expand ${file.name}` : `Collapse ${file.name}`}
+                        aria-label={collapsedDiffFiles[file.key] ? t('configWorkspace.diff.expandFile', { name: file.name }) : t('configWorkspace.diff.collapseFile', { name: file.name })}
                       >
                         {collapsedDiffFiles[file.key] ? '+' : '−'}
                       </button>
                       <div className="text-sm font-semibold text-text">{file.name}</div>
                     </div>
-                    <div className="text-xs text-text-dim font-label">{file.has_changes ? 'Changed' : 'No changes'}</div>
+                    <div className="text-xs text-text-dim font-label">{file.has_changes ? t('configWorkspace.diff.changed') : t('configWorkspace.diff.noChanges')}</div>
                   </div>
                   {!collapsedDiffFiles[file.key] && (
                     diffMode === 'unified' ? (
                       <div className="m-0 py-3 overflow-x-auto">
                         <div className="min-w-[920px] border-y border-outline-dim/60">
                           <div className="grid grid-cols-[64px_64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
-                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">Old</div>
-                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">New</div>
-                            <div className="px-4 py-2">Patch</div>
+                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">{t('configWorkspace.diff.old')}</div>
+                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">{t('configWorkspace.diff.new')}</div>
+                            <div className="px-4 py-2">{t('configWorkspace.diff.patch')}</div>
                           </div>
                           {file.diff
                             ? buildDiffRenderItems(file.diff, file.key).map((item, index) => {
@@ -779,7 +785,7 @@ export function ComposeEditor({ slug }) {
 
                                 return <DiffUnifiedRow key={`${file.key}-${index}`} row={item.row} />
                               })
-                            : <div className="px-4 py-3 text-gray-400 text-[12px] leading-6 font-mono">No textual diff.</div>}
+                            : <div className="px-4 py-3 text-gray-400 text-[12px] leading-6 font-mono">{t('configWorkspace.diff.noTextualDiff')}</div>}
                         </div>
                       </div>
                     ) : (
@@ -787,14 +793,14 @@ export function ComposeEditor({ slug }) {
                         <div className="min-w-[900px] grid grid-cols-2 border-t border-outline-dim text-[12px] leading-6 font-mono">
                           <div className="border-r border-outline-dim">
                             <div className="grid grid-cols-[64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
-                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">Old</div>
-                              <div className="px-4 py-2">Registry</div>
+                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">{t('configWorkspace.diff.old')}</div>
+                              <div className="px-4 py-2">{t('configWorkspace.diff.registry')}</div>
                             </div>
                           </div>
                           <div>
                             <div className="grid grid-cols-[64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
-                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">New</div>
-                              <div className="px-4 py-2">Fork</div>
+                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">{t('configWorkspace.diff.new')}</div>
+                              <div className="px-4 py-2">{t('configWorkspace.diff.fork')}</div>
                             </div>
                           </div>
                           {file.diff
@@ -823,8 +829,8 @@ export function ComposeEditor({ slug }) {
                                 ]
                               })
                             : [
-                                <div key={`${file.key}-left-empty`} className="border-r border-outline-dim"><DiffSideCell line="No textual diff." tone="empty" /></div>,
-                                <div key={`${file.key}-right-empty`}><DiffSideCell line="No textual diff." tone="empty" /></div>,
+                                <div key={`${file.key}-left-empty`} className="border-r border-outline-dim"><DiffSideCell line={t('configWorkspace.diff.noTextualDiff')} tone="empty" /></div>,
+                                <div key={`${file.key}-right-empty`}><DiffSideCell line={t('configWorkspace.diff.noTextualDiff')} tone="empty" /></div>,
                               ]}
                         </div>
                       </div>
@@ -834,7 +840,7 @@ export function ComposeEditor({ slug }) {
               ))}
               {!fullDiffInfo && (
                 <div className="rounded-xl border border-outline-dim bg-[#08080F] p-4 text-sm text-text-dim">
-                  Loading full diff...
+                  {t('configWorkspace.diff.loadingFullDiff')}
                 </div>
               )}
             </div>
@@ -845,8 +851,8 @@ export function ComposeEditor({ slug }) {
           <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">PR Description Summary</div>
-                <p className="text-sm text-text-dim mt-2 mb-0">Copy this markdown block directly into a pull request description.</p>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.prSummary.title')}</div>
+                <p className="text-sm text-text-dim mt-2 mb-0">{t('configWorkspace.prSummary.description')}</p>
               </div>
             </div>
             <pre className="mt-4 m-0 p-4 overflow-x-auto text-[12px] leading-6 text-gray-300 font-mono whitespace-pre-wrap break-words rounded-xl border border-outline-dim bg-[#08080F]">{manifestMarkdown}</pre>
@@ -943,32 +949,32 @@ function serializeEnvItems(items) {
 
 const ENV_GROUP_META = {
   gateway: {
-    label: 'Gateway',
-    description: 'Network binding, gateway behavior, and control plane settings.',
+    labelKey: 'configWorkspace.envGroups.gateway.label',
+    descriptionKey: 'configWorkspace.envGroups.gateway.description',
   },
   model: {
-    label: 'Model',
-    description: 'Model selection, provider configuration, and inference endpoints.',
+    labelKey: 'configWorkspace.envGroups.model.label',
+    descriptionKey: 'configWorkspace.envGroups.model.description',
   },
   auth: {
-    label: 'Auth',
-    description: 'Tokens, API keys, passwords, and authentication-related settings.',
+    labelKey: 'configWorkspace.envGroups.auth.label',
+    descriptionKey: 'configWorkspace.envGroups.auth.description',
   },
   ui: {
-    label: 'UI',
-    description: 'Dashboard URLs, ports, and user-facing interface settings.',
+    labelKey: 'configWorkspace.envGroups.ui.label',
+    descriptionKey: 'configWorkspace.envGroups.ui.description',
   },
   messaging: {
-    label: 'Messaging',
-    description: 'Discord and messaging channel integration settings.',
+    labelKey: 'configWorkspace.envGroups.messaging.label',
+    descriptionKey: 'configWorkspace.envGroups.messaging.description',
   },
   runtime: {
-    label: 'Runtime',
-    description: 'Bootstrap and execution flags that affect local runtime behavior.',
+    labelKey: 'configWorkspace.envGroups.runtime.label',
+    descriptionKey: 'configWorkspace.envGroups.runtime.description',
   },
   other: {
-    label: 'Other',
-    description: 'Additional values that do not match a predefined group.',
+    labelKey: 'configWorkspace.envGroups.other.label',
+    descriptionKey: 'configWorkspace.envGroups.other.description',
   },
 }
 
@@ -1044,6 +1050,7 @@ function groupEnvItems(items) {
 }
 
 export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
+  const { t } = useTranslation()
   const getRecipeForkStatus = useStore((s) => s.getRecipeForkStatus)
   const [items, setItems] = useState([])
   const [originalContent, setOriginalContent] = useState('')
@@ -1095,7 +1102,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
         setDefaultContent(data.default_content || data.content)
         setEnvPath(data.path || runtimeEnvPath || '')
       } catch {
-        if (!cancelled) setError('Failed to load runtime env file')
+        if (!cancelled) setError(t('configWorkspace.errors.loadEnv'))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -1103,11 +1110,11 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
 
     load()
     return () => { cancelled = true }
-  }, [slug, runtimeEnvPath])
+  }, [slug, runtimeEnvPath, t])
 
   const save = async () => {
     if (items.some((item) => item.type === 'entry' && !item.key.trim())) {
-      setError('Variable name cannot be empty')
+      setError(t('configWorkspace.errors.emptyVariableName'))
       return
     }
 
@@ -1124,14 +1131,14 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to save runtime env file')
+      setError(t('configWorkspace.errors.saveEnv'))
     } finally {
       setSaving(false)
     }
   }
 
   const resetToDefault = async () => {
-    if (!window.confirm('Reset runtime env to the default recipe version?')) return
+    if (!window.confirm(t('configWorkspace.confirmResetEnv'))) return
     setResetting(true)
     setError('')
     try {
@@ -1145,7 +1152,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Failed to reset runtime env file')
+      setError(t('configWorkspace.errors.resetEnv'))
     } finally {
       setResetting(false)
     }
@@ -1181,16 +1188,16 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
       <div className="px-5 py-4 border-b border-outline-dim bg-surface-low/50">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-bold text-text font-display m-0">Runtime Environment</h2>
+            <h2 className="text-sm font-bold text-text font-display m-0">{t('configWorkspace.env.title')}</h2>
             <p className="text-sm text-text-dim mt-1 mb-0 leading-relaxed">
-              Edit the live `.env` as structured key-value fields. Save applies your runtime configuration; restore reloads the recipe default template.
+              {t('configWorkspace.env.description')}
             </p>
             {envPath && <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{envPath}</p>}
             {forkActive && forkInfo?.fork_dir && (
-              <p className="text-xs text-primary mt-2 mb-0 font-label">Environment changes are being written to the active fork overlay at {forkInfo.fork_dir}.</p>
+              <p className="text-xs text-primary mt-2 mb-0 font-label">{t('configWorkspace.env.activeForkPath', { path: forkInfo.fork_dir })}</p>
             )}
             {forkInfo?.exists && !forkActive && forkInfo?.fork_dir && (
-              <p className="text-xs text-text-dim mt-2 mb-0 font-label">A local fork exists at {forkInfo.fork_dir}, but environment edits are currently targeting the registry workspace.</p>
+              <p className="text-xs text-text-dim mt-2 mb-0 font-label">{t('configWorkspace.env.inactiveForkPath', { path: forkInfo.fork_dir })}</p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -1199,21 +1206,21 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
               onClick={addEntry}
               className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
             >
-              Add Variable
+              {t('configWorkspace.actions.addVariable')}
             </button>
             <button
               disabled={!canReset || resetting || loading}
               onClick={resetToDefault}
               className="px-4 py-2 bg-warning/10 text-warning border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:bg-warning/15 disabled:opacity-40 disabled:cursor-default"
             >
-              {resetting ? 'Restoring...' : 'Restore Default'}
+              {resetting ? t('configWorkspace.actions.restoring') : t('configWorkspace.actions.restoreDefault')}
             </button>
             <button
               disabled={!dirty || saving || loading}
               onClick={save}
               className="px-4 py-2 bg-primary text-white border-none rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-40 disabled:cursor-default"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.loading') : t('configWorkspace.actions.saveChanges')}
             </button>
           </div>
         </div>
@@ -1222,15 +1229,15 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
       <div className="flex-1 min-h-0 overflow-y-auto p-5 flex flex-col">
         {loading ? (
           <div className="h-56 rounded-2xl bg-[#08080F] border border-outline-dim flex items-center justify-center text-sm text-text-dim">
-            Loading runtime env...
+            {t('configWorkspace.env.loading')}
           </div>
         ) : (
           <div className="space-y-5">
             {groupedItems.map((group) => (
               <div key={group.id} className="space-y-3">
                 <div className="px-1">
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{group.label}</div>
-                  <p className="text-sm text-text-dim leading-6 m-0 mt-1">{group.description}</p>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t(group.labelKey)}</div>
+                  <p className="text-sm text-text-dim leading-6 m-0 mt-1">{t(group.descriptionKey)}</p>
                 </div>
 
                 {group.items.map((item) => (
@@ -1238,7 +1245,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
                     <div key={item.id} className="rounded-2xl border border-outline-dim bg-[#08080F] p-4 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Environment Variable</div>
+                          <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.env.environmentVariable')}</div>
                           {item.comments?.length > 0 && (
                             <p className="text-sm text-text-dim leading-6 m-0 mt-2">{item.comments.join(' ')}</p>
                           )}
@@ -1247,37 +1254,37 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
                           onClick={() => removeEntry(item.id)}
                           className="px-3 py-1.5 bg-error-surface text-error border-none rounded-lg text-xs font-semibold cursor-pointer"
                         >
-                          Remove
+                          {t('running.remove')}
                         </button>
                       </div>
 
                       <div className="grid gap-3 md:grid-cols-[minmax(12rem,18rem)_minmax(0,1fr)]">
                         <label className="space-y-1.5">
-                          <span className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label block">Key</span>
+                          <span className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label block">{t('configWorkspace.env.key')}</span>
                           <input
                             value={item.key}
                             onChange={(e) => updateEntry(item.id, 'key', e.target.value)}
                             spellCheck={false}
                             className="w-full bg-surface-high text-text font-mono text-[12px] leading-6 px-3 py-2.5 rounded-xl border border-outline-dim focus:outline-none focus:border-primary/50"
-                            placeholder="ENV_KEY"
+                            placeholder={t('configWorkspace.env.keyPlaceholder')}
                           />
                         </label>
 
                         <label className="space-y-1.5">
-                          <span className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label block">Value</span>
+                          <span className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label block">{t('configWorkspace.env.value')}</span>
                           <input
                             value={item.value}
                             onChange={(e) => updateEntry(item.id, 'value', e.target.value)}
                             spellCheck={false}
                             className="w-full bg-surface-high text-text font-mono text-[12px] leading-6 px-3 py-2.5 rounded-xl border border-outline-dim focus:outline-none focus:border-primary/50"
-                            placeholder="value"
+                            placeholder={t('configWorkspace.env.valuePlaceholder')}
                           />
                         </label>
                       </div>
                     </div>
                   ) : (
                     <div key={item.id} className="rounded-2xl border border-outline-dim bg-[#08080F] p-4">
-                      <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Preserved Raw Block</div>
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.env.preservedRawBlock')}</div>
                       {item.comments?.length > 0 && (
                         <p className="text-sm text-text-dim leading-6 m-0 mt-2">{item.comments.join(' ')}</p>
                       )}
@@ -1289,17 +1296,17 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
             ))}
             {items.length === 0 && (
               <div className="rounded-2xl border border-dashed border-outline-dim bg-[#08080F] p-6 text-sm text-text-dim text-center">
-                No variables yet. Add a variable to create the runtime env file content.
+                {t('configWorkspace.env.noVariables')}
               </div>
             )}
           </div>
         )}
 
         <div className="flex flex-wrap items-center gap-3 mt-3 text-xs min-h-[20px]">
-          {saved && <span className="text-success font-label">Saved. Relaunch or reinstall to apply.</span>}
-          {dirty && !saved && <span className="text-warning font-label">Unsaved changes</span>}
-          {!dirty && canReset && !saved && <span className="text-text-dim font-label">Using a customized runtime env file.</span>}
-          {forkActive && !dirty && !saved && <span className="text-primary font-label">Runtime actions use the fork overlay.</span>}
+          {saved && <span className="text-success font-label">{t('configWorkspace.status.saved')}</span>}
+          {dirty && !saved && <span className="text-warning font-label">{t('configWorkspace.status.unsavedChanges')}</span>}
+          {!dirty && canReset && !saved && <span className="text-text-dim font-label">{t('configWorkspace.env.customizedFile')}</span>}
+          {forkActive && !dirty && !saved && <span className="text-primary font-label">{t('configWorkspace.status.forkOverlayActive')}</span>}
           {error && <span className="text-error font-label">{error}</span>}
         </div>
       </div>

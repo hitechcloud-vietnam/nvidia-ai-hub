@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
 
 export default function Models() {
+  const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const modelOverview = useStore((s) => s.modelOverview)
   const modelRuntime = useStore((s) => s.modelRuntime)
@@ -89,9 +91,9 @@ export default function Models() {
   )
 
   const consumerOptions = useMemo(() => ([
-    { value: 'all', label: 'All recipes' },
+    { value: 'all', label: t('models.allRecipes') },
     ...dependentRecipes.map((recipe) => ({ value: recipe.slug, label: recipe.name })),
-  ]), [dependentRecipes])
+  ]), [dependentRecipes, t])
 
   const activeConsumer = useMemo(
     () => dependentRecipes.find((recipe) => recipe.slug === consumerFilter) || null,
@@ -166,33 +168,33 @@ export default function Models() {
   const tabs = useMemo(() => ([
     {
       id: 'runtime',
-      label: 'Runtime',
-      description: 'Shared Ollama runtime status and paths.',
-      count: `${modelOverview?.ready ? 'Ready' : getRuntimeStateLabel(modelOverview)}`,
+      label: t('models.runtime'),
+      description: t('models.runtimeDesc'),
+      count: modelOverview?.ready ? t('models.states.ready') : getRuntimeStateLabel(modelOverview, t),
       error: modelSectionErrors?.modelRuntime,
     },
     {
       id: 'library',
-      label: 'Library',
-      description: 'Catalog, manual pull, installed models, and downloads.',
-      count: `${installedList.length} installed`,
+      label: t('models.library'),
+      description: t('models.libraryDesc'),
+      count: t('models.counts.installed', { count: installedList.length }),
       error: modelSectionErrors?.installedModels || modelSectionErrors?.modelCatalog || modelSectionErrors?.modelDownloads,
     },
     {
       id: 'huggingface',
-      label: 'Hugging Face',
-      description: 'Intake queue, snapshots, and source roadmap.',
-      count: `${hfSnapshots.length} snapshots`,
+      label: t('models.huggingface'),
+      description: t('models.hfDesc'),
+      count: t('models.counts.snapshots', { count: hfSnapshots.length }),
       error: modelSectionErrors?.hfIntakeQueue || modelSectionErrors?.hfInventory || modelSectionErrors?.modelSources,
     },
     {
       id: 'recipes',
-      label: 'Recipe Mapping',
-      description: 'Connected recipes and model guidance.',
-      count: `${dependentRecipes.length} recipes`,
+      label: t('models.recipeMapping'),
+      description: t('models.recipeDesc'),
+      count: t('models.counts.recipes', { count: dependentRecipes.length }),
       error: null,
     },
-  ]), [dependentRecipes.length, hfSnapshots.length, installedList.length, modelOverview, modelSectionErrors])
+  ]), [dependentRecipes.length, hfSnapshots.length, installedList.length, modelOverview, modelSectionErrors, t])
 
   const handlePull = async (name) => {
     const value = String(name || '').trim()
@@ -203,7 +205,7 @@ export default function Models() {
   const handleDelete = async (name) => {
     const value = String(name || '').trim()
     if (!value) return
-    if (!window.confirm(`Delete ${value}?`)) return
+    if (!window.confirm(t('models.confirmDeleteModel', { name: value }))) return
     await deleteModel(value)
   }
 
@@ -225,7 +227,7 @@ export default function Models() {
 
   const handleDeleteHfSnapshot = async (item) => {
     if (!item?.id) return
-    if (!window.confirm(`Delete shared snapshot ${item.repository || item.id}?`)) return
+    if (!window.confirm(t('models.confirmDeleteSnapshot', { name: item.repository || item.id }))) return
     await deleteHfSnapshot(item.id)
   }
 
@@ -240,12 +242,12 @@ export default function Models() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       })
-      if (!res.ok) throw new Error('Failed to save Hugging Face token')
+      if (!res.ok) throw new Error(t('models.errors.saveToken'))
       setHfToken('')
-      setHfTokenMessage('HF token saved to this host.')
+      setHfTokenMessage(t('models.hf.tokenSaved'))
       await fetchModelManager({ silent: true })
     } catch (error) {
-      setHfTokenMessage(error?.message || 'Failed to save Hugging Face token')
+      setHfTokenMessage(error?.message || t('models.errors.saveToken'))
     } finally {
       setHfTokenSaving(false)
     }
@@ -260,17 +262,17 @@ export default function Models() {
       <div className="rounded-3xl border border-outline-dim bg-surface p-5 md:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">P2.3 · Model Manager</div>
-            <h1 className="m-0 mt-2 text-2xl font-bold tracking-tight text-text font-display">Shared Model Manager</h1>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">{t('models.eyebrow')}</div>
+            <h1 className="m-0 mt-2 text-2xl font-bold tracking-tight text-text font-display">{t('models.title')}</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-              Browse shared Ollama models, govern Hugging Face shared snapshots, and reuse one runtime cache across connected recipes.
+              {t('models.subtitle')}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <InfoTile label="Installed" value={String(installedList.length)} />
-            <InfoTile label="Catalog" value={String(catalogList.length)} />
-            <InfoTile label="Active downloads" value={String(downloadsList.filter((item) => item.status === 'running').length)} />
-            <InfoTile label="HF snapshots" value={String(hfSummary.snapshot_count || 0)} />
+            <InfoTile label={t('models.installed')} value={String(installedList.length)} />
+            <InfoTile label={t('models.catalog')} value={String(catalogList.length)} />
+            <InfoTile label={t('models.activeDownloads')} value={String(downloadsList.filter((item) => item.status === 'running').length)} />
+            <InfoTile label={t('models.hfSnapshots')} value={String(hfSummary.snapshot_count || 0)} />
           </div>
         </div>
 
@@ -282,7 +284,7 @@ export default function Models() {
 
         {!modelManagerAvailable ? (
           <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-warning">
-            Chưa có model đã pull hoặc Hugging Face snapshot nào. Bạn vẫn có thể mở trang này để cấu hình HF token, xem runtime, và chuẩn bị pull model đầu tiên.
+            {t('models.warningNoModels')}
           </div>
         ) : null}
 
@@ -299,7 +301,7 @@ export default function Models() {
                   <div className="text-sm font-semibold text-text">{tab.label}</div>
                   <div className="mt-1 text-xs leading-5 text-text-dim">{tab.description}</div>
                 </div>
-                {tab.error ? <span className="rounded-full bg-warning/10 px-2 py-1 text-[10px] font-label text-warning">Issue</span> : null}
+                {tab.error ? <span className="rounded-full bg-warning/10 px-2 py-1 text-[10px] font-label text-warning">{t('models.issue')}</span> : null}
               </div>
               <div className="mt-3 text-xs font-label uppercase tracking-[0.12em] text-text-dim">{tab.count}</div>
             </button>
@@ -310,11 +312,11 @@ export default function Models() {
       <div className="mt-6 space-y-4">
         {activeTab === 'runtime' ? (
           <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-            {modelSectionErrors?.modelRuntime ? <SectionNotice message={`Runtime API: ${modelSectionErrors.modelRuntime}`} /> : null}
+            {modelSectionErrors?.modelRuntime ? <SectionNotice message={t('models.runtimeApiError', { message: modelSectionErrors.modelRuntime })} /> : null}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Runtime</div>
-                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared Ollama runtime</h2>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.runtime')}</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.runtimeTitle')}</h2>
               </div>
               <button
                 type="button"
@@ -322,54 +324,54 @@ export default function Models() {
                 disabled={modelsLoading}
                 className="rounded-xl border border-outline-dim bg-surface-high/70 px-4 py-2 text-sm font-semibold text-text cursor-pointer hover:bg-surface-high disabled:opacity-50"
               >
-                {modelsLoading ? 'Refreshing...' : 'Refresh'}
+                {modelsLoading ? t('models.refreshing') : t('models.refresh')}
               </button>
             </div>
 
             <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
               <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Hugging Face inventory</div>
-                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Downloaded snapshots</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.hf.inventory')}</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.hf.downloadedSnapshots')}</h2>
                   <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-                    Shared-storage snapshots downloaded by the intake worker are listed here for reuse planning and audit visibility.
+                    {t('models.hf.inventoryDescription')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <InfoTile label="Snapshots" value={String(hfSnapshots.length)} />
-                  <InfoTile label="HF token" value={modelOverview?.hugging_face?.token_configured ? 'Configured' : 'Missing'} />
-                  <InfoTile label="Downloaded" value={formatBytes(hfSummary.downloaded_bytes)} />
+                  <InfoTile label={t('models.hf.snapshots')} value={String(hfSnapshots.length)} />
+                  <InfoTile label={t('models.hf.token')} value={modelOverview?.hugging_face?.token_configured ? t('models.states.configured') : t('models.states.missing')} />
+                  <InfoTile label={t('models.hf.downloaded')} value={formatBytes(hfSummary.downloaded_bytes, t)} />
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 xl:grid-cols-4">
-                <StatusTile label="Queued" value={String(hfSummary.queued || 0)} />
-                <StatusTile label="Running" value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
-                <StatusTile label="Completed" value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
-                <StatusTile label="Failed" value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label={t('models.states.queued')} value={String(hfSummary.queued || 0)} />
+                <StatusTile label={t('models.states.running')} value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label={t('models.states.completed')} value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
+                <StatusTile label={t('models.states.failed')} value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
               </div>
 
               <div className="mt-4 space-y-3">
                 {hfSnapshots.length === 0 ? (
-                  <EmptyState title="No Hugging Face snapshots yet" body="Completed intake downloads will appear here once the background worker stores them in shared storage." />
+                  <EmptyState title={t('models.hf.emptySnapshotsTitle')} body={t('models.hf.emptySnapshotsBody')} />
                 ) : hfSnapshots.map((item) => (
                   <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
-                        <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.target_dir || 'huggingface'}</div>
+                        <div className="mt-1 text-xs text-text-dim font-label">{t('models.hf.revisionLine', { revision: item.revision || 'main', target: item.target_dir || 'huggingface' })}</div>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'available'}</span>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || t('models.states.available')}</span>
                     </div>
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
-                      <PathCard label="Path" value={item.path || '—'} />
-                      <PathCard label="Size" value={formatBytes(item.size_bytes)} />
+                      <PathCard label={t('models.path')} value={item.path || '—'} />
+                      <PathCard label={t('models.size')} value={formatBytes(item.size_bytes, t)} />
                     </div>
                     {item.queue_id ? (
-                      <div className="mt-3 text-[11px] text-text-dim font-label">Linked queue item: {item.queue_id}</div>
+                      <div className="mt-3 text-[11px] text-text-dim font-label">{t('models.hf.linkedQueueItem', { id: item.queue_id })}</div>
                     ) : null}
                     <div className="mt-3 text-[11px] text-text-dim font-label">
-                      {item.updated_at ? `Updated ${formatDate(item.updated_at)}` : 'Update time unavailable'}
+                      {item.updated_at ? t('models.hf.updatedAt', { value: formatDate(item.updated_at) }) : t('models.hf.updateTimeUnavailable')}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
@@ -378,7 +380,7 @@ export default function Models() {
                         disabled={modelAction === `hf-delete:${item.id}` || item.status === 'running'}
                         className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
                       >
-                        {modelAction === `hf-delete:${item.id}` ? 'Deleting...' : 'Delete snapshot'}
+                        {modelAction === `hf-delete:${item.id}` ? t('models.deleting') : t('models.hf.deleteSnapshot')}
                       </button>
                     </div>
                   </div>
@@ -387,20 +389,20 @@ export default function Models() {
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <StatusTile label="Recipe" value={modelOverview?.recipe_name || 'Ollama Runtime'} tone={modelOverview?.installed ? 'success' : 'neutral'} />
-              <StatusTile label="State" value={getRuntimeStateLabel(modelOverview)} tone={modelOverview?.ready ? 'success' : modelOverview?.starting ? 'warning' : 'neutral'} />
-              <StatusTile label="Starter model" value={modelRuntime?.starter_display_name || modelRuntime?.starter_model || '—'} tone={modelRuntime?.starter_ready ? 'success' : 'warning'} />
+              <StatusTile label={t('models.recipe')} value={modelOverview?.recipe_name || t('models.runtimeDefaultName')} tone={modelOverview?.installed ? 'success' : 'neutral'} />
+              <StatusTile label={t('models.runtimeState')} value={getRuntimeStateLabel(modelOverview)} tone={modelOverview?.ready ? 'success' : modelOverview?.starting ? 'warning' : 'neutral'} />
+              <StatusTile label={t('models.starterModel')} value={modelRuntime?.starter_display_name || modelRuntime?.starter_model || '—'} tone={modelRuntime?.starter_ready ? 'success' : 'warning'} />
             </div>
 
             {!modelOverview?.installed || !modelOverview?.ready ? (
               <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
-                <div className="text-sm font-semibold text-text">Runtime attention required</div>
+                <div className="text-sm font-semibold text-text">{t('models.runtimeAttentionRequired')}</div>
                 <div className="mt-1 text-sm leading-6 text-text-dim">
                   {!modelOverview?.installed
-                    ? 'Install the shared Ollama Runtime recipe before using shared model storage and download workflows.'
+                    ? t('models.runtimeInstallBody')
                     : modelOverview?.starting
-                      ? 'The shared runtime is starting. Refresh in a moment to continue managing models.'
-                      : 'The shared runtime is not ready. Start the runtime to enable catalog, downloads, and installed-model inventory.'}
+                      ? t('models.runtimeStartingBody')
+                      : t('models.runtimeNotReadyBody')}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
@@ -408,7 +410,7 @@ export default function Models() {
                     onClick={() => selectRecipe(modelOverview?.recipe_slug || 'ollama-runtime')}
                     className="rounded-xl border border-outline-dim bg-surface-high/70 px-4 py-2 text-sm font-semibold text-text cursor-pointer hover:bg-surface-high"
                   >
-                    Open recipe
+                    {t('models.openRecipe')}
                   </button>
                   {modelOverview?.installed && !ollamaRecipeState?.running && !modelOverview?.starting ? (
                     <button
@@ -416,7 +418,7 @@ export default function Models() {
                       onClick={handleStartRuntime}
                       className="btn-primary px-4 py-2 text-sm font-semibold"
                     >
-                      Start runtime
+                      {t('models.startRuntime')}
                     </button>
                   ) : null}
                 </div>
@@ -424,15 +426,15 @@ export default function Models() {
             ) : null}
 
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <PathCard label="Shared API" value={modelOverview?.shared_endpoint || modelOverview?.runtime_api_url || '—'} />
-              <PathCard label="Storage path" value={modelOverview?.model_storage_path || '—'} />
-              <PathCard label="Runtime UI" value={modelOverview?.ui_url || '—'} />
-              <PathCard label="Environment" value={modelOverview?.env_path || '—'} />
+              <PathCard label={t('models.runtimeCards.sharedApi')} value={modelOverview?.shared_endpoint || modelOverview?.runtime_api_url || '—'} />
+              <PathCard label={t('models.runtimeCards.storagePath')} value={modelOverview?.model_storage_path || '—'} />
+              <PathCard label={t('models.runtimeCards.runtimeUi')} value={modelOverview?.ui_url || '—'} />
+              <PathCard label={t('models.runtimeCards.environment')} value={modelOverview?.env_path || '—'} />
             </div>
 
             {Array.isArray(modelOverview?.notes) && modelOverview.notes.length > 0 ? (
               <div className="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4 text-sm text-text-dim">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Why this matters</div>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">{t('models.whyThisMatters')}</div>
                 <ul className="m-0 mt-3 list-disc space-y-2 pl-5">
                   {modelOverview.notes.map((note) => <li key={note}>{note}</li>)}
                 </ul>
@@ -442,12 +444,12 @@ export default function Models() {
             {dependentRecipes.length > 0 ? (
               <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Connected recipes</div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.connectedRecipes')}</div>
                   <div className="flex flex-wrap gap-2 text-[10px] font-label uppercase tracking-[0.12em]">
-                    <span className="rounded-full bg-success/10 px-2.5 py-1 text-success">{coverageSummary.ready} ready</span>
-                    <span className="rounded-full bg-warning/10 px-2.5 py-1 text-warning">{coverageSummary.missing} missing model</span>
-                    <span className="rounded-full bg-surface px-2.5 py-1 text-text-dim">{coverageSummary.manual} manual setup</span>
-                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{backendCoverageSummary.hf_ready || hfCoveredRecipes.length} HF covered</span>
+                    <span className="rounded-full bg-success/10 px-2.5 py-1 text-success">{t('models.coverage.ready', { count: coverageSummary.ready })}</span>
+                    <span className="rounded-full bg-warning/10 px-2.5 py-1 text-warning">{t('models.coverage.missingModel', { count: coverageSummary.missing })}</span>
+                    <span className="rounded-full bg-surface px-2.5 py-1 text-text-dim">{t('models.coverage.manualSetup', { count: coverageSummary.manual })}</span>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{t('models.coverage.hfCovered', { count: backendCoverageSummary.hf_ready || hfCoveredRecipes.length })}</span>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -470,20 +472,20 @@ export default function Models() {
         {activeTab === 'huggingface' ? (
           <div className="rounded-3xl border border-outline-dim bg-surface p-5">
             {(modelSectionErrors?.hfInventory || modelSectionErrors?.hfIntakeQueue || modelSectionErrors?.modelSources)
-              ? <SectionNotice message={`Some Hugging Face data is unavailable. Inventory: ${modelSectionErrors?.hfInventory || 'ok'} · Intake: ${modelSectionErrors?.hfIntakeQueue || 'ok'} · Sources: ${modelSectionErrors?.modelSources || 'ok'}`} />
+              ? <SectionNotice message={t('models.hf.partialDataUnavailable', { inventory: modelSectionErrors?.hfInventory || 'ok', intake: modelSectionErrors?.hfIntakeQueue || 'ok', sources: modelSectionErrors?.modelSources || 'ok' })} />
               : null}
             {!modelOverview?.hugging_face?.token_configured ? (
               <div className="mb-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
-                <div className="text-sm font-semibold text-text">Hugging Face token chưa được cấu hình</div>
+                <div className="text-sm font-semibold text-text">{t('models.hf.tokenMissingTitle')}</div>
                 <div className="mt-1 text-sm leading-6 text-text-dim">
-                  Điền token tại đây để queue model gated/private. Token sẽ được lưu ở <code className="rounded bg-surface px-1.5 py-0.5 text-xs">~/.cache/huggingface/token</code> trên host.
+                  {t('models.hf.tokenMissingBodyBefore')} <code className="rounded bg-surface px-1.5 py-0.5 text-xs">~/.cache/huggingface/token</code> {t('models.hf.tokenMissingBodyAfter')}
                 </div>
                 <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
                   <input
                     type="password"
                     value={hfToken}
                     onChange={(event) => setHfToken(event.target.value)}
-                    placeholder="hf_..."
+                    placeholder={t('models.hf.tokenPlaceholder')}
                     className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                   />
                   <button
@@ -492,63 +494,63 @@ export default function Models() {
                     disabled={!hfToken.trim() || hfTokenSaving}
                     className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                   >
-                    {hfTokenSaving ? 'Saving...' : 'Save token'}
+                    {hfTokenSaving ? t('models.saving') : t('models.hf.saveToken')}
                   </button>
                 </div>
                 <div className="mt-2 text-xs text-text-dim">
-                  Tạo token tại <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary hover:underline">huggingface.co/settings/tokens</a>
+                  {t('models.hf.createTokenAt')} <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary hover:underline">huggingface.co/settings/tokens</a>
                 </div>
                 {hfTokenMessage ? <div className="mt-2 text-xs text-warning">{hfTokenMessage}</div> : null}
               </div>
             ) : (
               <div className="mb-4 rounded-2xl border border-success/20 bg-success/10 p-4 text-sm text-success">
-                Hugging Face token đã được cấu hình trên host.
+                {t('models.hf.tokenConfigured')}
               </div>
             )}
             <div className="mt-0 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
               <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Hugging Face inventory</div>
-                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Downloaded snapshots</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.hf.inventory')}</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.hf.downloadedSnapshots')}</h2>
                   <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-                    Shared-storage snapshots downloaded by the intake worker are listed here for reuse planning and audit visibility.
+                    {t('models.hf.inventoryDescription')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <InfoTile label="Snapshots" value={String(hfSnapshots.length)} />
-                  <InfoTile label="HF token" value={modelOverview?.hugging_face?.token_configured ? 'Configured' : 'Missing'} />
-                  <InfoTile label="Downloaded" value={formatBytes(hfSummary.downloaded_bytes)} />
+                  <InfoTile label={t('models.hf.snapshots')} value={String(hfSnapshots.length)} />
+                  <InfoTile label={t('models.hf.token')} value={modelOverview?.hugging_face?.token_configured ? t('models.states.configured') : t('models.states.missing')} />
+                  <InfoTile label={t('models.hf.downloaded')} value={formatBytes(hfSummary.downloaded_bytes, t)} />
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 xl:grid-cols-4">
-                <StatusTile label="Queued" value={String(hfSummary.queued || 0)} />
-                <StatusTile label="Running" value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
-                <StatusTile label="Completed" value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
-                <StatusTile label="Failed" value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label={t('models.states.queued')} value={String(hfSummary.queued || 0)} />
+                <StatusTile label={t('models.states.running')} value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label={t('models.states.completed')} value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
+                <StatusTile label={t('models.states.failed')} value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
               </div>
 
               <div className="mt-4 space-y-3">
                 {hfSnapshots.length === 0 ? (
-                  <EmptyState title="No Hugging Face snapshots yet" body="Completed intake downloads will appear here once the background worker stores them in shared storage." />
+                  <EmptyState title={t('models.hf.emptySnapshotsTitle')} body={t('models.hf.emptySnapshotsBody')} />
                 ) : hfSnapshots.map((item) => (
                   <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
-                        <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.target_dir || 'huggingface'}</div>
+                        <div className="mt-1 text-xs text-text-dim font-label">{t('models.hf.revisionLine', { revision: item.revision || 'main', target: item.target_dir || 'huggingface' })}</div>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'available'}</span>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || t('models.states.available')}</span>
                     </div>
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
-                      <PathCard label="Path" value={item.path || '—'} />
-                      <PathCard label="Size" value={formatBytes(item.size_bytes)} />
+                      <PathCard label={t('models.path')} value={item.path || '—'} />
+                      <PathCard label={t('models.size')} value={formatBytes(item.size_bytes, t)} />
                     </div>
                     {item.queue_id ? (
-                      <div className="mt-3 text-[11px] text-text-dim font-label">Linked queue item: {item.queue_id}</div>
+                      <div className="mt-3 text-[11px] text-text-dim font-label">{t('models.hf.linkedQueueItem', { id: item.queue_id })}</div>
                     ) : null}
                     <div className="mt-3 text-[11px] text-text-dim font-label">
-                      {item.updated_at ? `Updated ${formatDate(item.updated_at)}` : 'Update time unavailable'}
+                      {item.updated_at ? t('models.hf.updatedAt', { value: formatDate(item.updated_at) }) : t('models.hf.updateTimeUnavailable')}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
@@ -557,7 +559,7 @@ export default function Models() {
                         disabled={modelAction === `hf-delete:${item.id}` || item.status === 'running'}
                         className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
                       >
-                        {modelAction === `hf-delete:${item.id}` ? 'Deleting...' : 'Delete snapshot'}
+                        {modelAction === `hf-delete:${item.id}` ? t('models.deleting') : t('models.hf.deleteSnapshot')}
                       </button>
                     </div>
                   </div>
@@ -568,28 +570,28 @@ export default function Models() {
             <div className="rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Download source roadmap</div>
-                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared model intake channels</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.hf.sourceRoadmap')}</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.hf.intakeChannels')}</h2>
                   <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-                    Ollama downloads are live now. Hugging Face intake now persists requests, processes them in a background worker, and stores snapshots in shared storage.
+                    {t('models.hf.intakeChannelsBody')}
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 xl:grid-cols-2">
                 {sourcesList.length === 0 ? (
-                  <EmptyState title="No source status available" body="Refresh the model manager to load source roadmap information." />
+                  <EmptyState title={t('models.hf.noSourceStatusTitle')} body={t('models.hf.noSourceStatusBody')} />
                 ) : sourcesList.map((source) => (
                   <div key={source.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-semibold text-text">{source.label}</div>
                         <div className="mt-1 text-xs text-text-dim">
-                          {source.queued_items ? `${source.queued_items} queued` : 'No queued items'}
-                          {typeof source.running_items === 'number' ? ` · ${source.running_items} running` : ''}
-                          {typeof source.completed_items === 'number' ? ` · ${source.completed_items} completed` : ''}
-                          {typeof source.failed_items === 'number' && source.failed_items > 0 ? ` · ${source.failed_items} failed` : ''}
-                          {typeof source.snapshot_count === 'number' ? ` · ${source.snapshot_count} snapshots` : ''}
+                          {source.queued_items ? t('models.hf.sourceQueued', { count: source.queued_items }) : t('models.hf.noQueuedItems')}
+                          {typeof source.running_items === 'number' ? ` · ${t('models.hf.sourceRunning', { count: source.running_items })}` : ''}
+                          {typeof source.completed_items === 'number' ? ` · ${t('models.hf.sourceCompleted', { count: source.completed_items })}` : ''}
+                          {typeof source.failed_items === 'number' && source.failed_items > 0 ? ` · ${t('models.hf.sourceFailed', { count: source.failed_items })}` : ''}
+                          {typeof source.snapshot_count === 'number' ? ` · ${t('models.hf.sourceSnapshots', { count: source.snapshot_count })}` : ''}
                         </div>
                       </div>
                       <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${source.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
@@ -598,8 +600,8 @@ export default function Models() {
                     </div>
                     {(typeof source.downloaded_bytes === 'number' && source.downloaded_bytes > 0) || typeof source.deleted_items === 'number' ? (
                       <div className="mt-3 text-[11px] text-text-dim font-label">
-                        {typeof source.downloaded_bytes === 'number' ? `Downloaded ${formatBytes(source.downloaded_bytes)}` : ''}
-                        {typeof source.deleted_items === 'number' ? ` · ${source.deleted_items} deleted` : ''}
+                        {typeof source.downloaded_bytes === 'number' ? t('models.hf.downloadedAmount', { value: formatBytes(source.downloaded_bytes, t) }) : ''}
+                        {typeof source.deleted_items === 'number' ? ` · ${t('models.hf.deletedItems', { count: source.deleted_items })}` : ''}
                       </div>
                     ) : null}
                   </div>
@@ -607,23 +609,23 @@ export default function Models() {
               </div>
 
               <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
-                <div className="text-sm font-semibold text-text">Queue Hugging Face intake</div>
+                <div className="text-sm font-semibold text-text">{t('models.hf.queueIntakeTitle')}</div>
                 <div className="mt-1 text-sm leading-6 text-text-dim">
-                  Submit a Hugging Face repository for token-aware background download into shared model storage.
+                  {t('models.hf.queueIntakeBody')}
                 </div>
                 <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
                   <input
                     type="text"
                     value={hfRepository}
                     onChange={(event) => setHfRepository(event.target.value)}
-                    placeholder="owner/model-name"
+                    placeholder={t('models.hf.repositoryPlaceholder')}
                     className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                   />
                   <input
                     type="text"
                     value={hfRevision}
                     onChange={(event) => setHfRevision(event.target.value)}
-                    placeholder="main"
+                    placeholder={t('models.hf.revisionPlaceholder')}
                     className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                   />
                   <button
@@ -632,23 +634,23 @@ export default function Models() {
                     disabled={!hfRepository.trim() || modelAction.startsWith('hf:')}
                     className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                   >
-                    {modelAction.startsWith('hf:') ? 'Queueing...' : 'Queue intake'}
+                    {modelAction.startsWith('hf:') ? t('models.hf.queueing') : t('models.hf.queueIntake')}
                   </button>
                 </div>
 
                 <div className="mt-4 space-y-3">
                   {hfQueueList.length === 0 ? (
-                    <EmptyState title="No Hugging Face intake requests yet" body="Queued Hugging Face repositories will appear here for later worker execution." />
+                    <EmptyState title={t('models.hf.noIntakeRequestsTitle')} body={t('models.hf.noIntakeRequestsBody')} />
                   ) : hfQueueList.slice(0, 5).map((item) => (
                     <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-3">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
-                          <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.message || 'Queued'}</div>
+                          <div className="mt-1 text-xs text-text-dim font-label">{t('models.hf.queueRevisionLine', { revision: item.revision || 'main', message: item.message || t('models.states.queued') })}</div>
                         </div>
-                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'queued'}</span>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || t('models.states.queued')}</span>
                       </div>
-                      {typeof item.progress === 'number' ? <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} /> : null}
+                      {typeof item.progress === 'number' ? <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} progressLabel={t('models.progress')} /> : null}
                       <div className="mt-3 flex flex-wrap gap-2">
                         {item.target_path ? <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim break-all">{item.target_path}</span> : null}
                         {item.status === 'queued' ? (
@@ -658,7 +660,7 @@ export default function Models() {
                             disabled={modelAction === `hf-cancel:${item.id}`}
                             className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
                           >
-                            {modelAction === `hf-cancel:${item.id}` ? 'Cancelling...' : 'Cancel'}
+                            {modelAction === `hf-cancel:${item.id}` ? t('models.hf.cancelling') : t('common.cancel')}
                           </button>
                         ) : null}
                         {item.status === 'failed' || item.status === 'cancelled' ? (
@@ -668,7 +670,7 @@ export default function Models() {
                             disabled={modelAction === `hf-retry:${item.id}`}
                             className="rounded-xl border border-outline-dim bg-surface-high/70 px-3 py-1.5 text-xs font-semibold text-text cursor-pointer hover:bg-surface-high disabled:opacity-50"
                           >
-                            {modelAction === `hf-retry:${item.id}` ? 'Retrying...' : 'Retry'}
+                            {modelAction === `hf-retry:${item.id}` ? t('models.retrying') : t('models.retry')}
                           </button>
                         ) : null}
                       </div>
@@ -686,10 +688,10 @@ export default function Models() {
             <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Consumption guidance</div>
-                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Recipe-aware model suggestions</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">{t('models.recipeGuidance')}</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.recipeSuggestionsTitle')}</h2>
                   <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-                    Focus on connected recipes to see their likely Ollama model targets and one-click shared downloads.
+                    {t('models.recipeSuggestionsBody')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -711,20 +713,20 @@ export default function Models() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold text-text">{activeConsumer.name}</div>
-                      <div className="mt-1 text-xs text-text-dim font-label uppercase tracking-[0.12em]">{activeConsumer.category || 'Recipe'}</div>
+                      <div className="mt-1 text-xs text-text-dim font-label uppercase tracking-[0.12em]">{activeConsumer.category || t('models.recipe')}</div>
                     </div>
                     <button
                       type="button"
                       onClick={() => selectRecipe(activeConsumer.slug)}
                       className="rounded-xl border border-outline-dim bg-surface-high/70 px-3 py-2 text-xs font-semibold text-text cursor-pointer hover:bg-surface-high"
                     >
-                      Open recipe
+                      {t('models.openRecipe')}
                     </button>
                   </div>
                   <div className="mt-3 text-sm leading-6 text-text-dim">
                     {activeConsumer.actionable_model
-                      ? <>Suggested shared model: <span className="font-semibold text-text">{activeConsumer.actionable_model}</span></>
-                      : activeConsumer.model_id || 'This recipe relies on manual in-app model selection after launch.'}
+                      ? <>{t('models.suggestedSharedModel')} <span className="font-semibold text-text">{activeConsumer.actionable_model}</span></>
+                      : activeConsumer.model_id || t('models.manualModelSelection')}
                   </div>
                   {activeConsumer.hf_snapshots?.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -739,16 +741,16 @@ export default function Models() {
               ) : null}
 
               <div className="mt-4 grid gap-3 xl:grid-cols-2">
-                <InfoTile label="Recipes ready now" value={String(coverageSummary.ready)} />
-                <InfoTile label="Need shared model" value={String(coverageSummary.missing)} />
-                <InfoTile label="Manual in-app setup" value={String(coverageSummary.manual)} />
-                <InfoTile label="HF-ready suggestions" value={String(hfReadySuggestedModels.length)} />
+                <InfoTile label={t('models.summary.recipesReadyNow')} value={String(coverageSummary.ready)} />
+                <InfoTile label={t('models.summary.needSharedModel')} value={String(coverageSummary.missing)} />
+                <InfoTile label={t('models.summary.manualInAppSetup')} value={String(coverageSummary.manual)} />
+                <InfoTile label={t('models.summary.hfReadySuggestions')} value={String(hfReadySuggestedModels.length)} />
               </div>
 
               {hfCoveredRecipes.length > 0 ? (
                 <div className="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4">
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Recipe mapping</div>
-                  <h3 className="m-0 mt-2 text-base font-bold tracking-tight text-text font-display">Recipes covered by Hugging Face assets</h3>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">{t('models.recipeMapping')}</div>
+                  <h3 className="m-0 mt-2 text-base font-bold tracking-tight text-text font-display">{t('models.hfCoveredRecipesTitle')}</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {hfCoveredRecipes.map((recipe) => (
                       <button
@@ -766,7 +768,7 @@ export default function Models() {
 
               <div className="mt-4 grid gap-3 xl:grid-cols-2">
                 {visibleRecommendedModels.length === 0 ? (
-                  <EmptyState title="No direct model suggestions" body="Some connected recipes require manual in-app model setup, so no exact shared Ollama model name is available yet." />
+                  <EmptyState title={t('models.noDirectSuggestionsTitle')} body={t('models.noDirectSuggestionsBody')} />
                 ) : visibleRecommendedModels.map((item) => {
                   const busy = modelAction === `pull:${item.name}`
                   const installed = installedList.some((model) => model.name === item.name)
@@ -778,7 +780,7 @@ export default function Models() {
                           <div className="mt-1 text-xs text-text-dim">{item.reason}</div>
                         </div>
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${installed ? 'bg-success/10 text-success' : item.available_via_hf ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'}`}>
-                          {installed ? 'Installed' : item.available_via_hf ? 'HF available' : 'Missing'}
+                          {installed ? t('models.states.installed') : item.available_via_hf ? t('models.states.hfAvailable') : t('models.states.missing')}
                         </span>
                       </div>
                       {item.available_via_hf && item.hf_repositories?.length ? (
@@ -811,7 +813,7 @@ export default function Models() {
                           onClick={() => handlePull(item.name)}
                           className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                         >
-                          {busy ? 'Pulling...' : installed ? 'Already installed' : 'Pull suggested model'}
+                          {busy ? t('models.pulling') : installed ? t('models.alreadyInstalled') : t('models.pullSuggestedModel')}
                         </button>
                       </div>
                     </div>
@@ -827,19 +829,19 @@ export default function Models() {
           <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-4">
               {(modelSectionErrors?.modelCatalog || modelSectionErrors?.modelDownloads || modelSectionErrors?.installedModels)
-                ? <SectionNotice message={`Library data is partially unavailable. Catalog: ${modelSectionErrors?.modelCatalog || 'ok'} · Installed: ${modelSectionErrors?.installedModels || 'ok'} · Downloads: ${modelSectionErrors?.modelDownloads || 'ok'}`} />
+                ? <SectionNotice message={t('models.libraryPartialDataUnavailable', { catalog: modelSectionErrors?.modelCatalog || 'ok', installed: modelSectionErrors?.installedModels || 'ok', downloads: modelSectionErrors?.modelDownloads || 'ok' })} />
                 : null}
               <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Manual pull</div>
-                  <div className="mt-1 text-sm leading-6 text-text-dim">Enter any Ollama model name if it is not already listed in the curated catalog.</div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.manualPull')}</div>
+                  <div className="mt-1 text-sm leading-6 text-text-dim">{t('models.manualPullBody')}</div>
                 </div>
                 <div className="flex w-full max-w-xl gap-2">
                   <input
                     type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Example: qwen3.5:4b or llama3.2-vision:11b"
+                    placeholder={t('models.manualPullPlaceholder')}
                     className="w-full rounded-xl border border-outline-dim bg-surface-high px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                   />
                   <button
@@ -848,26 +850,26 @@ export default function Models() {
                     disabled={!query.trim() || modelAction === `pull:${query}` || !modelOverview?.ready}
                     className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                   >
-                    Pull
+                    {t('models.pull')}
                   </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Catalog</div>
-                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Browse and download models</h2>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.catalog')}</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.browseAndDownload')}</h2>
                 </div>
                 <div className="text-sm text-text-dim leading-6">
                   {consumerFilter === 'all'
-                    ? 'Search the shared catalog by model, family, or capability.'
-                    : `Catalog narrowed to recommendations for ${activeConsumer?.name || 'the selected recipe'}.`}
+                    ? t('models.catalogSearchBody')
+                    : t('models.catalogNarrowed', { name: activeConsumer?.name || t('models.selectedRecipe') })}
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 xl:grid-cols-2">
                 {filteredCatalog.length === 0 ? (
-                  <EmptyState title="No catalog results" body={consumerFilter === 'all' ? 'Try a different search term or pull a model manually by name.' : 'This recipe currently has no exact catalog match. Use the manual pull box if you know the model name.'} />
+                  <EmptyState title={t('models.noCatalogResultsTitle')} body={consumerFilter === 'all' ? t('models.noCatalogResultsAll') : t('models.noCatalogResultsFiltered')} />
                 ) : filteredCatalog.map((entry) => {
                   const busy = entry.downloading || modelAction === `pull:${entry.name}`
                   return (
@@ -877,18 +879,18 @@ export default function Models() {
                           <div className="text-sm font-semibold text-text">{entry.title || entry.name}</div>
                           <div className="mt-1 text-xs text-text-dim font-label break-all">{entry.name}</div>
                         </div>
-                        <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{entry.size || 'Model'}</span>
+                        <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{entry.size || t('models.model')}</span>
                       </div>
-                      <p className="m-0 mt-3 text-sm leading-6 text-text-dim">{entry.summary || 'Shared runtime model entry.'}</p>
+                      <p className="m-0 mt-3 text-sm leading-6 text-text-dim">{entry.summary || t('models.sharedRuntimeModelEntry')}</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {(entry.capabilities || []).map((tag) => (
                           <span key={`${entry.name}-${tag}`} className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{tag}</span>
                         ))}
-                        {entry.installed ? <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-label text-success">Installed</span> : null}
-                        {entry.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
+                        {entry.installed ? <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-label text-success">{t('models.states.installed')}</span> : null}
+                        {entry.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">{t('models.downloading')}</span> : null}
                       </div>
                       {(entry.downloading || Number(entry.download_progress) > 0) ? (
-                        <ProgressBar value={Number(entry.download_progress) || 0} label={`${Math.round(Number(entry.download_progress) || 0)}%`} />
+                        <ProgressBar value={Number(entry.download_progress) || 0} label={`${Math.round(Number(entry.download_progress) || 0)}%`} progressLabel={t('models.progress')} />
                       ) : null}
                       <div className="mt-4 flex gap-2">
                         <button
@@ -897,7 +899,7 @@ export default function Models() {
                           onClick={() => handlePull(entry.name)}
                           className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                         >
-                          {busy ? 'Pulling...' : entry.installed ? 'Already installed' : 'Pull model'}
+                          {busy ? t('models.pulling') : entry.installed ? t('models.alreadyInstalled') : t('models.pullModel')}
                         </button>
                       </div>
                     </div>
@@ -908,11 +910,11 @@ export default function Models() {
 
             <div className="space-y-4">
               <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Installed models</div>
-                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared inventory</h2>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.installedModels')}</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.sharedInventory')}</h2>
                 <div className="mt-4 space-y-3">
                   {installedList.length === 0 ? (
-                    <EmptyState title="No models installed yet" body="Pull a model from the catalog or enter an Ollama model name manually." />
+                    <EmptyState title={t('models.noModelsInstalledTitle')} body={t('models.noModelsInstalledBody')} />
                   ) : installedList.map((model) => {
                     const deleting = model.deleting || modelAction === `delete:${model.name}`
                     return (
@@ -921,7 +923,7 @@ export default function Models() {
                           <div className="min-w-0">
                             <div className="text-sm font-semibold text-text break-all">{model.name}</div>
                             <div className="mt-1 text-xs text-text-dim font-label">
-                              {[model.family, model.parameter_size, model.quantization_level].filter(Boolean).join(' · ') || 'Installed model'}
+                              {[model.family, model.parameter_size, model.quantization_level].filter(Boolean).join(' · ') || t('models.installedModel')}
                             </div>
                           </div>
                           <button
@@ -930,15 +932,15 @@ export default function Models() {
                             onClick={() => handleDelete(model.name)}
                             className="rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
                           >
-                            {deleting ? 'Deleting...' : 'Delete'}
+                            {deleting ? t('models.deleting') : t('models.delete')}
                           </button>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{formatBytes(model.size)}</span>
-                          {model.loaded ? <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">Loaded</span> : null}
-                          {model.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
+                          <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{formatBytes(model.size, t)}</span>
+                          {model.loaded ? <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">{t('models.loaded')}</span> : null}
+                          {model.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">{t('models.downloading')}</span> : null}
                         </div>
-                        {model.downloading ? <ProgressBar value={Number(model.download_progress) || 0} label={`${Math.round(Number(model.download_progress) || 0)}%`} /> : null}
+                        {model.downloading ? <ProgressBar value={Number(model.download_progress) || 0} label={`${Math.round(Number(model.download_progress) || 0)}%`} progressLabel={t('models.progress')} /> : null}
                       </div>
                     )
                   })}
@@ -946,25 +948,25 @@ export default function Models() {
               </div>
 
               <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Downloads</div>
-                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Recent activity</h2>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{t('models.downloads')}</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">{t('models.recentActivity')}</h2>
                 <div className="mt-4 space-y-3">
                   {downloadsList.length === 0 ? (
-                    <EmptyState title="No recent downloads" body="Download progress and completion history will appear here." />
+                    <EmptyState title={t('models.noRecentDownloadsTitle')} body={t('models.noRecentDownloadsBody')} />
                   ) : downloadsList.map((item) => (
                     <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold text-text break-all">{item.name || 'Model job'}</div>
-                          <div className="mt-1 text-xs text-text-dim font-label">{item.message || item.status || 'Pending'}</div>
+                          <div className="text-sm font-semibold text-text break-all">{item.name || t('models.modelJob')}</div>
+                          <div className="mt-1 text-xs text-text-dim font-label">{item.message || item.status || t('models.states.pending')}</div>
                         </div>
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>
-                          {item.status || 'queued'}
+                          {item.status || t('models.states.queued')}
                         </span>
                       </div>
-                      <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} />
+                      <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} progressLabel={t('models.progress')} />
                       <div className="mt-3 text-[11px] text-text-dim font-label">
-                        {item.started_at ? `Started ${formatDate(item.started_at)}` : 'Start time unavailable'}
+                        {item.started_at ? t('models.startedAt', { value: formatDate(item.started_at) }) : t('models.startTimeUnavailable')}
                       </div>
                     </div>
                   ))}
@@ -978,12 +980,12 @@ export default function Models() {
   )
 }
 
-function getRuntimeStateLabel(overview) {
-  if (!overview?.installed) return 'Not installed'
-  if (overview.ready) return 'Ready'
-  if (overview.starting) return 'Starting'
-  if (overview.running) return 'Running'
-  return 'Installed'
+function getRuntimeStateLabel(overview, t) {
+  if (!overview?.installed) return t('models.states.notInstalled')
+  if (overview.ready) return t('models.states.ready')
+  if (overview.starting) return t('models.states.starting')
+  if (overview.running) return t('models.states.running')
+  return t('models.states.installed')
 }
 
 function getJobTone(status) {
@@ -993,9 +995,9 @@ function getJobTone(status) {
   return 'bg-surface text-text-dim'
 }
 
-function formatBytes(value) {
+function formatBytes(value, t) {
   const size = Number(value || 0)
-  if (!Number.isFinite(size) || size <= 0) return 'Unknown size'
+  if (!Number.isFinite(size) || size <= 0) return t('models.unknownSize')
   const gb = size / (1024 ** 3)
   if (gb >= 1) return `${gb.toFixed(2)} GB`
   const mb = size / (1024 ** 2)
@@ -1041,12 +1043,12 @@ function PathCard({ label, value }) {
   )
 }
 
-function ProgressBar({ value, label }) {
+function ProgressBar({ value, label, progressLabel = 'Progress' }) {
   const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between text-[11px] text-text-dim font-label">
-        <span>Progress</span>
+        <span>{progressLabel}</span>
         <span>{label}</span>
       </div>
       <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface">
