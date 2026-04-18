@@ -6,3 +6,4 @@ aiosqlite==0.21.0
 pyyaml==6.0.2
 aiohttp
 psutil==7.0.0
+huggingface_hub==0.34.4

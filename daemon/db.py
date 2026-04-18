@@ -10,6 +10,26 @@ CREATE TABLE IF NOT EXISTS installed_recipes (
     installed_at TEXT NOT NULL DEFAULT (datetime('now')),
     compose_project TEXT
 );
+
+CREATE TABLE IF NOT EXISTS recipe_verifications (
+    slug TEXT PRIMARY KEY,
+    verified_count INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS recipe_ratings (
+    slug TEXT NOT NULL,
+    score INTEGER NOT NULL CHECK(score >= 1 AND score <= 5),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS recipe_tips (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL,
+    author TEXT NOT NULL DEFAULT 'Anonymous operator',
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 

@@ -8,16 +8,27 @@ export default function Models() {
   const modelCatalog = useStore((s) => s.modelCatalog)
   const installedModels = useStore((s) => s.installedModels)
   const modelDownloads = useStore((s) => s.modelDownloads)
+  const modelSources = useStore((s) => s.modelSources)
+  const hfIntakeQueue = useStore((s) => s.hfIntakeQueue)
+  const hfInventory = useStore((s) => s.hfInventory)
   const modelsLoading = useStore((s) => s.modelsLoading)
   const modelsError = useStore((s) => s.modelsError)
   const modelAction = useStore((s) => s.modelAction)
+  const featureFlags = useStore((s) => s.featureFlags)
   const fetchModelManager = useStore((s) => s.fetchModelManager)
   const pullModel = useStore((s) => s.pullModel)
   const deleteModel = useStore((s) => s.deleteModel)
+  const queueHfModel = useStore((s) => s.queueHfModel)
+  const cancelHfQueueItem = useStore((s) => s.cancelHfQueueItem)
+  const retryHfQueueItem = useStore((s) => s.retryHfQueueItem)
+  const deleteHfSnapshot = useStore((s) => s.deleteHfSnapshot)
   const launchRecipe = useStore((s) => s.launchRecipe)
   const selectRecipe = useStore((s) => s.selectRecipe)
 
   const [query, setQuery] = useState('')
+  const [consumerFilter, setConsumerFilter] = useState('all')
+  const [hfRepository, setHfRepository] = useState('')
+  const [hfRevision, setHfRevision] = useState('main')
 
   useEffect(() => {
     fetchModelManager()
@@ -42,26 +53,109 @@ export default function Models() {
     () => (Array.isArray(modelDownloads?.downloads) ? modelDownloads.downloads : []),
     [modelDownloads],
   )
+  const sourcesList = useMemo(
+    () => (Array.isArray(modelSources?.sources) ? modelSources.sources : []),
+    [modelSources],
+  )
+  const hfQueueList = useMemo(
+    () => (Array.isArray(hfIntakeQueue?.items) ? hfIntakeQueue.items : []),
+    [hfIntakeQueue],
+  )
+  const hfSnapshots = useMemo(
+    () => (Array.isArray(hfInventory?.snapshots) ? hfInventory.snapshots : []),
+    [hfInventory],
+  )
   const dependentRecipes = useMemo(
     () => (Array.isArray(modelOverview?.dependent_recipes) ? modelOverview.dependent_recipes : []),
+    [modelOverview],
+  )
+  const recommendedModels = useMemo(
+    () => (Array.isArray(modelOverview?.recommended_models) ? modelOverview.recommended_models : []),
     [modelOverview],
   )
   const ollamaRecipeState = useMemo(
     () => recipes.find((recipe) => recipe.slug === modelOverview?.recipe_slug) || null,
     [recipes, modelOverview],
   )
+  const installedModelNames = useMemo(
+    () => new Set(installedList.map((model) => String(model.name || '').toLowerCase()).filter(Boolean)),
+    [installedList],
+  )
+
+  const consumerOptions = useMemo(() => ([
+    { value: 'all', label: 'All recipes' },
+    ...dependentRecipes.map((recipe) => ({ value: recipe.slug, label: recipe.name })),
+  ]), [dependentRecipes])
+
+  const activeConsumer = useMemo(
+    () => dependentRecipes.find((recipe) => recipe.slug === consumerFilter) || null,
+    [consumerFilter, dependentRecipes],
+  )
+
+  const visibleRecommendedModels = useMemo(() => {
+    if (consumerFilter === 'all') return recommendedModels
+    return recommendedModels.filter((item) => item.recipes?.some((recipe) => recipe.slug === consumerFilter))
+  }, [consumerFilter, recommendedModels])
+
+  const recipeCoverage = useMemo(() => dependentRecipes.map((recipe) => {
+    const actionable = String(recipe.actionable_model || '').trim()
+    const installed = actionable ? installedModelNames.has(actionable.toLowerCase()) : false
+    return {
+      ...recipe,
+      actionable,
+      installed,
+      status: actionable ? (installed ? 'ready' : 'missing-model') : 'manual',
+    }
+  }), [dependentRecipes, installedModelNames])
+
+  const coverageSummary = useMemo(() => ({
+    ready: recipeCoverage.filter((recipe) => recipe.status === 'ready').length,
+    missing: recipeCoverage.filter((recipe) => recipe.status === 'missing-model').length,
+    manual: recipeCoverage.filter((recipe) => recipe.status === 'manual').length,
+  }), [recipeCoverage])
+
+  const hfSummary = useMemo(
+    () => modelOverview?.hf_summary || hfInventory?.summary || { snapshot_count: hfSnapshots.length, downloaded_bytes: 0 },
+    [modelOverview, hfInventory, hfSnapshots.length],
+  )
+
+  const backendCoverageSummary = useMemo(
+    () => modelOverview?.coverage_summary || {},
+    [modelOverview],
+  )
+
+  const hfCoveredRecipes = useMemo(
+    () => recipeCoverage.filter((recipe) => recipe.hf_covered),
+    [recipeCoverage],
+  )
+
+  const hfReadySuggestedModels = useMemo(
+    () => visibleRecommendedModels.filter((item) => item.available_via_hf),
+    [visibleRecommendedModels],
+  )
 
   const filteredCatalog = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return catalogList
-    return catalogList.filter((entry) => {
+    let next = catalogList
+
+    if (consumerFilter !== 'all') {
+      const suggestedNames = new Set(
+        visibleRecommendedModels.map((item) => String(item.name || '').toLowerCase()).filter(Boolean),
+      )
+      if (suggestedNames.size > 0) {
+        next = next.filter((entry) => suggestedNames.has(String(entry.name || '').toLowerCase()))
+      }
+    }
+
+    if (!normalized) return next
+    return next.filter((entry) => {
       const haystack = [entry.name, entry.title, entry.summary, ...(entry.capabilities || [])]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
       return haystack.includes(normalized)
     })
-  }, [catalogList, query])
+  }, [catalogList, consumerFilter, query, visibleRecommendedModels])
 
   const handlePull = async (name) => {
     const value = String(name || '').trim()
@@ -82,6 +176,26 @@ export default function Models() {
     await fetchModelManager()
   }
 
+  const handleQueueHf = async () => {
+    const repository = String(hfRepository || '').trim()
+    if (!repository) return
+    const queued = await queueHfModel({ repository, revision: hfRevision })
+    if (queued) {
+      setHfRepository('')
+      setHfRevision('main')
+    }
+  }
+
+  const handleDeleteHfSnapshot = async (item) => {
+    if (!item?.id) return
+    if (!window.confirm(`Delete shared snapshot ${item.repository || item.id}?`)) return
+    await deleteHfSnapshot(item.id)
+  }
+
+  if (featureFlags?.modelManager === false) {
+    return null
+  }
+
   return (
     <div className="px-6 py-6 pb-12 animate-fadeIn">
       <div className="rounded-3xl border border-outline-dim bg-surface p-5 md:p-6">
@@ -90,14 +204,14 @@ export default function Models() {
             <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">P2.3 · Model Manager</div>
             <h1 className="m-0 mt-2 text-2xl font-bold tracking-tight text-text font-display">Shared Model Manager</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
-              Browse shared Ollama models, watch download progress, and reuse one runtime cache across connected recipes.
+              Browse shared Ollama models, govern Hugging Face shared snapshots, and reuse one runtime cache across connected recipes.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <InfoTile label="Installed" value={String(installedList.length)} />
             <InfoTile label="Catalog" value={String(catalogList.length)} />
             <InfoTile label="Active downloads" value={String(downloadsList.filter((item) => item.status === 'running').length)} />
-            <InfoTile label="Provider" value={modelOverview?.provider === 'ollama' ? 'Ollama' : '—'} />
+            <InfoTile label="HF snapshots" value={String(hfSummary.snapshot_count || 0)} />
           </div>
         </div>
 
@@ -124,6 +238,66 @@ export default function Models() {
               >
                 {modelsLoading ? 'Refreshing...' : 'Refresh'}
               </button>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Hugging Face inventory</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Downloaded snapshots</h2>
+                  <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
+                    Shared-storage snapshots downloaded by the intake worker are listed here for reuse planning and audit visibility.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <InfoTile label="Snapshots" value={String(hfSnapshots.length)} />
+                  <InfoTile label="HF token" value={modelOverview?.hugging_face?.token_configured ? 'Configured' : 'Missing'} />
+                  <InfoTile label="Downloaded" value={formatBytes(hfSummary.downloaded_bytes)} />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-4">
+                <StatusTile label="Queued" value={String(hfSummary.queued || 0)} />
+                <StatusTile label="Running" value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label="Completed" value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
+                <StatusTile label="Failed" value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {hfSnapshots.length === 0 ? (
+                  <EmptyState title="No Hugging Face snapshots yet" body="Completed intake downloads will appear here once the background worker stores them in shared storage." />
+                ) : hfSnapshots.map((item) => (
+                  <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
+                        <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.target_dir || 'huggingface'}</div>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'available'}</span>
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <PathCard label="Path" value={item.path || '—'} />
+                      <PathCard label="Size" value={formatBytes(item.size_bytes)} />
+                    </div>
+                    {item.queue_id ? (
+                      <div className="mt-3 text-[11px] text-text-dim font-label">Linked queue item: {item.queue_id}</div>
+                    ) : null}
+                    <div className="mt-3 text-[11px] text-text-dim font-label">
+                      {item.updated_at ? `Updated ${formatDate(item.updated_at)}` : 'Update time unavailable'}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteHfSnapshot(item)}
+                        disabled={modelAction === `hf-delete:${item.id}` || item.status === 'running'}
+                        className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
+                      >
+                        {modelAction === `hf-delete:${item.id}` ? 'Deleting...' : 'Delete snapshot'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -181,14 +355,22 @@ export default function Models() {
 
             {dependentRecipes.length > 0 ? (
               <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Connected recipes</div>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Connected recipes</div>
+                  <div className="flex flex-wrap gap-2 text-[10px] font-label uppercase tracking-[0.12em]">
+                    <span className="rounded-full bg-success/10 px-2.5 py-1 text-success">{coverageSummary.ready} ready</span>
+                    <span className="rounded-full bg-warning/10 px-2.5 py-1 text-warning">{coverageSummary.missing} missing model</span>
+                    <span className="rounded-full bg-surface px-2.5 py-1 text-text-dim">{coverageSummary.manual} manual setup</span>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{backendCoverageSummary.hf_ready || hfCoveredRecipes.length} HF covered</span>
+                  </div>
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {dependentRecipes.map((recipe) => (
+                  {recipeCoverage.map((recipe) => (
                     <button
                       key={recipe.slug}
                       type="button"
                       onClick={() => selectRecipe(recipe.slug)}
-                      className="rounded-full border border-outline-dim bg-surface px-3 py-1.5 text-[11px] font-label text-text cursor-pointer hover:border-primary/30 hover:text-primary"
+                      className={`rounded-full border px-3 py-1.5 text-[11px] font-label cursor-pointer hover:border-primary/30 hover:text-primary ${recipe.status === 'ready' ? 'border-success/20 bg-success/10 text-success' : recipe.status === 'missing-model' ? 'border-warning/20 bg-warning/10 text-warning' : 'border-outline-dim bg-surface text-text'}`}
                     >
                       {recipe.name}
                     </button>
@@ -199,23 +381,273 @@ export default function Models() {
           </div>
 
           <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Download source roadmap</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared model intake channels</h2>
+                  <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
+                    Ollama downloads are live now. Hugging Face intake now persists requests, processes them in a background worker, and stores snapshots in shared storage.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                {sourcesList.length === 0 ? (
+                  <EmptyState title="No source status available" body="Refresh the model manager to load source roadmap information." />
+                ) : sourcesList.map((source) => (
+                  <div key={source.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-text">{source.label}</div>
+                        <div className="mt-1 text-xs text-text-dim">
+                          {source.queued_items ? `${source.queued_items} queued` : 'No queued items'}
+                          {typeof source.running_items === 'number' ? ` · ${source.running_items} running` : ''}
+                          {typeof source.completed_items === 'number' ? ` · ${source.completed_items} completed` : ''}
+                          {typeof source.failed_items === 'number' && source.failed_items > 0 ? ` · ${source.failed_items} failed` : ''}
+                          {typeof source.snapshot_count === 'number' ? ` · ${source.snapshot_count} snapshots` : ''}
+                        </div>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${source.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                        {source.status}
+                      </span>
+                    </div>
+                    {(typeof source.downloaded_bytes === 'number' && source.downloaded_bytes > 0) || typeof source.deleted_items === 'number' ? (
+                      <div className="mt-3 text-[11px] text-text-dim font-label">
+                        {typeof source.downloaded_bytes === 'number' ? `Downloaded ${formatBytes(source.downloaded_bytes)}` : ''}
+                        {typeof source.deleted_items === 'number' ? ` · ${source.deleted_items} deleted` : ''}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
+                <div className="text-sm font-semibold text-text">Queue Hugging Face intake</div>
+                <div className="mt-1 text-sm leading-6 text-text-dim">
+                  Submit a Hugging Face repository for token-aware background download into shared model storage.
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
+                  <input
+                    type="text"
+                    value={hfRepository}
+                    onChange={(event) => setHfRepository(event.target.value)}
+                    placeholder="owner/model-name"
+                    className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                  />
+                  <input
+                    type="text"
+                    value={hfRevision}
+                    onChange={(event) => setHfRevision(event.target.value)}
+                    placeholder="main"
+                    className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleQueueHf}
+                    disabled={!hfRepository.trim() || modelAction.startsWith('hf:')}
+                    className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {modelAction.startsWith('hf:') ? 'Queueing...' : 'Queue intake'}
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {hfQueueList.length === 0 ? (
+                    <EmptyState title="No Hugging Face intake requests yet" body="Queued Hugging Face repositories will appear here for later worker execution." />
+                  ) : hfQueueList.slice(0, 5).map((item) => (
+                    <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
+                          <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.message || 'Queued'}</div>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'queued'}</span>
+                      </div>
+                      {typeof item.progress === 'number' ? <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} /> : null}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {item.target_path ? <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim break-all">{item.target_path}</span> : null}
+                        {item.status === 'queued' ? (
+                          <button
+                            type="button"
+                            onClick={() => cancelHfQueueItem(item.id)}
+                            disabled={modelAction === `hf-cancel:${item.id}`}
+                            className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
+                          >
+                            {modelAction === `hf-cancel:${item.id}` ? 'Cancelling...' : 'Cancel'}
+                          </button>
+                        ) : null}
+                        {item.status === 'failed' || item.status === 'cancelled' ? (
+                          <button
+                            type="button"
+                            onClick={() => retryHfQueueItem(item.id)}
+                            disabled={modelAction === `hf-retry:${item.id}`}
+                            className="rounded-xl border border-outline-dim bg-surface-high/70 px-3 py-1.5 text-xs font-semibold text-text cursor-pointer hover:bg-surface-high disabled:opacity-50"
+                          >
+                            {modelAction === `hf-retry:${item.id}` ? 'Retrying...' : 'Retry'}
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Consumption guidance</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Recipe-aware model suggestions</h2>
+                  <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
+                    Focus on connected recipes to see their likely Ollama model targets and one-click shared downloads.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {consumerOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setConsumerFilter(option.value)}
+                      className={`rounded-full border px-3 py-1.5 text-[11px] font-label cursor-pointer ${consumerFilter === option.value ? 'border-primary/40 bg-primary/10 text-primary' : 'border-outline-dim bg-surface text-text-dim hover:border-primary/20 hover:text-text'}`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {activeConsumer ? (
+                <div className="mt-4 rounded-2xl border border-outline-dim bg-surface px-4 py-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-text">{activeConsumer.name}</div>
+                      <div className="mt-1 text-xs text-text-dim font-label uppercase tracking-[0.12em]">{activeConsumer.category || 'Recipe'}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => selectRecipe(activeConsumer.slug)}
+                      className="rounded-xl border border-outline-dim bg-surface-high/70 px-3 py-2 text-xs font-semibold text-text cursor-pointer hover:bg-surface-high"
+                    >
+                      Open recipe
+                    </button>
+                  </div>
+                  <div className="mt-3 text-sm leading-6 text-text-dim">
+                    {activeConsumer.actionable_model
+                      ? <>Suggested shared model: <span className="font-semibold text-text">{activeConsumer.actionable_model}</span></>
+                      : activeConsumer.model_id || 'This recipe relies on manual in-app model selection after launch.'}
+                  </div>
+                  {activeConsumer.hf_snapshots?.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {activeConsumer.hf_snapshots.map((snapshot) => (
+                        <span key={`${activeConsumer.slug}-${snapshot.id}`} className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">
+                          HF: {snapshot.repository}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                <InfoTile label="Recipes ready now" value={String(coverageSummary.ready)} />
+                <InfoTile label="Need shared model" value={String(coverageSummary.missing)} />
+                <InfoTile label="Manual in-app setup" value={String(coverageSummary.manual)} />
+                <InfoTile label="HF-ready suggestions" value={String(hfReadySuggestedModels.length)} />
+              </div>
+
+              {hfCoveredRecipes.length > 0 ? (
+                <div className="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Recipe mapping</div>
+                  <h3 className="m-0 mt-2 text-base font-bold tracking-tight text-text font-display">Recipes covered by Hugging Face assets</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {hfCoveredRecipes.map((recipe) => (
+                      <button
+                        key={`hf-covered-${recipe.slug}`}
+                        type="button"
+                        onClick={() => selectRecipe(recipe.slug)}
+                        className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-label text-primary cursor-pointer hover:border-primary/40"
+                      >
+                        {recipe.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                {visibleRecommendedModels.length === 0 ? (
+                  <EmptyState title="No direct model suggestions" body="Some connected recipes require manual in-app model setup, so no exact shared Ollama model name is available yet." />
+                ) : visibleRecommendedModels.map((item) => {
+                  const busy = modelAction === `pull:${item.name}`
+                  const installed = installedList.some((model) => model.name === item.name)
+                  return (
+                    <div key={item.name} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-text break-all">{item.name}</div>
+                          <div className="mt-1 text-xs text-text-dim">{item.reason}</div>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${installed ? 'bg-success/10 text-success' : item.available_via_hf ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'}`}>
+                          {installed ? 'Installed' : item.available_via_hf ? 'HF available' : 'Missing'}
+                        </span>
+                      </div>
+                      {item.available_via_hf && item.hf_repositories?.length ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {item.hf_repositories.map((repo) => (
+                            <span key={`${item.name}-${repo}`} className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">
+                              {repo}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {item.recipes?.length ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {item.recipes.map((recipe) => (
+                            <button
+                              key={`${item.name}-${recipe.slug}`}
+                              type="button"
+                              onClick={() => selectRecipe(recipe.slug)}
+                              className="rounded-full border border-outline-dim bg-surface-high/60 px-2.5 py-1 text-[10px] font-label text-text-dim cursor-pointer hover:border-primary/20 hover:text-primary"
+                            >
+                              {recipe.name}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={installed || busy || !modelOverview?.ready}
+                          onClick={() => handlePull(item.name)}
+                          className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                        >
+                          {busy ? 'Pulling...' : installed ? 'Already installed' : 'Pull suggested model'}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Catalog</div>
-                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Browse and download models</h2>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Manual pull</div>
+                <div className="mt-1 text-sm leading-6 text-text-dim">Enter any Ollama model name if it is not already listed in the curated catalog.</div>
               </div>
               <div className="flex w-full max-w-xl gap-2">
                 <input
                   type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search by model, family, or capability..."
+                  placeholder="Example: qwen3.5:4b or llama3.2-vision:11b"
                   className="w-full rounded-xl border border-outline-dim bg-surface-high px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                 />
                 <button
                   type="button"
                   onClick={() => handlePull(query)}
-                  disabled={!query.trim() || modelAction.startsWith('pull:') || !modelOverview?.ready}
+                  disabled={!query.trim() || modelAction === `pull:${query}` || !modelOverview?.ready}
                   className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
                 >
                   Pull
@@ -223,8 +655,22 @@ export default function Models() {
               </div>
             </div>
 
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Catalog</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Browse and download models</h2>
+              </div>
+              <div className="text-sm text-text-dim leading-6">
+                {consumerFilter === 'all'
+                  ? 'Search the shared catalog by model, family, or capability.'
+                  : `Catalog narrowed to recommendations for ${activeConsumer?.name || 'the selected recipe'}.`}
+              </div>
+            </div>
+
             <div className="mt-4 grid gap-3 xl:grid-cols-2">
-              {filteredCatalog.map((entry) => {
+              {filteredCatalog.length === 0 ? (
+                <EmptyState title="No catalog results" body={consumerFilter === 'all' ? 'Try a different search term or pull a model manually by name.' : 'This recipe currently has no exact catalog match. Use the manual pull box if you know the model name.'} />
+              ) : filteredCatalog.map((entry) => {
                 const busy = entry.downloading || modelAction === `pull:${entry.name}`
                 return (
                   <div key={entry.name} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">

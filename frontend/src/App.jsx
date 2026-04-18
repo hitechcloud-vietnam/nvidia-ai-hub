@@ -29,9 +29,13 @@ export default function App() {
   const selectedRecipe = useStore((s) => s.selectedRecipe)
   const clearRecipe = useStore((s) => s.clearRecipe)
   const theme = useStore((s) => s.theme)
+  const featureFlags = useStore((s) => s.featureFlags)
   const metrics = useStore((s) => s.metrics)
   const registryStatus = useStore((s) => s.registryStatus)
   const [search, setSearch] = useState('')
+
+  const navItems = NAV_ITEMS.filter((item) => item.id !== 'models' || featureFlags?.modelManager !== false)
+  const activeTab = tab === 'models' && featureFlags?.modelManager === false ? 'catalog' : tab
 
   useMetrics()
   useRecipeMetrics()
@@ -89,8 +93,8 @@ export default function App() {
 
         {/* Nav */}
         <nav className="flex flex-col gap-1 flex-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = tab === item.id && !selectedRecipe
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id && !selectedRecipe
             const Icon = item.icon
             return (
               <button
@@ -168,12 +172,12 @@ export default function App() {
               <RecipeDetail />
             ) : (
               <div className="animate-fadeIn">
-                {tab === 'catalog' && <Catalog search={search} />}
-                {tab === 'models' && <Models />}
-                {tab === 'updates' && <Updates />}
-                {tab === 'running' && <Running />}
-                {tab === 'system' && <System />}
-                {tab === 'about' && <About />}
+                {activeTab === 'catalog' && <Catalog search={search} />}
+                {activeTab === 'models' && featureFlags?.modelManager !== false && <Models />}
+                {activeTab === 'updates' && <Updates />}
+                {activeTab === 'running' && <Running />}
+                {activeTab === 'system' && <System />}
+                {activeTab === 'about' && <About />}
               </div>
             )}
           </Suspense>
@@ -221,6 +225,8 @@ function About() {
   const registryStatus = useStore((s) => s.registryStatus)
   const syncingRegistry = useStore((s) => s.syncingRegistry)
   const syncRegistry = useStore((s) => s.syncRegistry)
+  const featureFlags = useStore((s) => s.featureFlags)
+  const setFeatureFlag = useStore((s) => s.setFeatureFlag)
 
   const handleSync = async () => {
     await syncRegistry()
@@ -299,6 +305,27 @@ function About() {
               </div>
             </div>
           ) : null}
+        </div>
+
+        <div className="bg-surface rounded-2xl p-5">
+          <h3 className="font-semibold text-sm font-display m-0 mb-3">Feature visibility</h3>
+          <div className="rounded-2xl border border-outline-dim bg-surface-high/40 px-4 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-text">Model Manager</div>
+                <div className="mt-1 text-sm text-text-dim leading-6">
+                  Hide or show the full `P2.3 · Model Manager` experience, including the sidebar menu entry.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeatureFlag('modelManager', !(featureFlags?.modelManager !== false))}
+                className={`inline-flex min-w-[96px] items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer ${featureFlags?.modelManager !== false ? 'border-success/20 bg-success/10 text-success' : 'border-outline-dim bg-surface text-text-dim'}`}
+              >
+                {featureFlags?.modelManager !== false ? 'Enabled' : 'Disabled'}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="bg-surface rounded-2xl p-5">

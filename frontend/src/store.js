@@ -6,6 +6,37 @@ const getInitialTheme = () => {
   return 'dark'
 }
 
+const FEATURE_FLAGS_STORAGE_KEY = 'nvidia-ai-hub-feature-flags'
+
+const getInitialFeatureFlags = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY) || '{}')
+    return {
+      modelManager: saved?.modelManager !== false,
+    }
+  } catch {
+    return { modelManager: true }
+  }
+}
+
+const persistFeatureFlags = (flags) => {
+  localStorage.setItem(FEATURE_FLAGS_STORAGE_KEY, JSON.stringify(flags))
+}
+
+const mergeRecipeCommunity = (state, slug, community) => {
+  const recipes = state.recipes.map((recipe) => (
+    recipe.slug === slug ? { ...recipe, community } : recipe
+  ))
+  const currentDetail = state.recipeDetails[slug]
+
+  return {
+    recipes,
+    recipeDetails: currentDetail
+      ? { ...state.recipeDetails, [slug]: { ...currentDetail, community } }
+      : state.recipeDetails,
+  }
+}
+
 export const useStore = create((set, get) => ({
   recipes: [],
   recipesLoadedAt: 0,
@@ -35,17 +66,33 @@ export const useStore = create((set, get) => ({
   modelCatalog: { models: [] },
   installedModels: { models: [] },
   modelDownloads: { downloads: [] },
+  modelSources: { sources: [] },
+  hfIntakeQueue: { items: [] },
+  hfInventory: { snapshots: [] },
   modelsLoading: false,
   modelsError: null,
   modelAction: '',
   _logWs: {},
   theme: getInitialTheme(),
+  featureFlags: getInitialFeatureFlags(),
 
   toggleTheme: () => {
     const next = get().theme === 'dark' ? 'light' : 'dark'
     localStorage.setItem('nvidia-ai-hub-theme', next)
     document.documentElement.setAttribute('data-theme', next)
     set({ theme: next })
+  },
+
+  setFeatureFlag: (key, enabled) => {
+    const nextFlags = { ...get().featureFlags, [key]: Boolean(enabled) }
+    persistFeatureFlags(nextFlags)
+    set({ featureFlags: nextFlags })
+  },
+
+  toggleFeatureFlag: (key) => {
+    const nextFlags = { ...get().featureFlags, [key]: !get().featureFlags?.[key] }
+    persistFeatureFlags(nextFlags)
+    set({ featureFlags: nextFlags })
   },
 
   setRecipes: (recipes) => set({ recipes, recipesLoadedAt: Date.now() }),
@@ -233,12 +280,15 @@ export const useStore = create((set, get) => ({
       set({ modelsLoading: true, modelsError: null })
     }
     try {
-      const [overviewRes, runtimeRes, installedRes, catalogRes, downloadsRes] = await Promise.all([
+      const [overviewRes, runtimeRes, installedRes, catalogRes, downloadsRes, sourcesRes, intakeRes, hfInventoryRes] = await Promise.all([
         fetch('/api/models/overview'),
         fetch('/api/models/runtime'),
         fetch('/api/models/installed'),
         fetch('/api/models/catalog'),
         fetch('/api/models/downloads'),
+        fetch('/api/models/sources'),
+        fetch('/api/models/intake'),
+        fetch('/api/models/huggingface'),
       ])
 
       const parseJson = async (res) => {
@@ -259,11 +309,14 @@ export const useStore = create((set, get) => ({
         }
       }
 
-      const [modelRuntime, installedModels, modelCatalog, modelDownloads] = await Promise.all([
+      const [modelRuntime, installedModels, modelCatalog, modelDownloads, modelSources, hfIntakeQueue, hfInventory] = await Promise.all([
         safeParse(runtimeRes, { reachable: false }),
         safeParse(installedRes, { models: [] }),
         safeParse(catalogRes, { models: [] }),
         safeParse(downloadsRes, { downloads: [] }),
+        safeParse(sourcesRes, { sources: [] }),
+        safeParse(intakeRes, { items: [] }),
+        safeParse(hfInventoryRes, { snapshots: [] }),
       ])
 
       const degraded = !modelRuntime?.reachable && modelOverview?.installed
@@ -277,10 +330,13 @@ export const useStore = create((set, get) => ({
         installedModels,
         modelCatalog,
         modelDownloads,
+        modelSources,
+        hfIntakeQueue,
+        hfInventory,
         modelsError,
         modelManagerLoadedAt: Date.now(),
       })
-      return { modelOverview, modelRuntime, installedModels, modelCatalog, modelDownloads }
+      return { modelOverview, modelRuntime, installedModels, modelCatalog, modelDownloads, modelSources, hfIntakeQueue, hfInventory }
     } catch (e) {
       console.error('Failed to fetch model manager data:', e)
       set({ modelsError: e.message || 'Failed to load model manager data' })
@@ -334,6 +390,82 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  queueHfModel: async ({ repository, revision = 'main', targetDir = 'huggingface', notes = '' }) => {
+    const label = `hf:${repository}`
+    set({ modelAction: label, modelsError: null })
+    try {
+      const res = await fetch('/api/models/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repository, revision, target_dir: targetDir, notes }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to queue Hugging Face model intake:', e)
+      set({ modelsError: e.message || 'Failed to queue Hugging Face model intake' })
+      return null
+    } finally {
+      set({ modelAction: '' })
+    }
+  },
+
+  cancelHfQueueItem: async (id) => {
+    if (!id) return null
+    set({ modelAction: `hf-cancel:${id}`, modelsError: null })
+    try {
+      const res = await fetch(`/api/models/intake/${encodeURIComponent(id)}/cancel`, { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to cancel Hugging Face queue item:', e)
+      set({ modelsError: e.message || 'Failed to cancel Hugging Face queue item' })
+      return null
+    } finally {
+      set({ modelAction: '' })
+    }
+  },
+
+  retryHfQueueItem: async (id) => {
+    if (!id) return null
+    set({ modelAction: `hf-retry:${id}`, modelsError: null })
+    try {
+      const res = await fetch(`/api/models/intake/${encodeURIComponent(id)}/retry`, { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to retry Hugging Face queue item:', e)
+      set({ modelsError: e.message || 'Failed to retry Hugging Face queue item' })
+      return null
+    } finally {
+      set({ modelAction: '' })
+    }
+  },
+
+  deleteHfSnapshot: async (id) => {
+    if (!id) return null
+    set({ modelAction: `hf-delete:${id}`, modelsError: null })
+    try {
+      const res = await fetch(`/api/models/huggingface/${encodeURIComponent(id)}/delete`, { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to delete Hugging Face snapshot:', e)
+      set({ modelsError: e.message || 'Failed to delete Hugging Face snapshot' })
+      return null
+    } finally {
+      set({ modelAction: '' })
+    }
+  },
+
   syncRegistry: async () => {
     set({ syncingRegistry: true })
     try {
@@ -376,9 +508,16 @@ export const useStore = create((set, get) => ({
 
     const request = (async () => {
       try {
-        const res = await fetch(`/api/recipes/${slug}`)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const detail = await res.json()
+        const [detailRes, exportsRes] = await Promise.all([
+          fetch(`/api/recipes/${slug}`),
+          fetch(`/api/recipes/${slug}/exports?host=${encodeURIComponent(location.hostname || 'localhost')}`),
+        ])
+        if (!detailRes.ok) throw new Error(`HTTP ${detailRes.status}`)
+        const detail = await detailRes.json()
+        const platformExports = exportsRes.ok ? await exportsRes.json().catch(() => null) : null
+        if (platformExports) {
+          detail.platform_exports = platformExports
+        }
         set((state) => ({
           recipeDetails: { ...state.recipeDetails, [slug]: detail },
           recipeDetailStatus: {
@@ -408,6 +547,97 @@ export const useStore = create((set, get) => ({
     }))
 
     return request
+  },
+
+  verifyRecipeCommunity: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/community/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ increment: 1 }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set((state) => mergeRecipeCommunity(state, slug, data))
+      return data
+    } catch (e) {
+      console.error('Failed to verify recipe:', e)
+      throw e
+    }
+  },
+
+  rateRecipeCommunity: async (slug, score) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/community/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set((state) => mergeRecipeCommunity(state, slug, data))
+      return data
+    } catch (e) {
+      console.error('Failed to rate recipe:', e)
+      throw e
+    }
+  },
+
+  addRecipeCommunityTip: async (slug, payload) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/community/tips`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set((state) => mergeRecipeCommunity(state, slug, data))
+      return data
+    } catch (e) {
+      console.error('Failed to add recipe tip:', e)
+      throw e
+    }
+  },
+
+  exportRecipeCommunity: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/community/export`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to export recipe community:', e)
+      throw e
+    }
+  },
+
+  getRecipeForkStatus: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to load recipe fork status:', e)
+      throw e
+    }
+  },
+
+  saveRecipeFork: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to save recipe fork:', e)
+      throw e
+    }
   },
 
   installRecipe: async (slug) => {

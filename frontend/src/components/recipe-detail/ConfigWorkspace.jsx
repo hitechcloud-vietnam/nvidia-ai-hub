@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { isNotebookRecipe } from '../../utils/recipePresentation'
+import { useStore } from '../../store'
 
 export default function RecipeConfigTab({ recipe }) {
   const isNotebook = isNotebookRecipe(recipe)
@@ -67,12 +68,16 @@ export function InlineConfigWorkspace({ recipe }) {
 }
 
 export function ComposeEditor({ slug }) {
+  const getRecipeForkStatus = useStore((s) => s.getRecipeForkStatus)
+  const saveRecipeFork = useStore((s) => s.saveRecipeFork)
   const [content, setContent] = useState('')
   const [original, setOriginal] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [forkSaving, setForkSaving] = useState(false)
+  const [forkInfo, setForkInfo] = useState(null)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
@@ -101,6 +106,22 @@ export function ComposeEditor({ slug }) {
     load()
     return () => { cancelled = true }
   }, [slug])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadFork = async () => {
+      try {
+        const status = await getRecipeForkStatus(slug)
+        if (!cancelled) setForkInfo(status)
+      } catch {
+        if (!cancelled) setForkInfo(null)
+      }
+    }
+
+    loadFork()
+    return () => { cancelled = true }
+  }, [getRecipeForkStatus, slug])
 
   const save = async () => {
     setSaving(true)
@@ -142,6 +163,26 @@ export function ComposeEditor({ slug }) {
     }
   }
 
+  const saveAsFork = async () => {
+    setForkSaving(true)
+    setError('')
+    try {
+      const result = await saveRecipeFork(slug)
+      setForkInfo({
+        slug,
+        exists: true,
+        fork_dir: result.fork_dir,
+        files: result.files,
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      setError('Failed to save recipe fork')
+    } finally {
+      setForkSaving(false)
+    }
+  }
+
   const dirty = content !== original
   const canReset = original !== defaultContent || content !== defaultContent
 
@@ -152,8 +193,18 @@ export function ComposeEditor({ slug }) {
           <div>
             <h2 className="text-sm font-bold text-text font-display m-0">Compose Configuration</h2>
             <p className="text-sm text-text-dim mt-1 mb-0 leading-relaxed">Edit the live `docker-compose.yml` for this recipe. Save keeps your custom version; restore brings back the default file from the registry.</p>
+            {forkInfo?.exists && forkInfo?.fork_dir && (
+              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">Fork workspace: {forkInfo.fork_dir}</p>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              disabled={forkSaving || loading}
+              onClick={saveAsFork}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {forkSaving ? 'Saving Fork...' : 'Save as My Fork'}
+            </button>
             <button
               disabled={!canReset || resetting || loading}
               onClick={resetToDefault}

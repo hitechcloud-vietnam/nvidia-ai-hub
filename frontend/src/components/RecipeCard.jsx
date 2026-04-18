@@ -21,6 +21,8 @@ export default function RecipeCard({ recipe }) {
   const hardwareFit = getRecipeHardwareFit(recipe, metrics)
   const registryChanged = Boolean(recipe.registry_changed)
   const updateCount = Number(recipe.registry_update_count || 0)
+  const community = recipe.community || {}
+  const hasCommunitySignal = (community.verified_count || 0) > 0 || (community.rating_count || 0) > 0
 
   const handleInstall = (e) => {
     e.stopPropagation()
@@ -87,6 +89,13 @@ export default function RecipeCard({ recipe }) {
             {registryChanged && recipe.installed && !recipe.running && (
               <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-label text-warning">
                 Registry changed{updateCount > 0 ? ` · ${updateCount}` : ''}
+              </span>
+            )}
+            {hasCommunitySignal && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-label text-primary">
+                {(community.verified_count || 0) > 0
+                  ? `${community.verified_count} verified`
+                  : `${Number(community.rating_average || 0).toFixed(1)}/5 community`}
               </span>
             )}
           </div>

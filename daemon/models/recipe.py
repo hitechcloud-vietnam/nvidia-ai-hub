@@ -45,6 +45,43 @@ class RecipeRegistryUpdate(BaseModel):
     subject: str = ""
 
 
+class RecipePlatformExportArtifact(BaseModel):
+    label: str
+    description: str = ""
+    value: str = ""
+    filename: str = ""
+    mime_type: str = "text/plain;charset=utf-8"
+    visible: bool = True
+
+
+class RecipePlatformExports(BaseModel):
+    metadata: str = ""
+    deployment_profiles: str = ""
+    sync_script: str = ""
+    ssh_command: str = ""
+    endpoint_summary: str = ""
+    show_endpoint_summary: bool = True
+    show_sync_script: bool = True
+    show_ssh_command: bool = True
+    artifacts: list[RecipePlatformExportArtifact] = []
+
+
+class RecipeCommunityTip(BaseModel):
+    id: int
+    author: str = "Anonymous operator"
+    content: str
+    created_at: str = ""
+
+
+class RecipeCommunitySummary(BaseModel):
+    rating_average: float = 0.0
+    rating_count: int = 0
+    verified_count: int = 0
+    tips_count: int = 0
+    tips: list[RecipeCommunityTip] = []
+    submit_recipe_url: str = ""
+
+
 class Recipe(BaseModel):
     name: str
     slug: str
@@ -79,6 +116,8 @@ class Recipe(BaseModel):
     registry_changed: bool = False
     registry_update_count: int = 0
     registry_updates: list[RecipeRegistryUpdate] = []
+    platform_exports: RecipePlatformExports | None = None
+    community: RecipeCommunitySummary = RecipeCommunitySummary()
 
 
 class RecipeSummary(BaseModel):
@@ -109,3 +148,4 @@ class RecipeSummary(BaseModel):
     registry_changed: bool = False
     registry_update_count: int = 0
     registry_updates: list[RecipeRegistryUpdate] = []
+    community: RecipeCommunitySummary = RecipeCommunitySummary()

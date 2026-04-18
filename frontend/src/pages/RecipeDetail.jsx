@@ -20,6 +20,8 @@ function hasDedicatedConfigTab(recipe) {
 function getDetailTabs(recipe) {
   const tabs = [{ id: 'details', label: 'Overview' }]
 
+  tabs.push({ id: 'community', label: 'Community' })
+
   if (hasDedicatedConfigTab(recipe)) {
     tabs.push({ id: 'config', label: 'Configuration' })
   }
@@ -55,6 +57,10 @@ export default function RecipeDetail() {
   const connectLogs = useStore((s) => s.connectLogs)
   const disconnectLogs = useStore((s) => s.disconnectLogs)
   const fetchRecipeDetail = useStore((s) => s.fetchRecipeDetail)
+  const verifyRecipeCommunity = useStore((s) => s.verifyRecipeCommunity)
+  const rateRecipeCommunity = useStore((s) => s.rateRecipeCommunity)
+  const addRecipeCommunityTip = useStore((s) => s.addRecipeCommunityTip)
+  const exportRecipeCommunity = useStore((s) => s.exportRecipeCommunity)
 
   const recipeSummary = recipes.find((r) => r.slug === selectedRecipe)
   const recipe = recipeDetails[selectedRecipe] || recipeSummary
@@ -428,6 +434,16 @@ export default function RecipeDetail() {
               </Suspense>
             </div>
           )
+        ) : activeTab === 'community' ? (
+          <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
+            <RecipeCommunityTab
+              recipe={recipe}
+              onVerify={verifyRecipeCommunity}
+              onRate={rateRecipeCommunity}
+              onAddTip={addRecipeCommunityTip}
+              onExport={exportRecipeCommunity}
+            />
+          </div>
         ) : activeTab === 'config' ? (
           <Suspense fallback={<ConfigWorkspaceSkeleton />}>
             <RecipeConfigTab key={recipe.slug} recipe={recipe} />
@@ -559,6 +575,254 @@ export default function RecipeDetail() {
   )
 }
 
+function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
+  const community = recipe.community || {}
+  const tips = Array.isArray(community.tips) ? community.tips : []
+  const [submittingVerify, setSubmittingVerify] = useState(false)
+  const [submittingRating, setSubmittingRating] = useState(0)
+  const [exporting, setExporting] = useState(false)
+  const [tipAuthor, setTipAuthor] = useState('')
+  const [tipContent, setTipContent] = useState('')
+  const [tipSaving, setTipSaving] = useState(false)
+  const [feedback, setFeedback] = useState('')
+  const [error, setError] = useState('')
+
+  const handleVerify = async () => {
+    setSubmittingVerify(true)
+    setError('')
+    setFeedback('')
+    try {
+      await onVerify(recipe.slug)
+      setFeedback('Verification recorded for this host profile.')
+    } catch (e) {
+      setError(e?.message || 'Failed to record verification')
+    } finally {
+      setSubmittingVerify(false)
+    }
+  }
+
+  const handleRate = async (score) => {
+    setSubmittingRating(score)
+    setError('')
+    setFeedback('')
+    try {
+      await onRate(recipe.slug, score)
+      setFeedback(`Saved ${score}-star rating.`)
+    } catch (e) {
+      setError(e?.message || 'Failed to save rating')
+    } finally {
+      setSubmittingRating(0)
+    }
+  }
+
+  const handleTipSubmit = async (event) => {
+    event.preventDefault()
+    const content = tipContent.trim()
+    if (content.length < 4) {
+      setError('Tip content must be at least 4 characters.')
+      return
+    }
+
+    setTipSaving(true)
+    setError('')
+    setFeedback('')
+    try {
+      await onAddTip(recipe.slug, {
+        author: tipAuthor.trim() || 'Anonymous operator',
+        content,
+      })
+      setTipContent('')
+      setTipAuthor('')
+      setFeedback('Community tip submitted.')
+    } catch (e) {
+      setError(e?.message || 'Failed to submit tip')
+    } finally {
+      setTipSaving(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setExporting(true)
+    setError('')
+    setFeedback('')
+    try {
+      const result = await onExport(recipe.slug)
+      setFeedback(`Community YAML exported to ${result.path}`)
+    } catch (e) {
+      setError(e?.message || 'Failed to export community YAML')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  return (
+    <div className="w-full px-6 py-6">
+      <div className="max-w-[56rem] space-y-6">
+        <div className="grid gap-4 md:grid-cols-4">
+          <CommunityMetricCard label="Average rating" value={community.rating_count ? `${community.rating_average.toFixed(1)} / 5` : 'Unrated'} hint={`${community.rating_count || 0} ratings`} />
+          <CommunityMetricCard label="Verified systems" value={String(community.verified_count || 0)} hint="Operators confirmed this recipe ran on their host" />
+          <CommunityMetricCard label="Shared tips" value={String(community.tips_count || 0)} hint="Short operational notes from the field" />
+          <CommunityMetricCard label="Submit recipe" value="Open PR flow" hint="Starts a GitHub contribution draft for this recipe" />
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+          <div className="rounded-3xl border border-outline-dim bg-surface p-5 space-y-5">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Verification</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                Confirm that this recipe worked on your current NVIDIA GPU host. This is lightweight operational evidence, not a formal certification.
+              </p>
+            </div>
+            <button
+              onClick={handleVerify}
+              disabled={submittingVerify}
+              className="w-full px-4 py-3 bg-primary text-primary-on border-none rounded-2xl text-sm font-semibold cursor-pointer disabled:opacity-50"
+            >
+              {submittingVerify ? 'Recording verification...' : 'Verified on my system'}
+            </button>
+
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Rating</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">Score the overall deployment experience for this recipe.</p>
+              <div className="mt-3 flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((score) => {
+                  const filled = score <= Math.round(community.rating_average || 0)
+                  return (
+                    <button
+                      key={score}
+                      onClick={() => handleRate(score)}
+                      disabled={submittingRating > 0}
+                      className={`h-10 w-10 rounded-xl border text-lg transition-all ${
+                        filled
+                          ? 'border-primary/30 bg-primary/10 text-primary'
+                          : 'border-outline-dim bg-surface-high text-text-dim hover:text-text'
+                      } disabled:opacity-50`}
+                      title={`Rate ${score} out of 5`}
+                    >
+                      ★
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-outline-dim bg-surface-low/60 p-4">
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Submit Recipe</div>
+              <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                Open a prefilled GitHub contribution draft to propose a new recipe, improvements, or validation notes for this one.
+              </p>
+              <a
+                href={community.submit_recipe_url || 'https://github.com/hitechcloud-vietnam/nvidia-ai-hub/compare/main...main?expand=1'}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-2 text-primary no-underline font-semibold hover:text-primary/80"
+              >
+                Open contribution draft
+              </a>
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-surface-high text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:border-primary hover:text-primary disabled:opacity-50"
+              >
+                {exporting ? 'Exporting...' : 'Export community YAML'}
+              </button>
+            </div>
+
+            {(feedback || error) && (
+              <div className="text-sm">
+                {feedback && <div className="text-success">{feedback}</div>}
+                {error && <div className="text-error">{error}</div>}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Comments & tips</div>
+                  <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+                    Capture deployment notes, hardware caveats, or operator shortcuts. Keep entries concise and actionable.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={handleTipSubmit} className="mt-4 space-y-3">
+                <input
+                  type="text"
+                  value={tipAuthor}
+                  onChange={(e) => setTipAuthor(e.target.value)}
+                  maxLength={80}
+                  placeholder="Name or team (optional)"
+                  className="w-full px-4 py-3 bg-surface-high rounded-2xl text-text text-sm outline-none border border-outline-dim focus:border-primary/40"
+                />
+                <textarea
+                  value={tipContent}
+                  onChange={(e) => setTipContent(e.target.value)}
+                  rows={5}
+                  maxLength={1200}
+                  placeholder="Example: Works reliably on Ubuntu 24.04 with the latest NVIDIA Container Toolkit, but first launch takes ~8 minutes while the model cache warms up."
+                  className="w-full px-4 py-3 bg-surface-high rounded-2xl text-text text-sm outline-none border border-outline-dim focus:border-primary/40 resize-y"
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs text-text-dim">{tipContent.trim().length}/1200</div>
+                  <button
+                    type="submit"
+                    disabled={tipSaving || tipContent.trim().length < 4}
+                    className="px-4 py-2.5 bg-primary text-primary-on border-none rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    {tipSaving ? 'Submitting...' : 'Share tip'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="space-y-3">
+              {tips.length > 0 ? tips.map((tip) => (
+                <div key={tip.id} className="rounded-3xl border border-outline-dim bg-surface p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-text font-display">{tip.author || 'Anonymous operator'}</div>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{formatCommunityTimestamp(tip.created_at)}</div>
+                  </div>
+                  <p className="text-sm text-text-dim leading-6 m-0 mt-3 whitespace-pre-wrap">{tip.content}</p>
+                </div>
+              )) : (
+                <div className="rounded-3xl border border-dashed border-outline-dim bg-surface p-6 text-sm text-text-dim">
+                  No community tips yet. Add the first deployment note for this recipe.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CommunityMetricCard({ label, value, hint }) {
+  return (
+    <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+      <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{label}</div>
+      <div className="mt-3 text-2xl font-bold text-text font-display">{value}</div>
+      <div className="mt-2 text-sm text-text-dim leading-6">{hint}</div>
+    </div>
+  )
+}
+
+function formatCommunityTimestamp(value) {
+  if (!value) return 'Recent'
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
+  const parsed = new Date(normalized)
+  if (Number.isNaN(parsed.getTime())) return value
+  return parsed.toLocaleString([], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function StatusPill({ color, pulse, children }) {
   const colorMap = {
     primary: 'bg-primary/10 text-primary',
@@ -631,54 +895,63 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
   const relatedRecipes = (recipe.depends_on || [])
     .map((slug) => recipes.find((item) => item.slug === slug))
     .filter(Boolean)
-  const platformExports = buildPlatformExports(recipe)
-  const exportCards = [
-    {
-      key: 'metadata',
-      label: 'Portable metadata',
-      description: 'Structured metadata for external launchers or inventory systems.',
-      value: platformExports.metadata,
-      filename: `${recipe.slug}-metadata.json`,
-      mimeType: 'application/json;charset=utf-8',
-      visible: true,
-    },
-    {
-      key: 'deploymentProfiles',
-      label: 'Deployment profiles',
-      description: 'Portable environment presets for workstation, lab, server, and DGX rollout planning.',
-      value: platformExports.deploymentProfiles,
-      filename: `${recipe.slug}-deployment-profiles.json`,
-      mimeType: 'application/json;charset=utf-8',
-      visible: true,
-    },
-    {
-      key: 'syncScript',
-      label: 'NVIDIA Sync custom script',
-      description: 'Drop-in shell snippet for a custom script integration surface.',
-      value: platformExports.syncScript,
-      filename: `${recipe.slug}-nvidia-sync.sh`,
-      mimeType: 'text/x-shellscript;charset=utf-8',
-      visible: platformExports.showSyncScript,
-    },
-    {
-      key: 'sshCommand',
-      label: 'SSH remote launch',
-      description: 'Bootstrap the recipe on a remote supported NVIDIA Linux host over SSH.',
-      value: platformExports.sshCommand,
-      filename: `${recipe.slug}-ssh-launch.sh`,
-      mimeType: 'text/x-shellscript;charset=utf-8',
-      visible: platformExports.showSshCommand,
-    },
-    {
-      key: 'endpointSummary',
-      label: 'Launch endpoint',
-      description: 'Resolved endpoint and runtime hints for downstream tooling.',
-      value: platformExports.endpointSummary,
-      filename: `${recipe.slug}-endpoint.txt`,
-      mimeType: 'text/plain;charset=utf-8',
-      visible: platformExports.showEndpointSummary,
-    },
-  ].filter((item) => item.visible)
+  const platformExports = recipe.platform_exports || buildPlatformExports(recipe)
+  const exportCards = Array.isArray(platformExports?.artifacts) && platformExports.artifacts.length > 0
+    ? platformExports.artifacts.map((item, index) => ({
+        key: `${recipe.slug}-export-${index}`,
+        label: item.label,
+        description: item.description,
+        value: item.value,
+        filename: item.filename,
+        mimeType: item.mime_type,
+      }))
+    : [
+        {
+          key: 'metadata',
+          label: 'Portable metadata',
+          description: 'Structured metadata for external launchers or inventory systems.',
+          value: platformExports.metadata,
+          filename: `${recipe.slug}-metadata.json`,
+          mimeType: 'application/json;charset=utf-8',
+          visible: true,
+        },
+        {
+          key: 'deploymentProfiles',
+          label: 'Deployment profiles',
+          description: 'Portable environment presets for workstation, lab, server, and DGX rollout planning.',
+          value: platformExports.deploymentProfiles,
+          filename: `${recipe.slug}-deployment-profiles.json`,
+          mimeType: 'application/json;charset=utf-8',
+          visible: true,
+        },
+        {
+          key: 'syncScript',
+          label: 'NVIDIA Sync custom script',
+          description: 'Drop-in shell snippet for a custom script integration surface.',
+          value: platformExports.syncScript,
+          filename: `${recipe.slug}-nvidia-sync.sh`,
+          mimeType: 'text/x-shellscript;charset=utf-8',
+          visible: platformExports.showSyncScript,
+        },
+        {
+          key: 'sshCommand',
+          label: 'SSH remote launch',
+          description: 'Bootstrap the recipe on a remote supported NVIDIA Linux host over SSH.',
+          value: platformExports.sshCommand,
+          filename: `${recipe.slug}-ssh-launch.sh`,
+          mimeType: 'text/x-shellscript;charset=utf-8',
+          visible: platformExports.showSshCommand,
+        },
+        {
+          key: 'endpointSummary',
+          label: 'Launch endpoint',
+          description: 'Resolved endpoint and runtime hints for downstream tooling.',
+          value: platformExports.endpointSummary,
+          filename: `${recipe.slug}-endpoint.txt`,
+          mimeType: 'text/plain;charset=utf-8',
+          visible: platformExports.showEndpointSummary,
+        },
+      ].filter((item) => item.visible)
 
   return (
     <div className="w-full px-6 py-6">

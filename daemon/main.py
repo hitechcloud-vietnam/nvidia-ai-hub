@@ -29,7 +29,9 @@ async def lifespan(app: FastAPI):
     await init_db()
     load_recipes()
     asyncio.create_task(_check_running_readiness())
+    models.start_hf_queue_worker()
     yield
+    await models.stop_hf_queue_worker()
 
 
 app = FastAPI(title="NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC", version="0.1.0", lifespan=lifespan)

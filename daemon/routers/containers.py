@@ -25,6 +25,7 @@ from daemon.services.docker_service import (
     ensure_runtime_env,
 )
 from daemon.services.registry_service import get_recipe, get_recipe_dir
+from daemon.services.fork_service import get_recipe_fork_status, save_recipe_fork
 from daemon.models.container import ContainerInfo
 
 router = APIRouter(tags=["containers"])
@@ -171,6 +172,26 @@ class EnvBody(BaseModel):
 
 class ExecBody(BaseModel):
     command: str
+
+
+@router.get("/api/recipes/{slug}/fork")
+async def get_recipe_fork(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return get_recipe_fork_status(slug)
+
+
+@router.post("/api/recipes/{slug}/fork")
+async def save_fork(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = save_recipe_fork(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "saved", **result}
 
 
 def _compose_file_for_slug(slug: str) -> Path:
