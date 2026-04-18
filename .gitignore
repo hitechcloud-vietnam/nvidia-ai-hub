@@ -20,6 +20,8 @@ data/
 
 # Build output
 frontend/dist/
+frontend/build-assets/*
+!frontend/build-assets/.gitkeep
 
 # Local dev workspaces
 comfyui-src/

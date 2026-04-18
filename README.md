@@ -29,15 +29,45 @@ The project includes:
 
 - A `FastAPI` backend for recipe, system, and container management
 - A `React + Vite` frontend served as static files by the backend
+- An optional `Electron` desktop shell for packaged Windows, macOS, and Linux builds
 - A Docker-based runtime model for AI applications in `registry/recipes`
 
 ## Local development
 
 For a complete local dev workflow (backend + frontend), production build validation, and white-page troubleshooting, see [`docs/local-development.md`](./docs/local-development.md).
 
+### Desktop packaging
+
+The repository now includes optional Electron packaging assets under `frontend/electron/`.
+
+Desktop packaging currently follows this model:
+
+- the web UI is still built from source with Vite
+- the desktop app launches a bundled local FastAPI backend on `127.0.0.1`
+- packaged builds target Windows, macOS, and Linux through `electron-builder`
+- Linux artifacts are intended to include the desktop app bundle rather than rely on the shell installer alone
+
+Frontend desktop commands:
+
+- `npm run desktop:dev`
+- `npm run desktop:pack`
+- `npm run desktop:dist`
+
+These commands are run from `frontend/` and require local Python plus repository backend dependencies to package successfully.
+
+Desktop packaging notes:
+
+- app icons are generated from `frontend/public/brand/spark-ai-hub-mark.svg` during desktop packaging
+- `npm install` in `frontend/` now re-checks and repairs an incomplete Electron binary install automatically
+- Windows signing is designed to be driven by `CSC_LINK` and `CSC_KEY_PASSWORD`
+- macOS signing and notarization additionally expect `CSC_NAME`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`
+- transient Electron download failures from upstream mirrors can surface as HTTP `504` during `npm run desktop:dist`; retrying the build is the expected first mitigation
+
 ## Installation and deployment
 
 For Linux deployment, Windows and macOS setup boundaries, Docker and NVIDIA runtime prerequisites, and optional PM2 process management, see [`docs/installation.md`](./docs/installation.md).
+
+For staged desktop packaging automation and optional installer builds, see [`docs/github-actions.md`](./docs/github-actions.md).
 
 For production-style Linux service management, reverse proxy setup, TLS, and network exposure guidance, see [`docs/deployment-production.md`](./docs/deployment-production.md).
 

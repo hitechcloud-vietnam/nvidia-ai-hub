@@ -20,6 +20,7 @@ These remain gated by `ENABLE_OPTIONAL_WORKFLOWS`:
 - `.github/workflows/recipe-validation-disabled.yml`
 - `.github/workflows/docs-governance-disabled.yml`
 - `.github/workflows/release-package-disabled.yml`
+- `.github/workflows/desktop-build-disabled.yml`
 - `.github/workflows/dependency-updates-disabled.yml`
 - `.github/workflows/dependabot-auto-triage-disabled.yml`
 
@@ -55,6 +56,30 @@ This should include core governance, planning, and legal-reference materials suc
 
 Intended to build a source bundle with a production frontend artifact.
 
+### Desktop packaging
+
+Intended to build Electron desktop artifacts for Windows, macOS, and Linux.
+
+The staged desktop workflow currently:
+
+- installs Node.js and Python on each hosted runner
+- installs frontend dependencies with `npm ci`
+- builds the frontend bundle
+- generates Windows, macOS, and Linux desktop icons from the tracked brand SVG
+- assembles a local backend runtime for Electron packaging
+- creates platform-specific desktop artifacts through `electron-builder`
+- uploads generated installer or bundle artifacts for review
+
+Hosted signing, notarization, and native Linux package validation are not configured yet and should be treated as follow-up rollout work.
+
+Before promoting desktop packaging to an official release workflow, provision platform secrets and certificates explicitly:
+
+- Windows signing: `CSC_LINK`, `CSC_KEY_PASSWORD`, and optional `WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`
+- macOS signing: `CSC_LINK`, `CSC_KEY_PASSWORD`, `CSC_NAME`
+- macOS notarization: `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`
+
+Local or hosted packaging can also fail when Electron's downloaded binary cache is incomplete or upstream mirrors return transient `504` responses. Re-running `npm install` in `frontend/` repairs a missing `node_modules/electron/path.txt` because the `postinstall` hook now re-checks the Electron runtime before packaging.
+
 ### Dependency update validation
 
 Intended to validate dependency and workflow automation changes.
@@ -78,6 +103,7 @@ If the variable is missing or has another value, the staged jobs remain effectiv
 5. enable dependency update validation
 6. enable Dependabot auto-triage
 7. enable release packaging
+8. enable desktop packaging
 
 This order keeps lower-risk validation ahead of heavier automation.
 

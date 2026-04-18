@@ -1,0 +1,73 @@
+name: Disabled - Desktop Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'daemon/**'
+      - 'frontend/**'
+      - 'registry/**'
+      - 'requirements.txt'
+      - '.github/workflows/desktop-build-disabled.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-desktop:
+    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: nvidia-ai-hub-desktop-windows
+          - os: macos-latest
+            artifact_name: nvidia-ai-hub-desktop-macos
+          - os: ubuntu-latest
+            artifact_name: nvidia-ai-hub-desktop-linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build desktop artifacts
+        working-directory: frontend
+        run: npm run desktop:dist
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            frontend/release/*.exe
+            frontend/release/*.dmg
+            frontend/release/*.AppImage
+            frontend/release/*.deb
+            frontend/release/*.tar.gz
+            frontend/release/latest*.yml
+          if-no-files-found: error

@@ -1,0 +1,32 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.photue.nvidia-ai-hub
+productName: NVIDIA AI Hub
+files:
+  - filter:
+      - dist/**/*
+      - electron/**/*
+      - package.json
+extraResources:
+  - from: electron/backend-dist
+    to: backend
+  - from: ../registry
+    to: app-bundle/registry
+  - from: dist
+    to: app-bundle/frontend/dist
+asar: true
+win:
+  target:
+    - nsis
+mac:
+  target:
+    - dmg
+  category: public.app-category.developer-tools
+linux:
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+  category: Development
+electronVersion: 37.10.3
