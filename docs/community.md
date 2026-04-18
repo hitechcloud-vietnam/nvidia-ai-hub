@@ -93,6 +93,8 @@ When these areas change, update the related docs together:
 - `docs/licensing.md`
 - `docs/legal-notice.md`
 - `docs/legal-vi.md`
+- `CONTRIBUTING.md`
+- `SUPPORT.md`
 
 ### Planning and roadmap state
 

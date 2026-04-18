@@ -40,6 +40,7 @@ Use:
 - [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
 - [`LICENSE`](./LICENSE)
 - [`docs/licensing.md`](./docs/licensing.md)
+- [`docs/legal-notice.md`](./docs/legal-notice.md)
 
 ## 2. Before opening an issue
 
@@ -48,8 +49,15 @@ Review the relevant docs first:
 - [`docs/installation.md`](./docs/installation.md)
 - [`docs/local-development.md`](./docs/local-development.md)
 - [`docs/deployment-production.md`](./docs/deployment-production.md)
+- [`docs/community.md`](./docs/community.md)
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [`SECURITY.md`](./SECURITY.md) when security may be involved
+
+If the request is about roadmap direction, feature sequencing, or registry expansion priorities, also review:
+
+- [`planning/sparkdeck-project-blueprint.md`](./planning/sparkdeck-project-blueprint.md)
+- [`planning/development-execution-plan.md`](./planning/development-execution-plan.md)
+- [`planning/registry-expansion-roadmap.md`](./planning/registry-expansion-roadmap.md)
 
 ## 3. Include this information
 
@@ -98,7 +106,12 @@ When reporting issues, be explicit about:
 - whether the problem is from a Linux installer flow or a source-development flow
 - whether Docker or GPU runtime validation was actually performed
 - whether the issue occurs on Linux, Windows, or macOS
+- whether the report is about runtime behavior, documentation wording, legal/licensing interpretation, or roadmap/planning expectations
 
 ## 6. Legal note
 
 References to NVIDIA technologies in this repository are descriptive only and do not imply endorsement. For legal and licensing terms, use the files listed in the licensing section of [`README.md`](./README.md).
+
+The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a controlling written instrument expressly distinguishes them.
+
+Questions about trademark attribution, no-endorsement wording, commercial boundary interpretation, or external publication should be routed through the legal and licensing documents before any public or customer-facing use.

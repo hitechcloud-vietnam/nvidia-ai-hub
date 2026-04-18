@@ -63,6 +63,17 @@ The repository should follow an enterprise-style contribution standard.
 
 If a contribution introduces external code, assets, models, or copied configuration, document the source and license in the pull request.
 
+When a change touches legal identity, trademark wording, commercial-use boundaries, public branding, or reviewer-facing repository policy, keep the wording synchronized across:
+
+- `README.md`
+- `NOTICE`
+- `LICENSE`
+- `COMMERCIAL-LICENSE.md`
+- `docs/licensing.md`
+- `docs/legal-notice.md`
+- `docs/legal-vi.md`
+- `docs/community.md`
+
 ## Project Structure
 
 ```text
@@ -240,6 +251,8 @@ Documentation should be:
 Documentation should not include unverifiable claims, internal-only customer context, or ambiguous operational steps.
 
 If you add or change commands, ports, environment variables, or prerequisites, update the relevant documentation in the same pull request.
+
+If you add or change legal, licensing, trademark, commercialization, or attribution wording, update the relevant legal and governance documents in the same pull request and explicitly call out the affected files in validation notes.
 
 Maintainers updating repository policy, review routing, labels, Dependabot, or branch protection guidance should also review [`docs/maintenance.md`](./docs/maintenance.md).
 

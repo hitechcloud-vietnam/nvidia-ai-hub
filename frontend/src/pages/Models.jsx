@@ -13,6 +13,7 @@ export default function Models() {
   const hfInventory = useStore((s) => s.hfInventory)
   const modelsLoading = useStore((s) => s.modelsLoading)
   const modelsError = useStore((s) => s.modelsError)
+  const modelSectionErrors = useStore((s) => s.modelSectionErrors)
   const modelAction = useStore((s) => s.modelAction)
   const featureFlags = useStore((s) => s.featureFlags)
   const fetchModelManager = useStore((s) => s.fetchModelManager)
@@ -29,6 +30,7 @@ export default function Models() {
   const [consumerFilter, setConsumerFilter] = useState('all')
   const [hfRepository, setHfRepository] = useState('')
   const [hfRevision, setHfRevision] = useState('main')
+  const [activeTab, setActiveTab] = useState('runtime')
 
   useEffect(() => {
     fetchModelManager()
@@ -157,6 +159,37 @@ export default function Models() {
     })
   }, [catalogList, consumerFilter, query, visibleRecommendedModels])
 
+  const tabs = useMemo(() => ([
+    {
+      id: 'runtime',
+      label: 'Runtime',
+      description: 'Shared Ollama runtime status and paths.',
+      count: `${modelOverview?.ready ? 'Ready' : getRuntimeStateLabel(modelOverview)}`,
+      error: modelSectionErrors?.modelRuntime,
+    },
+    {
+      id: 'library',
+      label: 'Library',
+      description: 'Catalog, manual pull, installed models, and downloads.',
+      count: `${installedList.length} installed`,
+      error: modelSectionErrors?.installedModels || modelSectionErrors?.modelCatalog || modelSectionErrors?.modelDownloads,
+    },
+    {
+      id: 'huggingface',
+      label: 'Hugging Face',
+      description: 'Intake queue, snapshots, and source roadmap.',
+      count: `${hfSnapshots.length} snapshots`,
+      error: modelSectionErrors?.hfIntakeQueue || modelSectionErrors?.hfInventory || modelSectionErrors?.modelSources,
+    },
+    {
+      id: 'recipes',
+      label: 'Recipe Mapping',
+      description: 'Connected recipes and model guidance.',
+      count: `${dependentRecipes.length} recipes`,
+      error: null,
+    },
+  ]), [dependentRecipes.length, hfSnapshots.length, installedList.length, modelOverview, modelSectionErrors])
+
   const handlePull = async (name) => {
     const value = String(name || '').trim()
     if (!value) return
@@ -220,11 +253,32 @@ export default function Models() {
             {modelsError}
           </div>
         ) : null}
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-2xl border p-4 text-left cursor-pointer transition ${activeTab === tab.id ? 'border-primary/40 bg-primary/10' : 'border-outline-dim bg-surface-high/30 hover:border-primary/20'}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-text">{tab.label}</div>
+                  <div className="mt-1 text-xs leading-5 text-text-dim">{tab.description}</div>
+                </div>
+                {tab.error ? <span className="rounded-full bg-warning/10 px-2 py-1 text-[10px] font-label text-warning">Issue</span> : null}
+              </div>
+              <div className="mt-3 text-xs font-label uppercase tracking-[0.12em] text-text-dim">{tab.count}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4">
+      <div className="mt-6 space-y-4">
+        {activeTab === 'runtime' ? (
           <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+            {modelSectionErrors?.modelRuntime ? <SectionNotice message={`Runtime API: ${modelSectionErrors.modelRuntime}`} /> : null}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Runtime</div>
@@ -379,8 +433,73 @@ export default function Models() {
               </div>
             ) : null}
           </div>
+        ) : null}
 
+        {activeTab === 'huggingface' ? (
           <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+            {(modelSectionErrors?.hfInventory || modelSectionErrors?.hfIntakeQueue || modelSectionErrors?.modelSources)
+              ? <SectionNotice message={`Some Hugging Face data is unavailable. Inventory: ${modelSectionErrors?.hfInventory || 'ok'} · Intake: ${modelSectionErrors?.hfIntakeQueue || 'ok'} · Sources: ${modelSectionErrors?.modelSources || 'ok'}`} />
+              : null}
+            <div className="mt-0 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Hugging Face inventory</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Downloaded snapshots</h2>
+                  <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-text-dim">
+                    Shared-storage snapshots downloaded by the intake worker are listed here for reuse planning and audit visibility.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <InfoTile label="Snapshots" value={String(hfSnapshots.length)} />
+                  <InfoTile label="HF token" value={modelOverview?.hugging_face?.token_configured ? 'Configured' : 'Missing'} />
+                  <InfoTile label="Downloaded" value={formatBytes(hfSummary.downloaded_bytes)} />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-4">
+                <StatusTile label="Queued" value={String(hfSummary.queued || 0)} />
+                <StatusTile label="Running" value={String(hfSummary.running || 0)} tone={(hfSummary.running || 0) > 0 ? 'warning' : 'neutral'} />
+                <StatusTile label="Completed" value={String(hfSummary.completed || 0)} tone={(hfSummary.completed || 0) > 0 ? 'success' : 'neutral'} />
+                <StatusTile label="Failed" value={String(hfSummary.failed || 0)} tone={(hfSummary.failed || 0) > 0 ? 'warning' : 'neutral'} />
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {hfSnapshots.length === 0 ? (
+                  <EmptyState title="No Hugging Face snapshots yet" body="Completed intake downloads will appear here once the background worker stores them in shared storage." />
+                ) : hfSnapshots.map((item) => (
+                  <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface px-4 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-text break-all">{item.repository}</div>
+                        <div className="mt-1 text-xs text-text-dim font-label">Revision {item.revision || 'main'} · {item.target_dir || 'huggingface'}</div>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>{item.status || 'available'}</span>
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <PathCard label="Path" value={item.path || '—'} />
+                      <PathCard label="Size" value={formatBytes(item.size_bytes)} />
+                    </div>
+                    {item.queue_id ? (
+                      <div className="mt-3 text-[11px] text-text-dim font-label">Linked queue item: {item.queue_id}</div>
+                    ) : null}
+                    <div className="mt-3 text-[11px] text-text-dim font-label">
+                      {item.updated_at ? `Updated ${formatDate(item.updated_at)}` : 'Update time unavailable'}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteHfSnapshot(item)}
+                        disabled={modelAction === `hf-delete:${item.id}` || item.status === 'running'}
+                        className="rounded-xl border border-error/20 bg-error/10 px-3 py-1.5 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
+                      >
+                        {modelAction === `hf-delete:${item.id}` ? 'Deleting...' : 'Delete snapshot'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -494,6 +613,11 @@ export default function Models() {
               </div>
             </div>
 
+          </div>
+        ) : null}
+
+        {activeTab === 'recipes' ? (
+          <div className="rounded-3xl border border-outline-dim bg-surface p-5">
             <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -631,149 +755,159 @@ export default function Models() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Manual pull</div>
-                <div className="mt-1 text-sm leading-6 text-text-dim">Enter any Ollama model name if it is not already listed in the curated catalog.</div>
-              </div>
-              <div className="flex w-full max-w-xl gap-2">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Example: qwen3.5:4b or llama3.2-vision:11b"
-                  className="w-full rounded-xl border border-outline-dim bg-surface-high px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-                />
-                <button
-                  type="button"
-                  onClick={() => handlePull(query)}
-                  disabled={!query.trim() || modelAction === `pull:${query}` || !modelOverview?.ready}
-                  className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                >
-                  Pull
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Catalog</div>
-                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Browse and download models</h2>
-              </div>
-              <div className="text-sm text-text-dim leading-6">
-                {consumerFilter === 'all'
-                  ? 'Search the shared catalog by model, family, or capability.'
-                  : `Catalog narrowed to recommendations for ${activeConsumer?.name || 'the selected recipe'}.`}
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 xl:grid-cols-2">
-              {filteredCatalog.length === 0 ? (
-                <EmptyState title="No catalog results" body={consumerFilter === 'all' ? 'Try a different search term or pull a model manually by name.' : 'This recipe currently has no exact catalog match. Use the manual pull box if you know the model name.'} />
-              ) : filteredCatalog.map((entry) => {
-                const busy = entry.downloading || modelAction === `pull:${entry.name}`
-                return (
-                  <div key={entry.name} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-text">{entry.title || entry.name}</div>
-                        <div className="mt-1 text-xs text-text-dim font-label break-all">{entry.name}</div>
-                      </div>
-                      <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{entry.size || 'Model'}</span>
-                    </div>
-                    <p className="m-0 mt-3 text-sm leading-6 text-text-dim">{entry.summary || 'Shared runtime model entry.'}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {(entry.capabilities || []).map((tag) => (
-                        <span key={`${entry.name}-${tag}`} className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{tag}</span>
-                      ))}
-                      {entry.installed ? <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-label text-success">Installed</span> : null}
-                      {entry.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
-                    </div>
-                    {(entry.downloading || Number(entry.download_progress) > 0) ? (
-                      <ProgressBar value={Number(entry.download_progress) || 0} label={`${Math.round(Number(entry.download_progress) || 0)}%`} />
-                    ) : null}
-                    <div className="mt-4 flex gap-2">
-                      <button
-                        type="button"
-                        disabled={entry.installed || busy || !modelOverview?.ready}
-                        onClick={() => handlePull(entry.name)}
-                        className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                      >
-                        {busy ? 'Pulling...' : entry.installed ? 'Already installed' : 'Pull model'}
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
           </div>
-        </div>
+        ) : null}
 
-        <div className="space-y-4">
-          <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Installed models</div>
-            <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared inventory</h2>
-            <div className="mt-4 space-y-3">
-              {installedList.length === 0 ? (
-                <EmptyState title="No models installed yet" body="Pull a model from the catalog or enter an Ollama model name manually." />
-              ) : installedList.map((model) => {
-                const deleting = model.deleting || modelAction === `delete:${model.name}`
-                return (
-                  <div key={model.name} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-text break-all">{model.name}</div>
-                        <div className="mt-1 text-xs text-text-dim font-label">
-                          {[model.family, model.parameter_size, model.quantization_level].filter(Boolean).join(' · ') || 'Installed model'}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        disabled={deleting || model.downloading}
-                        onClick={() => handleDelete(model.name)}
-                        className="rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
-                      >
-                        {deleting ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{formatBytes(model.size)}</span>
-                      {model.loaded ? <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">Loaded</span> : null}
-                      {model.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
-                    </div>
-                    {model.downloading ? <ProgressBar value={Number(model.download_progress) || 0} label={`${Math.round(Number(model.download_progress) || 0)}%`} /> : null}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-outline-dim bg-surface p-5">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Downloads</div>
-            <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Recent activity</h2>
-            <div className="mt-4 space-y-3">
-              {downloadsList.length === 0 ? (
-                <EmptyState title="No recent downloads" body="Download progress and completion history will appear here." />
-              ) : downloadsList.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-text break-all">{item.name || 'Model job'}</div>
-                      <div className="mt-1 text-xs text-text-dim font-label">{item.message || item.status || 'Pending'}</div>
-                    </div>
-                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>
-                      {item.status || 'queued'}
-                    </span>
-                  </div>
-                  <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} />
-                  <div className="mt-3 text-[11px] text-text-dim font-label">
-                    {item.started_at ? `Started ${formatDate(item.started_at)}` : 'Start time unavailable'}
-                  </div>
+        {activeTab === 'library' ? (
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-4">
+              {(modelSectionErrors?.modelCatalog || modelSectionErrors?.modelDownloads || modelSectionErrors?.installedModels)
+                ? <SectionNotice message={`Library data is partially unavailable. Catalog: ${modelSectionErrors?.modelCatalog || 'ok'} · Installed: ${modelSectionErrors?.installedModels || 'ok'} · Downloads: ${modelSectionErrors?.modelDownloads || 'ok'}`} />
+                : null}
+              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Manual pull</div>
+                  <div className="mt-1 text-sm leading-6 text-text-dim">Enter any Ollama model name if it is not already listed in the curated catalog.</div>
                 </div>
-              ))}
+                <div className="flex w-full max-w-xl gap-2">
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Example: qwen3.5:4b or llama3.2-vision:11b"
+                    className="w-full rounded-xl border border-outline-dim bg-surface-high px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handlePull(query)}
+                    disabled={!query.trim() || modelAction === `pull:${query}` || !modelOverview?.ready}
+                    className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    Pull
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Catalog</div>
+                  <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Browse and download models</h2>
+                </div>
+                <div className="text-sm text-text-dim leading-6">
+                  {consumerFilter === 'all'
+                    ? 'Search the shared catalog by model, family, or capability.'
+                    : `Catalog narrowed to recommendations for ${activeConsumer?.name || 'the selected recipe'}.`}
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                {filteredCatalog.length === 0 ? (
+                  <EmptyState title="No catalog results" body={consumerFilter === 'all' ? 'Try a different search term or pull a model manually by name.' : 'This recipe currently has no exact catalog match. Use the manual pull box if you know the model name.'} />
+                ) : filteredCatalog.map((entry) => {
+                  const busy = entry.downloading || modelAction === `pull:${entry.name}`
+                  return (
+                    <div key={entry.name} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-text">{entry.title || entry.name}</div>
+                          <div className="mt-1 text-xs text-text-dim font-label break-all">{entry.name}</div>
+                        </div>
+                        <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{entry.size || 'Model'}</span>
+                      </div>
+                      <p className="m-0 mt-3 text-sm leading-6 text-text-dim">{entry.summary || 'Shared runtime model entry.'}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(entry.capabilities || []).map((tag) => (
+                          <span key={`${entry.name}-${tag}`} className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{tag}</span>
+                        ))}
+                        {entry.installed ? <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-label text-success">Installed</span> : null}
+                        {entry.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
+                      </div>
+                      {(entry.downloading || Number(entry.download_progress) > 0) ? (
+                        <ProgressBar value={Number(entry.download_progress) || 0} label={`${Math.round(Number(entry.download_progress) || 0)}%`} />
+                      ) : null}
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={entry.installed || busy || !modelOverview?.ready}
+                          onClick={() => handlePull(entry.name)}
+                          className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                        >
+                          {busy ? 'Pulling...' : entry.installed ? 'Already installed' : 'Pull model'}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Installed models</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Shared inventory</h2>
+                <div className="mt-4 space-y-3">
+                  {installedList.length === 0 ? (
+                    <EmptyState title="No models installed yet" body="Pull a model from the catalog or enter an Ollama model name manually." />
+                  ) : installedList.map((model) => {
+                    const deleting = model.deleting || modelAction === `delete:${model.name}`
+                    return (
+                      <div key={model.name} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold text-text break-all">{model.name}</div>
+                            <div className="mt-1 text-xs text-text-dim font-label">
+                              {[model.family, model.parameter_size, model.quantization_level].filter(Boolean).join(' · ') || 'Installed model'}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            disabled={deleting || model.downloading}
+                            onClick={() => handleDelete(model.name)}
+                            className="rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-xs font-semibold text-error cursor-pointer hover:bg-error/15 disabled:opacity-50"
+                          >
+                            {deleting ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-label text-text-dim">{formatBytes(model.size)}</span>
+                          {model.loaded ? <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-label text-primary">Loaded</span> : null}
+                          {model.downloading ? <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-label text-warning">Downloading</span> : null}
+                        </div>
+                        {model.downloading ? <ProgressBar value={Number(model.download_progress) || 0} label={`${Math.round(Number(model.download_progress) || 0)}%`} /> : null}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-outline-dim bg-surface p-5">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">Downloads</div>
+                <h2 className="m-0 mt-2 text-lg font-bold tracking-tight text-text font-display">Recent activity</h2>
+                <div className="mt-4 space-y-3">
+                  {downloadsList.length === 0 ? (
+                    <EmptyState title="No recent downloads" body="Download progress and completion history will appear here." />
+                  ) : downloadsList.map((item) => (
+                    <div key={item.id} className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-text break-all">{item.name || 'Model job'}</div>
+                          <div className="mt-1 text-xs text-text-dim font-label">{item.message || item.status || 'Pending'}</div>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-label ${getJobTone(item.status)}`}>
+                          {item.status || 'queued'}
+                        </span>
+                      </div>
+                      <ProgressBar value={Number(item.progress) || 0} label={`${Math.round(Number(item.progress) || 0)}%`} />
+                      <div className="mt-3 text-[11px] text-text-dim font-label">
+                        {item.started_at ? `Started ${formatDate(item.started_at)}` : 'Start time unavailable'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   )
@@ -862,6 +996,14 @@ function EmptyState({ title, body }) {
     <div className="rounded-2xl border border-dashed border-outline-dim bg-surface-high/20 px-4 py-5 text-center">
       <div className="text-sm font-semibold text-text">{title}</div>
       <div className="mt-1 text-sm text-text-dim leading-6">{body}</div>
+    </div>
+  )
+}
+
+function SectionNotice({ message }) {
+  return (
+    <div className="rounded-2xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-warning">
+      {message}
     </div>
   )
 }

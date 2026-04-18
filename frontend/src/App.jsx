@@ -236,7 +236,7 @@ function About() {
   }
 
   return (
-    <div className="px-6 py-6 pb-12 max-w-2xl mx-auto animate-fadeIn">
+    <div className="px-6 py-6 pb-12 animate-fadeIn">
       <div className="flex items-center gap-4 mb-8">
         <img src="/brand/spark-ai-hub-mark.svg" alt="NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC" className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] p-2.5" />
         <div>

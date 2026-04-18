@@ -13,7 +13,7 @@
 [![Code Size](https://img.shields.io/github/languages/code-size/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub)
 [![Closed PRs](https://img.shields.io/github/issues-pr-closed/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/pulls?q=is%3Apr+is%3Aclosed)
 [![Latest Tag](https://img.shields.io/github/v/tag/hitechcloud-vietnam/nvidia-ai-hub?sort=semver&style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/tags)
-[![GitHub Streak](https://img.shields.io/badge/GitHub-Streak%20via%20Insights-24292f?style=flat-square&logo=github)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubpulse)
+[![GitHub Streak](https://img.shields.io/badge/GitHub-Streak%20via%20Insights-24292f?style=flat-square&logo=github)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/pulse)
 
 **Quick links:** [Overview](#overview) · [Installation](./docs/installation.md) · [Production deployment](./docs/deployment-production.md) · [Local development](./docs/local-development.md) · [Planning](#planning-and-roadmap) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 

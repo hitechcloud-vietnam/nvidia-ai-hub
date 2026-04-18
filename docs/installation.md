@@ -14,6 +14,10 @@ For Linux production-style service layout, reverse proxy patterns, TLS notes, an
 
 For tracked deployment example files that can be adapted locally, see the `deploy/` directory in the repository root.
 
+For product direction, phased implementation priorities, and registry growth planning, review the tracked planning documents in `planning/`, especially [`../planning/development-execution-plan.md`](../planning/development-execution-plan.md) and [`../planning/registry-expansion-roadmap.md`](../planning/registry-expansion-roadmap.md).
+
+For controlling legal, trademark, and commercial-use terms, review [`../LICENSE`](../LICENSE), [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md), [`../NOTICE`](../NOTICE), [`./licensing.md`](./licensing.md), and [`./legal-notice.md`](./legal-notice.md).
+
 ## 1. Platform support summary
 
 | Platform | Source development | Quick installer | Full local GPU recipe runtime | Recommended use |
@@ -45,6 +49,18 @@ For tracked deployment example files that can be adapted locally, see the `deplo
 
 - `pm2` for persistent source-based process management
 - reverse proxy such as Nginx, Caddy, or Traefik for exposed deployments
+
+## Legal and commercial boundary
+
+`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company**.
+
+Keep these legal boundaries in mind when installing, evaluating, documenting, or deploying the repository:
+
+- references to `NVIDIA`, `DGX`, `CUDA`, and related NVIDIA technologies are descriptive only and do not imply sponsorship, endorsement, certification, or approval;
+- the short name `NVIDIA AI Hub` and the full name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a controlling written instrument says otherwise; and
+- repository use remains subject to the non-commercial licensing model unless separate written commercial permission has been granted.
+
+If your installation or deployment is tied to paid delivery, managed service, client implementation, resale, hosted commercialization, or other revenue-generating activity, review [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md) before proceeding.
 
 ## 3. Linux deployment
 
@@ -114,6 +130,7 @@ Important limitations:
 - it does not currently install the NVIDIA driver or NVIDIA Container Toolkit for you
 - GPU runtime prerequisites must already be configured on the host
 - the installer was not executed end-to-end in this Windows workspace; Linux shell validation remains a reviewer task
+- changes to installer behavior should be synchronized with `README.md`, `docs/local-development.md`, `docs/deployment-production.md`, `SUPPORT.md`, and relevant planning documents when rollout expectations change
 
 ### 3.4 Manual Linux install from a clone
 

@@ -88,6 +88,13 @@ When changing install, runtime, or deployment behavior, review and update as nee
 - [`deployment-production.md`](./deployment-production.md)
 - [`README.md`](../README.md)
 
+When changing roadmap direction, execution sequencing, registry intake policy, or reviewer-facing governance wording, also review:
+
+- [`../planning/sparkdeck-project-blueprint.md`](../planning/sparkdeck-project-blueprint.md)
+- [`../planning/development-execution-plan.md`](../planning/development-execution-plan.md)
+- [`../planning/registry-expansion-roadmap.md`](../planning/registry-expansion-roadmap.md)
+- [`community.md`](./community.md)
+
 ## 7. Merge guidance
 
 Prefer squash merge for routine changes unless preserving commit history is important for audit or release reasons.

@@ -76,6 +76,7 @@ export const useStore = create((set, get) => ({
   hfInventory: { snapshots: [] },
   modelsLoading: false,
   modelsError: null,
+  modelSectionErrors: {},
   modelAction: '',
   _logWs: {},
   theme: getInitialTheme(),
@@ -286,18 +287,19 @@ export const useStore = create((set, get) => ({
       set({ modelsLoading: true, modelsError: null })
     }
     try {
-      const [overviewRes, runtimeRes, installedRes, catalogRes, downloadsRes, sourcesRes, intakeRes, hfInventoryRes] = await Promise.all([
-        fetch('/api/models/overview'),
-        fetch('/api/models/runtime'),
-        fetch('/api/models/installed'),
-        fetch('/api/models/catalog'),
-        fetch('/api/models/downloads'),
-        fetch('/api/models/sources'),
-        fetch('/api/models/intake'),
-        fetch('/api/models/huggingface'),
-      ])
+      const currentState = get()
+      const requestDefinitions = [
+        { key: 'modelOverview', label: 'Overview', url: '/api/models/overview', fallback: currentState.modelOverview, required: true },
+        { key: 'modelRuntime', label: 'Runtime', url: '/api/models/runtime', fallback: currentState.modelRuntime || { reachable: false } },
+        { key: 'installedModels', label: 'Installed models', url: '/api/models/installed', fallback: currentState.installedModels || { models: [] } },
+        { key: 'modelCatalog', label: 'Catalog', url: '/api/models/catalog', fallback: currentState.modelCatalog || { models: [] } },
+        { key: 'modelDownloads', label: 'Downloads', url: '/api/models/downloads', fallback: currentState.modelDownloads || { downloads: [] } },
+        { key: 'modelSources', label: 'Sources', url: '/api/models/sources', fallback: currentState.modelSources || { sources: [] } },
+        { key: 'hfIntakeQueue', label: 'Hugging Face intake', url: '/api/models/intake', fallback: currentState.hfIntakeQueue || { items: [] } },
+        { key: 'hfInventory', label: 'Hugging Face inventory', url: '/api/models/huggingface', fallback: currentState.hfInventory || { snapshots: [] } },
+      ]
 
-      const parseJson = async (res) => {
+      const parseResponse = async (res) => {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
           throw new Error(data?.detail || `HTTP ${res.status}`)
@@ -305,44 +307,55 @@ export const useStore = create((set, get) => ({
         return data
       }
 
-      const modelOverview = await parseJson(overviewRes)
+      const settled = await Promise.allSettled(
+        requestDefinitions.map(async (request) => {
+          const res = await fetch(request.url)
+          const data = await parseResponse(res)
+          return { ...request, data }
+        }),
+      )
 
-      const safeParse = async (res, fallback) => {
-        try {
-          return await parseJson(res)
-        } catch {
-          return fallback
+      const nextState = {}
+      const modelSectionErrors = {}
+
+      settled.forEach((result, index) => {
+        const request = requestDefinitions[index]
+        if (result.status === 'fulfilled') {
+          nextState[request.key] = result.value.data
+          return
         }
+
+        const message = result.reason?.message || 'Request failed'
+        modelSectionErrors[request.key] = message
+
+        if (request.required && !request.fallback) {
+          throw new Error(message)
+        }
+
+        nextState[request.key] = request.fallback
+      })
+
+      const modelOverview = nextState.modelOverview
+      const runtimeUnavailable = Boolean(modelSectionErrors.modelRuntime)
+      const degradedRuntimeAreas = ['modelRuntime', 'installedModels', 'modelCatalog', 'modelDownloads']
+        .filter((key) => modelSectionErrors[key])
+        .map((key) => requestDefinitions.find((item) => item.key === key)?.label)
+        .filter(Boolean)
+
+      let modelsError = null
+      if (runtimeUnavailable && modelOverview?.installed) {
+        modelsError = 'Ollama Runtime is installed, but its management API is currently unreachable. Runtime tabs may fail while Hugging Face tabs still work.'
+      } else if (degradedRuntimeAreas.length > 0) {
+        modelsError = `Some model sections are temporarily unavailable: ${degradedRuntimeAreas.join(', ')}.`
       }
 
-      const [modelRuntime, installedModels, modelCatalog, modelDownloads, modelSources, hfIntakeQueue, hfInventory] = await Promise.all([
-        safeParse(runtimeRes, { reachable: false }),
-        safeParse(installedRes, { models: [] }),
-        safeParse(catalogRes, { models: [] }),
-        safeParse(downloadsRes, { downloads: [] }),
-        safeParse(sourcesRes, { sources: [] }),
-        safeParse(intakeRes, { items: [] }),
-        safeParse(hfInventoryRes, { snapshots: [] }),
-      ])
-
-      const degraded = !modelRuntime?.reachable && modelOverview?.installed
-      const modelsError = degraded
-        ? 'Ollama Runtime is installed, but its management API is currently unreachable. Start the runtime to browse and manage shared models.'
-        : null
-
       set({
-        modelOverview,
-        modelRuntime,
-        installedModels,
-        modelCatalog,
-        modelDownloads,
-        modelSources,
-        hfIntakeQueue,
-        hfInventory,
+        ...nextState,
         modelsError,
+        modelSectionErrors,
         modelManagerLoadedAt: Date.now(),
       })
-      return { modelOverview, modelRuntime, installedModels, modelCatalog, modelDownloads, modelSources, hfIntakeQueue, hfInventory }
+      return nextState
     } catch (e) {
       console.error('Failed to fetch model manager data:', e)
       set({ modelsError: e.message || 'Failed to load model manager data' })

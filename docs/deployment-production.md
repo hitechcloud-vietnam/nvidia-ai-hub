@@ -23,6 +23,8 @@ Tracked deployment example assets are available under [`../deploy/`](../deploy/)
 
 For baseline installation and platform requirements, see [`docs/installation.md`](./installation.md).
 
+For active rollout priorities and implementation sequencing that may affect deployment guidance, review [`../planning/development-execution-plan.md`](../planning/development-execution-plan.md).
+
 ## 1. Recommended production model
 
 For production-style operation on Linux, the preferred sequence is:
@@ -309,3 +311,5 @@ Before calling a deployment ready, record evidence for:
 - targeted recipe validation for changed or high-risk recipes
 
 If a validation step was not run, document that clearly together with residual operational risk.
+
+When production guidance changes, review `README.md`, `docs/installation.md`, `docs/local-development.md`, and `SUPPORT.md` together so support boundaries, commands, and reviewer expectations remain aligned.

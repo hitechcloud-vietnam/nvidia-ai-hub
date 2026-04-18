@@ -231,10 +231,13 @@ Before opening a pull request:
 - call out any untested runtime behavior or platform limits
 
 Use [`../CONTRIBUTING.md`](../CONTRIBUTING.md) for repository policy and pull request expectations.
+
+Typical validation evidence for development-facing changes may include:
+
 - `npm run build`
 - `python -m compileall daemon`
 - recipe load smoke test:
    - `python -c "from daemon.services.registry_service import load_recipes; print(len(load_recipes()))"`
 - targeted `docker compose config -q` for changed recipes
 
-If you changed installation or runtime docs, confirm the commands match the current repository layout and supported platforms.
+If you changed installation, runtime, contributor, or roadmap-facing docs, confirm the commands and support boundaries still match the current repository layout, supported platforms, and active planning documents.

@@ -72,6 +72,7 @@ When changing repository maintenance controls, confirm:
 - Dependabot stays paused unless intentionally enabled
 - related docs are updated in the same pull request
 - legal and trademark wording remains synchronized where applicable
+- planning and roadmap references remain synchronized where applicable
 
 ## 5. Pull request notes for maintenance changes
 
@@ -82,3 +83,5 @@ Maintenance pull requests should include:
 - any permission changes
 - validation evidence for workflow or documentation changes
 - any deferred follow-up work
+
+If the maintenance change affects repository policy language, documentation routing, or review workflow expectations, note whether `docs/community.md` and the `planning/` index documents were reviewed for consistency.

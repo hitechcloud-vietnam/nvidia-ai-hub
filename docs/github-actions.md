@@ -49,6 +49,8 @@ Intended to validate recipe and shell-script structure.
 
 Intended to validate required docs and internal Markdown links.
 
+This should include core governance, planning, and legal-reference materials such as `README.md`, `docs/community.md`, `docs/licensing.md`, `docs/legal-notice.md`, and the tracked `planning/` documents.
+
 ### Release packaging
 
 Intended to build a source bundle with a production frontend artifact.
@@ -97,3 +99,5 @@ When a pull request changes workflow files, include:
 - any permission changes
 - any local equivalent validation performed
 - any untested GitHub-hosted behavior
+
+If workflow changes alter validation expectations for backend, frontend, recipes, docs, or governance, review the linked contributor guidance in [`../CONTRIBUTING.md`](../CONTRIBUTING.md), [`pull-request-process.md`](./pull-request-process.md), and the active execution priorities in [`../planning/development-execution-plan.md`](../planning/development-execution-plan.md).
