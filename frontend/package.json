@@ -18,12 +18,13 @@
     "build:web": "vite build",
     "build:backend": "node ./electron/scripts/build-backend.mjs",
     "build:icons": "node ./electron/scripts/generate-icons.mjs",
+    "clean:release": "node ./electron/scripts/clean-release.mjs",
     "electron:ensure": "node ./electron/scripts/ensure-electron.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "desktop:dev": "npm run build:web && npm run build:icons && npm run electron:ensure && electron .",
-    "desktop:pack": "npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder --dir",
-    "desktop:dist": "npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder",
+    "desktop:pack": "npm run clean:release && npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder --dir",
+    "desktop:dist": "npm run clean:release && npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder",
     "postinstall": "npm run electron:ensure"
   },
   "dependencies": {
@@ -83,7 +84,6 @@
     "npmRebuild": false,
     "afterSign": "electron/notarize.cjs",
     "win": {
-      "publisherName": "Pho Tue SoftWare And Technology Solutions Joint Stock Company",
       "icon": "build-assets/icon.ico",
       "target": [
         "nsis"

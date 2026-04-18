@@ -57,6 +57,8 @@ npm run lint
 - desktop packaging expects Python to be available on the build machine
 - hosted CI packaging is staged in `.github/workflows/desktop-build-disabled.yml`
 - app icons are generated from `public/brand/spark-ai-hub-mark.svg` via `npm run build:icons`
+- production web builds now split major vendor bundles in `vite.config.js` to reduce the main entry chunk during desktop and web packaging
+- `npm run desktop:pack` and `npm run desktop:dist` now clear `frontend/release/` first to avoid stale locked Windows packaging outputs
 - `npm install` now repairs a broken Electron binary install automatically via `npm run electron:ensure`
 - Windows signing can use `CSC_LINK` and `CSC_KEY_PASSWORD`
 - macOS signing additionally expects `CSC_NAME`

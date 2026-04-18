@@ -58,6 +58,8 @@ These commands are run from `frontend/` and require local Python plus repository
 Desktop packaging notes:
 
 - app icons are generated from `frontend/public/brand/spark-ai-hub-mark.svg` during desktop packaging
+- frontend production builds now split large vendor dependencies into dedicated chunks to reduce the main bundle size for web and desktop output
+- desktop pack/dist commands now clear `frontend/release/` before packaging to avoid stale locked output directories on Windows
 - `npm install` in `frontend/` now re-checks and repairs an incomplete Electron binary install automatically
 - Windows signing is designed to be driven by `CSC_LINK` and `CSC_KEY_PASSWORD`
 - macOS signing and notarization additionally expect `CSC_NAME`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`
