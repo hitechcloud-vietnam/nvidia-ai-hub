@@ -2,8 +2,10 @@ import asyncio
 import subprocess
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from daemon.config import settings
 from daemon.services.docker_service import (
     install_recipe,
     update_recipe,
@@ -24,8 +26,20 @@ from daemon.services.docker_service import (
     clear_pending,
     ensure_runtime_env,
 )
-from daemon.services.registry_service import get_recipe, get_recipe_dir
-from daemon.services.fork_service import get_recipe_fork_status, save_recipe_fork
+from daemon.models.container import DeploymentSelection
+from daemon.services.registry_service import get_recipe, get_recipe_dir, get_registry_recipe_dir
+from daemon.services.deployment_service import apply_recipe_deployment_selection, get_recipe_deployment_selection
+from daemon.services.fork_service import (
+    activate_recipe_fork,
+    build_recipe_fork_manifest_markdown_summary,
+    deactivate_recipe_fork,
+    delete_recipe_fork,
+    export_recipe_fork_bundle,
+    get_recipe_fork_full_diff,
+    get_recipe_fork_diff_summary,
+    get_recipe_fork_status,
+    save_recipe_fork,
+)
 from daemon.models.container import ContainerInfo
 
 router = APIRouter(tags=["containers"])
@@ -35,14 +49,21 @@ _builds: dict[str, dict] = {}
 
 
 @router.post("/api/recipes/{slug}/install")
-async def install(slug: str):
+async def install(slug: str, body: DeploymentSelection | None = None):
     recipe = get_recipe(slug)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
+    selection_payload = None
+    if body is not None:
+        try:
+            selection_payload = apply_recipe_deployment_selection(slug, body)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     # If already building, return current status
     if slug in _builds and not _builds[slug]["done"]:
-        return {"status": "building", "slug": slug}
+        return {"status": "building", "slug": slug, "deployment_selection": selection_payload}
 
     set_pending(slug, "installing")
     clear_ready(slug)
@@ -59,7 +80,7 @@ async def install(slug: str):
             clear_pending(slug)
 
     asyncio.create_task(_run_build())
-    return {"status": "building", "slug": slug}
+    return {"status": "building", "slug": slug, "deployment_selection": selection_payload}
 
 
 @router.post("/api/recipes/{slug}/update")
@@ -99,17 +120,23 @@ async def build_status(slug: str):
 
 
 @router.post("/api/recipes/{slug}/launch")
-async def launch(slug: str):
+async def launch(slug: str, body: DeploymentSelection | None = None):
     recipe = get_recipe(slug)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
+    selection_payload = None
+    if body is not None:
+        try:
+            selection_payload = apply_recipe_deployment_selection(slug, body)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
     set_pending(slug, "launching")
     clear_ready(slug)
     result = await launch_recipe(slug)
     if result == "launched":
         # Start background health check (will clear_pending when ready)
         await start_health_check(slug)
-        return {"status": "launched", "slug": slug}
+        return {"status": "launched", "slug": slug, "deployment_selection": selection_payload}
     clear_pending(slug)
     raise HTTPException(status_code=500, detail=result)
 
@@ -174,6 +201,27 @@ class ExecBody(BaseModel):
     command: str
 
 
+@router.get("/api/recipes/{slug}/deployment-selection")
+async def get_deployment_selection(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    selection = get_recipe_deployment_selection(slug)
+    return {"slug": slug, "selection": selection.model_dump() if selection else None}
+
+
+@router.post("/api/recipes/{slug}/deployment-selection")
+async def save_deployment_selection(slug: str, body: DeploymentSelection):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = apply_recipe_deployment_selection(slug, body)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "saved", "slug": slug, **result}
+
+
 @router.get("/api/recipes/{slug}/fork")
 async def get_recipe_fork(slug: str):
     recipe = get_recipe(slug)
@@ -194,6 +242,129 @@ async def save_fork(slug: str):
     return {"status": "saved", **result}
 
 
+@router.post("/api/recipes/{slug}/fork/activate")
+async def activate_fork(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = activate_recipe_fork(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "activated", **result}
+
+
+@router.post("/api/recipes/{slug}/fork/deactivate")
+async def deactivate_fork(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = deactivate_recipe_fork(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "deactivated", **result}
+
+
+@router.delete("/api/recipes/{slug}/fork")
+async def delete_fork(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = delete_recipe_fork(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "deleted", **result}
+
+
+@router.post("/api/recipes/{slug}/fork/export")
+async def export_fork_bundle(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = await export_recipe_fork_bundle(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "exported", **result}
+
+
+@router.get("/api/recipes/{slug}/fork/diff")
+async def get_fork_diff(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        return get_recipe_fork_diff_summary(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/api/recipes/{slug}/fork/diff/full")
+async def get_fork_full_diff(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        return get_recipe_fork_full_diff(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/api/recipes/{slug}/fork/manifest-markdown")
+async def get_fork_manifest_markdown(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        return {"slug": slug, "markdown": build_recipe_fork_manifest_markdown_summary(slug)}
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/api/recipes/{slug}/fork/manifest-markdown/download")
+async def download_fork_manifest_markdown(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        markdown = build_recipe_fork_manifest_markdown_summary(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    output_dir = settings.fork_bundles_path / slug
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{slug}-fork-summary.md"
+    output_path.write_text(markdown, encoding="utf-8")
+    return FileResponse(
+        path=output_path,
+        media_type="text/markdown; charset=utf-8",
+        filename=output_path.name,
+    )
+
+
+@router.get("/api/recipes/{slug}/fork/download")
+async def download_fork_bundle(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    try:
+        result = await export_recipe_fork_bundle(slug)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    bundle_path = Path(result["bundle_path"])
+    if not bundle_path.is_file():
+        raise HTTPException(status_code=404, detail="Bundle file not found")
+
+    return FileResponse(
+        path=bundle_path,
+        media_type="application/zip",
+        filename=bundle_path.name,
+    )
+
+
 def _compose_file_for_slug(slug: str) -> Path:
     recipe_dir = get_recipe_dir(slug)
     if not recipe_dir:
@@ -205,8 +376,12 @@ def _compose_file_for_slug(slug: str) -> Path:
 
 
 def _get_default_compose_content(compose_file: Path) -> str:
-    repo_root = compose_file.parents[3]
-    rel_path = compose_file.relative_to(repo_root)
+    slug = compose_file.parent.name
+    registry_recipe_dir = get_registry_recipe_dir(slug)
+    if not registry_recipe_dir:
+        raise HTTPException(status_code=404, detail="Default docker-compose.yml not available")
+    repo_root = settings.base_dir
+    rel_path = (registry_recipe_dir / compose_file.name).relative_to(repo_root)
     proc = subprocess.run(
         ["git", "show", f"HEAD:{rel_path.as_posix()}"],
         cwd=repo_root,
@@ -232,11 +407,14 @@ def _env_paths_for_slug(slug: str) -> tuple[Path, Path, Path]:
 
 
 def _get_default_env_content(template_file: Path) -> str:
-    if not template_file.is_file():
+    slug = template_file.parent.name
+    registry_recipe_dir = get_registry_recipe_dir(slug)
+    registry_template_file = registry_recipe_dir / template_file.name if registry_recipe_dir else None
+    if not registry_template_file or not registry_template_file.is_file():
         raise HTTPException(status_code=404, detail="Default runtime env not available")
 
-    repo_root = template_file.parents[3]
-    rel_path = template_file.relative_to(repo_root)
+    repo_root = settings.base_dir
+    rel_path = registry_template_file.relative_to(repo_root)
     proc = subprocess.run(
         ["git", "show", f"HEAD:{rel_path.as_posix()}"],
         cwd=repo_root,
@@ -246,7 +424,7 @@ def _get_default_env_content(template_file: Path) -> str:
     )
     if proc.returncode == 0:
         return proc.stdout
-    return template_file.read_text()
+    return registry_template_file.read_text()
 
 
 @router.get("/api/recipes/{slug}/compose")

@@ -1,151 +1,90 @@
 # Community and Governance
 
-This document is the central index for repository governance, contribution workflow, support guidance, and commercial-use policy.
+This document is the index for contributor, maintainer, support, and governance materials.
 
-## Core Documents
+## Core repository documents
 
-- Contribution guide: [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
-- Installation and deployment guide: [`./installation.md`](./installation.md)
-- Production deployment guide: [`./deployment-production.md`](./deployment-production.md)
-- Deployment example assets: `../deploy/systemd/`, `../deploy/nginx/`, `../deploy/caddy/`, `../deploy/pm2/`
-- Local development guide: [`./local-development.md`](./local-development.md)
-- Security policy: [`../SECURITY.md`](../SECURITY.md)
-- Code of conduct: [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
-- Support guide: [`../SUPPORT.md`](../SUPPORT.md)
-- Pull request process: [`./pull-request-process.md`](./pull-request-process.md)
-- GitHub Actions rollout guide: [`./github-actions.md`](./github-actions.md)
-- Repository maintenance guide: [`./maintenance.md`](./maintenance.md)
-- License: [`../LICENSE`](../LICENSE)
-- Commercial licensing: [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
-- Licensing guide: [`./licensing.md`](./licensing.md)
-- Legal notice: [`./legal-notice.md`](./legal-notice.md)
-- Legal notice (Vietnamese reference): [`./legal-vi.md`](./legal-vi.md)
-- Notice: [`../NOTICE`](../NOTICE)
+### Product and operation
 
-## Document Purpose Matrix
+- [`../README.md`](../README.md)
+- [`./installation.md`](./installation.md)
+- [`./local-development.md`](./local-development.md)
+- [`./deployment-production.md`](./deployment-production.md)
 
-| Document | Primary use | Typical audience |
-|---|---|---|
-| `../CONTRIBUTING.md` | contribution workflow, local validation, submission expectations | contributors |
-| `./installation.md` | platform support boundaries, installation, deployment prerequisites, Docker and NVIDIA runtime guidance | operators and contributors |
-| `./deployment-production.md` | Linux production service layout, reverse proxy, TLS, LAN/public exposure guidance | operators and maintainers |
-| `../deploy/*` | tracked deployment example files for service managers and reverse proxies | operators and maintainers |
-| `./local-development.md` | cross-platform developer setup, backend/frontend workflow, local validation | contributors |
-| `./pull-request-process.md` | review flow, branch protection, merge guidance | reviewers and maintainers |
-| `./github-actions.md` | workflow inventory, rollout gating, automation enablement | maintainers |
-| `./maintenance.md` | `CODEOWNERS`, labels, Dependabot, branch protection maintenance | maintainers |
-| `../SECURITY.md` | vulnerability reporting and disclosure process | reporters and maintainers |
-| `../CODE_OF_CONDUCT.md` | collaboration and behavior expectations | all participants |
-| `../SUPPORT.md` | support routing and usage questions | users and triagers |
-| `./licensing.md` | licensing model and commercial-use interpretation | users and maintainers |
-| `./legal-notice.md` | trademark attribution, ownership notice, and legal naming clarification | users, maintainers, legal reviewers |
-| `./legal-vi.md` | Vietnamese legal reference for internal/legal/commercial review | internal teams, maintainers, legal reviewers |
+### Contribution and review
 
-## When to Use What
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
+- [`./pull-request-process.md`](./pull-request-process.md)
+- [`./maintenance.md`](./maintenance.md)
+- [`./github-actions.md`](./github-actions.md)
 
-### Use `CONTRIBUTING.md` for
+### Support and conduct
 
-- local development workflow
-- contribution expectations
-- recipe submission guidance
-- pull request validation checklist
+- [`../SUPPORT.md`](../SUPPORT.md)
+- [`../SECURITY.md`](../SECURITY.md)
+- [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
 
-### Use `installation.md` for
+### Legal and licensing
 
-- Linux deployment workflow
-- Windows and macOS platform boundaries
-- Docker, NVIDIA driver, and NVIDIA Container Toolkit prerequisites
-- optional PM2 process management
+- [`../LICENSE`](../LICENSE)
+- [`../COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md)
+- [`../NOTICE`](../NOTICE)
+- [`./licensing.md`](./licensing.md)
+- [`./legal-notice.md`](./legal-notice.md)
+- [`./legal-vi.md`](./legal-vi.md)
 
-### Use `deployment-production.md` for
+### Planning and roadmap
 
-- `systemd` service setup
-- optional PM2 persistence for Linux source deployments
-- reverse proxy examples with Nginx or Caddy
-- TLS, LAN, and public exposure notes
+- [`../planning/sparkdeck-project-blueprint.md`](../planning/sparkdeck-project-blueprint.md)
+- [`../planning/development-execution-plan.md`](../planning/development-execution-plan.md)
+- [`../planning/registry-expansion-roadmap.md`](../planning/registry-expansion-roadmap.md)
 
-### Use `local-development.md` for
+## Which document to use
 
-- backend and frontend setup from source
-- cross-platform developer commands
-- production-style local build validation
-- Docker-backed validation during development
+| Need | Primary document |
+|---|---|
+| Understand the project and doc map | `README.md` |
+| Install or run on supported platforms | `docs/installation.md` |
+| Develop from source | `docs/local-development.md` |
+| Deploy on Linux with service management or reverse proxy | `docs/deployment-production.md` |
+| Contribute code, recipes, scripts, or docs | `CONTRIBUTING.md` |
+| Review and merge pull requests | `docs/pull-request-process.md` |
+| Maintain labels, CODEOWNERS, Dependabot, or workflow policy | `docs/maintenance.md` |
+| Understand staged workflow rollout | `docs/github-actions.md` |
+| Understand roadmap, execution phases, and registry batches | `planning/` documents |
+| Route support or bug reports | `SUPPORT.md` |
+| Report vulnerabilities | `SECURITY.md` |
+| Review licensing and trademark terms | `docs/licensing.md` and `docs/legal-notice.md` |
 
-### Use `github-actions.md` for
+## Governance expectations
 
-- active workflow inventory
-- gated workflow inventory
-- staged automation rollout guidance
-- `ENABLE_OPTIONAL_WORKFLOWS` enablement notes
+- keep repository policy docs aligned with actual behavior
+- update synchronized governance files together when wording changes
+- avoid duplicating long operational instructions across many files
+- use English for technical and governance documentation unless a file is explicitly a localized legal reference
+- preserve roadmap specificity instead of replacing planning files with overly compressed summaries
 
-### Use `maintenance.md` for
+## Synchronization hotspots
 
-- `CODEOWNERS` maintenance
-- label routing maintenance
-- Dependabot maintenance state
-- branch protection maintenance checklist
+When these areas change, update the related docs together:
 
-### Use `SECURITY.md` for
+### Install and runtime behavior
 
-- private security reporting
-- disclosure expectations
-- safe handling of vulnerabilities
+- `README.md`
+- `docs/installation.md`
+- `docs/local-development.md`
+- `docs/deployment-production.md`
+- `CONTRIBUTING.md`
+- `SUPPORT.md`
 
-### Use `CODE_OF_CONDUCT.md` for
+### Review and automation policy
 
-- expected collaboration behavior
-- review professionalism
-- unacceptable conduct and enforcement expectations
+- `CONTRIBUTING.md`
+- `docs/pull-request-process.md`
+- `docs/maintenance.md`
+- `docs/github-actions.md`
 
-### Use `SUPPORT.md` for
-
-- usage questions
-- bug reporting guidance
-- support triage expectations
-- commercial support boundary clarification
-
-### Use `legal-notice.md` for
-
-- consolidated trademark attribution
-- ownership and naming clarification
-- no-endorsement wording
-- legal review references for documentation and distribution
-
-### Use `legal-vi.md` for
-
-- Vietnamese legal reference wording
-- internal communication and dossier support
-- reviewer alignment for Vietnamese-language legal interpretation
-
-### Use `LICENSE` and `COMMERCIAL-LICENSE.md` for
-
-- non-commercial use rights
-- commercial restrictions
-- licensing boundary clarification
-- commercial permission path
-
-## Discussions, Issues, and Support Routing
-
-If GitHub Discussions is enabled, use it for:
-
-- usage questions
-- setup help
-- roadmap ideas
-- broader community conversations
-
-Use GitHub Issues for:
-
-- actionable bugs
-- documentation defects
-- reproducible regressions
-- concrete feature requests
-- recipe submission proposals
-
-Use private reporting, not public issues, for security concerns.
-
-## Attribution and Governance Notes
-
-Repository governance and licensing should remain consistent across:
+### Legal and licensing wording
 
 - `README.md`
 - `NOTICE`
@@ -154,16 +93,18 @@ Repository governance and licensing should remain consistent across:
 - `docs/licensing.md`
 - `docs/legal-notice.md`
 - `docs/legal-vi.md`
-- `.github/CODEOWNERS`
-- `.github/dependabot.yml`
-- `.github/labeler.yml`
-- `.github/workflows/*.yml`
-- issue and pull request templates
 
-When changing governance or licensing language, update all affected documents in the same pull request.
+### Planning and roadmap state
 
-Trademark attribution should remain consistent across `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, `docs/legal-notice.md`, and `docs/legal-vi.md`, especially where NVIDIA compatibility, branding, or company ownership language is presented.
+- `README.md`
+- `docs/community.md`
+- `planning/sparkdeck-project-blueprint.md`
+- `planning/development-execution-plan.md`
+- `planning/registry-expansion-roadmap.md`
 
-For English-language legal and governance materials, use the registered address format `128 Binh My Street, Binh My Commune, Ho Chi Minh City`. For Vietnamese-language legal materials, use `128 Đường Bình Mỹ, xã Bình Mỹ, Thành phố Hồ Chí Minh`.
+## Support routing summary
 
-Where repository governance or support materials mention the product name, treat `NVIDIA AI Hub` and `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` as the same software solution unless a specific written instrument expressly distinguishes them.
+- use Discussions for general questions when available
+- use Issues for actionable defects and documentation problems
+- use private security reporting for vulnerabilities
+- use licensing docs for commercial boundary questions

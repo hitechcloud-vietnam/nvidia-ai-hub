@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from daemon.config import settings
 from daemon.db import init_db
 from daemon.routers import recipes, containers, models, system
+from daemon.services.backup_service import resume_backup_restore_jobs
 from daemon.services.registry_service import load_recipes, get_recipes
 from daemon.services.docker_service import is_recipe_running, start_health_check
 
@@ -30,6 +31,7 @@ async def lifespan(app: FastAPI):
     load_recipes()
     asyncio.create_task(_check_running_readiness())
     models.start_hf_queue_worker()
+    resume_backup_restore_jobs()
     yield
     await models.stop_hf_queue_worker()
 

@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from daemon.config import settings
 from daemon.services.docker_service import get_installed_slugs, get_pending, is_ready, is_recipe_running
+from daemon.services.models_state import build_model_backup_snapshot
 from daemon.services.registry_service import get_recipe, get_recipe_dir, get_recipes
 
 
@@ -526,7 +527,11 @@ async def models_runtime():
 
 @router.get("/installed")
 async def installed_models():
-    return await _proxy_ollama_runtime("/api/models")
+    data = await _proxy_ollama_runtime("/api/models")
+    inventory_path = settings.data_dir / "models" / "ollama-installed.json"
+    inventory_path.parent.mkdir(parents=True, exist_ok=True)
+    inventory_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return data
 
 
 @router.get("/catalog")
@@ -587,6 +592,7 @@ async def model_sources():
 
 @router.get("/huggingface")
 async def huggingface_inventory():
+    snapshot = build_model_backup_snapshot()
     snapshots = _list_hf_snapshots()
     queue = _load_hf_queue()
     return {
@@ -594,6 +600,7 @@ async def huggingface_inventory():
         "storage_path": str(_hf_storage_root()),
         "summary": _build_hf_queue_summary(queue, snapshots),
         "snapshots": snapshots,
+        "backup_snapshot": snapshot,
     }
 
 

@@ -59,9 +59,25 @@ def get_recipe(slug: str) -> Recipe | None:
     return _recipes.get(slug)
 
 
-def get_recipe_dir(slug: str) -> Path | None:
+def get_registry_recipe_dir(slug: str) -> Path | None:
     d = settings.registry_path / slug
     return d if d.is_dir() else None
+
+
+def get_recipe_dir(slug: str) -> Path | None:
+    fork_dir = settings.forks_path / slug
+    state_path = fork_dir / "fork-state.json"
+    fork_active = False
+    if state_path.is_file():
+        try:
+            import json
+            state = json.loads(state_path.read_text(encoding="utf-8")) or {}
+            fork_active = bool(state.get("active"))
+        except Exception:
+            fork_active = False
+    if fork_dir.is_dir() and fork_active:
+        return fork_dir
+    return get_registry_recipe_dir(slug)
 
 
 def get_registry_status() -> dict:

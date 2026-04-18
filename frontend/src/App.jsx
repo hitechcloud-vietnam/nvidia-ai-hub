@@ -8,6 +8,7 @@ import Catalog from './pages/Catalog'
 const Running = lazy(() => import('./pages/Running'))
 const Models = lazy(() => import('./pages/Models'))
 const System = lazy(() => import('./pages/System'))
+const BackupRestore = lazy(() => import('./pages/BackupRestore'))
 const Updates = lazy(() => import('./pages/Updates'))
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'))
 
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { id: 'models', label: 'Models', icon: ModelsIcon },
   { id: 'running', label: 'Running', icon: PlayIcon },
   { id: 'system', label: 'System', icon: GaugeIcon },
+  { id: 'backup-restore', label: 'Backup & Restore', icon: ArchiveIcon },
   { id: 'updates', label: 'Updates', icon: RefreshIcon },
   { id: 'about', label: 'About', icon: InfoIcon },
 ]
@@ -177,6 +179,7 @@ export default function App() {
                 {activeTab === 'updates' && <Updates />}
                 {activeTab === 'running' && <Running />}
                 {activeTab === 'system' && <System />}
+                {activeTab === 'backup-restore' && <BackupRestore />}
                 {activeTab === 'about' && <About />}
               </div>
             )}
@@ -457,6 +460,16 @@ function RefreshIcon({ className }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12a9 9 0 1 1-2.64-6.36" />
       <path d="M21 3v6h-6" />
+    </svg>
+  )
+}
+
+function ArchiveIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="4" rx="1.5" />
+      <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" />
+      <path d="M10 12h4" />
     </svg>
   )
 }

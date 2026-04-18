@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import {
@@ -54,9 +54,14 @@ export default function RecipeDetail() {
   const buildProgress = useStore((s) => s.buildProgress)
   const containerLogs = useStore((s) => s.containerLogs)
   const recipeMetrics = useStore((s) => s.recipeMetrics)
+  const systemTopology = useStore((s) => s.systemTopology)
+  const deploymentPlans = useStore((s) => s.deploymentPlans)
   const connectLogs = useStore((s) => s.connectLogs)
   const disconnectLogs = useStore((s) => s.disconnectLogs)
   const fetchRecipeDetail = useStore((s) => s.fetchRecipeDetail)
+  const fetchSystemTopology = useStore((s) => s.fetchSystemTopology)
+  const fetchRecipeDeploymentPlan = useStore((s) => s.fetchRecipeDeploymentPlan)
+  const saveRecipeDeploymentSelection = useStore((s) => s.saveRecipeDeploymentSelection)
   const verifyRecipeCommunity = useStore((s) => s.verifyRecipeCommunity)
   const rateRecipeCommunity = useStore((s) => s.rateRecipeCommunity)
   const addRecipeCommunityTip = useStore((s) => s.addRecipeCommunityTip)
@@ -80,6 +85,8 @@ export default function RecipeDetail() {
   const [hfToken, setHfToken] = useState('')
   const [hfSaving, setHfSaving] = useState(false)
   const [hfError, setHfError] = useState('')
+  const [deploymentSelection, setDeploymentSelection] = useState(null)
+  const [deploymentSaving, setDeploymentSaving] = useState(false)
   const [execCommand, setExecCommand] = useState('')
   const [execHistory, setExecHistory] = useState([])
   const [execRunning, setExecRunning] = useState(false)
@@ -87,8 +94,33 @@ export default function RecipeDetail() {
   useEffect(() => {
     if (selectedRecipe) {
       fetchRecipeDetail(selectedRecipe)
+      fetchSystemTopology()
+      fetchRecipeDeploymentPlan(selectedRecipe)
     }
-  }, [selectedRecipe, fetchRecipeDetail])
+  }, [selectedRecipe, fetchRecipeDetail, fetchRecipeDeploymentPlan, fetchSystemTopology])
+
+  const deploymentPlan = selectedRecipe ? deploymentPlans[selectedRecipe] : null
+  const recommendedDeployment = useMemo(
+    () => deploymentPlan?.recommendations?.find((item) => item.recommended) || deploymentPlan?.recommendations?.[0] || null,
+    [deploymentPlan],
+  )
+
+  useEffect(() => {
+    if (deploymentPlan?.selected) {
+      setDeploymentSelection(deploymentPlan.selected)
+      return
+    }
+    if (recommendedDeployment) {
+      setDeploymentSelection({
+        profile: recommendedDeployment.profile,
+        strategy: recommendedDeployment.strategy,
+        target_gpu_indices: recommendedDeployment.target_gpu_indices || [],
+        target_hosts: recommendedDeployment.target_hosts || [],
+        shared_storage_path: '',
+        notes: '',
+      })
+    }
+  }, [deploymentPlan, recommendedDeployment])
 
   const isBuilding = installing === recipe?.slug
   const isUpdating = updating === recipe?.slug
@@ -203,7 +235,7 @@ export default function RecipeDetail() {
       }
     }
     setLaunching(true)
-    await launchRecipe(recipe.slug)
+    await launchRecipe(recipe.slug, deploymentSelection)
     setLaunching(false)
   }
 
@@ -221,7 +253,7 @@ export default function RecipeDetail() {
       setShowHfModal(false)
       setHfToken('')
       setLaunching(true)
-      await launchRecipe(recipe.slug)
+      await launchRecipe(recipe.slug, deploymentSelection)
       setLaunching(false)
     } catch {
       setHfError('Failed to save token. Please try again.')
@@ -320,6 +352,7 @@ export default function RecipeDetail() {
               {!isBusy && recipe.starting && <StatusPill color="warning" pulse>Starting...</StatusPill>}
               {!isBusy && !recipe.running && !recipe.starting && recipe.installed && <StatusPill color="dim">Stopped</StatusPill>}
               <StatusPill color={hardwareFit.tone}>{`Host ${hardwareFit.label}`}</StatusPill>
+              {deploymentSelection?.profile && <StatusPill color="primary">{deploymentSelection.profile}</StatusPill>}
             </div>
           </div>
 
@@ -331,7 +364,7 @@ export default function RecipeDetail() {
 
           <div className="shrink-0 flex items-center gap-2">
             {!recipe.installed && !isBusy && !isRemoving && (
-              <button onClick={() => installRecipe(recipe.slug)} className="btn-primary px-6 py-2.5 text-sm font-bold">
+              <button onClick={() => installRecipe(recipe.slug, deploymentSelection)} className="btn-primary px-6 py-2.5 text-sm font-bold">
                 Install
               </button>
             )}
@@ -421,12 +454,52 @@ export default function RecipeDetail() {
         {activeTab === 'details' ? (
           showDedicatedConfigTab ? (
             <div className="h-full min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
-              <AboutTab recipe={recipe} hardwareFit={hardwareFit} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
+              <AboutTab
+                recipe={recipe}
+                hardwareFit={hardwareFit}
+                purging={purging}
+                purgeRecipe={purgeRecipe}
+                isBuilding={isBusy}
+                deploymentPlan={deploymentPlan}
+                deploymentSelection={deploymentSelection}
+                setDeploymentSelection={setDeploymentSelection}
+                deploymentSaving={deploymentSaving}
+                saveDeploymentSelection={async () => {
+                  if (!recipe?.slug || !deploymentSelection) return
+                  setDeploymentSaving(true)
+                  try {
+                    await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                  } finally {
+                    setDeploymentSaving(false)
+                  }
+                }}
+                systemTopology={systemTopology}
+              />
             </div>
           ) : (
             <div className="h-full min-h-0 grid xl:grid-cols-[minmax(0,50rem)_minmax(24rem,1fr)]">
               <div className="overflow-y-auto border-b border-outline-dim xl:border-b-0 xl:border-r bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%)]">
-                <AboutTab recipe={recipe} hardwareFit={hardwareFit} purging={purging} purgeRecipe={purgeRecipe} isBuilding={isBusy} />
+                <AboutTab
+                  recipe={recipe}
+                  hardwareFit={hardwareFit}
+                  purging={purging}
+                  purgeRecipe={purgeRecipe}
+                  isBuilding={isBusy}
+                  deploymentPlan={deploymentPlan}
+                  deploymentSelection={deploymentSelection}
+                  setDeploymentSelection={setDeploymentSelection}
+                  deploymentSaving={deploymentSaving}
+                  saveDeploymentSelection={async () => {
+                    if (!recipe?.slug || !deploymentSelection) return
+                    setDeploymentSaving(true)
+                    try {
+                      await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                    } finally {
+                      setDeploymentSaving(false)
+                    }
+                  }}
+                  systemTopology={systemTopology}
+                />
               </div>
 
               <Suspense fallback={<ConfigWorkspaceSkeleton inline />}>
@@ -884,7 +957,7 @@ function RelatedRecipeCard({ recipe, onSelect }) {
   )
 }
 
-function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
+function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deploymentPlan, deploymentSelection, setDeploymentSelection, deploymentSaving, saveDeploymentSelection, systemTopology }) {
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
   const officialUrl = recipe.website || ''
@@ -983,6 +1056,15 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
           )}
 
           <HostFitPanel fit={hardwareFit} />
+
+          <DeploymentPlannerPanel
+            plan={deploymentPlan}
+            selection={deploymentSelection}
+            onChange={setDeploymentSelection}
+            onSave={saveDeploymentSelection}
+            saving={deploymentSaving}
+            systemTopology={systemTopology}
+          />
 
           {relatedRecipes.length > 0 && (
             <div className="space-y-4 pt-5 border-t border-outline-dim">
@@ -1110,6 +1192,142 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding }) {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, systemTopology }) {
+  if (!plan) return null
+
+  const recommendations = Array.isArray(plan.recommendations) ? plan.recommendations : []
+  const activeProfile = recommendations.find((item) => item.profile === selection?.profile) || recommendations[0] || null
+
+  return (
+    <div className="space-y-4 pt-5 border-t border-outline-dim">
+      <div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Deployment planner</div>
+        <p className="text-sm text-text-dim leading-6 m-0 mt-2">
+          Match this recipe to a single-GPU workstation, a multi-GPU host, or a cluster-ready rollout profile before install or launch.
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {recommendations.map((item) => {
+          const active = selection?.profile === item.profile
+          return (
+            <button
+              key={item.profile}
+              type="button"
+              onClick={() => onChange({
+                profile: item.profile,
+                strategy: item.strategy,
+                target_gpu_indices: item.target_gpu_indices || [],
+                target_hosts: selection?.target_hosts || item.target_hosts || [],
+                shared_storage_path: selection?.shared_storage_path || plan.selected?.shared_storage_path || '',
+                notes: selection?.notes || '',
+              })}
+              className={`text-left rounded-2xl border p-4 transition-all ${
+                active
+                  ? 'border-primary bg-primary/8 shadow-lg shadow-primary/10'
+                  : 'border-outline-dim bg-surface-high/40 hover:border-primary/30'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-sm font-semibold text-text font-display">{item.label}</div>
+                {item.recommended ? <span className="text-[10px] uppercase tracking-[0.16em] text-primary font-label">Recommended</span> : null}
+              </div>
+              <p className="m-0 mt-2 text-sm text-text-dim leading-6">{item.rationale}</p>
+              <div className="mt-3 text-[11px] text-text-dim font-label">
+                {item.supported ? `${item.gpu_count || 0} GPU target` : 'Not currently supported on this host'}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {activeProfile && (
+        <div className="rounded-2xl border border-outline-dim bg-surface-high/30 p-4 space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Launch strategy" value={activeProfile.strategy || selection?.strategy || 'local-ui'} />
+            <Field label="Target GPUs" value={(selection?.target_gpu_indices || []).length ? selection.target_gpu_indices.join(', ') : 'Automatic'} />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-2 text-sm text-text">
+              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Target hosts</span>
+              <input
+                value={(selection?.target_hosts || []).join(', ')}
+                onChange={(event) => onChange({ ...selection, target_hosts: event.target.value.split(',').map((item) => item.trim()).filter(Boolean) })}
+                className="rounded-xl border border-outline-dim bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-primary"
+                placeholder="host-a, host-b"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm text-text">
+              <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Shared storage path</span>
+              <input
+                value={selection?.shared_storage_path || ''}
+                onChange={(event) => onChange({ ...selection, shared_storage_path: event.target.value })}
+                className="rounded-xl border border-outline-dim bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-primary"
+                placeholder="/mnt/models/shared"
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-2 text-sm text-text">
+            <span className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Planner notes</span>
+            <textarea
+              value={selection?.notes || ''}
+              onChange={(event) => onChange({ ...selection, notes: event.target.value })}
+              className="min-h-[88px] rounded-2xl border border-outline-dim bg-surface px-3 py-3 text-sm text-text outline-none focus:border-primary resize-y"
+              placeholder="Document scheduler, host affinity, or storage assumptions for this recipe."
+            />
+          </label>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl bg-surface px-4 py-3 border border-outline-dim">
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Host readiness</div>
+              <div className="mt-2 text-sm text-text-dim leading-6">
+                {plan.available_gpu_count} GPU(s) detected · Network metadata {plan.network_ready ? 'configured' : 'not configured'} · Shared storage {plan.shared_storage_ready ? 'configured' : 'not configured'}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-surface px-4 py-3 border border-outline-dim">
+              <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Topology</div>
+              <div className="mt-2 text-sm text-text-dim leading-6">
+                {plan.topology?.detected
+                  ? `${plan.topology.nvlink_pairs || 0} NVLink pair(s) detected${plan.topology.peer_to_peer_capable ? ' with local peer-to-peer paths.' : '.'}`
+                  : (systemTopology?.notes?.[0] || plan.topology?.notes?.[0] || 'Topology data unavailable.')}
+              </div>
+            </div>
+          </div>
+
+          {Array.isArray(activeProfile.caveats) && activeProfile.caveats.length > 0 && (
+            <div className="rounded-2xl border border-warning/20 bg-warning/8 px-4 py-3">
+              <div className="text-[11px] uppercase tracking-[0.16em] text-warning font-label">Reviewer notes</div>
+              <ul className="m-0 mt-2 pl-5 text-sm text-text-dim space-y-1.5">
+                {activeProfile.caveats.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {Array.isArray(plan.warnings) && plan.warnings.length > 0 && (
+            <div className="rounded-2xl border border-error/20 bg-error/8 px-4 py-3">
+              <div className="text-[11px] uppercase tracking-[0.16em] text-error font-label">Operational warnings</div>
+              <ul className="m-0 mt-2 pl-5 text-sm text-text-dim space-y-1.5">
+                {plan.warnings.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={onSave} type="button" className="px-4 py-2.5 rounded-xl bg-surface text-text border border-outline-dim text-sm font-semibold hover:border-primary/40" disabled={saving || !selection}>
+              {saving ? 'Saving profile...' : 'Save deployment profile'}
+            </button>
+            <span className="text-xs text-text-dim">
+              Saved profiles are written into the recipe runtime env so install and launch flows reuse the same deployment intent.
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

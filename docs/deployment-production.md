@@ -93,7 +93,7 @@ cd frontend
 npm install
 npm run build
 cd ..
-python -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000
+./run.sh --host 0.0.0.0 --port 9000
 ```
 
 Then confirm:
@@ -148,6 +148,8 @@ sudo systemctl stop nvidia-ai-hub@ubuntu.service
 
 Adjust the working directory and user path to match your installation path.
 
+The tracked unit file already reads `HOST` and `PORT` from the service environment. For repository-local defaults, keep `NVIDIA_AI_HUB_HOST` and `NVIDIA_AI_HUB_PORT` in `.env` aligned with the values you expose through your process manager or reverse proxy.
+
 If you want a tracked starter file instead of copying from this document, begin with [`../deploy/systemd/nvidia-ai-hub@.service`](../deploy/systemd/nvidia-ai-hub@.service) and update the user, group, working directory, and bind settings for your host.
 
 ## 6. Optional PM2 deployment
@@ -164,7 +166,7 @@ Start the application:
 
 ```bash
 cd ~/nvidia-ai-hub
-pm2 start ".venv/bin/python -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000" --name nvidia-ai-hub
+pm2 start ./run.sh --name nvidia-ai-hub -- --host 0.0.0.0 --port 9000
 pm2 save
 ```
 

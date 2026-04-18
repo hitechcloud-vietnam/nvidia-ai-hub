@@ -5,17 +5,17 @@
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
 [![Optional Workflows](https://img.shields.io/badge/GitHub%20Actions-Optional%20Workflows%20Status-6f42c1?style=flat-square)](./docs/github-actions.md)
-[![GitHub Stars](https://img.shields.io/github/stars/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubstargazers)
-[![Open Issues](https://img.shields.io/github/issues/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubissues)
+[![GitHub Stars](https://img.shields.io/github/stars/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/stargazers)
+[![Open Issues](https://img.shields.io/github/issues/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/issues)
 [![GitHub License](https://img.shields.io/github/license/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](./LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubcommits/main)
-[![Contributors](https://img.shields.io/github/contributors/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubgraphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/graphs/contributors)
 [![Code Size](https://img.shields.io/github/languages/code-size/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub)
-[![Closed PRs](https://img.shields.io/github/issues-pr-closed/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubpulls?q=is%3Apr+is%3Aclosed)
-[![Latest Tag](https://img.shields.io/github/v/tag/hitechcloud-vietnam/nvidia-ai-hub?sort=semver&style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubtags)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/pulls?q=is%3Apr+is%3Aclosed)
+[![Latest Tag](https://img.shields.io/github/v/tag/hitechcloud-vietnam/nvidia-ai-hub?sort=semver&style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/tags)
 [![GitHub Streak](https://img.shields.io/badge/GitHub-Streak%20via%20Insights-24292f?style=flat-square&logo=github)](https://github.com/hitechcloud-vietnam/nvidia-ai-hubpulse)
 
-**Quick links:** [Overview](#overview) · [Installation](./docs/installation.md) · [Production deployment](./docs/deployment-production.md) · [Local development](./docs/local-development.md) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
+**Quick links:** [Overview](#overview) · [Installation](./docs/installation.md) · [Production deployment](./docs/deployment-production.md) · [Local development](./docs/local-development.md) · [Planning](#planning-and-roadmap) · [Contributing](#contributing) · [Security](#security-and-conduct) · [Community](#community) · [Licensing](#license)
 
 **Your AI app store for NVIDIA GPU platforms.** Browse, install, and launch AI apps with one click.
 
@@ -73,6 +73,22 @@ For repository automation, governance maintenance, and review routing, use:
 - GitHub Actions rollout guide: [`docs/github-actions.md`](./docs/github-actions.md)
 - Repository maintenance guide: [`docs/maintenance.md`](./docs/maintenance.md)
 - Pull request process: [`docs/pull-request-process.md`](./docs/pull-request-process.md)
+
+## Planning and roadmap
+
+The repository keeps product direction, implementation sequencing, and catalog growth planning in tracked planning documents.
+
+- Product blueprint: [`planning/sparkdeck-project-blueprint.md`](./planning/sparkdeck-project-blueprint.md)
+- Execution backlog and phased delivery plan: [`planning/development-execution-plan.md`](./planning/development-execution-plan.md)
+- Registry sourcing and batch expansion plan: [`planning/registry-expansion-roadmap.md`](./planning/registry-expansion-roadmap.md)
+
+Use these documents together:
+
+- `sparkdeck-project-blueprint.md` defines the long-range product model and feature architecture
+- `development-execution-plan.md` converts that model into bounded implementation workstreams and phases
+- `registry-expansion-roadmap.md` governs recipe expansion batches, banner coverage, and category balance
+
+When product scope, legal positioning, or rollout priorities change, keep the planning files synchronized with `README.md`, `docs/community.md`, and the relevant governance documents.
 
 ## Legal Notice and Trademark Attribution
 
@@ -158,13 +174,17 @@ It will:
 7. Install backend dependencies from `requirements.txt`
 8. Install frontend dependencies from `frontend/package.json`
 9. Build the production frontend into `frontend/dist`
-10. Start the backend on port `9000`
+10. Create `.env` from `.env.example` when needed
+11. Persist `NVIDIA_AI_HUB_HOST` and `NVIDIA_AI_HUB_PORT` in the root `.env`
+12. Start the backend with `./run.sh` using the configured host and port
 
 Because the backend serves the built frontend from `frontend/dist`, the UI is available immediately after install.
 
 If `--no-start` or `-NoStart` is used, the installer completes all setup steps but skips launching the API server.
 
 If `--port`, `--host`, `-Port`, or `-Host` is used during install, the chosen values are written into the shared root `.env` file.
+
+`run.sh` also supports `--host` and `--port` for one-off overrides and will otherwise read the persisted values from `.env`.
 
 ## Features
 
@@ -243,6 +263,8 @@ You can also override host and port for a single run:
 ```bash
 ./run.sh --host 127.0.0.1 --port 9010
 ```
+
+If `.env` is present, `run.sh` uses `NVIDIA_AI_HUB_HOST` and `NVIDIA_AI_HUB_PORT` as defaults.
 
 If the frontend must be rebuilt, ensure the machine has:
 

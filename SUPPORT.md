@@ -1,120 +1,104 @@
 # Support
 
-## Purpose
+This document explains where to ask questions, where to report defects, and how to route security or commercial requests.
 
-This document explains where to ask questions, where to report problems, and how to request commercial assistance for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
+## 1. Use the right channel
 
-`NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` is a software solution developed and distributed by **Pho Tue SoftWare And Technology Solutions Joint Stock Company** (including the **HiTechCloud** brand).
+### GitHub Discussions
 
-Official company details:
+Use Discussions, when enabled, for:
 
-- Vietnamese legal entity name: **CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ VÀ PHẦN MỀM PHỔ TUỆ**
-- English legal entity name: **Pho Tue SoftWare And Technology Solutions Joint Stock Company**
-- Tax code: `0318222903`
-- D-U-N-S Number: `557339920`
-- Registered address: `128 Binh My Street, Binh My Commune, Ho Chi Minh City`
-
-The short product name `NVIDIA AI Hub` and the detailed product name `NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC` refer to the same software solution unless a specific legal or commercial document states otherwise.
-
-`NVIDIA`, the `NVIDIA` logo, `DGX`, `CUDA`, and related NVIDIA names are trademarks and/or registered trademarks of **NVIDIA Corporation** and its affiliates in the United States and other countries. References to NVIDIA technologies in this repository are descriptive only and do not imply endorsement or sponsorship unless expressly stated in writing.
-
-## Support Channels
-
-### Questions and Usage Help
-
-Use GitHub Discussions when repository Discussions are enabled.
-
-Good fit for Discussions:
-
-- installation questions
-- environment setup help
-- usage guidance
+- usage questions
+- installation help
+- environment guidance
 - roadmap ideas
-- architecture discussions
+- architecture discussion
 - recipe suggestions before implementation
 
-If Discussions is not enabled yet, open an issue only when there is a concrete actionable defect or documentation problem.
+### GitHub Issues
 
-### Bug Reports
-
-Use GitHub Issues for:
+Use Issues for:
 
 - reproducible defects
-- broken scripts or startup flows
+- installer or runtime failures
 - frontend or backend regressions
 - documentation inaccuracies
 - recipe metadata or loading problems
 
-Before opening an issue:
+### Security reports
 
-- review [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-- review [`docs/installation.md`](./docs/installation.md) for supported deployment boundaries and prerequisites
-- review [`docs/deployment-production.md`](./docs/deployment-production.md) for Linux production service, reverse proxy, TLS, and exposure guidance
-- review [`docs/local-development.md`](./docs/local-development.md) for source-based setup and validation commands
-- review [`SECURITY.md`](./SECURITY.md) if the problem may be security-related
-- gather logs, environment details, and reproduction steps
+Do **not** open public issues for vulnerabilities.
 
-### Security Reports
+Follow [`SECURITY.md`](./SECURITY.md).
 
-Do **not** open public issues for security vulnerabilities.
+### Commercial requests
 
-Follow the private reporting guidance in [`SECURITY.md`](./SECURITY.md).
+Commercial usage, delivery, managed service, consulting, or revenue-generating use requires separate written permission.
 
-### Commercial Support and Licensing
+Use:
 
-Commercial usage, client delivery, consulting, hosting, managed services, and other revenue-generating use require separate written permission.
+- [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
+- [`LICENSE`](./LICENSE)
+- [`docs/licensing.md`](./docs/licensing.md)
 
-See [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md), [`LICENSE`](./LICENSE), and [`docs/licensing.md`](./docs/licensing.md).
+## 2. Before opening an issue
 
-## What to Include in a Support Request
+Review the relevant docs first:
+
+- [`docs/installation.md`](./docs/installation.md)
+- [`docs/local-development.md`](./docs/local-development.md)
+- [`docs/deployment-production.md`](./docs/deployment-production.md)
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- [`SECURITY.md`](./SECURITY.md) when security may be involved
+
+## 3. Include this information
 
 Provide:
 
 - operating system
-- installation path or install method
+- installation method or source workflow used
 - Python, Node.js, and Docker versions when relevant
-- exact command used
+- exact commands used
 - expected result
 - actual result
-- logs, screenshots, or stack traces
+- logs, stack traces, screenshots, or browser console output when relevant
 - whether the issue is reproducible
 
-## Self-Check Before Requesting Help
+## 4. Self-check steps
 
-Consider running:
+Linux or shell-based environments:
 
 ```bash
 ./check.sh
 ```
 
-On Windows or macOS, use the equivalent source-based checks from [`docs/local-development.md`](./docs/local-development.md).
-
-For platform prerequisites, Docker setup, NVIDIA runtime expectations, and PM2 notes, review [`docs/installation.md`](./docs/installation.md).
-
-For Linux production deployment patterns, reverse proxy validation, and network exposure notes, review [`docs/deployment-production.md`](./docs/deployment-production.md).
-
-For backend startup validation:
+Source validation examples:
 
 ```bash
-.venv/bin/python -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
+.venv/bin/python -m uvicorn daemon.main:app --host 127.0.0.1 --port 9000
+cd frontend
+npm run lint
+npm run build
 ```
 
-On Windows:
+Windows PowerShell example:
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn daemon.main:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn daemon.main:app --host 127.0.0.1 --port 9000
 ```
 
-For frontend validation:
+If you are on Windows or macOS, use the source workflow from [`docs/local-development.md`](./docs/local-development.md) instead of Linux shell script assumptions.
 
-```bash
-cd frontend
-npm run build
-npm run lint
-```
+## 5. Support boundary
 
-## Response Expectations
+Support is best-effort unless a separate written commercial agreement states otherwise.
 
-Support is provided on a best-effort basis unless a separate commercial agreement says otherwise.
+When reporting issues, be explicit about:
 
-Clear reproduction details and validation output improve response quality and turnaround.
+- whether the problem is from a Linux installer flow or a source-development flow
+- whether Docker or GPU runtime validation was actually performed
+- whether the issue occurs on Linux, Windows, or macOS
+
+## 6. Legal note
+
+References to NVIDIA technologies in this repository are descriptive only and do not imply endorsement. For legal and licensing terms, use the files listed in the licensing section of [`README.md`](./README.md).

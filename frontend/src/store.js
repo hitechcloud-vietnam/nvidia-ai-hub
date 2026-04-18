@@ -46,6 +46,8 @@ export const useStore = create((set, get) => ({
   registryStatus: null,
   syncingRegistry: false,
   metrics: null,
+  systemTopology: null,
+  deploymentPlans: {},
   recipeMetrics: {},
   metricHistory: [],
   buildLogs: {},
@@ -67,6 +69,9 @@ export const useStore = create((set, get) => ({
   installedModels: { models: [] },
   modelDownloads: { downloads: [] },
   modelSources: { sources: [] },
+  backupPreview: null,
+  backupAction: '',
+  backupRestoreJob: null,
   hfIntakeQueue: { items: [] },
   hfInventory: { snapshots: [] },
   modelsLoading: false,
@@ -126,6 +131,7 @@ export const useStore = create((set, get) => ({
     }
   }),
   setRecipeMetrics: (recipeMetrics) => set({ recipeMetrics: recipeMetrics || {} }),
+  setSystemTopology: (systemTopology) => set({ systemTopology }),
 
   selectRecipe: (slug) => {
     set({ selectedRecipe: slug })
@@ -487,6 +493,146 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  fetchSystemTopology: async (options = {}) => {
+    const { force = false } = options
+    if (!force && get().systemTopology) return get().systemTopology
+    try {
+      const res = await fetch('/api/system/topology')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      set({ systemTopology: data })
+      return data
+    } catch (e) {
+      console.error('Failed to fetch system topology:', e)
+      return get().systemTopology
+    }
+  },
+
+  exportSystemBackup: async () => {
+    set({ backupAction: 'export' })
+    try {
+      const res = await fetch('/api/system/backup/export', { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to export system backup:', e)
+      throw e
+    } finally {
+      set({ backupAction: '' })
+    }
+  },
+
+  previewSystemBackupRestore: async (snapshot) => {
+    set({ backupAction: 'preview' })
+    try {
+      const res = await fetch('/api/system/backup/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshot }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set({ backupPreview: data })
+      return data
+    } catch (e) {
+      console.error('Failed to preview backup restore:', e)
+      throw e
+    } finally {
+      set({ backupAction: '' })
+    }
+  },
+
+  restoreSystemBackup: async (snapshot) => {
+    set({ backupAction: 'restore' })
+    try {
+      const res = await fetch('/api/system/backup/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshot }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set({ backupPreview: data })
+      await get().fetchRecipes({ force: true })
+      await get().fetchModelManager({ silent: true })
+      return data
+    } catch (e) {
+      console.error('Failed to restore backup:', e)
+      throw e
+    } finally {
+      set({ backupAction: '' })
+    }
+  },
+
+  startSystemBackupRestore: async (snapshot) => {
+    set({ backupAction: 'restore-start' })
+    try {
+      const res = await fetch('/api/system/backup/restore/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshot }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set({ backupRestoreJob: data, backupPreview: data.staged || get().backupPreview })
+      return data
+    } catch (e) {
+      console.error('Failed to start restore job:', e)
+      throw e
+    } finally {
+      set({ backupAction: '' })
+    }
+  },
+
+  fetchBackupRestoreJob: async (jobId) => {
+    if (!jobId) return null
+    try {
+      const res = await fetch(`/api/system/backup/restore/${encodeURIComponent(jobId)}`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set({ backupRestoreJob: data })
+      return data
+    } catch (e) {
+      console.error('Failed to fetch restore job:', e)
+      return get().backupRestoreJob
+    }
+  },
+
+  fetchRecipeDeploymentPlan: async (slug, options = {}) => {
+    if (!slug) return null
+    const { force = false } = options
+    const cached = get().deploymentPlans[slug]
+    if (!force && cached) return cached
+    try {
+      const res = await fetch(`/api/system/deployment-plan/${slug}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      set((state) => ({ deploymentPlans: { ...state.deploymentPlans, [slug]: data } }))
+      return data
+    } catch (e) {
+      console.error(`Failed to fetch deployment plan for ${slug}:`, e)
+      return get().deploymentPlans[slug] || null
+    }
+  },
+
+  saveRecipeDeploymentSelection: async (slug, selection) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/deployment-selection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selection),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      await get().fetchRecipeDeploymentPlan(slug, { force: true })
+      return data
+    } catch (e) {
+      console.error('Failed to save deployment selection:', e)
+      throw e
+    }
+  },
+
   fetchRecipeDetail: async (slug, options = {}) => {
     if (!slug) return null
 
@@ -640,7 +786,103 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  installRecipe: async (slug) => {
+  activateRecipeFork: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/activate`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to activate recipe fork:', e)
+      throw e
+    }
+  },
+
+  deactivateRecipeFork: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/deactivate`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to deactivate recipe fork:', e)
+      throw e
+    }
+  },
+
+  deleteRecipeFork: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork`, {
+        method: 'DELETE',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to delete recipe fork:', e)
+      throw e
+    }
+  },
+
+  exportRecipeForkBundle: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/export`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to export recipe fork bundle:', e)
+      throw e
+    }
+  },
+
+  getRecipeForkDiffSummary: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/diff`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to load recipe fork diff summary:', e)
+      throw e
+    }
+  },
+
+  getRecipeForkFullDiff: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/diff/full`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to load recipe fork full diff:', e)
+      throw e
+    }
+  },
+
+  getRecipeForkManifestMarkdown: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/manifest-markdown`)
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to load recipe fork manifest markdown:', e)
+      throw e
+    }
+  },
+
+  getRecipeForkManifestMarkdownDownloadUrl: (slug) => `/api/recipes/${slug}/fork/manifest-markdown/download`,
+
+  getRecipeForkDownloadUrl: (slug) => `/api/recipes/${slug}/fork/download`,
+
+  installRecipe: async (slug, selection = null) => {
     set({
       installing: slug,
       buildLogs: { ...get().buildLogs, [slug]: [] },
@@ -648,7 +890,11 @@ export const useStore = create((set, get) => ({
     })
 
     try {
-      const res = await fetch(`/api/recipes/${slug}/install`, { method: 'POST' })
+      const res = await fetch(`/api/recipes/${slug}/install`, {
+        method: 'POST',
+        headers: selection ? { 'Content-Type': 'application/json' } : undefined,
+        body: selection ? JSON.stringify(selection) : undefined,
+      })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e) {
       console.error('Install POST failed:', e)
@@ -771,14 +1017,18 @@ export const useStore = create((set, get) => ({
     poll()
   },
 
-  launchRecipe: async (slug) => {
+  launchRecipe: async (slug, selection = null) => {
     const override = { starting: true, running: false, ready: false }
     set({
       _inFlight: { ...get()._inFlight, [slug]: override },
       recipes: get().recipes.map(r => r.slug === slug ? { ...r, ...override } : r),
     })
     try {
-      await fetch(`/api/recipes/${slug}/launch`, { method: 'POST' })
+      await fetch(`/api/recipes/${slug}/launch`, {
+        method: 'POST',
+        headers: selection ? { 'Content-Type': 'application/json' } : undefined,
+        body: selection ? JSON.stringify(selection) : undefined,
+      })
     } catch (e) {
       console.error('Launch failed:', e)
     } finally {

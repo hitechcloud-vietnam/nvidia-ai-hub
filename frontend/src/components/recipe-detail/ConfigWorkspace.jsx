@@ -2,6 +2,200 @@ import { useEffect, useMemo, useState } from 'react'
 import { isNotebookRecipe } from '../../utils/recipePresentation'
 import { useStore } from '../../store'
 
+function DiffLine({ line }) {
+  let className = 'text-gray-300'
+  if (line.startsWith('+++') || line.startsWith('---')) {
+    className = 'text-sky-300 bg-sky-500/10'
+  } else if (line.startsWith('@@')) {
+    className = 'text-amber-300 bg-amber-500/10'
+  } else if (line.startsWith('+')) {
+    className = 'text-emerald-300 bg-emerald-500/10'
+  } else if (line.startsWith('-')) {
+    className = 'text-rose-300 bg-rose-500/10'
+  }
+
+  return <div className={`px-4 ${className}`}>{line || ' '}</div>
+}
+
+function getDiffToneClass(tone = 'context') {
+  return {
+    header: 'text-sky-300 bg-sky-500/10',
+    hunk: 'text-amber-300 bg-amber-500/10',
+    add: 'text-emerald-300 bg-emerald-500/10',
+    remove: 'text-rose-300 bg-rose-500/10',
+    context: 'text-gray-300',
+    empty: 'text-gray-500 bg-white/0',
+  }[tone] || 'text-gray-300'
+}
+
+function DiffUnifiedRow({ row }) {
+  const toneClass = getDiffToneClass(row.tone)
+
+  return (
+    <div className={`grid grid-cols-[64px_64px_minmax(0,1fr)] text-[12px] leading-6 font-mono ${toneClass}`}>
+      <div className="px-3 text-right text-text-dim border-r border-outline-dim/60 select-none">{row.leftLineNumber ?? ''}</div>
+      <div className="px-3 text-right text-text-dim border-r border-outline-dim/60 select-none">{row.rightLineNumber ?? ''}</div>
+      <div className="px-4 break-words whitespace-pre-wrap">{row.line || ' '}</div>
+    </div>
+  )
+}
+
+function DiffSideCell({ line, tone = 'context', lineNumber = null, align = 'right' }) {
+  const toneClass = getDiffToneClass(tone)
+
+  return (
+    <div className={`grid grid-cols-[64px_minmax(0,1fr)] ${toneClass}`}>
+      <div className={`px-3 py-0.5 text-text-dim border-r border-outline-dim/60 select-none ${align === 'right' ? 'text-right' : 'text-left'}`}>
+        {lineNumber ?? ''}
+      </div>
+      <div className="px-4 py-0.5 min-h-[28px] break-words whitespace-pre-wrap">{line || ' '}</div>
+    </div>
+  )
+}
+
+function DiffCollapsedContext({ hiddenCount, onExpand, compact = false }) {
+  const toneClass = {
+    context: 'text-gray-300 bg-surface-low/40',
+  }.context
+
+  return (
+    <button
+      onClick={onExpand}
+      className={`w-full ${compact ? 'grid grid-cols-[64px_minmax(0,1fr)]' : 'grid grid-cols-[64px_64px_minmax(0,1fr)]'} text-left text-[12px] leading-6 font-mono border-y border-outline-dim/40 transition-all hover:border-primary/50 ${toneClass}`}
+    >
+      <div className="px-3 border-r border-outline-dim/60" />
+      {!compact && <div className="px-3 border-r border-outline-dim/60" />}
+      <div className="px-4 py-1 text-text-dim">Show {hiddenCount} unchanged lines</div>
+    </button>
+  )
+}
+
+function parseUnifiedDiffRows(diffText) {
+  const rows = []
+  const lines = (diffText || '').split('\n')
+  let leftLineNumber = null
+  let rightLineNumber = null
+
+  for (const line of lines) {
+    if (line.startsWith('---') || line.startsWith('+++')) {
+      rows.push({
+        kind: 'meta',
+        line,
+        tone: 'header',
+        left: line,
+        right: line,
+        leftTone: 'header',
+        rightTone: 'header',
+        leftLineNumber: null,
+        rightLineNumber: null,
+      })
+      continue
+    }
+    if (line.startsWith('@@')) {
+      const match = line.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/)
+      if (match) {
+        leftLineNumber = Number(match[1])
+        rightLineNumber = Number(match[3])
+      }
+      rows.push({
+        kind: 'hunk',
+        line,
+        tone: 'hunk',
+        left: line,
+        right: line,
+        leftTone: 'hunk',
+        rightTone: 'hunk',
+        leftLineNumber: null,
+        rightLineNumber: null,
+      })
+      continue
+    }
+    if (line.startsWith('-')) {
+      rows.push({
+        kind: 'remove',
+        line,
+        tone: 'remove',
+        left: line,
+        right: '',
+        leftTone: 'remove',
+        rightTone: 'empty',
+        leftLineNumber,
+        rightLineNumber: null,
+      })
+      leftLineNumber = leftLineNumber == null ? null : leftLineNumber + 1
+      continue
+    }
+    if (line.startsWith('+')) {
+      rows.push({
+        kind: 'add',
+        line,
+        tone: 'add',
+        left: '',
+        right: line,
+        leftTone: 'empty',
+        rightTone: 'add',
+        leftLineNumber: null,
+        rightLineNumber,
+      })
+      rightLineNumber = rightLineNumber == null ? null : rightLineNumber + 1
+      continue
+    }
+    rows.push({
+      kind: 'context',
+      line,
+      tone: 'context',
+      left: line,
+      right: line,
+      leftTone: 'context',
+      rightTone: 'context',
+      leftLineNumber,
+      rightLineNumber,
+    })
+    leftLineNumber = leftLineNumber == null ? null : leftLineNumber + 1
+    rightLineNumber = rightLineNumber == null ? null : rightLineNumber + 1
+  }
+
+  return rows
+}
+
+function buildDiffRenderItems(diffText, fileKey) {
+  const rows = parseUnifiedDiffRows(diffText)
+  const items = []
+  let contextRun = []
+  let contextIndex = 0
+
+  const flushContextRun = () => {
+    if (!contextRun.length) return
+    if (contextRun.length <= 6) {
+      contextRun.forEach((row) => items.push({ type: 'row', row }))
+    } else {
+      contextIndex += 1
+      items.push({ type: 'row', row: contextRun[0] })
+      items.push({ type: 'row', row: contextRun[1] })
+      items.push({
+        type: 'collapsed-context',
+        key: `${fileKey}-context-${contextIndex}`,
+        hiddenRows: contextRun.slice(2, -2),
+      })
+      items.push({ type: 'row', row: contextRun[contextRun.length - 2] })
+      items.push({ type: 'row', row: contextRun[contextRun.length - 1] })
+    }
+    contextRun = []
+  }
+
+  rows.forEach((row) => {
+    if (row.kind === 'context') {
+      contextRun.push(row)
+      return
+    }
+    flushContextRun()
+    items.push({ type: 'row', row })
+  })
+  flushContextRun()
+
+  return items
+}
+
 export default function RecipeConfigTab({ recipe }) {
   const isNotebook = isNotebookRecipe(recipe)
   const tabs = useMemo(() => [
@@ -70,6 +264,15 @@ export function InlineConfigWorkspace({ recipe }) {
 export function ComposeEditor({ slug }) {
   const getRecipeForkStatus = useStore((s) => s.getRecipeForkStatus)
   const saveRecipeFork = useStore((s) => s.saveRecipeFork)
+  const activateRecipeFork = useStore((s) => s.activateRecipeFork)
+  const deactivateRecipeFork = useStore((s) => s.deactivateRecipeFork)
+  const deleteRecipeFork = useStore((s) => s.deleteRecipeFork)
+  const exportRecipeForkBundle = useStore((s) => s.exportRecipeForkBundle)
+  const getRecipeForkDiffSummary = useStore((s) => s.getRecipeForkDiffSummary)
+  const getRecipeForkFullDiff = useStore((s) => s.getRecipeForkFullDiff)
+  const getRecipeForkManifestMarkdown = useStore((s) => s.getRecipeForkManifestMarkdown)
+  const getRecipeForkManifestMarkdownDownloadUrl = useStore((s) => s.getRecipeForkManifestMarkdownDownloadUrl)
+  const getRecipeForkDownloadUrl = useStore((s) => s.getRecipeForkDownloadUrl)
   const [content, setContent] = useState('')
   const [original, setOriginal] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
@@ -77,7 +280,19 @@ export function ComposeEditor({ slug }) {
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [forkSaving, setForkSaving] = useState(false)
+  const [forkToggling, setForkToggling] = useState(false)
+  const [forkDeleting, setForkDeleting] = useState(false)
+  const [bundleExporting, setBundleExporting] = useState(false)
   const [forkInfo, setForkInfo] = useState(null)
+  const [bundleInfo, setBundleInfo] = useState(null)
+  const [diffInfo, setDiffInfo] = useState(null)
+  const [fullDiffInfo, setFullDiffInfo] = useState(null)
+  const [manifestMarkdown, setManifestMarkdown] = useState('')
+  const [showFullDiff, setShowFullDiff] = useState(false)
+  const [diffMode, setDiffMode] = useState('unified')
+  const [collapsedDiffFiles, setCollapsedDiffFiles] = useState({})
+  const [expandedDiffContexts, setExpandedDiffContexts] = useState({})
+  const [copyingMarkdown, setCopyingMarkdown] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
@@ -122,6 +337,62 @@ export function ComposeEditor({ slug }) {
     loadFork()
     return () => { cancelled = true }
   }, [getRecipeForkStatus, slug])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadDiff = async () => {
+      try {
+        const diff = await getRecipeForkDiffSummary(slug)
+        if (!cancelled) setDiffInfo(diff)
+      } catch {
+        if (!cancelled) setDiffInfo(null)
+      }
+    }
+
+    loadDiff()
+    return () => { cancelled = true }
+  }, [getRecipeForkDiffSummary, slug, forkInfo?.exists, forkInfo?.active])
+
+  useEffect(() => {
+    let cancelled = false
+    if (!forkInfo?.exists || !showFullDiff) {
+      setFullDiffInfo(null)
+      return () => { cancelled = true }
+    }
+
+    const loadFullDiff = async () => {
+      try {
+        const diff = await getRecipeForkFullDiff(slug)
+        if (!cancelled) setFullDiffInfo(diff)
+      } catch {
+        if (!cancelled) setFullDiffInfo(null)
+      }
+    }
+
+    loadFullDiff()
+    return () => { cancelled = true }
+  }, [forkInfo?.exists, getRecipeForkFullDiff, showFullDiff, slug])
+
+  useEffect(() => {
+    let cancelled = false
+    if (!forkInfo?.exists) {
+      setManifestMarkdown('')
+      return () => { cancelled = true }
+    }
+
+    const loadMarkdown = async () => {
+      try {
+        const result = await getRecipeForkManifestMarkdown(slug)
+        if (!cancelled) setManifestMarkdown(result.markdown || '')
+      } catch {
+        if (!cancelled) setManifestMarkdown('')
+      }
+    }
+
+    loadMarkdown()
+    return () => { cancelled = true }
+  }, [forkInfo?.exists, getRecipeForkManifestMarkdown, slug, diffInfo?.summary?.changed_files])
 
   const save = async () => {
     setSaving(true)
@@ -171,9 +442,12 @@ export function ComposeEditor({ slug }) {
       setForkInfo({
         slug,
         exists: true,
+        active: result.active,
         fork_dir: result.fork_dir,
         files: result.files,
       })
+      setDiffInfo(await getRecipeForkDiffSummary(slug))
+      if (showFullDiff) setFullDiffInfo(await getRecipeForkFullDiff(slug))
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
@@ -185,6 +459,102 @@ export function ComposeEditor({ slug }) {
 
   const dirty = content !== original
   const canReset = original !== defaultContent || content !== defaultContent
+  const forkActive = Boolean(forkInfo?.exists && forkInfo?.active)
+
+  const toggleDiffFile = (fileKey) => {
+    setCollapsedDiffFiles((current) => ({
+      ...current,
+      [fileKey]: !current[fileKey],
+    }))
+  }
+
+  const expandDiffContext = (contextKey) => {
+    setExpandedDiffContexts((current) => ({
+      ...current,
+      [contextKey]: true,
+    }))
+  }
+
+  const handleForkToggle = async () => {
+    if (!forkInfo?.exists) return
+    setForkToggling(true)
+    setError('')
+    try {
+      const result = forkActive
+        ? await deactivateRecipeFork(slug)
+        : await activateRecipeFork(slug)
+      setForkInfo(result)
+      setDiffInfo(await getRecipeForkDiffSummary(slug))
+      if (showFullDiff) setFullDiffInfo(await getRecipeForkFullDiff(slug))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      setError(`Failed to ${forkActive ? 'deactivate' : 'activate'} recipe fork`)
+    } finally {
+      setForkToggling(false)
+    }
+  }
+
+  const handleForkDelete = async () => {
+    if (!forkInfo?.exists) return
+    if (!window.confirm('Delete this local fork workspace and return to the registry version?')) return
+    setForkDeleting(true)
+    setError('')
+    try {
+      const result = await deleteRecipeFork(slug)
+      setForkInfo(result)
+      const res = await fetch(`/api/recipes/${slug}/compose`)
+      if (!res.ok) throw new Error('reload failed')
+      const data = await res.json()
+      setContent(data.content)
+      setOriginal(data.content)
+      setDefaultContent(data.default_content || data.content)
+      setDiffInfo(null)
+      setFullDiffInfo(null)
+      setManifestMarkdown('')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      setError('Failed to delete recipe fork')
+    } finally {
+      setForkDeleting(false)
+    }
+  }
+
+  const handleBundleExport = async () => {
+    if (!forkInfo?.exists) return
+    setBundleExporting(true)
+    setError('')
+    try {
+      const result = await exportRecipeForkBundle(slug)
+      setBundleInfo(result)
+      setDiffInfo(result.manifest?.diff_summary || diffInfo)
+      if (showFullDiff) setFullDiffInfo(await getRecipeForkFullDiff(slug))
+      const markdown = await getRecipeForkManifestMarkdown(slug)
+      setManifestMarkdown(markdown.markdown || '')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      setError('Failed to export recipe fork bundle')
+    } finally {
+      setBundleExporting(false)
+    }
+  }
+
+  const handleCopyMarkdown = async () => {
+    if (!manifestMarkdown) return
+    setCopyingMarkdown(true)
+    setError('')
+    try {
+      await navigator.clipboard.writeText(manifestMarkdown)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      setError('Failed to copy markdown summary')
+    } finally {
+      setCopyingMarkdown(false)
+    }
+  }
 
   return (
     <div className="h-full min-h-0 flex flex-col">
@@ -196,6 +566,18 @@ export function ComposeEditor({ slug }) {
             {forkInfo?.exists && forkInfo?.fork_dir && (
               <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">Fork workspace: {forkInfo.fork_dir}</p>
             )}
+            {forkActive && (
+              <p className="text-xs text-primary mt-2 mb-0 font-label">Active fork mode is enabled for this recipe. Install, launch, and update now read from the fork workspace.</p>
+            )}
+            {forkInfo?.exists && !forkActive && (
+              <p className="text-xs text-text-dim mt-2 mb-0 font-label">A local fork exists but runtime actions are currently using the registry version.</p>
+            )}
+            {bundleInfo?.bundle_path && (
+              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">Latest fork bundle: {bundleInfo.bundle_path}</p>
+            )}
+            {bundleInfo?.manifest_path && (
+              <p className="text-xs text-text-dim mt-1 mb-0 font-mono break-all">Bundle manifest: {bundleInfo.manifest_path}</p>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -205,6 +587,53 @@ export function ComposeEditor({ slug }) {
             >
               {forkSaving ? 'Saving Fork...' : 'Save as My Fork'}
             </button>
+            <button
+              disabled={!forkInfo?.exists || forkToggling || loading}
+              onClick={handleForkToggle}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {forkToggling ? (forkActive ? 'Disabling Fork...' : 'Enabling Fork...') : (forkActive ? 'Use Registry Version' : 'Use My Fork')}
+            </button>
+            <button
+              disabled={!forkInfo?.exists || forkDeleting || loading}
+              onClick={handleForkDelete}
+              className="px-4 py-2 bg-error/10 text-error border-none rounded-xl text-sm font-semibold cursor-pointer transition-all hover:bg-error/15 disabled:opacity-40 disabled:cursor-default"
+            >
+              {forkDeleting ? 'Deleting Fork...' : 'Delete Fork'}
+            </button>
+            <button
+              disabled={!forkInfo?.exists || bundleExporting || loading}
+              onClick={handleBundleExport}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {bundleExporting ? 'Exporting Bundle...' : 'Export Fork Bundle'}
+            </button>
+            <a
+              href={forkInfo?.exists ? getRecipeForkDownloadUrl(slug) : undefined}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${forkInfo?.exists && !loading ? 'bg-surface text-text border border-outline-dim hover:border-primary hover:text-primary' : 'bg-surface text-text-dim border border-outline-dim opacity-40 pointer-events-none'}`}
+            >
+              Download Bundle
+            </a>
+            <button
+              disabled={!forkInfo?.exists || loading}
+              onClick={() => setShowFullDiff((value) => !value)}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {showFullDiff ? 'Hide Full Diff' : 'View Full Diff'}
+            </button>
+            <button
+              disabled={!manifestMarkdown || copyingMarkdown || loading}
+              onClick={handleCopyMarkdown}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {copyingMarkdown ? 'Copying...' : 'Copy PR Summary'}
+            </button>
+            <a
+              href={forkInfo?.exists ? getRecipeForkManifestMarkdownDownloadUrl(slug) : undefined}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${forkInfo?.exists && !loading ? 'bg-surface text-text border border-outline-dim hover:border-primary hover:text-primary' : 'bg-surface text-text-dim border border-outline-dim opacity-40 pointer-events-none'}`}
+            >
+              Download .md Summary
+            </a>
             <button
               disabled={!canReset || resetting || loading}
               onClick={resetToDefault}
@@ -241,8 +670,188 @@ export function ComposeEditor({ slug }) {
           {saved && <span className="text-success font-label">Saved. Relaunch or reinstall to apply.</span>}
           {dirty && !saved && <span className="text-warning font-label">Unsaved changes</span>}
           {!dirty && canReset && !saved && <span className="text-text-dim font-label">Using a customized compose file.</span>}
+          {forkActive && !dirty && !saved && <span className="text-primary font-label">Runtime actions use the fork overlay.</span>}
+          {forkInfo?.exists && !forkActive && !dirty && !saved && <span className="text-text-dim font-label">Fork saved locally but inactive.</span>}
+          {bundleInfo?.bundle_path && !saved && <span className="text-text-dim font-label">Fork bundle ready for manual review or PR packaging.</span>}
           {error && <span className="text-error font-label">{error}</span>}
         </div>
+
+        {diffInfo?.summary && (
+          <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
+            <div className="flex flex-wrap items-center gap-3 justify-between">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Registry vs Fork Diff Summary</div>
+                <p className="text-sm text-text-dim mt-2 mb-0">
+                  {diffInfo.summary.changed_files} of {diffInfo.summary.total_files} tracked files differ from the registry baseline.
+                </p>
+              </div>
+              <div className="text-xs text-text-dim font-label">
+                {diffInfo.summary.active ? 'Fork overlay active' : 'Fork overlay inactive'}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {diffInfo.files?.map((file) => (
+                <div key={file.key} className="rounded-xl border border-outline-dim bg-[#08080F] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-semibold text-text">{file.name}</div>
+                    <span className={`text-[10px] uppercase tracking-[0.14em] font-label ${file.status === 'unchanged' ? 'text-success' : file.status === 'changed' ? 'text-warning' : 'text-text-dim'}`}>
+                      {file.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-1 text-xs text-text-dim">
+                    <div>+{file.added_lines} added lines</div>
+                    <div>-{file.removed_lines} removed lines</div>
+                    <div>{file.changed_lines} changed line pairs</div>
+                    <div>{file.registry_exists ? 'Registry file present' : 'No registry baseline'}</div>
+                    <div>{file.fork_exists ? 'Fork file present' : 'Missing in fork'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showFullDiff && forkInfo?.exists && (
+          <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">Full Unified Diff</div>
+                <p className="text-sm text-text-dim mt-2 mb-0">Review the exact registry-to-fork patch before packaging the bundle.</p>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-2xl bg-surface-high/70 p-1.5 border border-outline-dim">
+                <button
+                  onClick={() => setDiffMode('unified')}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${diffMode === 'unified' ? 'bg-primary text-primary-on shadow-lg shadow-primary/20' : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'}`}
+                >
+                  Unified
+                </button>
+                <button
+                  onClick={() => setDiffMode('side-by-side')}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${diffMode === 'side-by-side' ? 'bg-primary text-primary-on shadow-lg shadow-primary/20' : 'bg-transparent text-text-dim hover:bg-surface-highest hover:text-text'}`}
+                >
+                  Side by Side
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {fullDiffInfo?.files?.map((file) => (
+                <div key={file.key} className="rounded-xl border border-outline-dim bg-[#08080F] overflow-hidden">
+                  <div className="px-4 py-3 border-b border-outline-dim flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => toggleDiffFile(file.key)}
+                        className="w-8 h-8 rounded-lg border border-outline-dim bg-surface text-text cursor-pointer hover:border-primary hover:text-primary transition-all"
+                        aria-label={collapsedDiffFiles[file.key] ? `Expand ${file.name}` : `Collapse ${file.name}`}
+                      >
+                        {collapsedDiffFiles[file.key] ? '+' : '−'}
+                      </button>
+                      <div className="text-sm font-semibold text-text">{file.name}</div>
+                    </div>
+                    <div className="text-xs text-text-dim font-label">{file.has_changes ? 'Changed' : 'No changes'}</div>
+                  </div>
+                  {!collapsedDiffFiles[file.key] && (
+                    diffMode === 'unified' ? (
+                      <div className="m-0 py-3 overflow-x-auto">
+                        <div className="min-w-[920px] border-y border-outline-dim/60">
+                          <div className="grid grid-cols-[64px_64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
+                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">Old</div>
+                            <div className="px-3 py-2 text-right border-r border-outline-dim/60">New</div>
+                            <div className="px-4 py-2">Patch</div>
+                          </div>
+                          {file.diff
+                            ? buildDiffRenderItems(file.diff, file.key).map((item, index) => {
+                                if (item.type === 'collapsed-context') {
+                                  if (expandedDiffContexts[item.key]) {
+                                    return item.hiddenRows.map((row, hiddenIndex) => (
+                                      <DiffUnifiedRow key={`${item.key}-expanded-${hiddenIndex}`} row={row} />
+                                    ))
+                                  }
+                                  return (
+                                    <DiffCollapsedContext
+                                      key={item.key}
+                                      hiddenCount={item.hiddenRows.length}
+                                      onExpand={() => expandDiffContext(item.key)}
+                                    />
+                                  )
+                                }
+
+                                return <DiffUnifiedRow key={`${file.key}-${index}`} row={item.row} />
+                              })
+                            : <div className="px-4 py-3 text-gray-400 text-[12px] leading-6 font-mono">No textual diff.</div>}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <div className="min-w-[900px] grid grid-cols-2 border-t border-outline-dim text-[12px] leading-6 font-mono">
+                          <div className="border-r border-outline-dim">
+                            <div className="grid grid-cols-[64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
+                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">Old</div>
+                              <div className="px-4 py-2">Registry</div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="grid grid-cols-[64px_minmax(0,1fr)] text-[11px] uppercase tracking-[0.14em] text-text-dim font-label border-b border-outline-dim bg-surface-low/60">
+                              <div className="px-3 py-2 text-right border-r border-outline-dim/60">New</div>
+                              <div className="px-4 py-2">Fork</div>
+                            </div>
+                          </div>
+                          {file.diff
+                            ? buildDiffRenderItems(file.diff, file.key).map((item, index) => {
+                                if (item.type === 'collapsed-context') {
+                                  if (expandedDiffContexts[item.key]) {
+                                    return item.hiddenRows.map((row, hiddenIndex) => ([
+                                      <div key={`${item.key}-left-expanded-${hiddenIndex}`} className="border-r border-outline-dim"><DiffSideCell line={row.left} tone={row.leftTone} lineNumber={row.leftLineNumber} /></div>,
+                                      <div key={`${item.key}-right-expanded-${hiddenIndex}`}><DiffSideCell line={row.right} tone={row.rightTone} lineNumber={row.rightLineNumber} /></div>,
+                                    ]))
+                                  }
+
+                                  return [
+                                    <div key={`${item.key}-left`} className="border-r border-outline-dim">
+                                      <DiffCollapsedContext hiddenCount={item.hiddenRows.length} onExpand={() => expandDiffContext(item.key)} compact />
+                                    </div>,
+                                    <div key={`${item.key}-right`}>
+                                      <DiffCollapsedContext hiddenCount={item.hiddenRows.length} onExpand={() => expandDiffContext(item.key)} compact />
+                                    </div>,
+                                  ]
+                                }
+
+                                return [
+                                  <div key={`${file.key}-left-${index}`} className="border-r border-outline-dim"><DiffSideCell line={item.row.left} tone={item.row.leftTone} lineNumber={item.row.leftLineNumber} /></div>,
+                                  <div key={`${file.key}-right-${index}`}><DiffSideCell line={item.row.right} tone={item.row.rightTone} lineNumber={item.row.rightLineNumber} /></div>,
+                                ]
+                              })
+                            : [
+                                <div key={`${file.key}-left-empty`} className="border-r border-outline-dim"><DiffSideCell line="No textual diff." tone="empty" /></div>,
+                                <div key={`${file.key}-right-empty`}><DiffSideCell line="No textual diff." tone="empty" /></div>,
+                              ]}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              ))}
+              {!fullDiffInfo && (
+                <div className="rounded-xl border border-outline-dim bg-[#08080F] p-4 text-sm text-text-dim">
+                  Loading full diff...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {manifestMarkdown && (
+          <div className="mt-4 rounded-2xl border border-outline-dim bg-surface-low/50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">PR Description Summary</div>
+                <p className="text-sm text-text-dim mt-2 mb-0">Copy this markdown block directly into a pull request description.</p>
+              </div>
+            </div>
+            <pre className="mt-4 m-0 p-4 overflow-x-auto text-[12px] leading-6 text-gray-300 font-mono whitespace-pre-wrap break-words rounded-xl border border-outline-dim bg-[#08080F]">{manifestMarkdown}</pre>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -435,6 +1044,7 @@ function groupEnvItems(items) {
 }
 
 export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
+  const getRecipeForkStatus = useStore((s) => s.getRecipeForkStatus)
   const [items, setItems] = useState([])
   const [originalContent, setOriginalContent] = useState('')
   const [defaultContent, setDefaultContent] = useState('')
@@ -444,11 +1054,29 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [envPath, setEnvPath] = useState(runtimeEnvPath || '')
+  const [forkInfo, setForkInfo] = useState(null)
 
   const serializedContent = serializeEnvItems(items)
   const dirty = serializedContent !== originalContent
   const canReset = originalContent !== defaultContent || serializedContent !== defaultContent
   const groupedItems = groupEnvItems(items)
+  const forkActive = Boolean(forkInfo?.exists && forkInfo?.active)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadFork = async () => {
+      try {
+        const status = await getRecipeForkStatus(slug)
+        if (!cancelled) setForkInfo(status)
+      } catch {
+        if (!cancelled) setForkInfo(null)
+      }
+    }
+
+    loadFork()
+    return () => { cancelled = true }
+  }, [getRecipeForkStatus, slug])
 
   useEffect(() => {
     let cancelled = false
@@ -558,6 +1186,12 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
               Edit the live `.env` as structured key-value fields. Save applies your runtime configuration; restore reloads the recipe default template.
             </p>
             {envPath && <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{envPath}</p>}
+            {forkActive && forkInfo?.fork_dir && (
+              <p className="text-xs text-primary mt-2 mb-0 font-label">Environment changes are being written to the active fork overlay at {forkInfo.fork_dir}.</p>
+            )}
+            {forkInfo?.exists && !forkActive && forkInfo?.fork_dir && (
+              <p className="text-xs text-text-dim mt-2 mb-0 font-label">A local fork exists at {forkInfo.fork_dir}, but environment edits are currently targeting the registry workspace.</p>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -665,6 +1299,7 @@ export function EnvEditor({ slug, runtimeEnvPath, standalone = false }) {
           {saved && <span className="text-success font-label">Saved. Relaunch or reinstall to apply.</span>}
           {dirty && !saved && <span className="text-warning font-label">Unsaved changes</span>}
           {!dirty && canReset && !saved && <span className="text-text-dim font-label">Using a customized runtime env file.</span>}
+          {forkActive && !dirty && !saved && <span className="text-primary font-label">Runtime actions use the fork overlay.</span>}
           {error && <span className="text-error font-label">{error}</span>}
         </div>
       </div>

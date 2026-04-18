@@ -29,6 +29,66 @@ class GpuMetrics(BaseModel):
     fan_speed_percent: int = 0
 
 
+class GpuTopologyLink(BaseModel):
+    target_index: int = 0
+    target_label: str = ""
+    link_type: str = ""
+    bandwidth_class: str = ""
+
+
+class GpuTopologyRow(BaseModel):
+    gpu_index: int = 0
+    gpu_label: str = ""
+    links: list[GpuTopologyLink] = Field(default_factory=list)
+
+
+class GpuTopologySnapshot(BaseModel):
+    detected: bool = False
+    source: str = ""
+    multi_gpu: bool = False
+    peer_to_peer_capable: bool = False
+    nvlink_pairs: int = 0
+    rows: list[GpuTopologyRow] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class DeploymentSelection(BaseModel):
+    profile: str = "single-gpu"
+    strategy: str = "local-ui"
+    target_gpu_indices: list[int] = Field(default_factory=list)
+    target_hosts: list[str] = Field(default_factory=list)
+    shared_storage_path: str = ""
+    notes: str = ""
+    updated_at: int = 0
+
+
+class DeploymentProfileRecommendation(BaseModel):
+    profile: str
+    label: str
+    supported: bool = False
+    recommended: bool = False
+    rationale: str = ""
+    strategy: str = ""
+    gpu_count: int = 0
+    target_gpu_indices: list[int] = Field(default_factory=list)
+    target_hosts: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class DeploymentPlan(BaseModel):
+    slug: str
+    host_hostname: str = ""
+    available_gpu_count: int = 0
+    available_gpu_indices: list[int] = Field(default_factory=list)
+    needs_gpu: bool = True
+    shared_storage_ready: bool = False
+    network_ready: bool = False
+    topology: GpuTopologySnapshot = Field(default_factory=GpuTopologySnapshot)
+    selected: DeploymentSelection = Field(default_factory=DeploymentSelection)
+    recommendations: list[DeploymentProfileRecommendation] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
 class RecipeMetrics(BaseModel):
     slug: str
     running: bool = False

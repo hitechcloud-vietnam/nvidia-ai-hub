@@ -12,7 +12,18 @@ from pathlib import Path
 import psutil
 
 from daemon.config import settings
-from daemon.models.container import GpuMetrics, RecipeMetrics, SystemMetrics
+from daemon.models.container import (
+    DeploymentPlan,
+    DeploymentProfileRecommendation,
+    DeploymentSelection,
+    GpuMetrics,
+    GpuTopologyLink,
+    GpuTopologyRow,
+    GpuTopologySnapshot,
+    RecipeMetrics,
+    SystemMetrics,
+)
+from daemon.models.recipe import Recipe
 from daemon.services.registry_service import get_recipes
 
 
@@ -530,6 +541,193 @@ def _apply_gpu_summary(metrics: SystemMetrics):
     metrics.gpu_memory_used_mb = sum(gpu.memory_used_mb for gpu in metrics.gpus)
     metrics.gpu_memory_total_mb = sum(gpu.memory_total_mb for gpu in metrics.gpus)
     metrics.gpu_temperature = max((gpu.temperature for gpu in metrics.gpus), default=0.0)
+
+
+def _classify_topology_link(raw_value: str) -> str:
+    value = str(raw_value or "").strip().upper()
+    if not value or value == "X":
+        return "self"
+    if value.startswith("NV"):
+        return "nvlink"
+    if value in {"PIX", "PXB", "PHB"}:
+        return "pcie"
+    if value in {"SOC", "NODE", "SYS"}:
+        return "system"
+    return "unknown"
+
+
+def _cluster_hosts_path() -> Path:
+    return settings.cluster_path / "hosts.json"
+
+
+def _cluster_shared_storage_path() -> Path:
+    return settings.cluster_path / "shared-storage.txt"
+
+
+async def get_gpu_topology_snapshot(metrics: SystemMetrics | None = None) -> GpuTopologySnapshot:
+    snapshot = GpuTopologySnapshot()
+    system_metrics = metrics or await get_system_metrics()
+    snapshot.multi_gpu = len(system_metrics.gpus) > 1
+
+    if len(system_metrics.gpus) < 2:
+        snapshot.notes.append("Topology details are only available when at least two GPUs are detected.")
+        return snapshot
+
+    if not shutil.which("nvidia-smi"):
+        snapshot.notes.append("`nvidia-smi` is unavailable on this host, so NVIDIA topology data could not be collected.")
+        return snapshot
+
+    output = await _run_command("nvidia-smi", "topo", "-m", timeout_seconds=5.0)
+    if not output:
+        snapshot.notes.append("`nvidia-smi topo -m` returned no topology matrix.")
+        return snapshot
+
+    lines = [line.rstrip() for line in output.splitlines() if line.strip()]
+    header: list[str] = []
+    rows: list[GpuTopologyRow] = []
+
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if stripped.startswith("GPU") and not header:
+            parts = stripped.split()
+            header = [part for part in parts if re.fullmatch(r"GPU\d+", part)]
+            continue
+
+        if not re.match(r"^GPU\d+\s+", stripped):
+            continue
+
+        parts = stripped.split()
+        row_label = parts[0]
+        row_index = _safe_int(row_label.replace("GPU", ""))
+        gpu_links = parts[1:1 + len(header)] if header else []
+        links: list[GpuTopologyLink] = []
+
+        for column, target_label in enumerate(header):
+            link_value = gpu_links[column] if column < len(gpu_links) else ""
+            target_index = _safe_int(target_label.replace("GPU", ""))
+            link_class = _classify_topology_link(link_value)
+            if row_index == target_index:
+                continue
+            links.append(
+                GpuTopologyLink(
+                    target_index=target_index,
+                    target_label=target_label,
+                    link_type=link_value,
+                    bandwidth_class=link_class,
+                )
+            )
+
+        rows.append(GpuTopologyRow(gpu_index=row_index, gpu_label=row_label, links=links))
+
+    if rows:
+        snapshot.detected = True
+        snapshot.source = "nvidia-smi topo -m"
+        snapshot.rows = rows
+        snapshot.nvlink_pairs = sum(
+            1
+            for row in rows
+            for link in row.links
+            if link.bandwidth_class == "nvlink" and row.gpu_index < link.target_index
+        )
+        snapshot.peer_to_peer_capable = any(
+            link.bandwidth_class in {"nvlink", "pcie"}
+            for row in rows
+            for link in row.links
+        )
+    else:
+        snapshot.notes.append("GPU telemetry is available, but no parsable topology matrix was returned.")
+
+    return snapshot
+
+
+def _build_recommendations(
+    recipe: Recipe,
+    metrics: SystemMetrics,
+    topology: GpuTopologySnapshot,
+    selected: DeploymentSelection,
+    shared_storage_ready: bool,
+    network_ready: bool,
+) -> list[DeploymentProfileRecommendation]:
+    gpu_indices = [gpu.index for gpu in metrics.gpus]
+    needs_gpu = bool(recipe.docker.gpu)
+    multi_gpu_supported = len(gpu_indices) >= 2
+    cluster_supported = multi_gpu_supported and shared_storage_ready and network_ready
+
+    return [
+        DeploymentProfileRecommendation(
+            profile="single-gpu",
+            label="Single GPU",
+            supported=(not needs_gpu) or len(gpu_indices) >= 1,
+            recommended=(selected.profile == "single-gpu") or len(gpu_indices) <= 1,
+            rationale="Use one local GPU for workstation or single-user deployment.",
+            strategy="local-ui",
+            gpu_count=1 if gpu_indices else 0,
+            target_gpu_indices=gpu_indices[:1],
+            caveats=[] if gpu_indices else ["No local GPU telemetry is available for this recipe."],
+        ),
+        DeploymentProfileRecommendation(
+            profile="multi-gpu",
+            label="Multi-GPU",
+            supported=(not needs_gpu) or multi_gpu_supported,
+            recommended=multi_gpu_supported and topology.peer_to_peer_capable,
+            rationale="Spread larger inference or throughput-oriented workloads across local GPUs.",
+            strategy="distributed-local",
+            gpu_count=len(gpu_indices),
+            target_gpu_indices=gpu_indices,
+            caveats=([] if multi_gpu_supported else ["At least two local GPUs are required for the multi-GPU profile."])
+            + ([] if topology.peer_to_peer_capable or not multi_gpu_supported else ["Topology data did not confirm direct high-bandwidth GPU links."]),
+        ),
+        DeploymentProfileRecommendation(
+            profile="cluster",
+            label="Clustered",
+            supported=(not needs_gpu) or cluster_supported,
+            recommended=cluster_supported,
+            rationale="Prepare the recipe for multi-host rollouts where network and shared storage are preconfigured.",
+            strategy="cluster-orchestrated",
+            gpu_count=len(gpu_indices),
+            target_gpu_indices=gpu_indices,
+            target_hosts=[metrics.hostname] if network_ready else [],
+            caveats=([] if network_ready else ["Create `data/cluster/hosts.json` to declare remote-capable hosts."])
+            + ([] if shared_storage_ready else ["Create `data/cluster/shared-storage.txt` to declare the shared model/data path."]),
+        ),
+    ]
+
+
+async def get_recipe_deployment_plan(recipe: Recipe, selected: DeploymentSelection | None = None) -> DeploymentPlan:
+    metrics = await get_system_metrics()
+    topology = await get_gpu_topology_snapshot(metrics)
+    hosts_ready = _cluster_hosts_path().is_file()
+    shared_storage_file = _cluster_shared_storage_path()
+    shared_storage_ready = shared_storage_file.is_file() and shared_storage_file.read_text(encoding="utf-8").strip() != ""
+
+    current_selection = selected or DeploymentSelection(
+        profile="multi-gpu" if len(metrics.gpus) >= 2 else "single-gpu",
+        strategy="distributed-local" if len(metrics.gpus) >= 2 else "local-ui",
+        target_gpu_indices=[gpu.index for gpu in metrics.gpus[:max(1, min(2, len(metrics.gpus)))]],
+        target_hosts=[metrics.hostname] if hosts_ready else [],
+        shared_storage_path=shared_storage_file.read_text(encoding="utf-8").strip() if shared_storage_ready else "",
+        updated_at=int(time.time()),
+    )
+
+    warnings: list[str] = []
+    if recipe.docker.gpu and not metrics.gpus:
+        warnings.append("This recipe expects GPU acceleration, but no GPU telemetry is available on the current host.")
+    if current_selection.profile == "cluster" and not (hosts_ready and shared_storage_ready):
+        warnings.append("Cluster mode remains a planning profile until shared storage and remote host metadata are configured.")
+
+    return DeploymentPlan(
+        slug=recipe.slug,
+        host_hostname=metrics.hostname,
+        available_gpu_count=len(metrics.gpus),
+        available_gpu_indices=[gpu.index for gpu in metrics.gpus],
+        needs_gpu=bool(recipe.docker.gpu),
+        shared_storage_ready=shared_storage_ready,
+        network_ready=hosts_ready,
+        topology=topology,
+        selected=current_selection,
+        recommendations=_build_recommendations(recipe, metrics, topology, current_selection, shared_storage_ready, hosts_ready),
+        warnings=warnings,
+    )
 
 
 def _merge_gpu_entries(existing: list[GpuMetrics], incoming: list[GpuMetrics]) -> list[GpuMetrics]:

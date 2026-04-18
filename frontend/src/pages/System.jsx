@@ -46,6 +46,8 @@ function CircularGauge({ value, max, label, sublabel, unit, color = 'var(--terti
 
 export default function System() {
   const metrics = useStore((s) => s.metrics)
+  const topology = useStore((s) => s.systemTopology)
+  const fetchSystemTopology = useStore((s) => s.fetchSystemTopology)
   const history = useStore((s) => s.metricHistory)
   const recipes = useStore((s) => s.recipes)
   const theme = useStore((s) => s.theme)
@@ -56,8 +58,9 @@ export default function System() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => setChartsVisible(true), 150)
+    fetchSystemTopology()
     return () => window.clearTimeout(timer)
-  }, [])
+  }, [fetchSystemTopology])
 
   if (!metrics) {
     return (
@@ -176,6 +179,52 @@ export default function System() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div className="bg-surface rounded-2xl p-5 card-hover mb-8">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold font-display text-text m-0">GPU Topology Planning</h3>
+              <p className="text-[11px] text-text-dim font-label m-0 mt-0.5">Multi-GPU link awareness for local and cluster-ready rollouts</p>
+            </div>
+            {topology?.detected ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <MetricCard label="Multi-GPU" value={topology.multi_gpu ? 'Yes' : 'No'} hint="More than one GPU detected on this host" />
+                  <MetricCard label="Peer-to-peer" value={topology.peer_to_peer_capable ? 'Available' : 'Unknown'} hint="Derived from the NVIDIA topology matrix" />
+                  <MetricCard label="NVLink pairs" value={`${topology.nvlink_pairs || 0}`} hint={topology.source || 'nvidia-smi topo -m'} />
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[11px] text-text-dim font-label border-b border-outline-dim">
+                        <th className="text-left pb-2 font-medium">GPU</th>
+                        <th className="text-left pb-2 font-medium">Links</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topology.rows.map((row) => (
+                        <tr key={row.gpu_label} className="border-b border-outline-dim last:border-0">
+                          <td className="py-2.5 font-medium text-text">{row.gpu_label}</td>
+                          <td className="py-2.5 text-text-dim">
+                            <div className="flex flex-wrap gap-2">
+                              {row.links.map((link) => (
+                                <span key={`${row.gpu_label}-${link.target_label}`} className="px-2.5 py-1 rounded-full bg-surface-high text-[11px] font-label text-text-dim">
+                                  {link.target_label}: {link.link_type || '—'}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-text-dim leading-6">
+                {topology?.notes?.[0] || 'Topology data will appear here when multiple NVIDIA GPUs are available and `nvidia-smi topo -m` is supported.'}
+              </div>
+            )}
           </div>
         </>
       )}

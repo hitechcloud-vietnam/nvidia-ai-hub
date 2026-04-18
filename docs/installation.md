@@ -97,10 +97,15 @@ What the installer currently does:
 - installs `git` if missing
 - installs `python3`, `python3-venv`, and `pip` if missing
 - installs Docker Engine if missing
+- installs Node.js `22.x` if the current `node` version is missing or too old for the frontend build
 - clones or updates the repository into `$HOME/nvidia-ai-hub`
 - creates `.venv`
 - installs backend dependencies
-- starts the FastAPI service with `uvicorn`
+- installs frontend dependencies
+- builds `frontend/dist`
+- creates `.env` from `.env.example` when needed
+- persists `NVIDIA_AI_HUB_HOST` and `NVIDIA_AI_HUB_PORT` in the root `.env`
+- starts the application through `./run.sh` unless `--no-start` is used
 
 Important limitations:
 
@@ -108,6 +113,7 @@ Important limitations:
 - it is designed around `apt-get`
 - it does not currently install the NVIDIA driver or NVIDIA Container Toolkit for you
 - GPU runtime prerequisites must already be configured on the host
+- the installer was not executed end-to-end in this Windows workspace; Linux shell validation remains a reviewer task
 
 ### 3.4 Manual Linux install from a clone
 
@@ -123,7 +129,7 @@ cd frontend
 npm install
 npm run build
 cd ..
-python -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000
+./run.sh --host 0.0.0.0 --port 9000
 ```
 
 Open:
@@ -150,6 +156,13 @@ This validates:
 - key repository files
 - configured service port availability
 
+`run.sh` supports:
+
+- `--host <bind-address>`
+- `--port <bind-port>`
+
+If no override is provided, it reads `NVIDIA_AI_HUB_HOST` and `NVIDIA_AI_HUB_PORT` from the root `.env` file.
+
 ### 3.6 Optional PM2 deployment on Linux
 
 PM2 is optional and can be used when you want a lightweight persistent process without wiring up systemd.
@@ -164,7 +177,7 @@ Start the API:
 
 ```bash
 cd ~/nvidia-ai-hub
-pm2 start ".venv/bin/python -m uvicorn daemon.main:app --host 0.0.0.0 --port 9000" --name nvidia-ai-hub
+pm2 start ./run.sh --name nvidia-ai-hub -- --host 0.0.0.0 --port 9000
 pm2 save
 ```
 

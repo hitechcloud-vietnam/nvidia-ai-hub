@@ -1,36 +1,26 @@
 # Repository Maintenance
 
-This document describes the core repository maintenance controls for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
+This guide is for maintainers updating repository controls, review routing, and staged automation.
 
-## Scope
+## 1. Maintenance areas
 
-Use this guide when maintaining repository automation, review routing, and governance configuration.
+### `CODEOWNERS`
 
-It complements:
+Keep `/.github/CODEOWNERS` aligned with the real repository layout.
 
-- [`./github-actions.md`](./github-actions.md)
-- [`./pull-request-process.md`](./pull-request-process.md)
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
-- [`./community.md`](./community.md)
-- [`./legal-notice.md`](./legal-notice.md)
-
-## Maintenance Areas
-
-### CODEOWNERS
-
-`/.github/CODEOWNERS` defines default review ownership for:
+Update it when ownership changes for:
 
 - backend files
 - frontend files
-- recipe and script assets
+- recipes and scripts
 - governance and workflow files
 - dependency management files
 
-When review routing changes, update `CODEOWNERS` in the same pull request as the affected workflow, dependency, or governance change.
-
 ### Labels
 
-`/.github/labeler.yml` maps changed paths to repository labels such as:
+Keep `/.github/labeler.yml` aligned with current paths and review categories.
+
+Recommended label families include:
 
 - `backend`
 - `frontend`
@@ -41,78 +31,54 @@ When review routing changes, update `CODEOWNERS` in the same pull request as the
 - `licensing`
 - `dependencies`
 
-Keep labels aligned with the current repository structure so pull requests are routed consistently.
-
 ### Dependabot
 
-`/.github/dependabot.yml` stages automated dependency update pull requests for:
+`/.github/dependabot.yml` exists but remains paused by default through `open-pull-requests-limit: 0`.
 
-- Python dependencies in `/`
-- frontend npm dependencies in `/frontend`
-- GitHub Actions dependencies in `/`
-
-Current default state:
-
-- Dependabot is configured
-- dependency update pull request creation is paused with `open-pull-requests-limit: 0`
-
-When enabling an ecosystem, increase the limit only for the ecosystem that is ready for review.
+If enabling an ecosystem, raise the limit only for the ecosystem that is ready for review.
 
 ### Optional workflows
 
-The repository includes staged workflows under `/.github/workflows/` that remain gated by `ENABLE_OPTIONAL_WORKFLOWS`.
+Staged workflows under `/.github/workflows/` remain gated by `ENABLE_OPTIONAL_WORKFLOWS`.
 
-Current gated workflows:
+Review [`github-actions.md`](./github-actions.md) before enabling any staged workflow.
 
-- `ci-validation-disabled.yml`
-- `recipe-validation-disabled.yml`
-- `docs-governance-disabled.yml`
-- `dependency-updates-disabled.yml`
-- `dependabot-auto-triage-disabled.yml`
-- `release-package-disabled.yml`
+## 2. Standard terms
 
-Current active workflow for rollout visibility:
+- **staged** — present in the repository but not yet intended for broad operational use
+- **gated** — runs only when `ENABLE_OPTIONAL_WORKFLOWS == 'true'`
+- **paused** — configuration exists but automatic pull request creation is intentionally suppressed
 
-- `optional-workflows-status.yml`
+## 3. Branch protection
 
-Review `docs/github-actions.md` before enabling any staged workflow.
+Recommended protection for `main`:
 
-Standard terminology in this repository:
+- require pull requests before merge
+- require approval
+- require code owner review
+- dismiss stale approvals after new commits
+- require conversation resolution
+- block force pushes
+- block branch deletion
 
-- **staged**: present in the repository but not yet intended for broad operational use
-- **gated**: workflow jobs run only when `ENABLE_OPTIONAL_WORKFLOWS == 'true'`
-- **paused**: Dependabot configuration exists, but pull request creation is held by `open-pull-requests-limit: 0`
-
-### Branch protection
-
-Recommended branch protection for `main` should include:
-
-- pull request required before merge
-- approval required
-- code owner review required
-- stale approval dismissal after new commits
-- conversation resolution required
-- force-push blocked
-- branch deletion blocked
-
-## Maintenance Checklist
+## 4. Maintainer checklist
 
 When changing repository maintenance controls, confirm:
 
-- `CODEOWNERS` still matches the real file layout
-- labels still map to the expected paths
+- `CODEOWNERS` still matches the layout
+- labels still route as intended
 - workflow permissions remain minimal
-- optional workflows are still gated unless intentionally enabled
-- Dependabot remains paused unless maintainers explicitly allow new update pull requests
-- related docs were updated in the same pull request
-- legal notice and trademark wording remain synchronized where applicable
+- optional workflows stay gated unless intentionally enabled
+- Dependabot stays paused unless intentionally enabled
+- related docs are updated in the same pull request
+- legal and trademark wording remains synchronized where applicable
 
-## Reviewer Notes
+## 5. Pull request notes for maintenance changes
 
-For repository maintenance pull requests, include:
+Maintenance pull requests should include:
 
-- affected maintenance area
+- affected control area
 - whether automation remains gated or paused
 - any permission changes
-- validation evidence for documentation or workflow edits
-- any follow-up work intentionally deferred
+- validation evidence for workflow or documentation changes
+- any deferred follow-up work

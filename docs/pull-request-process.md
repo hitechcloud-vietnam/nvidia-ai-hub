@@ -1,31 +1,63 @@
 # Pull Request Process
 
-This document defines the recommended repository review and merge workflow for NVIDIA AI Hub by Pho Tue SoftWare Solutions JSC.
+This document defines the expected review and merge workflow.
 
-## Branch Protection Recommendations
+## 1. Pull request scope
 
-Apply these protections to `main`:
+Prefer pull requests that stay within one main concern:
+
+- backend
+- frontend
+- recipes
+- scripts and installer behavior
+- documentation and governance
+- dependency or workflow maintenance
+
+If a pull request crosses areas, explain why the changes must land together.
+
+## 2. Review expectations
+
+### Backend
+
+- include backend validation notes
+- identify affected API paths, startup flow, or runtime behavior
+
+### Frontend
+
+- include `npm run lint`
+- include `npm run build`
+- include a short manual verification summary
+
+### Recipes
+
+- list the exact recipe slugs changed
+- state whether validation was smoke-tested or metadata-only
+
+### Scripts and installer changes
+
+- state the operating system and shell used for validation
+- clearly note when behavior was reviewed statically rather than executed
+
+### Documentation and governance
+
+- identify the synchronized files updated together
+- note any reviewer risk where behavior could not be exercised directly
+
+## 3. Branch protection recommendation
+
+Recommended protection for `main`:
 
 - require pull requests before merge
-- require at least 1 approving review
-- require review from code owners
-- dismiss stale approvals when new commits are pushed
+- require at least one approval
+- require code owner review
+- dismiss stale approvals on new commits
 - require conversation resolution before merge
 - block force pushes
 - block branch deletion
 
-## Review Expectations
+## 4. Labels and ownership
 
-- Backend changes should include backend validation notes.
-- Frontend changes should include build status and manual UI verification notes.
-- Recipe changes should identify the affected recipe(s) and any smoke-test evidence.
-- Script or installer changes should specify operating system and shell validation.
-- Deployment documentation changes should state whether Linux service, reverse proxy, TLS, or exposure guidance was reviewed.
-- Governance and licensing changes should identify every synchronized document updated in the same pull request, including `README.md`, `NOTICE`, `LICENSE`, `COMMERCIAL-LICENSE.md`, `docs/licensing.md`, and `docs/legal-notice.md` when applicable.
-
-## Labels and Ownership
-
-Use repository labels to help triage reviews:
+Recommended labels:
 
 - `backend`
 - `frontend`
@@ -36,63 +68,26 @@ Use repository labels to help triage reviews:
 - `licensing`
 - `dependencies`
 
-`CODEOWNERS` should be enabled together with branch protection so reviewer requests are assigned automatically.
+`CODEOWNERS` should remain aligned with the repository structure so reviewers are requested automatically.
 
-For dependency and automation changes, keep explicit ownership entries for:
+## 5. Automation and dependency updates
 
-- `requirements.txt`
-- `frontend/package.json`
-- `frontend/package-lock.json`
-- `.github/dependabot.yml`
-- `.github/workflows/*.yml`
+- keep dependency pull requests small and reviewable
+- refresh stale dependency branches before merge
+- keep workflow permissions minimal
+- use [`maintenance.md`](./maintenance.md) and [`github-actions.md`](./github-actions.md) when touching repository automation
 
-This helps dependency and workflow pull requests request review from the expected maintainers even when changes are narrowly scoped.
+Staged workflows remain gated by `ENABLE_OPTIONAL_WORKFLOWS`. Dependabot remains paused until maintainers raise `open-pull-requests-limit`.
 
-## Dependabot and Automation
+## 6. Related document review
 
-- Keep dependency update pull requests small and easy to review.
-- Prefer grouped review by ecosystem when several updates arrive at the same time.
-- Use labels from `.github/labeler.yml` to route changes quickly.
-- Rebase or refresh dependency pull requests before merging if they become stale.
-- Use [`./maintenance.md`](./maintenance.md) when updating `CODEOWNERS`, label routing, Dependabot policy, or branch protection guidance.
+When changing install, runtime, or deployment behavior, review and update as needed:
 
-### Optional GitHub Actions workflows
+- [`installation.md`](./installation.md)
+- [`local-development.md`](./local-development.md)
+- [`deployment-production.md`](./deployment-production.md)
+- [`README.md`](../README.md)
 
-The repository includes staged workflow definitions that are gated by `ENABLE_OPTIONAL_WORKFLOWS`.
+## 7. Merge guidance
 
-Active workflows that are not gated:
-
-- `.github/workflows/pr-validation.yml`
-- `.github/workflows/labeler.yml`
-- `.github/workflows/optional-workflows-status.yml`
-
-Gated workflows:
-
-- `.github/workflows/ci-validation-disabled.yml`
-- `.github/workflows/recipe-validation-disabled.yml`
-- `.github/workflows/docs-governance-disabled.yml`
-- `.github/workflows/dependency-updates-disabled.yml`
-- `.github/workflows/dependabot-auto-triage-disabled.yml`
-- `.github/workflows/release-package-disabled.yml`
-
-These staged workflows do not execute their jobs unless the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
-
-Dependency update pull requests are also staged conservatively: `.github/dependabot.yml` exists, but each ecosystem currently uses `open-pull-requests-limit: 0` so Dependabot does not open update pull requests until maintainers explicitly allow it.
-
-Recommended usage:
-
-- keep the variable unset during initial workflow rollout
-- review the workflow contents and required permissions first
-- enable the variable only when the repository is ready to run the optional automation set
-
-Use [`./github-actions.md`](./github-actions.md) for the full workflow inventory and rollout details.
-
-When pull requests change installation, local development, or production deployment guidance, also review:
-
-- [`./installation.md`](./installation.md)
-- [`./local-development.md`](./local-development.md)
-- [`./deployment-production.md`](./deployment-production.md)
-
-## Merge Guidance
-
-Prefer squash merges for routine changes unless preserving commit history is important for release or audit purposes.
+Prefer squash merge for routine changes unless preserving commit history is important for audit or release reasons.

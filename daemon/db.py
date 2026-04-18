@@ -36,6 +36,23 @@ CREATE TABLE IF NOT EXISTS recipe_tips (
 async def get_db() -> aiosqlite.Connection:
     db = await aiosqlite.connect(DB_PATH)
     db.row_factory = aiosqlite.Row
+
+    async def execute_fetchone(sql: str, parameters=()):
+        cursor = await db.execute(sql, parameters)
+        try:
+            return await cursor.fetchone()
+        finally:
+            await cursor.close()
+
+    async def execute_fetchall(sql: str, parameters=()):
+        cursor = await db.execute(sql, parameters)
+        try:
+            return await cursor.fetchall()
+        finally:
+            await cursor.close()
+
+    db.execute_fetchone = execute_fetchone
+    db.execute_fetchall = execute_fetchall
     return db
 
 

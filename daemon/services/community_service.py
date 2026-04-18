@@ -19,7 +19,8 @@ def community_yaml_path_for_slug(slug: str) -> Path:
 
 
 async def export_recipe_community_yaml(slug: str) -> Path:
-    async with await get_db() as db:
+    db = await get_db()
+    try:
         rating_row = await db.execute_fetchone(
             "SELECT COUNT(*) AS rating_count, COALESCE(AVG(score), 0) AS rating_average FROM recipe_ratings WHERE slug = ?",
             (slug,),
@@ -32,6 +33,8 @@ async def export_recipe_community_yaml(slug: str) -> Path:
             "SELECT author, content, created_at FROM recipe_tips WHERE slug = ? ORDER BY id DESC",
             (slug,),
         )
+    finally:
+        await db.close()
 
     payload = {
         "slug": slug,

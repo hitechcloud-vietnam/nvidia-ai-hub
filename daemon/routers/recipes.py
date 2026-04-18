@@ -41,12 +41,13 @@ def _build_submit_recipe_url(recipe: Recipe | RecipeSummary | None = None) -> st
     if not recipe:
         return SUBMIT_RECIPE_URL
 
+    upstream = getattr(recipe, "upstream", "") or "n/a"
     title = quote(f"recipe: {recipe.slug}")
     body = quote(
         "## Recipe submission\n"
         f"- Name: {recipe.name}\n"
         f"- Slug: {recipe.slug}\n"
-        f"- Upstream: {recipe.upstream or 'n/a'}\n"
+        f"- Upstream: {upstream}\n"
         "- Summary: \n\n"
         "## Validation\n"
         "- Tested on: \n"
@@ -57,7 +58,8 @@ def _build_submit_recipe_url(recipe: Recipe | RecipeSummary | None = None) -> st
 
 
 async def _load_recipe_community(slug: str, recipe: Recipe | RecipeSummary | None = None) -> RecipeCommunitySummary:
-    async with await get_db() as db:
+    db = await get_db()
+    try:
         rating_row = await db.execute_fetchone(
             "SELECT COUNT(*) AS rating_count, COALESCE(AVG(score), 0) AS rating_average FROM recipe_ratings WHERE slug = ?",
             (slug,),
@@ -70,6 +72,8 @@ async def _load_recipe_community(slug: str, recipe: Recipe | RecipeSummary | Non
             "SELECT id, author, content, created_at FROM recipe_tips WHERE slug = ? ORDER BY id DESC LIMIT 8",
             (slug,),
         )
+    finally:
+        await db.close()
 
     return RecipeCommunitySummary(
         rating_average=round(float(rating_row["rating_average"] or 0), 1),
@@ -248,7 +252,8 @@ async def verify_recipe(slug: str, body: RecipeVerificationBody):
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
-    async with await get_db() as db:
+    db = await get_db()
+    try:
         await db.execute(
             """
             INSERT INTO recipe_verifications (slug, verified_count, updated_at)
@@ -260,6 +265,8 @@ async def verify_recipe(slug: str, body: RecipeVerificationBody):
             (slug, body.increment),
         )
         await db.commit()
+    finally:
+        await db.close()
 
     await export_recipe_community_yaml(slug)
     return await _load_recipe_community(slug, recipe)
@@ -271,12 +278,15 @@ async def rate_recipe(slug: str, body: RecipeRatingBody):
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
-    async with await get_db() as db:
+    db = await get_db()
+    try:
         await db.execute(
             "INSERT INTO recipe_ratings (slug, score) VALUES (?, ?)",
             (slug, body.score),
         )
         await db.commit()
+    finally:
+        await db.close()
 
     await export_recipe_community_yaml(slug)
     return await _load_recipe_community(slug, recipe)
@@ -293,12 +303,15 @@ async def add_recipe_tip(slug: str, body: RecipeTipBody):
     if len(content) < 4:
         raise HTTPException(status_code=400, detail="Tip content is too short")
 
-    async with await get_db() as db:
+    db = await get_db()
+    try:
         await db.execute(
             "INSERT INTO recipe_tips (slug, author, content) VALUES (?, ?, ?)",
             (slug, author, content),
         )
         await db.commit()
+    finally:
+        await db.close()
 
     await export_recipe_community_yaml(slug)
     return await _load_recipe_community(slug, recipe)
