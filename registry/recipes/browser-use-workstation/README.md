@@ -22,7 +22,8 @@ Browser-based automation workstation for NVIDIA GPUs using the official `browser
 
 - Add at least one provider credential in `.env` before first use, such as `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`, or `DEEPSEEK_API_KEY`.
 - The upstream UI defaults to `DEFAULT_LLM=openai`, but the provider and model can also be changed inside the WebUI.
-- `USE_OWN_BROWSER=true` enables browser reuse mode. When using that mode, set `BROWSER_PATH` and optionally `BROWSER_USER_DATA`.
+- During runtime env generation, NVIDIA AI Hub now auto-detects a local Chromium-based browser path when possible and fills `BROWSER_PATH` plus `USE_OWN_BROWSER=true` automatically. You can still override both values manually in `.env`.
+- `USE_OWN_BROWSER=true` enables browser reuse mode. When using that mode, set `BROWSER_PATH` and optionally `BROWSER_USER_DATA` if auto-detection did not match your preferred browser.
 - `KEEP_BROWSER_OPEN=true` keeps the browser session alive between tasks.
 - `BROWSER_CDP` can point to an external Chromium-compatible DevTools endpoint if you want the agent to attach to an existing browser.
 - `OLLAMA_BASE_URL` is included for local model routing patterns, but you may still need to set the provider and endpoint inside the UI depending on your chosen backend.

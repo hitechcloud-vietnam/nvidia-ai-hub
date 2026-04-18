@@ -6,6 +6,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import sys
 import threading
 from pathlib import Path
 from typing import AsyncGenerator
@@ -211,6 +212,7 @@ def _render_runtime_env(template_text: str) -> str:
         "MINIO_SECRET_KEY": shared_secrets["minio_password"],
         "S3_AWS_SECRET_ACCESS_KEY": shared_secrets["minio_password"],
     }
+    generated_values.update(_auto_detect_runtime_env_values())
 
     rendered_lines: list[str] = []
     for line in template_text.splitlines():
@@ -226,9 +228,98 @@ def _render_runtime_env(template_text: str) -> str:
     return "\n".join(rendered_lines) + "\n"
 
 
+def _browser_detection_candidates() -> list[tuple[str, str | None, str | None]]:
+    local_app_data = os.getenv("LOCALAPPDATA")
+    program_files = os.getenv("PROGRAMFILES")
+    program_files_x86 = os.getenv("PROGRAMFILES(X86)")
+    home = Path.home()
+
+    if os.name == "nt":
+        candidates = [
+            ("chrome", os.path.join(program_files or "", "Google", "Chrome", "Application", "chrome.exe"), os.path.join(local_app_data or "", "Google", "Chrome", "User Data")),
+            ("chrome", os.path.join(program_files_x86 or "", "Google", "Chrome", "Application", "chrome.exe"), os.path.join(local_app_data or "", "Google", "Chrome", "User Data")),
+            ("edge", os.path.join(program_files_x86 or "", "Microsoft", "Edge", "Application", "msedge.exe"), os.path.join(local_app_data or "", "Microsoft", "Edge", "User Data")),
+            ("edge", os.path.join(program_files or "", "Microsoft", "Edge", "Application", "msedge.exe"), os.path.join(local_app_data or "", "Microsoft", "Edge", "User Data")),
+            ("brave", os.path.join(program_files or "", "BraveSoftware", "Brave-Browser", "Application", "brave.exe"), os.path.join(local_app_data or "", "BraveSoftware", "Brave-Browser", "User Data")),
+            ("brave", os.path.join(program_files_x86 or "", "BraveSoftware", "Brave-Browser", "Application", "brave.exe"), os.path.join(local_app_data or "", "BraveSoftware", "Brave-Browser", "User Data")),
+            ("chromium", os.path.join(local_app_data or "", "Chromium", "Application", "chrome.exe"), os.path.join(local_app_data or "", "Chromium", "User Data")),
+        ]
+        return [(name, path, profile) for name, path, profile in candidates if path]
+
+    if sys.platform == "darwin":
+        return [
+            ("chrome", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", str(home / "Library" / "Application Support" / "Google" / "Chrome")),
+            ("edge", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", str(home / "Library" / "Application Support" / "Microsoft Edge")),
+            ("brave", "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser", str(home / "Library" / "Application Support" / "BraveSoftware" / "Brave-Browser")),
+            ("chromium", "/Applications/Chromium.app/Contents/MacOS/Chromium", str(home / "Library" / "Application Support" / "Chromium")),
+        ]
+
+    return [
+        ("chrome", shutil.which("google-chrome") or shutil.which("google-chrome-stable"), str(home / ".config" / "google-chrome")),
+        ("edge", shutil.which("microsoft-edge") or shutil.which("microsoft-edge-stable"), str(home / ".config" / "microsoft-edge")),
+        ("brave", shutil.which("brave-browser") or shutil.which("brave"), str(home / ".config" / "BraveSoftware" / "Brave-Browser")),
+        ("chromium", shutil.which("chromium") or shutil.which("chromium-browser"), str(home / ".config" / "chromium")),
+    ]
+
+
+def _auto_detect_runtime_env_values() -> dict[str, str]:
+    for _browser_name, browser_path, browser_user_data in _browser_detection_candidates():
+        if not browser_path:
+            continue
+        if not Path(browser_path).is_file():
+            continue
+
+        detected: dict[str, str] = {
+            "BROWSER_PATH": browser_path,
+            "USE_OWN_BROWSER": "true",
+        }
+        if browser_user_data and Path(browser_user_data).exists():
+            detected["BROWSER_USER_DATA"] = browser_user_data
+        return detected
+
+    return {}
+
+
+def _merge_runtime_env_defaults(existing_text: str) -> str:
+    detected_values = _auto_detect_runtime_env_values()
+    if not detected_values:
+        return existing_text if existing_text.endswith("\n") else existing_text + "\n"
+
+    updated_lines: list[str] = []
+    seen_keys: set[str] = set()
+    changed = False
+
+    for line in existing_text.splitlines():
+        if not line or line.lstrip().startswith("#") or "=" not in line:
+            updated_lines.append(line)
+            continue
+
+        key, value = line.split("=", 1)
+        seen_keys.add(key)
+        if key in detected_values and not value.strip():
+            updated_lines.append(f"{key}={detected_values[key]}")
+            changed = True
+            continue
+        updated_lines.append(line)
+
+    for key, value in detected_values.items():
+        if key not in seen_keys:
+            updated_lines.append(f"{key}={value}")
+            changed = True
+
+    if not changed:
+        return existing_text if existing_text.endswith("\n") else existing_text + "\n"
+
+    return "\n".join(updated_lines) + "\n"
+
+
 def ensure_runtime_env(recipe_dir: Path) -> tuple[Path | None, bool]:
     env_file = _runtime_env_file(recipe_dir)
     if env_file.is_file():
+        current_text = env_file.read_text()
+        merged_text = _merge_runtime_env_defaults(current_text)
+        if merged_text != current_text:
+            env_file.write_text(merged_text)
         return env_file, False
 
     template_file = _runtime_env_template_file(recipe_dir)
