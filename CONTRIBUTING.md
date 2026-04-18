@@ -63,6 +63,8 @@ The repository should follow an enterprise-style contribution standard.
 
 If a contribution introduces external code, assets, models, or copied configuration, document the source and license in the pull request.
 
+Repository automation runs by default when matching files are changed. When a pull request touches `.github/workflows/` or `.github/dependabot.yml`, update the related governance docs in the same change set.
+
 When a change touches legal identity, trademark wording, commercial-use boundaries, public branding, or reviewer-facing repository policy, keep the wording synchronized across:
 
 - `README.md`
@@ -263,14 +265,14 @@ Before opening a pull request, confirm:
 - [ ] The change is scoped and reviewable
 - [ ] Documentation was updated if behavior changed
 - [ ] Required validation notes were added for backend, frontend, recipe, script, or governance changes
-- [ ] Optional GitHub Actions workflows were reviewed if the change depends on repository automation
+- [ ] Repository automation changes were reviewed if the change depends on workflows or Dependabot
 
-## Optional GitHub Actions Workflows
+## Repository Automation
 
-Additional GitHub Actions workflow files are staged under `.github/workflows/` and remain gated until `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
+Repository workflow files under `.github/workflows/` run automatically when their event and path filters match.
 
-The repository also includes `.github/dependabot.yml`, but dependency update pull requests remain paused until maintainers raise the configured `open-pull-requests-limit` above `0`.
+The repository also includes `.github/dependabot.yml`, and dependency update pull requests remain active with bounded `open-pull-requests-limit` values.
 
-Use [`docs/github-actions.md`](./docs/github-actions.md) for the current workflow inventory and rollout guidance.
+Use [`docs/github-actions.md`](./docs/github-actions.md) for the current workflow inventory and automation guidance.
 
-If your change relies on staged automation, mention that dependency in the pull request and confirm whether the gate remains disabled or has been enabled by maintainers.
+If your change relies on repository automation, mention that dependency in the pull request and confirm what workflow scope or automation behavior changed.

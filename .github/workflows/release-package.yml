@@ -1,4 +1,4 @@
-name: Disabled - Release Package Build
+name: Release Package Build
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - 'registry/**'
       - 'scripts/**'
       - 'requirements.txt'
-      - '.github/workflows/release-package-disabled.yml'
+      - '.github/workflows/release-package.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,6 @@ concurrency:
 
 jobs:
   build-release-package:
-    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -69,3 +68,4 @@ jobs:
           name: nvidia-ai-hub-source
           path: dist/nvidia-ai-hub-source.tar.gz
           if-no-files-found: error
+

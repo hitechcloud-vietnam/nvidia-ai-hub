@@ -1,4 +1,4 @@
-name: Disabled - Recipe Validation
+name: Recipe Validation
 
 on:
   pull_request:
@@ -6,13 +6,13 @@ on:
     paths:
       - 'registry/**'
       - 'scripts/**'
-      - '.github/workflows/recipe-validation-disabled.yml'
+      - '.github/workflows/recipe-validation.yml'
   push:
     branches: [main]
     paths:
       - 'registry/**'
       - 'scripts/**'
-      - '.github/workflows/recipe-validation-disabled.yml'
+      - '.github/workflows/recipe-validation.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,6 @@ concurrency:
 
 jobs:
   recipe-validation:
-    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

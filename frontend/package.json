@@ -19,12 +19,14 @@
     "build:backend": "node ./electron/scripts/build-backend.mjs",
     "build:icons": "node ./electron/scripts/generate-icons.mjs",
     "clean:release": "node ./electron/scripts/clean-release.mjs",
+    "desktop:prepare": "npm run clean:release && npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure",
     "electron:ensure": "node ./electron/scripts/ensure-electron.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "desktop:dev": "npm run build:web && npm run build:icons && npm run electron:ensure && electron .",
-    "desktop:pack": "npm run clean:release && npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder --dir",
-    "desktop:dist": "npm run clean:release && npm run build:web && npm run build:icons && npm run build:backend && npm run electron:ensure && electron-builder",
+    "desktop:pack": "npm run desktop:prepare && electron-builder --dir",
+    "desktop:dist": "npm run desktop:prepare && electron-builder",
+    "desktop:dist:win": "npm run desktop:prepare && electron-builder --win nsis -c.artifactName=\"${productName}-${version}-win-${arch}-setup.${ext}\" && electron-builder --win portable -c.artifactName=\"${productName}-${version}-win-${arch}-portable.${ext}\" && electron-builder --win zip -c.artifactName=\"${productName}-${version}-win-${arch}.${ext}\" && electron-builder --win msi -c.artifactName=\"${productName}-${version}-win-${arch}.${ext}\"",
     "postinstall": "npm run electron:ensure"
   },
   "dependencies": {

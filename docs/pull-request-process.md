@@ -77,7 +77,7 @@ Recommended labels:
 - keep workflow permissions minimal
 - use [`maintenance.md`](./maintenance.md) and [`github-actions.md`](./github-actions.md) when touching repository automation
 
-Staged workflows remain gated by `ENABLE_OPTIONAL_WORKFLOWS`. Dependabot remains paused until maintainers raise `open-pull-requests-limit`.
+Repository workflows run automatically when their path and event filters match. Dependabot remains active with bounded pull request limits.
 
 ## 6. Related document review
 

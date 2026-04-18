@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/optional-workflows-status.yml'
-      - '.github/workflows/*-disabled.yml'
+      - '.github/workflows/*.yml'
       - '.github/dependabot.yml'
       - 'docs/github-actions.md'
       - 'docs/pull-request-process.md'
@@ -19,29 +19,20 @@ jobs:
   report-status:
     runs-on: ubuntu-latest
     steps:
-      - name: Report optional workflow state
-        env:
-          ENABLE_OPTIONAL_WORKFLOWS: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS }}
+      - name: Report active automation state
         run: |
-          echo "Repository variable ENABLE_OPTIONAL_WORKFLOWS='${ENABLE_OPTIONAL_WORKFLOWS}'"
-          if [ "${ENABLE_OPTIONAL_WORKFLOWS}" = "true" ]; then
-            echo "Optional workflows are enabled."
-          else
-            echo "Optional workflows are disabled."
-            echo "Set repository variable ENABLE_OPTIONAL_WORKFLOWS=true to activate gated jobs."
-          fi
+          echo "Repository automation is active by default."
+          echo "Validation workflows:"
+          echo "- .github/workflows/ci-validation.yml"
+          echo "- .github/workflows/recipe-validation.yml"
+          echo "- .github/workflows/docs-governance.yml"
+          echo "Dependency and release workflows:"
+          echo "- .github/workflows/dependency-updates.yml"
+          echo "- .github/workflows/dependabot-auto-triage.yml"
+          echo "- .github/workflows/release-package.yml"
+          echo "- .github/workflows/desktop-build.yml"
 
-      - name: Summarize staged workflows
-        run: |
-          echo "Staged optional workflows:"
-          echo "- .github/workflows/ci-validation-disabled.yml"
-          echo "- .github/workflows/recipe-validation-disabled.yml"
-          echo "- .github/workflows/docs-governance-disabled.yml"
-          echo "- .github/workflows/dependency-updates-disabled.yml"
-          echo "- .github/workflows/dependabot-auto-triage-disabled.yml"
-          echo "- .github/workflows/release-package-disabled.yml"
-
-      - name: Report Dependabot pause state
+      - name: Report Dependabot active state
         run: |
           echo "Dependabot configuration file: .github/dependabot.yml"
-          echo "Current default state: paused via open-pull-requests-limit=0 for each ecosystem."
+          echo "Current default state: active with bounded open pull request limits per ecosystem."

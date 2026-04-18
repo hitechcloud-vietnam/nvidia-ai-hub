@@ -1,4 +1,4 @@
-name: Disabled - Docs and Governance Validation
+name: Docs and Governance Validation
 
 on:
   pull_request:
@@ -36,7 +36,6 @@ concurrency:
 
 jobs:
   docs-governance-validation:
-    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 

@@ -1,4 +1,4 @@
-name: Disabled - CI Validation
+name: CI Validation
 
 on:
   pull_request:
@@ -7,14 +7,14 @@ on:
       - 'daemon/**'
       - 'frontend/**'
       - 'requirements.txt'
-      - '.github/workflows/ci-validation-disabled.yml'
+      - '.github/workflows/ci-validation.yml'
   push:
     branches: [main]
     paths:
       - 'daemon/**'
       - 'frontend/**'
       - 'requirements.txt'
-      - '.github/workflows/ci-validation-disabled.yml'
+      - '.github/workflows/ci-validation.yml'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +26,6 @@ concurrency:
 
 jobs:
   backend-frontend-validation:
-    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

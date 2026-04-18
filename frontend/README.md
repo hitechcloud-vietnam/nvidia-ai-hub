@@ -55,7 +55,8 @@ npm run lint
 - Electron sources live in `electron/`
 - the packaged desktop app starts a local FastAPI backend runtime
 - desktop packaging expects Python to be available on the build machine
-- hosted CI packaging is staged in `.github/workflows/desktop-build-disabled.yml`
+- hosted CI packaging runs through `.github/workflows/desktop-build.yml`
+- Windows CI packaging uses `npm run desktop:dist:win` so setup and portable `.exe` artifacts keep separate names
 - app icons are generated from `public/brand/spark-ai-hub-mark.svg` via `npm run build:icons`
 - production web builds now split major vendor bundles in `vite.config.js` to reduce the main entry chunk during desktop and web packaging
 - `npm run desktop:pack` and `npm run desktop:dist` now clear `frontend/release/` first to avoid stale locked Windows packaging outputs

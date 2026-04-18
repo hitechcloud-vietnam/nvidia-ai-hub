@@ -165,7 +165,7 @@ export default function App() {
         <header className="shrink-0 flex items-center justify-between px-6 py-3 bg-surface-low/60 backdrop-blur-md border-b border-outline-dim">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold tracking-tight font-display">{t('appName')}</span>
-            <span className="text-[10px] text-text-dim font-medium font-label bg-surface-high px-2 py-0.5 rounded-md">{t('topbar.version', { value: 'v1.1' })}</span>
+            <span className="text-[10px] text-text-dim font-medium font-label bg-surface-high px-2 py-0.5 rounded-md">{t('topbar.version', { value: 'v4.0.0' })}</span>
           </div>
 
           {!selectedRecipe && (

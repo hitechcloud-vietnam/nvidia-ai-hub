@@ -1,36 +1,32 @@
-# GitHub Actions Rollout Guide
+# GitHub Actions Guide
 
-This document describes the staged automation model for this repository.
+This document describes the active automation model for this repository.
 
 ## 1. Current automation state
 
-The repository contains active workflows and staged workflows.
+The repository contains active workflows for validation, packaging, and dependency automation.
 
 ### Active workflows
 
 - `.github/workflows/pr-validation.yml`
 - `.github/workflows/labeler.yml`
 - `.github/workflows/optional-workflows-status.yml`
+- `.github/workflows/ci-validation.yml`
+- `.github/workflows/recipe-validation.yml`
+- `.github/workflows/docs-governance.yml`
+- `.github/workflows/dependency-updates.yml`
+- `.github/workflows/dependabot-auto-triage.yml`
+- `.github/workflows/release-package.yml`
+- `.github/workflows/desktop-build.yml`
+- `.github/workflows/release-publish.yml`
 
-### Staged workflows
-
-These remain gated by `ENABLE_OPTIONAL_WORKFLOWS`:
-
-- `.github/workflows/ci-validation-disabled.yml`
-- `.github/workflows/recipe-validation-disabled.yml`
-- `.github/workflows/docs-governance-disabled.yml`
-- `.github/workflows/release-package-disabled.yml`
-- `.github/workflows/desktop-build-disabled.yml`
-- `.github/workflows/dependency-updates-disabled.yml`
-- `.github/workflows/dependabot-auto-triage-disabled.yml`
-
-### Paused dependency automation
+### Dependency automation
 
 - `.github/dependabot.yml`
 
-Dependabot is configured but paused through `open-pull-requests-limit: 0`.
+Dependabot is configured and active with bounded pull request limits.
 
-## 2. What the staged workflows are for
+## 2. What the workflows are for
 
 ### CI validation
 
@@ -56,11 +52,13 @@ This should include core governance, planning, and legal-reference materials suc
 
 Intended to build a source bundle with a production frontend artifact.
 
+This workflow uploads the source bundle as a GitHub Actions artifact for tagged and manually triggered builds.
+
 ### Desktop packaging
 
 Intended to build Electron desktop artifacts for Windows, macOS, and Linux.
 
-The staged desktop workflow currently:
+The desktop workflow currently:
 
 - installs Node.js and Python on each hosted runner
 - installs frontend dependencies with `npm ci`
@@ -70,9 +68,19 @@ The staged desktop workflow currently:
 - creates platform-specific desktop artifacts through `electron-builder`
 - uploads generated installer or bundle artifacts for review
 
-Hosted signing, notarization, and native Linux package validation are not configured yet and should be treated as follow-up rollout work.
+On Windows, the workflow uses `npm run desktop:dist:win` so NSIS setup, portable, ZIP, and MSI outputs do not overwrite one another.
 
-Before promoting desktop packaging to an official release workflow, provision platform secrets and certificates explicitly:
+### Release publishing
+
+Intended to publish release notes and packaged assets to a GitHub Release.
+
+This workflow runs on `release: published` and can also be started manually.
+
+It rebuilds the source bundle and desktop artifacts from the release tag, then uploads them to the matching GitHub Release.
+
+Hosted signing, notarization, and native Linux package validation are not configured yet and should be treated as follow-up work.
+
+If signing is added later, provision platform secrets and certificates explicitly:
 
 - Windows signing: `CSC_LINK`, `CSC_KEY_PASSWORD`, and optional `WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`
 - macOS signing: `CSC_LINK`, `CSC_KEY_PASSWORD`, `CSC_NAME`
@@ -88,40 +96,21 @@ Intended to validate dependency and workflow automation changes.
 
 Intended to label and guide Dependabot pull requests after maintainers intentionally enable dependency pull requests.
 
-## 3. Enablement model
-
-Staged workflows run only when the repository variable `ENABLE_OPTIONAL_WORKFLOWS` is set to `true`.
-
-If the variable is missing or has another value, the staged jobs remain effectively disabled.
-
-## 4. Recommended rollout order
-
-1. review `.github/dependabot.yml`
-2. enable CI validation
-3. enable docs and governance validation
-4. enable recipe validation
-5. enable dependency update validation
-6. enable Dependabot auto-triage
-7. enable release packaging
-8. enable desktop packaging
-
-This order keeps lower-risk validation ahead of heavier automation.
-
-## 5. Permissions guidance
+## 3. Permissions guidance
 
 Before enabling or changing workflows, verify:
 
 - permissions remain minimal
 - workflow scope matches watched files
 - tool versions remain aligned with project docs
-- staged workflows are not enabled accidentally
+- workflow triggers stay intentionally scoped
 
-## 6. Pull request expectation for workflow changes
+## 4. Pull request expectation for workflow changes
 
 When a pull request changes workflow files, include:
 
 - what changed
-- whether the workflow remains gated
+- whether trigger scope or automation behavior changed
 - any permission changes
 - any local equivalent validation performed
 - any untested GitHub-hosted behavior

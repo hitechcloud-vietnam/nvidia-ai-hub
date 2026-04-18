@@ -4,7 +4,7 @@
 [![Security](https://img.shields.io/badge/Security-Policy-blue?style=flat-square)](./SECURITY.md)
 [![License](https://img.shields.io/badge/License-Non--Commercial-orange?style=flat-square)](./LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Commercial%20Licensing-purple?style=flat-square)](./COMMERCIAL-LICENSE.md)
-[![Optional Workflows](https://img.shields.io/badge/GitHub%20Actions-Optional%20Workflows%20Status-6f42c1?style=flat-square)](./docs/github-actions.md)
+[![Automation](https://img.shields.io/badge/GitHub%20Actions-Automation%20Guide-6f42c1?style=flat-square)](./docs/github-actions.md)
 [![GitHub Stars](https://img.shields.io/github/stars/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/stargazers)
 [![Open Issues](https://img.shields.io/github/issues/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](https://github.com/hitechcloud-vietnam/nvidia-ai-hub/issues)
 [![GitHub License](https://img.shields.io/github/license/hitechcloud-vietnam/nvidia-ai-hub?style=flat-square)](./LICENSE)
@@ -69,7 +69,7 @@ Desktop packaging notes:
 
 For Linux deployment, Windows and macOS setup boundaries, Docker and NVIDIA runtime prerequisites, and optional PM2 process management, see [`docs/installation.md`](./docs/installation.md).
 
-For staged desktop packaging automation and optional installer builds, see [`docs/github-actions.md`](./docs/github-actions.md).
+For repository automation, release packaging, and installer builds, see [`docs/github-actions.md`](./docs/github-actions.md).
 
 For production-style Linux service management, reverse proxy setup, TLS, and network exposure guidance, see [`docs/deployment-production.md`](./docs/deployment-production.md).
 

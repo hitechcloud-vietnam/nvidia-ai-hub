@@ -1,8 +1,7 @@
 version: 2
 
-# Dependency update PR creation is staged but paused by default.
-# To enable Dependabot, raise each open-pull-requests-limit above 0
-# after reviewing docs/github-actions.md and enabling the gated validation workflow.
+# Dependency update PR creation is active by default.
+# Keep limits small enough for review capacity while maintaining automation coverage.
 updates:
   - package-ecosystem: "pip"
     directory: "/"
@@ -11,7 +10,7 @@ updates:
       day: "monday"
       time: "03:00"
       timezone: "UTC"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "backend"
@@ -30,7 +29,7 @@ updates:
       day: "monday"
       time: "03:15"
       timezone: "UTC"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "frontend"
@@ -49,7 +48,7 @@ updates:
       day: "monday"
       time: "03:30"
       timezone: "UTC"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "governance"

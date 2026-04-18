@@ -1,0 +1,154 @@
+name: Release Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-publish-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-source-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend distribution
+        working-directory: frontend
+        run: npm run build
+
+      - name: Prepare source bundle
+        run: |
+          mkdir -p dist
+          tar \
+            --exclude='.git' \
+            --exclude='.venv' \
+            --exclude='frontend/node_modules' \
+            --exclude='frontend/dist' \
+            -czf dist/nvidia-ai-hub-source.tar.gz .
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvidia-ai-hub-source-release
+          path: dist/nvidia-ai-hub-source.tar.gz
+          if-no-files-found: error
+
+  build-desktop-assets:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: nvidia-ai-hub-desktop-windows-release
+            build_command: npm run desktop:dist:win
+          - os: macos-latest
+            artifact_name: nvidia-ai-hub-desktop-macos-release
+            build_command: npm run desktop:dist
+          - os: ubuntu-latest
+            artifact_name: nvidia-ai-hub-desktop-linux-release
+            build_command: npm run desktop:dist
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build desktop artifacts
+        working-directory: frontend
+        run: ${{ matrix.build_command }}
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            frontend/release/*.exe
+            frontend/release/*.msi
+            frontend/release/*.zip
+            frontend/release/*.dmg
+            frontend/release/*.AppImage
+            frontend/release/*.deb
+            frontend/release/*.tar.gz
+            frontend/release/latest*.yml
+          if-no-files-found: error
+
+  publish-release-assets:
+    needs:
+      - build-source-bundle
+      - build-desktop-assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/release-assets
+
+      - name: Publish release notes and assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name || github.ref_name }}
+          generate_release_notes: true
+          append_body: true
+          draft: false
+          prerelease: ${{ github.event.release.prerelease || false }}
+          fail_on_unmatched_files: true
+          files: |
+            dist/release-assets/**/*.tar.gz
+            dist/release-assets/**/*.exe
+            dist/release-assets/**/*.msi
+            dist/release-assets/**/*.zip
+            dist/release-assets/**/*.dmg
+            dist/release-assets/**/*.AppImage
+            dist/release-assets/**/*.deb
+            dist/release-assets/**/latest*.yml

@@ -1,6 +1,6 @@
 # Repository Maintenance
 
-This guide is for maintainers updating repository controls, review routing, and staged automation.
+This guide is for maintainers updating repository controls, review routing, and active automation.
 
 ## 1. Maintenance areas
 
@@ -33,20 +33,20 @@ Recommended label families include:
 
 ### Dependabot
 
-`/.github/dependabot.yml` exists but remains paused by default through `open-pull-requests-limit: 0`.
+`/.github/dependabot.yml` is active by default with bounded pull request limits.
 
-If enabling an ecosystem, raise the limit only for the ecosystem that is ready for review.
+Adjust limits per ecosystem only when review capacity changes.
 
-### Optional workflows
+### Repository workflows
 
-Staged workflows under `/.github/workflows/` remain gated by `ENABLE_OPTIONAL_WORKFLOWS`.
+Repository workflows under `/.github/workflows/` are active by default.
 
-Review [`github-actions.md`](./github-actions.md) before enabling any staged workflow.
+Review [`github-actions.md`](./github-actions.md) before changing workflow scope, permissions, or release behavior.
 
 ## 2. Standard terms
 
-- **staged** — present in the repository but not yet intended for broad operational use
-- **gated** — runs only when `ENABLE_OPTIONAL_WORKFLOWS == 'true'`
+- **active** — enabled by default when workflow event and path filters match
+- **bounded** — automation is enabled with limits sized for reviewer capacity
 - **paused** — configuration exists but automatic pull request creation is intentionally suppressed
 
 ## 3. Branch protection
@@ -68,8 +68,8 @@ When changing repository maintenance controls, confirm:
 - `CODEOWNERS` still matches the layout
 - labels still route as intended
 - workflow permissions remain minimal
-- optional workflows stay gated unless intentionally enabled
-- Dependabot stays paused unless intentionally enabled
+- workflow triggers stay scoped intentionally
+- Dependabot limits stay aligned with reviewer capacity
 - related docs are updated in the same pull request
 - legal and trademark wording remains synchronized where applicable
 - planning and roadmap references remain synchronized where applicable
@@ -79,7 +79,7 @@ When changing repository maintenance controls, confirm:
 Maintenance pull requests should include:
 
 - affected control area
-- whether automation remains gated or paused
+- whether automation scope or limits changed
 - any permission changes
 - validation evidence for workflow or documentation changes
 - any deferred follow-up work

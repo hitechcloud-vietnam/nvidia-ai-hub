@@ -1,4 +1,4 @@
-name: Dependency Updates Validation (Disabled)
+name: Dependency Updates Validation
 
 on:
   workflow_dispatch:
@@ -15,7 +15,6 @@ permissions:
 
 jobs:
   validate-dependency-updates:
-    if: ${{ vars.ENABLE_OPTIONAL_WORKFLOWS == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

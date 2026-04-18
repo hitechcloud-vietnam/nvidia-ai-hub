@@ -50,7 +50,7 @@ This document is the index for contributor, maintainer, support, and governance 
 | Contribute code, recipes, scripts, or docs | `CONTRIBUTING.md` |
 | Review and merge pull requests | `docs/pull-request-process.md` |
 | Maintain labels, CODEOWNERS, Dependabot, or workflow policy | `docs/maintenance.md` |
-| Understand staged workflow rollout | `docs/github-actions.md` |
+| Understand repository automation | `docs/github-actions.md` |
 | Understand roadmap, execution phases, and registry batches | `planning/` documents |
 | Route support or bug reports | `SUPPORT.md` |
 | Report vulnerabilities | `SECURITY.md` |
