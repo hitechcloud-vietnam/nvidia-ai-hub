@@ -32,12 +32,14 @@ export default function App() {
   const clearRecipe = useStore((s) => s.clearRecipe)
   const theme = useStore((s) => s.theme)
   const featureFlags = useStore((s) => s.featureFlags)
+  const fetchModelManagerAvailability = useStore((s) => s.fetchModelManagerAvailability)
   const metrics = useStore((s) => s.metrics)
   const registryStatus = useStore((s) => s.registryStatus)
   const [search, setSearch] = useState('')
 
-  const navItems = NAV_ITEMS.filter((item) => item.id !== 'models' || featureFlags?.modelManager !== false)
-  const activeTab = tab === 'models' && featureFlags?.modelManager === false ? 'catalog' : tab
+  const showModelManager = featureFlags?.modelManager === true
+  const navItems = NAV_ITEMS.filter((item) => item.id !== 'models' || showModelManager)
+  const activeTab = tab === 'models' && !showModelManager ? 'catalog' : tab
 
   useMetrics()
   useRecipeMetrics()
@@ -57,16 +59,19 @@ export default function App() {
   useEffect(() => {
     fetchRecipes()
     fetchRegistryStatus()
+    fetchModelManagerAvailability()
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchRecipes()
         fetchRegistryStatus()
+        fetchModelManagerAvailability()
       }
     }, 10000)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchRecipes()
         fetchRegistryStatus()
+        fetchModelManagerAvailability()
       }
     }
 
@@ -75,7 +80,7 @@ export default function App() {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [fetchRecipes, fetchRegistryStatus])
+  }, [fetchModelManagerAvailability, fetchRecipes, fetchRegistryStatus])
 
   const runningCount = recipes.filter((r) => r.running || r.starting).length
   const updatesCount = recipes.filter((r) => r.registry_changed).length || registryStatus?.changed_recipe_slugs?.length || 0
@@ -175,7 +180,7 @@ export default function App() {
             ) : (
               <div className="animate-fadeIn">
                 {activeTab === 'catalog' && <Catalog search={search} />}
-                {activeTab === 'models' && featureFlags?.modelManager !== false && <Models />}
+                {activeTab === 'models' && showModelManager && <Models />}
                 {activeTab === 'updates' && <Updates />}
                 {activeTab === 'running' && <Running />}
                 {activeTab === 'system' && <System />}
@@ -229,6 +234,7 @@ function About() {
   const syncingRegistry = useStore((s) => s.syncingRegistry)
   const syncRegistry = useStore((s) => s.syncRegistry)
   const featureFlags = useStore((s) => s.featureFlags)
+  const modelManagerAvailable = useStore((s) => s.modelManagerAvailable)
   const setFeatureFlag = useStore((s) => s.setFeatureFlag)
 
   const handleSync = async () => {
@@ -317,15 +323,23 @@ function About() {
               <div>
                 <div className="text-sm font-semibold text-text">Model Manager</div>
                 <div className="mt-1 text-sm text-text-dim leading-6">
-                  Hide or show the full `P2.3 · Model Manager` experience, including the sidebar menu entry.
+                  Mặc định `P2.3 · Model Manager` sẽ tắt. Có thể bật thủ công ngay cả khi chưa pull model nào.
                 </div>
+                <div className="mt-2 text-xs text-text-dim font-label">
+                  Availability: {modelManagerAvailable ? 'Detected models available' : 'No installed models detected yet'}
+                </div>
+                {!modelManagerAvailable ? (
+                  <div className="mt-2 rounded-xl border border-warning/20 bg-warning/10 px-3 py-2 text-xs text-warning">
+                    Có thể bật trước để cấu hình trước, nhưng trang sẽ hiện cảnh báo vì chưa có model hoặc snapshot nào.
+                  </div>
+                ) : null}
               </div>
               <button
                 type="button"
-                onClick={() => setFeatureFlag('modelManager', !(featureFlags?.modelManager !== false))}
-                className={`inline-flex min-w-[96px] items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer ${featureFlags?.modelManager !== false ? 'border-success/20 bg-success/10 text-success' : 'border-outline-dim bg-surface text-text-dim'}`}
+                onClick={() => setFeatureFlag('modelManager', !(featureFlags?.modelManager === true))}
+                className={`inline-flex min-w-[96px] items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer ${featureFlags?.modelManager === true ? 'border-success/20 bg-success/10 text-success' : 'border-outline-dim bg-surface text-text-dim'}`}
               >
-                {featureFlags?.modelManager !== false ? 'Enabled' : 'Disabled'}
+                {featureFlags?.modelManager === true ? 'Enabled' : 'Disabled'}
               </button>
             </div>
           </div>

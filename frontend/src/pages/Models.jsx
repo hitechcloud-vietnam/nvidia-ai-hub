@@ -16,6 +16,7 @@ export default function Models() {
   const modelSectionErrors = useStore((s) => s.modelSectionErrors)
   const modelAction = useStore((s) => s.modelAction)
   const featureFlags = useStore((s) => s.featureFlags)
+  const modelManagerAvailable = useStore((s) => s.modelManagerAvailable)
   const fetchModelManager = useStore((s) => s.fetchModelManager)
   const pullModel = useStore((s) => s.pullModel)
   const deleteModel = useStore((s) => s.deleteModel)
@@ -30,6 +31,9 @@ export default function Models() {
   const [consumerFilter, setConsumerFilter] = useState('all')
   const [hfRepository, setHfRepository] = useState('')
   const [hfRevision, setHfRevision] = useState('main')
+  const [hfToken, setHfToken] = useState('')
+  const [hfTokenSaving, setHfTokenSaving] = useState(false)
+  const [hfTokenMessage, setHfTokenMessage] = useState('')
   const [activeTab, setActiveTab] = useState('runtime')
 
   useEffect(() => {
@@ -225,7 +229,29 @@ export default function Models() {
     await deleteHfSnapshot(item.id)
   }
 
-  if (featureFlags?.modelManager === false) {
+  const handleSaveHfToken = async () => {
+    const token = String(hfToken || '').trim()
+    if (!token) return
+    setHfTokenSaving(true)
+    setHfTokenMessage('')
+    try {
+      const res = await fetch('/api/system/hf-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      })
+      if (!res.ok) throw new Error('Failed to save Hugging Face token')
+      setHfToken('')
+      setHfTokenMessage('HF token saved to this host.')
+      await fetchModelManager({ silent: true })
+    } catch (error) {
+      setHfTokenMessage(error?.message || 'Failed to save Hugging Face token')
+    } finally {
+      setHfTokenSaving(false)
+    }
+  }
+
+  if (featureFlags?.modelManager !== true) {
     return null
   }
 
@@ -251,6 +277,12 @@ export default function Models() {
         {modelsError ? (
           <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-warning">
             {modelsError}
+          </div>
+        ) : null}
+
+        {!modelManagerAvailable ? (
+          <div className="mt-4 rounded-2xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-warning">
+            Chưa có model đã pull hoặc Hugging Face snapshot nào. Bạn vẫn có thể mở trang này để cấu hình HF token, xem runtime, và chuẩn bị pull model đầu tiên.
           </div>
         ) : null}
 
@@ -440,6 +472,39 @@ export default function Models() {
             {(modelSectionErrors?.hfInventory || modelSectionErrors?.hfIntakeQueue || modelSectionErrors?.modelSources)
               ? <SectionNotice message={`Some Hugging Face data is unavailable. Inventory: ${modelSectionErrors?.hfInventory || 'ok'} · Intake: ${modelSectionErrors?.hfIntakeQueue || 'ok'} · Sources: ${modelSectionErrors?.modelSources || 'ok'}`} />
               : null}
+            {!modelOverview?.hugging_face?.token_configured ? (
+              <div className="mb-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
+                <div className="text-sm font-semibold text-text">Hugging Face token chưa được cấu hình</div>
+                <div className="mt-1 text-sm leading-6 text-text-dim">
+                  Điền token tại đây để queue model gated/private. Token sẽ được lưu ở <code className="rounded bg-surface px-1.5 py-0.5 text-xs">~/.cache/huggingface/token</code> trên host.
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+                  <input
+                    type="password"
+                    value={hfToken}
+                    onChange={(event) => setHfToken(event.target.value)}
+                    placeholder="hf_..."
+                    className="w-full rounded-xl border border-outline-dim bg-surface px-4 py-2 text-sm text-text outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveHfToken}
+                    disabled={!hfToken.trim() || hfTokenSaving}
+                    className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {hfTokenSaving ? 'Saving...' : 'Save token'}
+                  </button>
+                </div>
+                <div className="mt-2 text-xs text-text-dim">
+                  Tạo token tại <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary hover:underline">huggingface.co/settings/tokens</a>
+                </div>
+                {hfTokenMessage ? <div className="mt-2 text-xs text-warning">{hfTokenMessage}</div> : null}
+              </div>
+            ) : (
+              <div className="mb-4 rounded-2xl border border-success/20 bg-success/10 p-4 text-sm text-success">
+                Hugging Face token đã được cấu hình trên host.
+              </div>
+            )}
             <div className="mt-0 rounded-2xl border border-outline-dim bg-surface-high/30 p-4">
               <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                 <div>

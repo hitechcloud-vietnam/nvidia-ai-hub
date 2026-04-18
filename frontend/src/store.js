@@ -12,10 +12,10 @@ const getInitialFeatureFlags = () => {
   try {
     const saved = JSON.parse(localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY) || '{}')
     return {
-      modelManager: saved?.modelManager !== false,
+      modelManager: saved?.modelManager === true,
     }
   } catch {
-    return { modelManager: true }
+    return { modelManager: false }
   }
 }
 
@@ -43,6 +43,7 @@ export const useStore = create((set, get) => ({
   recipeDetails: {},
   recipeDetailStatus: {},
   modelManagerLoadedAt: 0,
+  modelManagerAvailable: false,
   registryStatus: null,
   syncingRegistry: false,
   metrics: null,
@@ -93,6 +94,38 @@ export const useStore = create((set, get) => ({
     const nextFlags = { ...get().featureFlags, [key]: Boolean(enabled) }
     persistFeatureFlags(nextFlags)
     set({ featureFlags: nextFlags })
+  },
+
+  fetchModelManagerAvailability: async () => {
+    try {
+      const [installedResult, hfResult] = await Promise.allSettled([
+        fetch('/api/models/installed').then(async (res) => {
+          const data = await res.json().catch(() => ({}))
+          if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+          return data
+        }),
+        fetch('/api/models/huggingface').then(async (res) => {
+          const data = await res.json().catch(() => ({}))
+          if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+          return data
+        }),
+      ])
+
+      const installedCount = installedResult.status === 'fulfilled' && Array.isArray(installedResult.value?.models)
+        ? installedResult.value.models.length
+        : 0
+      const snapshotCount = hfResult.status === 'fulfilled'
+        ? Number(hfResult.value?.summary?.snapshot_count ?? hfResult.value?.snapshots?.length ?? 0)
+        : 0
+
+      const available = installedCount > 0 || snapshotCount > 0
+      set({ modelManagerAvailable: available })
+      return available
+    } catch (e) {
+      console.error('Failed to determine model manager availability:', e)
+      set({ modelManagerAvailable: false })
+      return false
+    }
   },
 
   toggleFeatureFlag: (key) => {
@@ -353,6 +386,8 @@ export const useStore = create((set, get) => ({
         ...nextState,
         modelsError,
         modelSectionErrors,
+        modelManagerAvailable: (Array.isArray(nextState.installedModels?.models) && nextState.installedModels.models.length > 0)
+          || Number(nextState.hfInventory?.summary?.snapshot_count ?? nextState.hfInventory?.snapshots?.length ?? 0) > 0,
         modelManagerLoadedAt: Date.now(),
       })
       return nextState
@@ -377,6 +412,7 @@ export const useStore = create((set, get) => ({
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      set({ modelManagerAvailable: true })
       await get().fetchModelManager({ silent: true })
       return data
     } catch (e) {
