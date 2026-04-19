@@ -1,0 +1,43 @@
+name: "Formbricks"
+slug: formbricks
+version: "1.0.0"
+description: "Run a practical self-hosted Formbricks survey and product feedback workspace with the official image, local PostgreSQL and Redis services, and persistent uploads for research and feedback collection workflows."
+author: "Formbricks"
+source: "official"
+website: "https://formbricks.com/"
+upstream: "https://github.com/formbricks/formbricks"
+category: workflow
+categories:
+  - surveys
+  - analytics
+  - webui
+tags:
+  - formbricks
+  - surveys
+  - feedback
+  - postgres
+  - redis
+icon: "📝"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 14
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/formbricks/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Formbricks with local PostgreSQL and Redis services and publish the web UI on port 3000."
+    command: "docker compose --env-file registry/recipes/formbricks/.env -p nvidia-ai-hub-formbricks -f registry/recipes/formbricks/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Formbricks while preserving PostgreSQL, Redis, and uploads data."
+    command: "docker compose --env-file registry/recipes/formbricks/.env -p nvidia-ai-hub-formbricks -f registry/recipes/formbricks/docker-compose.yml down"

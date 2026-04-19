@@ -1,0 +1,40 @@
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.0}
+    container_name: nvidia-ai-hub-leantime-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-leantime}
+      MYSQL_USER: ${MYSQL_USER:-leantime}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-me-leantime-mysql-password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me-leantime-mysql-root-password}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD:-change-me-leantime-mysql-root-password} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  leantime:
+    image: ${LEANTIME_IMAGE:-leantime/leantime:latest}
+    container_name: nvidia-ai-hub-leantime
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      LEAN_APP_URL: ${LEAN_APP_URL:-http://localhost:8080}
+      LEAN_DB_HOST: mysql
+      LEAN_DB_PORT: 3306
+      LEAN_DB_DATABASE: ${MYSQL_DATABASE:-leantime}
+      LEAN_DB_USER: ${MYSQL_USER:-leantime}
+      LEAN_DB_PASSWORD: ${MYSQL_PASSWORD:-change-me-leantime-mysql-password}
+      LEAN_EMAIL_RETURN: ${LEAN_EMAIL_RETURN:-changeme@local.local}
+      LEAN_SESSION_PASSWORD: ${LEAN_SESSION_PASSWORD:-change-me-leantime-session-password}
+    ports:
+      - "${LEANTIME_HOST_PORT:-8080}:8080"
+    volumes:
+      - ./data/userfiles:/var/www/html/userfiles
+      - ./data/plugins:/var/www/html/app/Plugins
+    restart: unless-stopped

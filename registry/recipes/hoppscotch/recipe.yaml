@@ -1,0 +1,43 @@
+name: "Hoppscotch"
+slug: hoppscotch
+version: "1.0.0"
+description: "Run a conservative self-hosted Hoppscotch API collaboration workspace with the official all-in-one image, a local PostgreSQL database, and persistent server data for API testing and team workspaces."
+author: "Hoppscotch"
+source: "official"
+website: "https://hoppscotch.io/"
+upstream: "https://github.com/hoppscotch/hoppscotch"
+category: workflow
+categories:
+  - api
+  - collaboration
+  - webui
+tags:
+  - hoppscotch
+  - api
+  - graphql
+  - postgres
+  - collaboration
+icon: "🛰️"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 14
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/hoppscotch/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Hoppscotch with a local PostgreSQL database and publish the main web UI on port 3000."
+    command: "docker compose --env-file registry/recipes/hoppscotch/.env -p nvidia-ai-hub-hoppscotch -f registry/recipes/hoppscotch/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Hoppscotch while preserving PostgreSQL data and server state."
+    command: "docker compose --env-file registry/recipes/hoppscotch/.env -p nvidia-ai-hub-hoppscotch -f registry/recipes/hoppscotch/docker-compose.yml down"

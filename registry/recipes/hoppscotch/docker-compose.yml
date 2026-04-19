@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    container_name: nvidia-ai-hub-hoppscotch-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hoppscotch}
+      POSTGRES_USER: ${POSTGRES_USER:-hoppscotch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-hoppscotch-postgres-password}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hoppscotch} -d ${POSTGRES_DB:-hoppscotch}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  hoppscotch:
+    image: ${HOPPSCOTCH_IMAGE:-ghcr.io/hoppscotch/hoppscotch-aio:latest}
+    container_name: nvidia-ai-hub-hoppscotch
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hoppscotch}:${POSTGRES_PASSWORD:-change-me-hoppscotch-postgres-password}@postgres:5432/${POSTGRES_DB:-hoppscotch}
+      JWT_SECRET: ${JWT_SECRET:-change-me-hoppscotch-jwt-secret-32-chars}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-hoppscotch-session-secret-32-chars}
+      TOKEN_SALT_COMPLEXITY: ${TOKEN_SALT_COMPLEXITY:-change-me-hoppscotch-token-salt}
+      WHITELISTED_ORIGINS: ${WHITELISTED_ORIGINS:-http://localhost:3000,http://localhost:3100}
+      VITE_BASE_URL: ${VITE_BASE_URL:-http://localhost:3000}
+      VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-http://localhost:3170}
+      VITE_BACKEND_GQL_URL: ${VITE_BACKEND_GQL_URL:-http://localhost:3170/graphql}
+      VITE_BACKEND_WS_URL: ${VITE_BACKEND_WS_URL:-ws://localhost:3170/graphql}
+    ports:
+      - "${HOPPSCOTCH_WEB_PORT:-3000}:3000"
+      - "${HOPPSCOTCH_ADMIN_PORT:-3100}:3100"
+      - "${HOPPSCOTCH_BACKEND_PORT:-3170}:3170"
+      - "${HOPPSCOTCH_WEBAPP_SERVER_PORT:-3200}:3200"
+    volumes:
+      - ./data/webapp-server:/data
+    restart: unless-stopped

@@ -1,0 +1,43 @@
+name: "Leantime"
+slug: leantime
+version: "1.0.0"
+description: "Run a practical self-hosted Leantime project management workspace with the official image, a local MySQL database, and persistent storage for collaborative planning, tasks, and lean operations tracking."
+author: "Leantime"
+source: "official"
+website: "https://leantime.io/"
+upstream: "https://github.com/Leantime/leantime"
+category: workflow
+categories:
+  - project-management
+  - collaboration
+  - webui
+tags:
+  - leantime
+  - project-management
+  - mysql
+  - planning
+  - collaboration
+icon: "📋"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8080
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/leantime/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Leantime with a local MySQL database and publish the web UI on port 8080."
+    command: "docker compose --env-file registry/recipes/leantime/.env -p nvidia-ai-hub-leantime -f registry/recipes/leantime/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Leantime while preserving MySQL data and uploaded files."
+    command: "docker compose --env-file registry/recipes/leantime/.env -p nvidia-ai-hub-leantime -f registry/recipes/leantime/docker-compose.yml down"

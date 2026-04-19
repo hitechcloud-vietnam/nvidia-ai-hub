@@ -1,0 +1,25 @@
+services:
+  directus:
+    image: ${DIRECTUS_IMAGE:-directus/directus:latest}
+    container_name: nvidia-ai-hub-directus
+    environment:
+      KEY: ${KEY:-change-me-directus-key}
+      SECRET: ${SECRET:-change-me-directus-secret-with-at-least-32-characters}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-directus-admin-password}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8055}
+      DB_CLIENT: sqlite3
+      DB_FILENAME: ${DB_FILENAME:-/directus/database/database.sqlite}
+    ports:
+      - "${DIRECTUS_HOST_PORT:-8055}:8055"
+    volumes:
+      - ./data/database:/directus/database
+      - ./data/uploads:/directus/uploads
+      - ./data/extensions:/directus/extensions
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8055/server/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped

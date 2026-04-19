@@ -1,0 +1,44 @@
+name: "Trigger.dev"
+slug: trigger-dev
+version: "1.0.0"
+description: "Run a conservative self-hosted Trigger.dev baseline with the official webapp image, local PostgreSQL, Redis, and Electric services, and a published web interface for workflow orchestration experiments."
+author: "Trigger.dev"
+source: "official"
+website: "https://trigger.dev/"
+upstream: "https://github.com/triggerdotdev/trigger.dev"
+category: workflow
+categories:
+  - automation
+  - orchestration
+  - webui
+tags:
+  - trigger-dev
+  - workflows
+  - postgres
+  - redis
+  - electric
+icon: "⚙️"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 16
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8030
+  path: "/"
+  health_path: "/healthcheck"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/trigger-dev/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start a conservative Trigger.dev baseline with PostgreSQL, Redis, Electric, and the published webapp on port 8030."
+    command: "docker compose --env-file registry/recipes/trigger-dev/.env -p nvidia-ai-hub-trigger-dev -f registry/recipes/trigger-dev/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Trigger.dev while preserving PostgreSQL, Redis, and Electric state."
+    command: "docker compose --env-file registry/recipes/trigger-dev/.env -p nvidia-ai-hub-trigger-dev -f registry/recipes/trigger-dev/docker-compose.yml down"

@@ -1,0 +1,44 @@
+name: "Directus"
+slug: directus
+version: "1.0.0"
+description: "Run a practical self-hosted Directus data platform with the official image, local SQLite storage, and persistent uploads for internal content, admin dashboards, and API-driven workflows."
+author: "Directus"
+source: "official"
+website: "https://directus.io/"
+upstream: "https://github.com/directus/directus"
+category: workflow
+categories:
+  - cms
+  - database
+  - webui
+tags:
+  - directus
+  - cms
+  - api
+  - sqlite
+  - admin
+icon: "🧭"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8055
+  path: "/"
+  health_path: "/server/health"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/directus/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Directus with persistent SQLite data and publish the admin UI on port 8055."
+    command: "docker compose --env-file registry/recipes/directus/.env -p nvidia-ai-hub-directus -f registry/recipes/directus/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Directus while preserving the local database and uploads."
+    command: "docker compose --env-file registry/recipes/directus/.env -p nvidia-ai-hub-directus -f registry/recipes/directus/docker-compose.yml down"
