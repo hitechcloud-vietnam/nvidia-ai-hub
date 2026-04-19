@@ -1,0 +1,44 @@
+name: "LobeHub"
+slug: lobehub
+version: "1.0.0"
+description: "Run a practical self-hosted LobeHub AI workspace with the official image, local PostgreSQL with PGVector, Redis, and S3-compatible object storage for chats, files, and assistant assets."
+author: "LobeHub"
+source: "official"
+website: "https://lobehub.com/"
+upstream: "https://github.com/lobehub/lobe-chat"
+category: llm
+categories:
+  - chat-ui
+  - agent
+  - multi-modal
+tags:
+  - lobehub
+  - chat
+  - assistants
+  - postgres
+  - redis
+  - s3
+icon: "💬"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 25
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3210
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/lobehub/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start LobeHub with local PostgreSQL, Redis, RustFS-compatible S3 storage, and the web UI on port 3210."
+    command: "docker compose --env-file registry/recipes/lobehub/.env -p nvidia-ai-hub-lobehub -f registry/recipes/lobehub/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop LobeHub while preserving database, cache, and object-storage data."
+    command: "docker compose --env-file registry/recipes/lobehub/.env -p nvidia-ai-hub-lobehub -f registry/recipes/lobehub/docker-compose.yml down"

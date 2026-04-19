@@ -286,7 +286,7 @@ def _copy_if_exists(source: Path, destination: Path) -> bool:
     return True
 
 
-def save_recipe_fork(slug: str) -> dict:
+def save_recipe_fork(slug: str, compose_content: str | None = None) -> dict:
     recipe_dir = get_registry_recipe_dir(slug)
     if not recipe_dir:
         raise FileNotFoundError(f"Recipe not found: {slug}")
@@ -297,9 +297,13 @@ def save_recipe_fork(slug: str) -> dict:
     env_template = recipe_dir / ".env.example"
     recipe_source = recipe_dir / "recipe.yaml"
 
-    compose_saved = _copy_if_exists(compose_source, fork_dir / "docker-compose.yml")
+    compose_target = fork_dir / "docker-compose.yml"
+    compose_saved = _copy_if_exists(compose_source, compose_target)
     recipe_saved = _copy_if_exists(recipe_source, fork_dir / "recipe.yaml")
     env_saved = _copy_if_exists(env_source if env_source.is_file() else env_template, fork_dir / ".env")
+    if compose_content is not None:
+        compose_target.write_text(compose_content, encoding="utf-8")
+        compose_saved = True
     _write_fork_state(slug, active=True)
 
     return {

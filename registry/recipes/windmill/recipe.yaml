@@ -1,0 +1,44 @@
+name: "Windmill"
+slug: windmill
+version: "1.0.0"
+description: "Run a practical self-hosted Windmill automation workspace with the official image, local PostgreSQL, a dedicated worker, and a simple local web UI baseline for scripts, flows, and operational automation."
+author: "Windmill"
+source: "official"
+website: "https://www.windmill.dev/"
+upstream: "https://github.com/windmill-labs/windmill"
+category: workflow
+categories:
+  - automation
+  - orchestration
+  - webui
+tags:
+  - windmill
+  - automation
+  - scripts
+  - postgres
+  - workflows
+icon: "🌬️"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 16
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3014
+  path: "/"
+  health_path: "/api/health"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/windmill/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Windmill with local PostgreSQL, one worker, and the web UI on port 3014."
+    command: "docker compose --env-file registry/recipes/windmill/.env -p nvidia-ai-hub-windmill -f registry/recipes/windmill/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Windmill while preserving PostgreSQL state."
+    command: "docker compose --env-file registry/recipes/windmill/.env -p nvidia-ai-hub-windmill -f registry/recipes/windmill/docker-compose.yml down"

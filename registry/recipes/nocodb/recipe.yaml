@@ -1,0 +1,43 @@
+name: "NocoDB"
+slug: nocodb
+version: "1.0.0"
+description: "Run a practical self-hosted NocoDB collaborative database workspace with the official image, a local PostgreSQL metadata database, and persistent storage for no-code tables, internal apps, and lightweight AI-adjacent operations data."
+author: "NocoDB"
+source: "official"
+website: "https://nocodb.com/"
+upstream: "https://github.com/nocodb/nocodb"
+category: workflow
+categories:
+  - database
+  - collaboration
+  - webui
+tags:
+  - nocodb
+  - no-code
+  - database
+  - postgres
+  - tables
+icon: "🧮"
+requirements:
+  min_memory_gb: 4
+  recommended_memory_gb: 8
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3011
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/nocodb/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start NocoDB with a local PostgreSQL metadata database and publish the web UI on port 3011."
+    command: "docker compose --env-file registry/recipes/nocodb/.env -p nvidia-ai-hub-nocodb -f registry/recipes/nocodb/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop NocoDB while preserving project and PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/nocodb/.env -p nvidia-ai-hub-nocodb -f registry/recipes/nocodb/docker-compose.yml down"

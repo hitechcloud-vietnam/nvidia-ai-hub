@@ -1,0 +1,44 @@
+name: "Budibase"
+slug: budibase
+version: "1.0.0"
+description: "Run a practical self-hosted Budibase low-code platform with the official service images, local CouchDB, Redis, MinIO-compatible object storage, and a web UI for internal apps, forms, and operational tools."
+author: "Budibase"
+source: "official"
+website: "https://budibase.com/"
+upstream: "https://github.com/Budibase/budibase"
+category: workflow
+categories:
+  - low-code
+  - internal-tools
+  - webui
+tags:
+  - budibase
+  - low-code
+  - internal-tools
+  - couchdb
+  - minio
+  - redis
+icon: "🏗️"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3015
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 7
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/budibase/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Budibase with local CouchDB, Redis, MinIO, worker, and proxy services on port 3015."
+    command: "docker compose --env-file registry/recipes/budibase/.env -p nvidia-ai-hub-budibase -f registry/recipes/budibase/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Budibase while preserving database and object-storage data."
+    command: "docker compose --env-file registry/recipes/budibase/.env -p nvidia-ai-hub-budibase -f registry/recipes/budibase/docker-compose.yml down"

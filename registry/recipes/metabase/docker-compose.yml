@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: nvidia-ai-hub-metabase-postgres
+    environment:
+      POSTGRES_USER: ${MB_DB_USER:-metabase}
+      POSTGRES_DB: ${MB_DB_DBNAME:-metabaseappdb}
+      POSTGRES_PASSWORD: ${MB_DB_PASS:-change-me-metabase-postgres}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MB_DB_USER:-metabase} -d ${MB_DB_DBNAME:-metabaseappdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  metabase:
+    image: ${METABASE_IMAGE:-metabase/metabase:latest}
+    container_name: nvidia-ai-hub-metabase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    environment:
+      JAVA_TIMEZONE: ${JAVA_TIMEZONE:-UTC}
+      MB_DB_TYPE: ${MB_DB_TYPE:-postgres}
+      MB_DB_DBNAME: ${MB_DB_DBNAME:-metabaseappdb}
+      MB_DB_PORT: ${MB_DB_PORT:-5432}
+      MB_DB_USER: ${MB_DB_USER:-metabase}
+      MB_DB_PASS: ${MB_DB_PASS:-change-me-metabase-postgres}
+      MB_DB_HOST: ${MB_DB_HOST:-postgres}
+    ports:
+      - "${METABASE_HOST_PORT:-3002}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail -I http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    restart: unless-stopped

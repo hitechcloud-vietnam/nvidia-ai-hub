@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: nvidia-ai-hub-docmost-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docmost}
+      POSTGRES_USER: ${POSTGRES_USER:-docmost}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-docmost-postgres}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docmost} -d ${POSTGRES_DB:-docmost}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: nvidia-ai-hub-docmost-redis
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  docmost:
+    image: ${DOCMOST_IMAGE:-docmost/docmost:latest}
+    container_name: nvidia-ai-hub-docmost
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3003}
+      APP_SECRET: ${APP_SECRET:-change-me-docmost-app-secret}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-docmost}:${POSTGRES_PASSWORD:-change-me-docmost-postgres}@postgres:5432/${POSTGRES_DB:-docmost}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+    ports:
+      - "${DOCMOST_HOST_PORT:-3003}:3000"
+    volumes:
+      - ./data/storage:/app/data/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped

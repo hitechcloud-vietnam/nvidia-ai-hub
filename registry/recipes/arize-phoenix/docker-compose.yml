@@ -1,0 +1,21 @@
+services:
+  arize-phoenix:
+    image: ${PHOENIX_IMAGE:-arizephoenix/phoenix:latest}
+    container_name: nvidia-ai-hub-arize-phoenix
+    environment:
+      PHOENIX_WORKING_DIR: ${PHOENIX_WORKING_DIR:-/mnt/data}
+      PHOENIX_PORT: ${PHOENIX_PORT:-6006}
+      PHOENIX_GRPC_PORT: ${PHOENIX_GRPC_PORT:-4317}
+      PHOENIX_ENABLE_AUTH: ${PHOENIX_ENABLE_AUTH:-false}
+      PHOENIX_SECRET: ${PHOENIX_SECRET:-change-me-phoenix-secret}
+    ports:
+      - "${PHOENIX_HOST_PORT:-6006}:6006"
+    volumes:
+      - ./data:/mnt/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:6006/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped

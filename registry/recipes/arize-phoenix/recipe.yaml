@@ -1,0 +1,44 @@
+name: "Arize Phoenix"
+slug: arize-phoenix
+version: "1.0.0"
+description: "Run a practical self-hosted Arize Phoenix observability workspace with the official container image and local persistent storage for traces, evaluations, datasets, and prompt investigations."
+author: "Arize AI"
+source: "official"
+website: "https://arize.com/phoenix"
+upstream: "https://github.com/Arize-ai/phoenix"
+category: agent
+categories:
+  - observability
+  - evaluation
+  - webui
+tags:
+  - phoenix
+  - arize
+  - observability
+  - tracing
+  - evaluation
+  - prompt-engineering
+icon: "🔥"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 6006
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/arize-phoenix/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start the official Arize Phoenix container with persistent local storage and publish the UI on port 6006."
+    command: "docker compose --env-file registry/recipes/arize-phoenix/.env -p nvidia-ai-hub-arize-phoenix -f registry/recipes/arize-phoenix/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Arize Phoenix while preserving local workspace data."
+    command: "docker compose --env-file registry/recipes/arize-phoenix/.env -p nvidia-ai-hub-arize-phoenix -f registry/recipes/arize-phoenix/docker-compose.yml down"

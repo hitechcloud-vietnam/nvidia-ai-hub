@@ -1,0 +1,43 @@
+name: "Helicone"
+slug: helicone
+version: "1.0.0"
+description: "Run a practical self-hosted Helicone observability stack with the official all-in-one image for LLM logging, gateway analytics, proxying, and request inspection."
+author: "Helicone"
+source: "official"
+website: "https://www.helicone.ai/"
+upstream: "https://github.com/Helicone/helicone"
+category: agent
+categories:
+  - observability
+  - gateway
+  - analytics
+tags:
+  - helicone
+  - observability
+  - proxy
+  - analytics
+  - llm-gateway
+icon: "🛰️"
+requirements:
+  min_memory_gb: 10
+  recommended_memory_gb: 20
+  disk_gb: 25
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3004
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/helicone/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Helicone all-in-one and publish the dashboard on port 3004."
+    command: "docker compose --env-file registry/recipes/helicone/.env -p nvidia-ai-hub-helicone -f registry/recipes/helicone/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Helicone while preserving embedded database, analytics, and object-storage data."
+    command: "docker compose --env-file registry/recipes/helicone/.env -p nvidia-ai-hub-helicone -f registry/recipes/helicone/docker-compose.yml down"

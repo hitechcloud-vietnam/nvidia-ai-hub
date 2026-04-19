@@ -1,0 +1,39 @@
+services:
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: nvidia-ai-hub-searxng-ai-stack-redis
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  searxng:
+    image: ${SEARXNG_IMAGE:-docker.io/searxng/searxng:latest}
+    container_name: nvidia-ai-hub-searxng-ai-stack
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      BASE_URL: ${SEARXNG_BASE_URL:-http://localhost:8080/}
+      INSTANCE_NAME: ${INSTANCE_NAME:-NVIDIA AI Hub SearXNG}
+      UWSGI_WORKERS: ${UWSGI_WORKERS:-2}
+      UWSGI_THREADS: ${UWSGI_THREADS:-4}
+      FORCE_OWNERSHIP: ${FORCE_OWNERSHIP:-true}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${SEARXNG_HOST_PORT:-8080}:8080"
+    volumes:
+      - ./data/searxng:/etc/searxng
+      - ./data/cache:/var/cache/searxng
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped

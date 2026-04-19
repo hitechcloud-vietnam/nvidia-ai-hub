@@ -90,6 +90,8 @@ export default function RecipeDetail() {
   const [hfError, setHfError] = useState('')
   const [deploymentSelection, setDeploymentSelection] = useState(null)
   const [deploymentSaving, setDeploymentSaving] = useState(false)
+  const [deploymentSaveInfo, setDeploymentSaveInfo] = useState(null)
+  const [deploymentSaveError, setDeploymentSaveError] = useState('')
   const [execCommand, setExecCommand] = useState('')
   const [execHistory, setExecHistory] = useState([])
   const [execRunning, setExecRunning] = useState(false)
@@ -124,6 +126,11 @@ export default function RecipeDetail() {
       })
     }
   }, [deploymentPlan, recommendedDeployment])
+
+  useEffect(() => {
+    setDeploymentSaveInfo(null)
+    setDeploymentSaveError('')
+  }, [recipe?.slug])
 
   const isBuilding = installing === recipe?.slug
   const isUpdating = updating === recipe?.slug
@@ -470,13 +477,21 @@ export default function RecipeDetail() {
                 saveDeploymentSelection={async () => {
                   if (!recipe?.slug || !deploymentSelection) return
                   setDeploymentSaving(true)
+                  setDeploymentSaveError('')
                   try {
-                    await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                    const result = await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                    setDeploymentSaveInfo(result)
+                    return result
+                  } catch (error) {
+                    setDeploymentSaveError(error?.message || 'Failed to save deployment profile')
+                    throw error
                   } finally {
                     setDeploymentSaving(false)
                   }
                 }}
                 systemTopology={systemTopology}
+                deploymentSaveInfo={deploymentSaveInfo}
+                deploymentSaveError={deploymentSaveError}
               />
             </div>
           ) : (
@@ -495,13 +510,21 @@ export default function RecipeDetail() {
                   saveDeploymentSelection={async () => {
                     if (!recipe?.slug || !deploymentSelection) return
                     setDeploymentSaving(true)
+                    setDeploymentSaveError('')
                     try {
-                      await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                      const result = await saveRecipeDeploymentSelection(recipe.slug, deploymentSelection)
+                      setDeploymentSaveInfo(result)
+                      return result
+                    } catch (error) {
+                      setDeploymentSaveError(error?.message || 'Failed to save deployment profile')
+                      throw error
                     } finally {
                       setDeploymentSaving(false)
                     }
                   }}
                   systemTopology={systemTopology}
+                  deploymentSaveInfo={deploymentSaveInfo}
+                  deploymentSaveError={deploymentSaveError}
                 />
               </div>
 
@@ -963,7 +986,7 @@ function RelatedRecipeCard({ recipe, onSelect }) {
   )
 }
 
-function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deploymentPlan, deploymentSelection, setDeploymentSelection, deploymentSaving, saveDeploymentSelection, systemTopology }) {
+function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deploymentPlan, deploymentSelection, setDeploymentSelection, deploymentSaving, saveDeploymentSelection, systemTopology, deploymentSaveInfo, deploymentSaveError }) {
   const { t } = useTranslation()
   const recipes = useStore((s) => s.recipes)
   const selectRecipe = useStore((s) => s.selectRecipe)
@@ -1075,6 +1098,8 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
             onSave={saveDeploymentSelection}
             saving={deploymentSaving}
             systemTopology={systemTopology}
+            saveInfo={deploymentSaveInfo}
+            saveError={deploymentSaveError}
           />
 
           {relatedRecipes.length > 0 && (
@@ -1217,7 +1242,7 @@ function OverviewSection({ children, className = '' }) {
   )
 }
 
-function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, systemTopology }) {
+function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, systemTopology, saveInfo, saveError }) {
   const { t } = useTranslation()
   if (!plan) return null
 
@@ -1348,6 +1373,24 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
               {t('recipe.saveDeploymentProfileBody')}
             </span>
           </div>
+
+          {(saveInfo?.path || saveError) && (
+            <div className={`rounded-2xl border px-4 py-3 ${saveError ? 'border-error/20 bg-error/8' : 'border-success/20 bg-success/8'}`}>
+              <div className={`text-[11px] uppercase tracking-[0.16em] font-label ${saveError ? 'text-error' : 'text-success'}`}>
+                {saveError ? t('recipe.saveDeploymentProfileFailed') : t('recipe.saveDeploymentProfileSaved')}
+              </div>
+              {saveError ? (
+                <div className="mt-2 text-sm text-text-dim leading-6">{saveError}</div>
+              ) : (
+                <>
+                  <div className="mt-2 text-sm text-text-dim leading-6">{t('recipe.saveDeploymentProfileSavedBody')}</div>
+                  <code className="mt-3 block rounded-xl border border-outline-dim bg-surface px-3 py-2 text-xs text-text-muted font-mono break-all">
+                    {saveInfo.path}
+                  </code>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

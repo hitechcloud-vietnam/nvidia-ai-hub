@@ -30,6 +30,8 @@
     "postinstall": "npm run electron:ensure"
   },
   "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "i18next": "^26.0.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -39,17 +41,17 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@electron/notarize": "^3.1.0",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/vite": "^4.2.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "electron": "^37.5.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "electron": "^37.5.0",
-    "electron-builder": "^26.0.12",
-    "@electron/notarize": "^3.1.0",
     "globals": "^16.5.0",
     "icon-gen": "^3.0.1",
     "tailwindcss": "^4.2.0",

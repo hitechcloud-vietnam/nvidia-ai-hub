@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    container_name: nvidia-ai-hub-kestra-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kestra}
+      POSTGRES_USER: ${POSTGRES_USER:-kestra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-kestra-postgres}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kestra} -d ${POSTGRES_DB:-kestra}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  kestra:
+    image: ${KESTRA_IMAGE:-kestra/kestra:latest}
+    container_name: nvidia-ai-hub-kestra
+    user: "root"
+    command: server standalone --config /etc/kestra/application.yaml
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KESTRA_ADMIN_EMAIL: ${KESTRA_ADMIN_EMAIL:-admin@kestra.local}
+      KESTRA_ADMIN_PASSWORD: ${KESTRA_ADMIN_PASSWORD:-change-me-kestra-admin}
+    ports:
+      - "${KESTRA_HOST_PORT:-3012}:8080"
+    volumes:
+      - ./application.yaml:/etc/kestra/application.yaml:ro
+      - ./data/storage:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/tmp:/tmp/kestra-wd
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/api/v1/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped

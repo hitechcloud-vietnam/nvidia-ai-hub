@@ -1,0 +1,44 @@
+name: "Metabase"
+slug: metabase
+version: "1.0.0"
+description: "Run a practical self-hosted Metabase analytics workspace with the official image, a local PostgreSQL application database, and persistent storage for dashboards, collections, and AI-adjacent operational reporting."
+author: "Metabase"
+source: "official"
+website: "https://www.metabase.com/"
+upstream: "https://github.com/metabase/metabase"
+category: workflow
+categories:
+  - analytics
+  - observability
+  - webui
+tags:
+  - metabase
+  - analytics
+  - dashboards
+  - business-intelligence
+  - postgres
+icon: "📊"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3002
+  path: "/"
+  health_path: "/api/health"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/metabase/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Metabase with a local PostgreSQL application database and publish the web UI on port 3002."
+    command: "docker compose --env-file registry/recipes/metabase/.env -p nvidia-ai-hub-metabase -f registry/recipes/metabase/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Metabase while preserving dashboard and PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/metabase/.env -p nvidia-ai-hub-metabase -f registry/recipes/metabase/docker-compose.yml down"

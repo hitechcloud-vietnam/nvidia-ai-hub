@@ -1,0 +1,44 @@
+name: "n8n AI Starter"
+slug: n8n-ai-starter
+version: "1.0.0"
+description: "Run a practical self-hosted n8n automation and AI workflow starter with the official n8n image, local PostgreSQL, and persistent workflow state for agents, integrations, and scheduled jobs."
+author: "n8n"
+source: "official"
+website: "https://n8n.io/"
+upstream: "https://github.com/n8n-io/n8n"
+category: workflow
+categories:
+  - workflow
+  - agent
+  - automation
+tags:
+  - n8n
+  - automation
+  - workflows
+  - agents
+  - postgres
+  - integrations
+icon: "🪄"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 5678
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/n8n-ai-starter/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start n8n with a local PostgreSQL database, persistent user data, and the web UI on port 5678."
+    command: "docker compose --env-file registry/recipes/n8n-ai-starter/.env -p nvidia-ai-hub-n8n-ai-starter -f registry/recipes/n8n-ai-starter/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop n8n AI Starter while preserving workflows, credentials, logs, and PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/n8n-ai-starter/.env -p nvidia-ai-hub-n8n-ai-starter -f registry/recipes/n8n-ai-starter/docker-compose.yml down"

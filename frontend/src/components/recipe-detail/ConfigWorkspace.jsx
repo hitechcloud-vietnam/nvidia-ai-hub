@@ -272,6 +272,7 @@ export function ComposeEditor({ slug }) {
   const deactivateRecipeFork = useStore((s) => s.deactivateRecipeFork)
   const deleteRecipeFork = useStore((s) => s.deleteRecipeFork)
   const exportRecipeForkBundle = useStore((s) => s.exportRecipeForkBundle)
+  const openRecipeForkBundleDir = useStore((s) => s.openRecipeForkBundleDir)
   const getRecipeForkDiffSummary = useStore((s) => s.getRecipeForkDiffSummary)
   const getRecipeForkFullDiff = useStore((s) => s.getRecipeForkFullDiff)
   const getRecipeForkManifestMarkdown = useStore((s) => s.getRecipeForkManifestMarkdown)
@@ -287,6 +288,7 @@ export function ComposeEditor({ slug }) {
   const [forkToggling, setForkToggling] = useState(false)
   const [forkDeleting, setForkDeleting] = useState(false)
   const [bundleExporting, setBundleExporting] = useState(false)
+  const [openingBundleDir, setOpeningBundleDir] = useState(false)
   const [forkInfo, setForkInfo] = useState(null)
   const [bundleInfo, setBundleInfo] = useState(null)
   const [diffInfo, setDiffInfo] = useState(null)
@@ -297,8 +299,22 @@ export function ComposeEditor({ slug }) {
   const [collapsedDiffFiles, setCollapsedDiffFiles] = useState({})
   const [expandedDiffContexts, setExpandedDiffContexts] = useState({})
   const [copyingMarkdown, setCopyingMarkdown] = useState(false)
+  const [copiedPath, setCopiedPath] = useState('')
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+
+  const copyPath = async (value) => {
+    if (!value) return
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedPath(value)
+      window.setTimeout(() => {
+        setCopiedPath((current) => (current === value ? '' : current))
+      }, 1600)
+    } catch {
+      setError(t('configWorkspace.errors.copyPath'))
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -442,7 +458,7 @@ export function ComposeEditor({ slug }) {
     setForkSaving(true)
     setError('')
     try {
-      const result = await saveRecipeFork(slug)
+      const result = await saveRecipeFork(slug, { compose_content: content })
       setForkInfo({
         slug,
         exists: true,
@@ -450,6 +466,8 @@ export function ComposeEditor({ slug }) {
         fork_dir: result.fork_dir,
         files: result.files,
       })
+      setOriginal(content)
+      setDefaultContent(result.files?.compose ? content : defaultContent)
       setDiffInfo(await getRecipeForkDiffSummary(slug))
       if (showFullDiff) setFullDiffInfo(await getRecipeForkFullDiff(slug))
       setSaved(true)
@@ -560,10 +578,25 @@ export function ComposeEditor({ slug }) {
     }
   }
 
+  const handleOpenBundleDir = async () => {
+    setOpeningBundleDir(true)
+    setError('')
+    try {
+      const result = await openRecipeForkBundleDir(slug)
+      if (result?.bundle_dir) {
+        setBundleInfo((current) => ({ ...(current || {}), bundle_dir: result.bundle_dir }))
+      }
+    } catch {
+      setError(t('configWorkspace.errors.openBundleFolder'))
+    } finally {
+      setOpeningBundleDir(false)
+    }
+  }
+
   return (
     <div className="h-full min-h-0 flex flex-col">
       <div className="shrink-0 px-5 py-4 border-b border-outline-dim bg-surface-low/60">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h2 className="text-sm font-bold text-text font-display m-0">{t('configWorkspace.compose.title')}</h2>
             <p className="text-sm text-text-dim mt-1 mb-0 leading-relaxed">{t('configWorkspace.compose.description')}</p>
@@ -577,13 +610,37 @@ export function ComposeEditor({ slug }) {
               <p className="text-xs text-text-dim mt-2 mb-0 font-label">{t('configWorkspace.compose.localForkInactive')}</p>
             )}
             {bundleInfo?.bundle_path && (
-              <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{t('configWorkspace.compose.latestForkBundle', { path: bundleInfo.bundle_path })}</p>
+              <div className="mt-3 rounded-2xl border border-outline-dim bg-surface-high/40 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.compose.latestForkBundleLabel')}</div>
+                  <button
+                    type="button"
+                    onClick={() => copyPath(bundleInfo.bundle_path)}
+                    className="px-3 py-1.5 bg-surface text-text border border-outline-dim rounded-lg text-xs font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary"
+                  >
+                    {copiedPath === bundleInfo.bundle_path ? t('configWorkspace.actions.copiedPath') : t('configWorkspace.actions.copyPath')}
+                  </button>
+                </div>
+                <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{bundleInfo.bundle_path}</p>
+              </div>
             )}
             {bundleInfo?.manifest_path && (
-              <p className="text-xs text-text-dim mt-1 mb-0 font-mono break-all">{t('configWorkspace.compose.bundleManifest', { path: bundleInfo.manifest_path })}</p>
+              <div className="mt-2 rounded-2xl border border-outline-dim bg-surface-high/40 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-text-dim font-label">{t('configWorkspace.compose.bundleManifestLabel')}</div>
+                  <button
+                    type="button"
+                    onClick={() => copyPath(bundleInfo.manifest_path)}
+                    className="px-3 py-1.5 bg-surface text-text border border-outline-dim rounded-lg text-xs font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary"
+                  >
+                    {copiedPath === bundleInfo.manifest_path ? t('configWorkspace.actions.copiedPath') : t('configWorkspace.actions.copyPath')}
+                  </button>
+                </div>
+                <p className="text-xs text-text-dim mt-2 mb-0 font-mono break-all">{bundleInfo.manifest_path}</p>
+              </div>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 xl:justify-end">
             <button
               disabled={forkSaving || loading}
               onClick={saveAsFork}
@@ -620,6 +677,13 @@ export function ComposeEditor({ slug }) {
             >
               {t('configWorkspace.actions.downloadBundle')}
             </a>
+            <button
+              disabled={!bundleInfo?.bundle_dir || openingBundleDir || loading}
+              onClick={handleOpenBundleDir}
+              className="px-4 py-2 bg-surface text-text border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer transition-all hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-default"
+            >
+              {openingBundleDir ? t('configWorkspace.actions.openingFolder') : t('configWorkspace.actions.openBundleFolder')}
+            </button>
             <button
               disabled={!forkInfo?.exists || loading}
               onClick={() => setShowFullDiff((value) => !value)}
@@ -658,7 +722,7 @@ export function ComposeEditor({ slug }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 p-5 flex flex-col">
+      <div className="flex-1 min-h-0 p-5 flex flex-col overflow-hidden">
         {loading ? (
           <div className="h-full rounded-2xl bg-[#08080F] border border-outline-dim flex items-center justify-center text-sm text-text-dim">
             {t('configWorkspace.compose.loading')}
@@ -668,7 +732,7 @@ export function ComposeEditor({ slug }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             spellCheck={false}
-            className="flex-1 min-h-0 w-full bg-[#08080F] text-gray-300 font-mono text-[12px] leading-6 p-4 rounded-2xl border border-outline-dim resize-none focus:outline-none focus:border-primary/50"
+            className="flex-1 min-h-0 w-full bg-[#08080F] text-gray-300 font-mono text-[12px] leading-6 p-4 rounded-2xl border border-outline-dim resize-none overflow-auto focus:outline-none focus:border-primary/50"
           />
         )}
 

@@ -1,5 +1,6 @@
 import asyncio
 import subprocess
+import sys
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
@@ -201,6 +202,10 @@ class ExecBody(BaseModel):
     command: str
 
 
+class ForkBody(BaseModel):
+    compose_content: str | None = None
+
+
 @router.get("/api/recipes/{slug}/deployment-selection")
 async def get_deployment_selection(slug: str):
     recipe = get_recipe(slug)
@@ -222,21 +227,13 @@ async def save_deployment_selection(slug: str, body: DeploymentSelection):
     return {"status": "saved", "slug": slug, **result}
 
 
-@router.get("/api/recipes/{slug}/fork")
-async def get_recipe_fork(slug: str):
-    recipe = get_recipe(slug)
-    if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
-    return get_recipe_fork_status(slug)
-
-
 @router.post("/api/recipes/{slug}/fork")
-async def save_fork(slug: str):
+async def save_fork(slug: str, body: ForkBody | None = None):
     recipe = get_recipe(slug)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     try:
-        result = save_recipe_fork(slug)
+        result = save_recipe_fork(slug, compose_content=body.compose_content if body else None)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return {"status": "saved", **result}
@@ -288,6 +285,29 @@ async def export_fork_bundle(slug: str):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return {"status": "exported", **result}
+
+
+@router.post("/api/recipes/{slug}/fork/open-bundle-dir")
+async def open_fork_bundle_dir(slug: str):
+    recipe = get_recipe(slug)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    bundle_dir = settings.fork_bundles_path / slug
+    if not bundle_dir.is_dir():
+        raise HTTPException(status_code=404, detail=f"Bundle directory not found: {bundle_dir}")
+
+    try:
+        if sys.platform.startswith("win"):
+            subprocess.Popen(["explorer", str(bundle_dir)])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(bundle_dir)])
+        else:
+            subprocess.Popen(["xdg-open", str(bundle_dir)])
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Unable to open bundle directory: {exc}") from exc
+
+    return {"status": "opened", "slug": slug, "bundle_dir": str(bundle_dir)}
 
 
 @router.get("/api/recipes/{slug}/fork/diff")

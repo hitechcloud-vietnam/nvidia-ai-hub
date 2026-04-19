@@ -1,0 +1,102 @@
+services:
+  couchdb:
+    image: ${COUCHDB_IMAGE:-couchdb:3}
+    container_name: nvidia-ai-hub-budibase-couchdb
+    environment:
+      COUCHDB_USER: ${COUCH_DB_USER:-budibase}
+      COUCHDB_PASSWORD: ${COUCH_DB_PASSWORD:-change-me-budibase-couchdb}
+    volumes:
+      - ./data/couchdb:/opt/couchdb/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:5984/_up || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: nvidia-ai-hub-budibase-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-change-me-budibase-redis}
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-change-me-budibase-redis} ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  minio:
+    image: ${MINIO_IMAGE:-minio/minio:latest}
+    container_name: nvidia-ai-hub-budibase-minio
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-budibase}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-me-budibase-minio}
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - ./data/minio:/data
+    restart: unless-stopped
+
+  budibase-apps:
+    image: ${BUDIBASE_APPS_IMAGE:-budibase/apps:latest}
+    container_name: nvidia-ai-hub-budibase-apps
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      COUCH_DB_URL: http://${COUCH_DB_USER:-budibase}:${COUCH_DB_PASSWORD:-change-me-budibase-couchdb}@couchdb:5984
+      REDIS_URL: redis://:${REDIS_PASSWORD:-change-me-budibase-redis}@redis:6379
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-budibase}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-change-me-budibase-minio}
+      JWT_SECRET: ${JWT_SECRET:-change-me-budibase-jwt-secret}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-change-me-budibase-internal-api-key}
+      API_ENCRYPTION_KEY: ${API_ENCRYPTION_KEY:-change-me-budibase-api-encryption-key}
+      SELF_HOSTED: "1"
+    restart: unless-stopped
+
+  budibase-worker:
+    image: ${BUDIBASE_WORKER_IMAGE:-budibase/worker:latest}
+    container_name: nvidia-ai-hub-budibase-worker
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      COUCH_DB_URL: http://${COUCH_DB_USER:-budibase}:${COUCH_DB_PASSWORD:-change-me-budibase-couchdb}@couchdb:5984
+      REDIS_URL: redis://:${REDIS_PASSWORD:-change-me-budibase-redis}@redis:6379
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-budibase}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-change-me-budibase-minio}
+      JWT_SECRET: ${JWT_SECRET:-change-me-budibase-jwt-secret}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-change-me-budibase-internal-api-key}
+      API_ENCRYPTION_KEY: ${API_ENCRYPTION_KEY:-change-me-budibase-api-encryption-key}
+      SELF_HOSTED: "1"
+    restart: unless-stopped
+
+  budibase-proxy:
+    image: ${BUDIBASE_PROXY_IMAGE:-budibase/proxy:latest}
+    container_name: nvidia-ai-hub-budibase-proxy
+    depends_on:
+      budibase-apps:
+        condition: service_started
+    ports:
+      - "${BUDIBASE_HOST_PORT:-3015}:10000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:10000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped

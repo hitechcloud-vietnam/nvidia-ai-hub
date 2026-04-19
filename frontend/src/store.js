@@ -2,6 +2,16 @@ import { create } from 'zustand'
 import { resolveWebSocketUrl } from './desktopRuntime'
 import i18n, { persistLanguage } from './i18n'
 
+const REMOTE_SESSION_TTL_MS = 5000
+
+const createRemoteTerminalTab = (sessionId) => ({
+  id: `remote-tab-${sessionId}-${Date.now()}`,
+  sessionId,
+  title: '',
+  connected: false,
+  launchMode: 'SSH',
+})
+
 const tStore = (key, options) => i18n.t(`store.${key}`, options)
 
 const getInitialTheme = () => {
@@ -90,6 +100,13 @@ export const useStore = create((set, get) => ({
   modelSectionErrors: {},
   modelAction: '',
   _logWs: {},
+  remoteSessions: [],
+  remoteSessionsLoadedAt: 0,
+  remoteTerminalTabs: [],
+  activeRemoteTabId: null,
+  remoteTerminalOutput: {},
+  remoteTerminalStatus: {},
+  _remoteWs: {},
   theme: getInitialTheme(),
   language: getInitialLanguage(),
   featureFlags: getInitialFeatureFlags(),
@@ -263,6 +280,262 @@ export const useStore = create((set, get) => ({
       delete next[slug]
       return { _logWs: next }
     })
+  },
+
+  fetchRemoteSessions: async (options = {}) => {
+    const { force = false } = options
+    const now = Date.now()
+    if (!force && get().remoteSessions.length > 0 && now - get().remoteSessionsLoadedAt < REMOTE_SESSION_TTL_MS) {
+      return get().remoteSessions
+    }
+
+    try {
+      const res = await fetch('/api/remote-sessions')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      const sessions = Array.isArray(data?.sessions) ? data.sessions : []
+      set({ remoteSessions: sessions, remoteSessionsLoadedAt: Date.now() })
+      return sessions
+    } catch (e) {
+      console.error('Failed to fetch remote sessions:', e)
+      return get().remoteSessions
+    }
+  },
+
+  saveRemoteSession: async (payload) => {
+    try {
+      const res = await fetch('/api/remote-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      const session = data?.session
+      if (!session) throw new Error('Remote session response was empty')
+      set((state) => ({
+        remoteSessions: [session, ...state.remoteSessions.filter((item) => item.id !== session.id)],
+        remoteSessionsLoadedAt: Date.now(),
+      }))
+      return data
+    } catch (e) {
+      console.error('Failed to save remote session:', e)
+      throw e
+    }
+  },
+
+  deleteRemoteSession: async (sessionId) => {
+    try {
+      const res = await fetch(`/api/remote-sessions/${sessionId}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      get().disconnectRemoteTerminal(sessionId)
+      set((state) => ({
+        remoteSessions: state.remoteSessions.filter((item) => item.id !== sessionId),
+        remoteTerminalTabs: state.remoteTerminalTabs.filter((item) => item.sessionId !== sessionId),
+      }))
+      return data
+    } catch (e) {
+      console.error('Failed to delete remote session:', e)
+      throw e
+    }
+  },
+
+  openRemoteTerminalTab: (session, options = {}) => {
+    const { activate = true } = options
+    const existing = get().remoteTerminalTabs.find((item) => item.sessionId === session.id)
+    if (existing) {
+      if (activate) set({ activeRemoteTabId: existing.id })
+      return existing.id
+    }
+
+    const tab = {
+      ...createRemoteTerminalTab(session.id),
+      title: session.name || session.host,
+      launchMode: String(session.protocol || 'ssh').toUpperCase(),
+    }
+
+    set((state) => ({
+      remoteTerminalTabs: [...state.remoteTerminalTabs, tab],
+      activeRemoteTabId: activate ? tab.id : state.activeRemoteTabId,
+      remoteTerminalOutput: { ...state.remoteTerminalOutput, [tab.id]: [] },
+      remoteTerminalStatus: {
+        ...state.remoteTerminalStatus,
+        [tab.id]: { state: 'idle', sessionId: session.id, protocol: session.protocol, launchMode: tab.launchMode },
+      },
+    }))
+    return tab.id
+  },
+
+  closeRemoteTerminalTab: (tabId) => {
+    const tab = get().remoteTerminalTabs.find((item) => item.id === tabId)
+    if (!tab) return
+    get().disconnectRemoteTerminal(tab.sessionId)
+    set((state) => {
+      const nextTabs = state.remoteTerminalTabs.filter((item) => item.id !== tabId)
+      const nextActive = state.activeRemoteTabId === tabId ? (nextTabs[nextTabs.length - 1]?.id || null) : state.activeRemoteTabId
+      const nextOutput = { ...state.remoteTerminalOutput }
+      const nextStatus = { ...state.remoteTerminalStatus }
+      delete nextOutput[tabId]
+      delete nextStatus[tabId]
+      return { remoteTerminalTabs: nextTabs, activeRemoteTabId: nextActive, remoteTerminalOutput: nextOutput, remoteTerminalStatus: nextStatus }
+    })
+  },
+
+  setActiveRemoteTerminalTab: (tabId) => set({ activeRemoteTabId: tabId }),
+
+  appendRemoteTerminalOutput: (tabId, chunk) => set((state) => ({
+    remoteTerminalOutput: {
+      ...state.remoteTerminalOutput,
+      [tabId]: [...(state.remoteTerminalOutput[tabId] || []), chunk],
+    },
+  })),
+
+  clearRemoteTerminalOutput: (tabId) => set((state) => ({
+    remoteTerminalOutput: { ...state.remoteTerminalOutput, [tabId]: [] },
+  })),
+
+  connectRemoteTerminal: (session, options = {}) => {
+    const { password = '', cols = 120, rows = 30, force = false } = options
+    const existingTab = get().remoteTerminalTabs.find((item) => item.sessionId === session.id)
+    const tabId = existingTab?.id || get().openRemoteTerminalTab(session, { activate: true })
+    const existingWs = get()._remoteWs[session.id]
+    if (!force && existingWs && existingWs.readyState <= 1) {
+      set({ activeRemoteTabId: tabId })
+      return tabId
+    }
+
+    if (existingWs && existingWs.readyState <= 1) {
+      existingWs.close()
+    }
+
+    const ws = new WebSocket(resolveWebSocketUrl(`/ws/remote-sessions/${session.id}`))
+
+    set((state) => ({
+      _remoteWs: { ...state._remoteWs, [session.id]: ws },
+      activeRemoteTabId: tabId,
+      remoteTerminalStatus: {
+        ...state.remoteTerminalStatus,
+        [tabId]: { ...(state.remoteTerminalStatus[tabId] || {}), state: 'connecting', sessionId: session.id, protocol: session.protocol },
+      },
+      remoteTerminalOutput: force ? { ...state.remoteTerminalOutput, [tabId]: [] } : state.remoteTerminalOutput,
+    }))
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'connect', password, cols, rows }))
+    }
+
+    ws.onmessage = (event) => {
+      let payload = null
+      try {
+        payload = JSON.parse(event.data)
+      } catch {
+        get().appendRemoteTerminalOutput(tabId, String(event.data || ''))
+        return
+      }
+
+      if (payload?.type === 'output') {
+        get().appendRemoteTerminalOutput(tabId, payload.data || '')
+        return
+      }
+
+      if (payload?.type === 'status') {
+        set((state) => ({
+          remoteTerminalStatus: {
+            ...state.remoteTerminalStatus,
+            [tabId]: { ...(state.remoteTerminalStatus[tabId] || {}), ...payload, protocol: session.protocol },
+          },
+          remoteTerminalTabs: state.remoteTerminalTabs.map((item) => item.id === tabId ? { ...item, connected: payload.state === 'connected' } : item),
+        }))
+        return
+      }
+
+      if (payload?.type === 'error') {
+        get().appendRemoteTerminalOutput(tabId, `\r\n[nvidia-ai-hub] ${payload.message || 'Remote terminal error'}\r\n`)
+        set((state) => ({
+          remoteTerminalStatus: {
+            ...state.remoteTerminalStatus,
+            [tabId]: { ...(state.remoteTerminalStatus[tabId] || {}), state: 'error', error: payload.message || 'Remote terminal error' },
+          },
+        }))
+      }
+    }
+
+    ws.onerror = () => {
+      set((state) => ({
+        remoteTerminalStatus: {
+          ...state.remoteTerminalStatus,
+          [tabId]: { ...(state.remoteTerminalStatus[tabId] || {}), state: 'error', error: 'Remote terminal WebSocket error' },
+        },
+      }))
+    }
+
+    ws.onclose = () => {
+      set((state) => {
+        const nextWs = { ...state._remoteWs }
+        delete nextWs[session.id]
+        return {
+          _remoteWs: nextWs,
+          remoteTerminalStatus: {
+            ...state.remoteTerminalStatus,
+            [tabId]: { ...(state.remoteTerminalStatus[tabId] || {}), state: 'closed', protocol: session.protocol },
+          },
+          remoteTerminalTabs: state.remoteTerminalTabs.map((item) => item.id === tabId ? { ...item, connected: false } : item),
+        }
+      })
+    }
+
+    return tabId
+  },
+
+  disconnectRemoteTerminal: (sessionId) => {
+    const ws = get()._remoteWs[sessionId]
+    if (ws && ws.readyState <= 1) {
+      ws.send(JSON.stringify({ type: 'disconnect' }))
+      ws.close()
+    }
+  },
+
+  sendRemoteTerminalInput: (sessionId, data) => {
+    const ws = get()._remoteWs[sessionId]
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'input', data }))
+    }
+  },
+
+  resizeRemoteTerminal: (sessionId, cols, rows) => {
+    const ws = get()._remoteWs[sessionId]
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'resize', cols, rows }))
+    }
+  },
+
+  launchRemoteSessionNative: async (launchPayload) => {
+    const runtime = window.desktopRuntime
+    if (!runtime?.launchRemoteSession) {
+      if (launchPayload?.openUrl) {
+        window.open(launchPayload.openUrl, '_blank', 'noopener,noreferrer')
+        return { status: 'opened', method: 'window.open' }
+      }
+      throw new Error('Desktop native launcher is unavailable in this environment.')
+    }
+    return runtime.launchRemoteSession(launchPayload)
+  },
+
+  saveRemoteSessionRdp: async (launchPayload) => {
+    const runtime = window.desktopRuntime
+    if (runtime?.saveRdpFile) {
+      return runtime.saveRdpFile(launchPayload)
+    }
+
+    const blob = new Blob([launchPayload?.rdpFile || ''], { type: 'application/x-rdp' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'remote-session.rdp'
+    link.click()
+    URL.revokeObjectURL(url)
+    return { status: 'downloaded' }
   },
 
   addBuildLine: (slug, line) => set((s) => {
@@ -837,10 +1110,12 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  saveRecipeFork: async (slug) => {
+  saveRecipeFork: async (slug, payload = null) => {
     try {
       const res = await fetch(`/api/recipes/${slug}/fork`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload || {}),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
@@ -903,6 +1178,20 @@ export const useStore = create((set, get) => ({
       return data
     } catch (e) {
       console.error('Failed to export recipe fork bundle:', e)
+      throw e
+    }
+  },
+
+  openRecipeForkBundleDir: async (slug) => {
+    try {
+      const res = await fetch(`/api/recipes/${slug}/fork/open-bundle-dir`, {
+        method: 'POST',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+      return data
+    } catch (e) {
+      console.error('Failed to open recipe fork bundle directory:', e)
       throw e
     }
   },

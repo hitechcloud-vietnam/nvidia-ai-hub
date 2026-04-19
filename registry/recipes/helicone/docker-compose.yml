@@ -1,0 +1,21 @@
+services:
+  helicone:
+    image: ${HELICONE_IMAGE:-helicone/helicone-all-in-one:latest}
+    container_name: nvidia-ai-hub-helicone
+    environment:
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3004}
+    ports:
+      - "${HELICONE_DASHBOARD_PORT:-3004}:3000"
+      - "${HELICONE_PROXY_PORT:-8585}:8585"
+      - "${HELICONE_S3_PORT:-9080}:9000"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./data/clickhouse:/var/lib/clickhouse
+      - ./data/minio:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped

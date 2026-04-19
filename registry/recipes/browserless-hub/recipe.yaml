@@ -1,0 +1,44 @@
+name: "Browserless Hub"
+slug: browserless-hub
+version: "1.0.0"
+description: "Run a practical self-hosted Browserless Chromium endpoint for automation, scraping, PDF generation, and AI browser agents with persistent configuration and optional token-based access control."
+author: "Browserless"
+source: "official"
+website: "https://www.browserless.io/"
+upstream: "https://github.com/browserless/browserless"
+category: agent
+categories:
+  - browser-automation
+  - automation
+  - webui
+tags:
+  - browserless
+  - chromium
+  - playwright
+  - puppeteer
+  - browser-automation
+  - scraping
+icon: "🌐"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3000
+  path: "/docs"
+docker:
+  build: false
+  build_time_minutes: 3
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/browserless-hub/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Browserless Chromium and publish the browser automation endpoint on port 3000."
+    command: "docker compose --env-file registry/recipes/browserless-hub/.env -p nvidia-ai-hub-browserless-hub -f registry/recipes/browserless-hub/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Browserless Hub while preserving local user-data state."
+    command: "docker compose --env-file registry/recipes/browserless-hub/.env -p nvidia-ai-hub-browserless-hub -f registry/recipes/browserless-hub/docker-compose.yml down"

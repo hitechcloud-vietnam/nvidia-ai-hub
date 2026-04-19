@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    container_name: nvidia-ai-hub-windmill-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-windmill}
+      POSTGRES_USER: ${POSTGRES_USER:-windmill}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-windmill-postgres}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-windmill} -d ${POSTGRES_DB:-windmill}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  windmill-server:
+    image: ${WINDMILL_IMAGE:-ghcr.io/windmill-labs/windmill:main}
+    container_name: nvidia-ai-hub-windmill-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: server
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://windmill:change-me-windmill-postgres@postgres:5432/windmill}
+      BASE_URL: ${BASE_URL:-http://localhost:3014}
+      WM_ADMIN_EMAIL: ${WM_ADMIN_EMAIL:-admin@windmill.local}
+      WM_ADMIN_PASSWORD: ${WM_ADMIN_PASSWORD:-change-me-windmill-admin}
+    ports:
+      - "${WINDMILL_HOST_PORT:-3014}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/api/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped
+
+  windmill-worker:
+    image: ${WINDMILL_IMAGE:-ghcr.io/windmill-labs/windmill:main}
+    container_name: nvidia-ai-hub-windmill-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://windmill:change-me-windmill-postgres@postgres:5432/windmill}
+      BASE_URL: ${BASE_URL:-http://localhost:3014}
+      WM_ADMIN_EMAIL: ${WM_ADMIN_EMAIL:-admin@windmill.local}
+      WM_ADMIN_PASSWORD: ${WM_ADMIN_PASSWORD:-change-me-windmill-admin}
+      DISABLE_NSJAIL: "true"
+      ENABLE_UNSHARE_PID: "false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/worker:/tmp/windmill
+    restart: unless-stopped

@@ -1,0 +1,44 @@
+name: "Kestra"
+slug: kestra
+version: "1.0.0"
+description: "Run a practical self-hosted Kestra orchestration workspace with the official image, a local PostgreSQL backend, persistent flow storage, and the web UI for jobs, schedules, and operational automations."
+author: "Kestra"
+source: "official"
+website: "https://kestra.io/"
+upstream: "https://github.com/kestra-io/kestra"
+category: workflow
+categories:
+  - orchestration
+  - automation
+  - webui
+tags:
+  - kestra
+  - orchestration
+  - workflows
+  - postgres
+  - scheduler
+icon: "🪄"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3012
+  path: "/"
+  health_path: "/api/v1/health"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/kestra/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Kestra with local PostgreSQL and publish the orchestration UI on port 3012."
+    command: "docker compose --env-file registry/recipes/kestra/.env -p nvidia-ai-hub-kestra -f registry/recipes/kestra/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Kestra while preserving PostgreSQL and workflow state."
+    command: "docker compose --env-file registry/recipes/kestra/.env -p nvidia-ai-hub-kestra -f registry/recipes/kestra/docker-compose.yml down"

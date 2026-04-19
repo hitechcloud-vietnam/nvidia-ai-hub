@@ -1,0 +1,46 @@
+name: "Langfuse"
+slug: langfuse
+version: "1.0.0"
+description: "Run a practical self-hosted Langfuse observability stack with the official web and worker services, local PostgreSQL, ClickHouse, Redis, and MinIO for traces, prompts, evaluations, and dataset assets."
+author: "Langfuse"
+source: "official"
+website: "https://langfuse.com/"
+upstream: "https://github.com/langfuse/langfuse"
+category: agent
+categories:
+  - observability
+  - evaluation
+  - prompt-management
+tags:
+  - langfuse
+  - observability
+  - tracing
+  - evaluation
+  - prompts
+  - clickhouse
+  - postgres
+  - redis
+icon: "🪢"
+requirements:
+  min_memory_gb: 12
+  recommended_memory_gb: 24
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3001
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 8
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/langfuse/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Langfuse with local PostgreSQL, ClickHouse, Redis, and MinIO dependencies and publish the web UI on port 3001."
+    command: "docker compose --env-file registry/recipes/langfuse/.env -p nvidia-ai-hub-langfuse -f registry/recipes/langfuse/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Langfuse while preserving PostgreSQL, ClickHouse, Redis, and MinIO data."
+    command: "docker compose --env-file registry/recipes/langfuse/.env -p nvidia-ai-hub-langfuse -f registry/recipes/langfuse/docker-compose.yml down"

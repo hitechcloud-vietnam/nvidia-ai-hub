@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    container_name: nvidia-ai-hub-nocodb-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nocodb}
+      POSTGRES_USER: ${POSTGRES_USER:-nocodb}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-nocodb-postgres}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nocodb} -d ${POSTGRES_DB:-nocodb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  nocodb:
+    image: ${NOCODB_IMAGE:-nocodb/nocodb:latest}
+    container_name: nvidia-ai-hub-nocodb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NC_DB: ${NC_DB:-pg://postgres:5432?u=nocodb&p=change-me-nocodb-postgres&d=nocodb}
+      NC_PUBLIC_URL: ${NC_PUBLIC_URL:-http://localhost:3011}
+    ports:
+      - "${NOCODB_HOST_PORT:-3011}:8080"
+    volumes:
+      - ./data/nocodb:/usr/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped

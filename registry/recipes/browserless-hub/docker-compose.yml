@@ -1,0 +1,23 @@
+services:
+  browserless:
+    image: ${BROWSERLESS_IMAGE:-ghcr.io/browserless/chromium:latest}
+    container_name: nvidia-ai-hub-browserless-hub
+    environment:
+      TOKEN: ${TOKEN:-change-me-browserless-token}
+      CONCURRENT: ${CONCURRENT:-5}
+      QUEUE_LENGTH: ${QUEUE_LENGTH:-20}
+      TIMEOUT: ${TIMEOUT:-60000}
+      KEEP_ALIVE: ${KEEP_ALIVE:-true}
+      PREBOOT_CHROME: ${PREBOOT_CHROME:-true}
+      DEBUG: ${DEBUG:-browserless:*}
+    ports:
+      - "${BROWSERLESS_HOST_PORT:-3000}:3000"
+    volumes:
+      - ./data/browserless:/usr/src/app/user-data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/docs || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped

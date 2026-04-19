@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from daemon.config import settings
 from daemon.db import init_db
-from daemon.routers import recipes, containers, models, system
+from daemon.routers import recipes, containers, models, system, remote_sessions
 from daemon.services.backup_service import resume_backup_restore_jobs
 from daemon.services.registry_service import load_recipes, get_recipes
 from daemon.services.docker_service import is_recipe_running, start_health_check
@@ -50,6 +50,7 @@ app.include_router(recipes.router)
 app.include_router(containers.router)
 app.include_router(models.router)
 app.include_router(system.router)
+app.include_router(remote_sessions.router)
 
 # Serve static assets (js, css, etc.) under /assets
 if DIST_DIR.is_dir():

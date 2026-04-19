@@ -30,6 +30,20 @@ CREATE TABLE IF NOT EXISTS recipe_tips (
     content TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS remote_sessions (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    protocol TEXT NOT NULL,
+    host TEXT NOT NULL,
+    port INTEGER,
+    username TEXT NOT NULL DEFAULT '',
+    remote_path TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    password_hint TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 

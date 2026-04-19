@@ -1,0 +1,43 @@
+name: "Docmost"
+slug: docmost
+version: "1.0.0"
+description: "Run a practical self-hosted Docmost team knowledge base with the official image, local PostgreSQL, Redis, and persistent document storage for internal docs, AI context libraries, and operational runbooks."
+author: "Docmost"
+source: "official"
+website: "https://docmost.com/"
+upstream: "https://github.com/docmost/docmost"
+category: workflow
+categories:
+  - knowledge-base
+  - collaboration
+  - webui
+tags:
+  - docmost
+  - documentation
+  - wiki
+  - postgres
+  - redis
+icon: "📚"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 15
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3003
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/docmost/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Docmost with local PostgreSQL, Redis, persistent storage, and the web UI on port 3003."
+    command: "docker compose --env-file registry/recipes/docmost/.env -p nvidia-ai-hub-docmost -f registry/recipes/docmost/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Docmost while preserving document, Redis, and PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/docmost/.env -p nvidia-ai-hub-docmost -f registry/recipes/docmost/docker-compose.yml down"

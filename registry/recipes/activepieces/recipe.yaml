@@ -1,0 +1,43 @@
+name: "Activepieces"
+slug: activepieces
+version: "1.0.0"
+description: "Run a practical self-hosted Activepieces automation workspace with the official image, local PostgreSQL, Redis, and persistent application state for AI automations, integrations, and background jobs."
+author: "Activepieces"
+source: "official"
+website: "https://www.activepieces.com/"
+upstream: "https://github.com/activepieces/activepieces"
+category: workflow
+categories:
+  - automation
+  - workflow
+  - agent
+tags:
+  - activepieces
+  - automation
+  - integrations
+  - postgres
+  - redis
+icon: "🧩"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 20
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3005
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 6
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/activepieces/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start Activepieces with local PostgreSQL, Redis, and the web UI on port 3005."
+    command: "docker compose --env-file registry/recipes/activepieces/.env -p nvidia-ai-hub-activepieces -f registry/recipes/activepieces/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop Activepieces while preserving workflow, Redis, and PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/activepieces/.env -p nvidia-ai-hub-activepieces -f registry/recipes/activepieces/docker-compose.yml down"

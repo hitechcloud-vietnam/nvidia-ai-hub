@@ -12,6 +12,7 @@ const Running = lazy(() => import('./pages/Running'))
 const Models = lazy(() => import('./pages/Models'))
 const System = lazy(() => import('./pages/System'))
 const BackupRestore = lazy(() => import('./pages/BackupRestore'))
+const RemoteTerminal = lazy(() => import('./pages/RemoteTerminal'))
 const Updates = lazy(() => import('./pages/Updates'))
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'))
 
@@ -38,6 +39,7 @@ export default function App() {
     models: t('nav.models'),
     running: t('nav.running'),
     system: t('nav.system'),
+    terminal: t('nav.terminal'),
     'backup-restore': t('nav.backupRestore'),
     updates: t('nav.updates'),
     about: t('nav.about'),
@@ -48,6 +50,7 @@ export default function App() {
     { id: 'models', icon: ModelsIcon },
     { id: 'running', icon: PlayIcon },
     { id: 'system', icon: GaugeIcon },
+    { id: 'terminal', icon: TerminalIcon },
     { id: 'backup-restore', icon: ArchiveIcon },
     { id: 'updates', icon: RefreshIcon },
     { id: 'about', icon: InfoIcon },
@@ -219,6 +222,7 @@ export default function App() {
                 {activeTab === 'updates' && <Updates />}
                 {activeTab === 'running' && <Running />}
                 {activeTab === 'system' && <System />}
+                {activeTab === 'terminal' && <RemoteTerminal />}
                 {activeTab === 'backup-restore' && <BackupRestore />}
                 {activeTab === 'about' && <About />}
               </div>
@@ -513,6 +517,16 @@ function GaugeIcon({ className }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
       <path d="M12 6v6l4 2" />
+    </svg>
+  )
+}
+
+function TerminalIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2.5" />
+      <path d="M7 9l3 3-3 3" />
+      <path d="M13 15h4" />
     </svg>
   )
 }

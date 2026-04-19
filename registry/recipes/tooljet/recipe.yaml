@@ -1,0 +1,43 @@
+name: "ToolJet"
+slug: tooljet
+version: "1.0.0"
+description: "Run a practical self-hosted ToolJet internal app builder with the official image, local PostgreSQL databases, and a single-instance baseline for low-code tools, dashboards, and AI-adjacent operations apps."
+author: "ToolJet"
+source: "official"
+website: "https://www.tooljet.com/"
+upstream: "https://github.com/ToolJet/ToolJet"
+category: workflow
+categories:
+  - low-code
+  - internal-tools
+  - webui
+tags:
+  - tooljet
+  - low-code
+  - internal-tools
+  - postgres
+  - dashboards
+icon: "🧰"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 16
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 3013
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/tooljet/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start ToolJet with local PostgreSQL databases and publish the UI on port 3013."
+    command: "docker compose --env-file registry/recipes/tooljet/.env -p nvidia-ai-hub-tooljet -f registry/recipes/tooljet/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop ToolJet while preserving PostgreSQL data."
+    command: "docker compose --env-file registry/recipes/tooljet/.env -p nvidia-ai-hub-tooljet -f registry/recipes/tooljet/docker-compose.yml down"

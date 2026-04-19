@@ -1,0 +1,44 @@
+name: "SearXNG AI Stack"
+slug: searxng-ai-stack
+version: "1.0.0"
+description: "Run a practical self-hosted SearXNG metasearch stack with local Redis caching and persistent configuration for privacy-oriented retrieval, browsing, and AI-assisted search workflows."
+author: "SearXNG"
+source: "official"
+website: "https://searxng.org/"
+upstream: "https://github.com/searxng/searxng"
+category: workflow
+categories:
+  - search
+  - retrieval
+  - webui
+tags:
+  - searxng
+  - search
+  - retrieval
+  - metasearch
+  - privacy
+  - redis
+icon: "🔎"
+requirements:
+  min_memory_gb: 6
+  recommended_memory_gb: 12
+  disk_gb: 10
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 8080
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 4
+  gpu: false
+status: experimental
+runtime_env_path: "registry/recipes/searxng-ai-stack/.env"
+requires_hf_token: false
+commands:
+  - label: "Install / launch"
+    description: "Start SearXNG with local Redis caching and publish the web UI on port 8080."
+    command: "docker compose --env-file registry/recipes/searxng-ai-stack/.env -p nvidia-ai-hub-searxng-ai-stack -f registry/recipes/searxng-ai-stack/docker-compose.yml up -d"
+  - label: "Stop"
+    description: "Stop SearXNG AI Stack while preserving configuration and cache data."
+    command: "docker compose --env-file registry/recipes/searxng-ai-stack/.env -p nvidia-ai-hub-searxng-ai-stack -f registry/recipes/searxng-ai-stack/docker-compose.yml down"

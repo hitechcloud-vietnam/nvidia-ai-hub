@@ -1,7 +1,8 @@
-const { app, BrowserWindow, nativeImage, shell } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain, nativeImage, shell } = require('electron')
 const path = require('node:path')
 const fs = require('node:fs')
-const { spawn } = require('node:child_process')
+const os = require('node:os')
+const { spawn, spawnSync } = require('node:child_process')
 
 const isDev = !app.isPackaged
 const backendPort = process.env.NVIDIA_AI_HUB_DESKTOP_PORT || '39000'
@@ -11,6 +12,176 @@ process.env.NVIDIA_AI_HUB_DESKTOP_PORT = backendPort
 
 let mainWindow = null
 let backendProcess = null
+
+function sanitizeRemotePayload(payload) {
+  const protocol = String(payload?.protocol || '').toLowerCase()
+  const host = String(payload?.host || '').trim()
+  const port = Number(payload?.port || 0)
+  const username = String(payload?.username || '').trim()
+  const openUrl = typeof payload?.openUrl === 'string' ? payload.openUrl.trim() : ''
+  const nativeScheme = typeof payload?.nativeScheme === 'string' ? payload.nativeScheme.trim() : ''
+  const rdpFile = typeof payload?.rdpFile === 'string' ? payload.rdpFile : ''
+  const target = typeof payload?.target === 'string' ? payload.target.trim() : ''
+
+  if (!['ssh', 'sftp', 'rdp', 'vnc', 'http', 'https'].includes(protocol)) {
+    throw new Error(`Unsupported protocol: ${protocol || 'unknown'}`)
+  }
+  if ((protocol === 'ssh' || protocol === 'sftp' || protocol === 'rdp' || protocol === 'vnc') && !host) {
+    throw new Error('Remote host is required.')
+  }
+
+  return {
+    protocol,
+    host,
+    port: Number.isFinite(port) && port > 0 ? port : null,
+    username,
+    openUrl,
+    nativeScheme,
+    rdpFile,
+    target,
+  }
+}
+
+function spawnDetached(command, args) {
+  const child = spawn(command, args, {
+    detached: true,
+    stdio: 'ignore',
+    shell: false,
+  })
+  child.unref()
+}
+
+function launchViaOsAssociation(url) {
+  if (!url) {
+    throw new Error('No URL or native scheme was provided.')
+  }
+  if (process.platform === 'win32') {
+    spawnDetached('cmd', ['/c', 'start', '', url])
+    return
+  }
+  if (process.platform === 'darwin') {
+    spawnDetached('open', [url])
+    return
+  }
+  spawnDetached('xdg-open', [url])
+}
+
+function commandExists(command) {
+  const probe = process.platform === 'win32'
+    ? spawnSync('where', [command], { stdio: 'ignore', shell: false })
+    : spawnSync('which', [command], { stdio: 'ignore', shell: false })
+  return probe.status === 0
+}
+
+function quoteAppleScriptString(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
+function launchNativeTerminalCommand(command, args) {
+  if (process.platform === 'win32') {
+    if (commandExists('wt')) {
+      spawnDetached('wt', ['new-tab', command, ...args])
+      return { status: 'launched', method: 'windows-terminal', target: [command, ...args].join(' ') }
+    }
+
+    spawnDetached('cmd', ['/k', command, ...args])
+    return { status: 'launched', method: 'cmd', target: [command, ...args].join(' ') }
+  }
+
+  if (process.platform === 'darwin') {
+    const terminalCommand = [command, ...args]
+      .map((value) => {
+        const text = String(value)
+        return /[^A-Za-z0-9_\-./:@]/.test(text) ? `'${text.replace(/'/g, `'\\''`)}'` : text
+      })
+      .join(' ')
+
+    const appleScript = [
+      'tell application "Terminal"',
+      'activate',
+      `do script "${quoteAppleScriptString(terminalCommand)}"`,
+      'end tell',
+    ]
+
+    spawnDetached('osascript', appleScript.flatMap((line) => ['-e', line]))
+    return { status: 'launched', method: 'terminal-app', target: terminalCommand }
+  }
+
+  if (commandExists('x-terminal-emulator')) {
+    spawnDetached('x-terminal-emulator', ['-e', command, ...args])
+    return { status: 'launched', method: 'x-terminal-emulator', target: [command, ...args].join(' ') }
+  }
+
+  if (commandExists('gnome-terminal')) {
+    spawnDetached('gnome-terminal', ['--', command, ...args])
+    return { status: 'launched', method: 'gnome-terminal', target: [command, ...args].join(' ') }
+  }
+
+  throw new Error('No supported native terminal application was found for launching SSH/SFTP.')
+}
+
+function launchRemoteSession(payload) {
+  const sanitized = sanitizeRemotePayload(payload)
+
+  if (sanitized.protocol === 'ssh') {
+    const args = []
+    if (sanitized.port) args.push('-p', String(sanitized.port))
+    args.push(`${sanitized.username ? `${sanitized.username}@` : ''}${sanitized.host}`)
+    return launchNativeTerminalCommand('ssh', args)
+  }
+
+  if (sanitized.protocol === 'sftp') {
+    const args = []
+    if (sanitized.port) args.push('-P', String(sanitized.port))
+    args.push(`${sanitized.username ? `${sanitized.username}@` : ''}${sanitized.host}`)
+    return launchNativeTerminalCommand('sftp', args)
+  }
+
+  if (sanitized.protocol === 'http' || sanitized.protocol === 'https') {
+    if (sanitized.openUrl) {
+      shell.openExternal(sanitized.openUrl)
+      return { status: 'launched', method: 'shell.openExternal', target: sanitized.openUrl }
+    }
+  }
+
+  if (sanitized.protocol === 'rdp' && process.platform === 'win32') {
+    const target = sanitized.target || `${sanitized.host}:${sanitized.port || 3389}`
+    spawnDetached('mstsc', [`/v:${target}`])
+    return { status: 'launched', method: 'mstsc', target }
+  }
+
+  if (sanitized.protocol === 'ssh' || sanitized.protocol === 'sftp' || sanitized.protocol === 'vnc' || sanitized.protocol === 'rdp') {
+    const candidate = sanitized.nativeScheme || sanitized.openUrl
+    if (candidate) {
+      launchViaOsAssociation(candidate)
+      return { status: 'launched', method: 'os-association', target: candidate }
+    }
+  }
+
+  throw new Error(`No native launch strategy is available for protocol ${sanitized.protocol}.`)
+}
+
+async function saveRdpFile(payload) {
+  const sanitized = sanitizeRemotePayload(payload)
+  if (!sanitized.rdpFile) {
+    throw new Error('No RDP file content provided.')
+  }
+
+  const defaultName = `${(sanitized.host || 'remote-session').replace(/[^a-z0-9.-]+/gi, '-')}.rdp`
+  const defaultPath = path.join(os.homedir(), 'Downloads', defaultName)
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Save RDP file',
+    defaultPath,
+    filters: [{ name: 'Remote Desktop', extensions: ['rdp'] }],
+  })
+
+  if (result.canceled || !result.filePath) {
+    return { status: 'cancelled' }
+  }
+
+  fs.writeFileSync(result.filePath, sanitized.rdpFile, 'utf8')
+  return { status: 'saved', path: result.filePath }
+}
 
 function getAppIconPath() {
   const generatedIconPath = path.resolve(__dirname, '..', 'build-assets', 'icon.png')
@@ -161,6 +332,16 @@ function createWindow() {
     return { action: 'deny' }
   })
 }
+
+ipcMain.handle('remote:launch', async (_event, payload) => launchRemoteSession(payload))
+ipcMain.handle('remote:save-rdp-file', async (_event, payload) => saveRdpFile(payload))
+ipcMain.handle('remote:open-external', async (_event, url) => {
+  if (typeof url !== 'string' || !url.trim()) {
+    throw new Error('A valid URL is required.')
+  }
+  await shell.openExternal(url)
+  return { status: 'opened', url }
+})
 
 app.whenReady().then(async () => {
   if (process.platform === 'win32') {
