@@ -28,43 +28,23 @@ const PROTOCOLS = [
 
 export default function RemoteTerminal() {
   const { t } = useTranslation()
-  const {
-    remoteSessions,
-    remoteTerminalTabs,
-    activeRemoteTabId,
-    remoteTerminalOutput,
-    remoteTerminalStatus,
-    fetchRemoteSessions,
-    saveRemoteSession,
-    deleteRemoteSession,
-    openRemoteTerminalTab,
-    closeRemoteTerminalTab,
-    setActiveRemoteTerminalTab,
-    connectRemoteTerminal,
-    disconnectRemoteTerminal,
-    sendRemoteTerminalInput,
-    resizeRemoteTerminal,
-    launchRemoteSessionNative,
-    saveRemoteSessionRdp,
-  } = useStore((state) => ({
-    remoteSessions: state.remoteSessions,
-    remoteTerminalTabs: state.remoteTerminalTabs,
-    activeRemoteTabId: state.activeRemoteTabId,
-    remoteTerminalOutput: state.remoteTerminalOutput,
-    remoteTerminalStatus: state.remoteTerminalStatus,
-    fetchRemoteSessions: state.fetchRemoteSessions,
-    saveRemoteSession: state.saveRemoteSession,
-    deleteRemoteSession: state.deleteRemoteSession,
-    openRemoteTerminalTab: state.openRemoteTerminalTab,
-    closeRemoteTerminalTab: state.closeRemoteTerminalTab,
-    setActiveRemoteTerminalTab: state.setActiveRemoteTerminalTab,
-    connectRemoteTerminal: state.connectRemoteTerminal,
-    disconnectRemoteTerminal: state.disconnectRemoteTerminal,
-    sendRemoteTerminalInput: state.sendRemoteTerminalInput,
-    resizeRemoteTerminal: state.resizeRemoteTerminal,
-    launchRemoteSessionNative: state.launchRemoteSessionNative,
-    saveRemoteSessionRdp: state.saveRemoteSessionRdp,
-  }))
+  const remoteSessions = useStore((state) => state.remoteSessions)
+  const remoteTerminalTabs = useStore((state) => state.remoteTerminalTabs)
+  const activeRemoteTabId = useStore((state) => state.activeRemoteTabId)
+  const remoteTerminalOutput = useStore((state) => state.remoteTerminalOutput)
+  const remoteTerminalStatus = useStore((state) => state.remoteTerminalStatus)
+  const fetchRemoteSessions = useStore((state) => state.fetchRemoteSessions)
+  const saveRemoteSession = useStore((state) => state.saveRemoteSession)
+  const deleteRemoteSession = useStore((state) => state.deleteRemoteSession)
+  const openRemoteTerminalTab = useStore((state) => state.openRemoteTerminalTab)
+  const closeRemoteTerminalTab = useStore((state) => state.closeRemoteTerminalTab)
+  const setActiveRemoteTerminalTab = useStore((state) => state.setActiveRemoteTerminalTab)
+  const connectRemoteTerminal = useStore((state) => state.connectRemoteTerminal)
+  const disconnectRemoteTerminal = useStore((state) => state.disconnectRemoteTerminal)
+  const sendRemoteTerminalInput = useStore((state) => state.sendRemoteTerminalInput)
+  const resizeRemoteTerminal = useStore((state) => state.resizeRemoteTerminal)
+  const launchRemoteSessionNative = useStore((state) => state.launchRemoteSessionNative)
+  const saveRemoteSessionRdp = useStore((state) => state.saveRemoteSessionRdp)
 
   const [selectedId, setSelectedId] = useState(null)
   const [form, setForm] = useState(DEFAULT_FORM)
