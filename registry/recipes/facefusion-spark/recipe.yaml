@@ -1,5 +1,5 @@
 name: "FaceFusion"
-slug: facefusion-spark
+slug: facefusion-nvidia-ai-hub
 version: "1.0.0"
 description: "Perform face swaps, lip-sync, and face enhancement across images and videos with FaceFusion, an industry-leading face manipulation platform built for practical restoration and editing workflows."
 author: "FaceFusion"

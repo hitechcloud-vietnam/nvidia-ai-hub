@@ -27,7 +27,7 @@ fail() {
 }
 
 check_python() {
-    if spark_command_exists python3; then
+    if nvidia_ai_hub_command_exists python3; then
         pass "python3 available: $(python3 --version 2>&1)"
     else
         fail "python3 is not installed"
@@ -55,7 +55,7 @@ check_python() {
 
 check_frontend() {
     if [ -f "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
-        if spark_frontend_needs_build; then
+        if nvidia_ai_hub_frontend_needs_build; then
             warn "Frontend bundle exists but is outdated"
         else
             pass "Frontend bundle is present and up to date"
@@ -64,10 +64,10 @@ check_frontend() {
         warn "Frontend bundle is missing"
     fi
 
-    if spark_frontend_needs_build; then
-        if spark_command_exists node; then
+    if nvidia_ai_hub_frontend_needs_build; then
+        if nvidia_ai_hub_command_exists node; then
             local major
-            major="$(spark_node_major_version)"
+            major="$(nvidia_ai_hub_node_major_version)"
             if [ "$major" -ge "$NVIDIA_AI_HUB_NODE_MAJOR" ]; then
                 pass "Node.js is available for frontend rebuilds: $(node --version 2>/dev/null)"
             else
@@ -77,19 +77,19 @@ check_frontend() {
             fail "Node.js is required because the frontend needs to be rebuilt"
         fi
 
-        if spark_command_exists npm; then
+        if nvidia_ai_hub_command_exists npm; then
             pass "npm is available: $(npm --version 2>/dev/null)"
         else
             fail "npm is required because the frontend needs to be rebuilt"
         fi
     else
-        if spark_command_exists node; then
+        if nvidia_ai_hub_command_exists node; then
             pass "Node.js is available: $(node --version 2>/dev/null)"
         else
             warn "Node.js is not installed, but the current frontend bundle can still be served"
         fi
 
-        if spark_command_exists npm; then
+        if nvidia_ai_hub_command_exists npm; then
             pass "npm is available: $(npm --version 2>/dev/null)"
         else
             warn "npm is not installed, but it is only needed when rebuilding the frontend"
@@ -98,7 +98,7 @@ check_frontend() {
 }
 
 check_docker() {
-    if spark_command_exists docker; then
+    if nvidia_ai_hub_command_exists docker; then
         pass "Docker CLI is available: $(docker --version 2>/dev/null)"
     else
         fail "Docker CLI is not installed"
@@ -113,7 +113,7 @@ check_docker() {
 }
 
 check_git() {
-    if spark_command_exists git; then
+    if nvidia_ai_hub_command_exists git; then
         pass "git is available: $(git --version 2>/dev/null)"
     else
         warn "git is not installed; updates via install.sh will not work"
@@ -147,7 +147,7 @@ check_files() {
 }
 
 check_port() {
-    if ! spark_command_exists python3; then
+    if ! nvidia_ai_hub_command_exists python3; then
         return
     fi
 

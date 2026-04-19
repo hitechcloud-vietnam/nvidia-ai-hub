@@ -1,5 +1,5 @@
 name: "Hunyuan3D 2.1"
-slug: hunyuan3d-spark
+slug: hunyuan3d-nvidia-ai-hub
 version: "1.0.0"
 description: "Turn images into high-fidelity 3D assets with production-ready PBR materials using Hunyuan3D 2.1, then export textured meshes as GLB models for downstream 3D workflows."
 author: "Tencent"

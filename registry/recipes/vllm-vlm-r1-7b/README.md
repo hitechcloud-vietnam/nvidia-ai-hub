@@ -27,7 +27,7 @@ This recipe focuses on a direct single-node vLLM deployment shape:
 - serves one multimodal model at a time
 - enables one image per prompt by default
 - preserves the Hugging Face cache between restarts
-- keeps configuration simple enough for local DGX Spark-style experimentation
+- keeps configuration simple enough for local NVIDIA GPU, NVIDIA DGX and NVIDIA DGX Spark-style experimentation
 
 This preset does **not** include:
 

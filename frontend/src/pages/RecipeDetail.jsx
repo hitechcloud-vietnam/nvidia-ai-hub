@@ -735,7 +735,7 @@ function RecipeCommunityTab({ recipe, onVerify, onRate, onAddTip, onExport }) {
 
   return (
     <div className="w-full px-6 py-6">
-      <div className="max-w-[56rem] space-y-6">
+      <div className="w-full max-w-none space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
           <CommunityMetricCard label={t('recipe.communityAverageRating')} value={community.rating_count ? `${community.rating_average.toFixed(1)} / 5` : t('recipe.communityUnrated')} hint={t('recipe.communityRatings', { count: community.rating_count || 0 })} />
           <CommunityMetricCard label={t('recipe.communityVerifiedSystems')} value={String(community.verified_count || 0)} hint={t('recipe.communityVerifiedHint')} />

@@ -1,5 +1,5 @@
 name: "ComfyUI"
-slug: comfyui-spark
+slug: comfyui-nvidia-ai-hub
 version: "1.0.0"
 description: "Create and run node-based workflows for image, video, 3D, and audio generation with ComfyUI, with full visual control to branch, remix, and reuse complex generative pipelines."
 author: "ComfyAnonymous"

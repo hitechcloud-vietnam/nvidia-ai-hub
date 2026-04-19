@@ -713,9 +713,24 @@ async def stop_recipe(slug: str) -> str:
     if not recipe_dir:
         return f"Recipe directory not found for {slug}"
 
-    cmd = _compose_cmd(slug, recipe_dir) + ["down"]
-    returncode, _ = await _run_command_output(cmd, cwd=str(recipe_dir))
-    return "stopped" if returncode == 0 else "failed"
+    cmd = _compose_cmd(slug, recipe_dir) + ["stop"]
+    returncode, output = await _run_command_output(cmd, cwd=str(recipe_dir), env=_launch_env())
+
+    if returncode == 0:
+        return "stopped"
+
+    fallback_cmd = _compose_cmd(slug, recipe_dir) + ["down"]
+    fallback_returncode, fallback_output = await _run_command_output(
+        fallback_cmd,
+        cwd=str(recipe_dir),
+        env=_launch_env(),
+    )
+
+    if fallback_returncode == 0:
+        return "stopped"
+
+    combined = "\n".join(part for part in [output, fallback_output] if part)
+    return combined or "failed"
 
 
 async def restart_recipe(slug: str) -> str:
@@ -727,13 +742,13 @@ async def restart_recipe(slug: str) -> str:
     if _runtime_env_template_file(recipe_dir).is_file() and runtime_env_file is None:
         return f"Failed to prepare runtime env for {slug}"
 
-    cmd = _compose_cmd(slug, recipe_dir) + ["restart"]
+    cmd = _compose_cmd(slug, recipe_dir) + ["up", "-d"]
     returncode, output = await _run_command_output(cmd, cwd=str(recipe_dir), env=_launch_env())
 
     if returncode == 0:
         return "restarted"
 
-    fallback_cmd = _compose_cmd(slug, recipe_dir) + ["up", "-d"]
+    fallback_cmd = _compose_cmd(slug, recipe_dir) + ["restart"]
     fallback_returncode, fallback_output = await _run_command_output(
         fallback_cmd,
         cwd=str(recipe_dir),

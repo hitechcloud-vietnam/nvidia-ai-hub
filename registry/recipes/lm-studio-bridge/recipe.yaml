@@ -53,7 +53,7 @@ commands:
     command: "lms get ${LM_STUDIO_MODEL:-openai/gpt-oss-20b}"
   - label: "Load model"
     description: "Load the configured model into memory with optional GPU offload and context settings before exposing the HTTP APIs."
-    command: "lms load ${LM_STUDIO_MODEL:-openai/gpt-oss-20b} --identifier=${LM_STUDIO_MODEL_ALIAS:-spark-lm-studio} --gpu=${LM_STUDIO_GPU_OFFLOAD:-max} --context-length=${LM_STUDIO_CONTEXT_LENGTH:-8192}"
+    command: "lms load ${LM_STUDIO_MODEL:-openai/gpt-oss-20b} --identifier=${LM_STUDIO_MODEL_ALIAS:-nvidia-ai-hub-lm-studio} --gpu=${LM_STUDIO_GPU_OFFLOAD:-max} --context-length=${LM_STUDIO_CONTEXT_LENGTH:-8192}"
   - label: "Start server"
     description: "Start the LM Studio local server on the configured port with optional CORS support for trusted local development workflows."
     command: "lms server start --port ${LM_STUDIO_PORT:-1234}"

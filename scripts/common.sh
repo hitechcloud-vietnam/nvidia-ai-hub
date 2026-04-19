@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-spark_load_env() {
+nvidia_ai_hub_load_env() {
     local root="${1:-$PWD}"
     local env_file="$root/.env"
 
@@ -21,7 +21,7 @@ spark_load_env() {
     NVIDIA_AI_HUB_DIST_INDEX="$NVIDIA_AI_HUB_FRONTEND_DIR/dist/index.html"
 }
 
-spark_ensure_env_file() {
+nvidia_ai_hun_ensure_env_file() {
     local root="${1:-${NVIDIA_AI_HUB_ROOT:-$PWD}}"
     local env_file="$root/.env"
     local env_example="$root/.env.example"
@@ -30,10 +30,10 @@ spark_ensure_env_file() {
         cp "$env_example" "$env_file"
     fi
 
-    spark_load_env "$root"
+    nvidia_ai_hub_load_env "$root"
 }
 
-spark_validate_port() {
+nvidia_ai_hub_validate_port() {
     case "$1" in
         ''|*[!0-9]*)
             return 1
@@ -43,18 +43,18 @@ spark_validate_port() {
     [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
 }
 
-spark_validate_host() {
+nvidia_ai_hub_validate_host() {
     [ -n "${1:-}" ]
 }
 
-spark_write_env_value() {
+nvidia_ai_hub_write_env_value() {
     local key="$1"
     local value="$2"
     local env_file="${NVIDIA_AI_HUB_ENV_FILE:-$PWD/.env}"
     local temp_file
 
     mkdir -p "$(dirname "$env_file")"
-    spark_ensure_env_file "${NVIDIA_AI_HUB_ROOT:-$PWD}"
+    nvidia_ai_hub_ensure_env_file "${NVIDIA_AI_HUB_ROOT:-$PWD}"
     touch "$env_file"
     temp_file="$(mktemp)"
 
@@ -67,15 +67,15 @@ spark_write_env_value() {
 
     mv "$temp_file" "$env_file"
     export "$key=$value"
-    spark_load_env "${NVIDIA_AI_HUB_ROOT:-$PWD}"
+    nvidia_ai_hub_load_env "${NVIDIA_AI_HUB_ROOT:-$PWD}"
 }
 
-spark_command_exists() {
+nvidia_ai_hub_command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-spark_node_major_version() {
-    if ! spark_command_exists node; then
+nvidia_ai_hub_node_major_version() {
+    if ! nvidia_ai_hub_command_exists node; then
         echo "0"
         return
     fi
@@ -83,7 +83,7 @@ spark_node_major_version() {
     node -p "process.versions.node.split('.')[0]" 2>/dev/null || echo "0"
 }
 
-spark_frontend_needs_build() {
+nvidia_ai_hub_frontend_needs_build() {
     if [ ! -f "$NVIDIA_AI_HUB_DIST_INDEX" ]; then
         return 0
     fi
@@ -111,15 +111,15 @@ spark_frontend_needs_build() {
     return 1
 }
 
-spark_frontend_toolchain_ready() {
-    if ! spark_command_exists node || ! spark_command_exists npm; then
+nvidia_ai_hub_frontend_toolchain_ready() {
+    if ! nvidia_ai_hub_command_exists node || ! nvidia_ai_hub_command_exists npm; then
         return 1
     fi
 
-    [ "$(spark_node_major_version)" -ge "$NVIDIA_AI_HUB_NODE_MAJOR" ]
+    [ "$(nvidia_ai_hub_node_major_version)" -ge "$NVIDIA_AI_HUB_NODE_MAJOR" ]
 }
 
-spark_install_frontend_dependencies() {
+nvidia_ai_hub_install_frontend_dependencies() {
     if [ -f "$NVIDIA_AI_HUB_FRONTEND_DIR/package-lock.json" ]; then
         (cd "$NVIDIA_AI_HUB_FRONTEND_DIR" && npm ci --no-fund --no-audit)
     else
@@ -127,8 +127,8 @@ spark_install_frontend_dependencies() {
     fi
 }
 
-spark_build_frontend() {
+nvidia_ai_hub_build_frontend() {
     (cd "$NVIDIA_AI_HUB_FRONTEND_DIR" && npm run build)
 }
 
-spark_load_env "$PWD"
+nvidia_ai_hub_load_env "$PWD"

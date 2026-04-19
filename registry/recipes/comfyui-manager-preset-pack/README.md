@@ -1,6 +1,6 @@
 # ComfyUI Manager Preset Pack
 
-Manager-enabled ComfyUI workspace for NVIDIA GPUs that layers the official `ComfyUI-Manager` extension onto the existing `comfyui-spark` base image so operators can install custom nodes, manage snapshots, and import reusable component packs from one persistent visual workflow environment.
+Manager-enabled ComfyUI workspace for NVIDIA GPUs that layers the official `ComfyUI-Manager` extension onto the existing `comfyui-nvidia-ai-hub` base image so operators can install custom nodes, manage snapshots, and import reusable component packs from one persistent visual workflow environment.
 
 ## What it provides
 
@@ -24,7 +24,7 @@ Manager-enabled ComfyUI workspace for NVIDIA GPUs that layers the official `Comf
 
 This recipe intentionally provides a manager-ready ComfyUI baseline:
 
-- keeps the existing `comfyui-spark` runtime as the base application layer
+- keeps the existing `comfyui-nvidia-ai-hub` runtime as the base application layer
 - installs the official `ComfyUI-Manager` extension using the documented `custom_nodes/comfyui-manager` layout
 - enables the manager UI on startup with `--enable-manager`
 - persists manager-owned configuration, snapshots, and component packs across restarts
