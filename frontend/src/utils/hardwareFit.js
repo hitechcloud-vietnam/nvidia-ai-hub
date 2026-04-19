@@ -25,6 +25,26 @@ function createCheck(id, label, status, message) {
   return { id, label, status, message }
 }
 
+function toGbFromMb(value) {
+  const numeric = Number(value || 0)
+  if (numeric <= 0) return 0
+  return Math.round((numeric / 1024) * 10) / 10
+}
+
+function getHostGpuMemoryGb(metrics) {
+  const gpuList = Array.isArray(metrics?.gpus) ? metrics.gpus : []
+  const maxPerGpuMb = gpuList.reduce((maxValue, gpu) => {
+    const totalMb = Number(gpu?.memory_total_mb || 0)
+    return totalMb > maxValue ? totalMb : maxValue
+  }, 0)
+
+  if (maxPerGpuMb > 0) {
+    return toGbFromMb(maxPerGpuMb)
+  }
+
+  return toGbFromMb(metrics?.gpu_memory_total_mb || 0)
+}
+
 function getStatusTone(status) {
   if (status === 'critical') return 'error'
   if (status === 'warning') return 'warning'
@@ -59,14 +79,16 @@ export function getRecipeHardwareFit(recipe, metrics) {
 
   const minRam = Number(requirements.min_memory_gb || 0)
   const recommendedRam = Number(requirements.recommended_memory_gb || 0)
-  const hostRam = Number(metrics.ram_total_gb || 0)
-  if (hostRam > 0 && minRam > 0) {
-    if (hostRam < minRam) {
-      checks.push(createCheck('ram', i18n.t('hardwareFit.checkLabels.systemRam'), 'critical', i18n.t('hardwareFit.messages.ramCritical', { minRam, hostRam })))
-    } else if (recommendedRam > hostRam) {
-      checks.push(createCheck('ram', i18n.t('hardwareFit.checkLabels.systemRam'), 'warning', i18n.t('hardwareFit.messages.ramWarning', { minRam, recommendedRam })))
+  const hostMemory = needsGpu ? getHostGpuMemoryGb(metrics) : Number(metrics.ram_total_gb || 0)
+  const memoryLabel = needsGpu ? i18n.t('hardwareFit.checkLabels.gpuMemory') : i18n.t('hardwareFit.checkLabels.systemRam')
+  const messagePrefix = needsGpu ? 'gpuRam' : 'ram'
+  if (hostMemory > 0 && minRam > 0) {
+    if (hostMemory < minRam) {
+      checks.push(createCheck('ram', memoryLabel, 'critical', i18n.t(`hardwareFit.messages.${messagePrefix}Critical`, { minRam, hostRam: hostMemory })))
+    } else if (recommendedRam > hostMemory) {
+      checks.push(createCheck('ram', memoryLabel, 'warning', i18n.t(`hardwareFit.messages.${messagePrefix}Warning`, { minRam, recommendedRam, hostRam: hostMemory })))
     } else {
-      checks.push(createCheck('ram', i18n.t('hardwareFit.checkLabels.systemRam'), 'good', i18n.t('hardwareFit.messages.ramGood', { hostRam })))
+      checks.push(createCheck('ram', memoryLabel, 'good', i18n.t(`hardwareFit.messages.${messagePrefix}Good`, { hostRam: hostMemory })))
     }
   }
 

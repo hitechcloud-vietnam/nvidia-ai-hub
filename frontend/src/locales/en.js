@@ -310,6 +310,7 @@ const en = {
       },
       checkLabels: {
         systemRam: 'System RAM',
+        gpuMemory: 'GPU memory',
         freeDisk: 'Free disk',
         gpuAvailability: 'GPU availability',
         computeCapability: 'Compute capability',
@@ -319,6 +320,9 @@ const en = {
         ramCritical: 'Needs at least {{minRam}} GB RAM; host reports {{hostRam}} GB.',
         ramWarning: 'Meets the {{minRam}} GB minimum, but is below the recommended {{recommendedRam}} GB.',
         ramGood: 'Host RAM ({{hostRam}} GB) meets the recipe target.',
+        gpuRamCritical: 'Needs at least {{minRam}} GB GPU memory; host reports {{hostRam}} GB on the best available GPU.',
+        gpuRamWarning: 'Meets the {{minRam}} GB GPU memory minimum, but is below the recommended {{recommendedRam}} GB on the best available GPU.',
+        gpuRamGood: 'Best available GPU memory ({{hostRam}} GB) meets the recipe target.',
         diskCritical: 'Needs about {{requiredDisk}} GB free disk; host reports {{freeDisk}} GB free.',
         diskGood: 'Host has {{freeDisk}} GB free disk for an estimated {{requiredDisk}} GB footprint.',
         gpuCritical: 'Recipe expects an NVIDIA-capable GPU host, but no GPU telemetry is currently available.',
