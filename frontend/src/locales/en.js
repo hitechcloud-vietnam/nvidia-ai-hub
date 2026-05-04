@@ -234,6 +234,7 @@ const en = {
     system: {
       waitingMetrics: 'Waiting for metrics...',
       title: 'System Monitor',
+      openMonitor: 'Open System Monitor',
       cpu: 'CPU',
       gpu: 'GPU',
       ram: 'RAM',
@@ -248,6 +249,7 @@ const en = {
       waitingSensor: 'Waiting for sensor',
       gpuMemory: 'GPU memory',
       disk: 'Disk',
+      diskUsage: 'Disk Usage',
       gpuTelemetryAvailable: 'GPU telemetry available',
       cpuFrequency: 'CPU frequency',
       physicalCores: '{{count}} physical cores',

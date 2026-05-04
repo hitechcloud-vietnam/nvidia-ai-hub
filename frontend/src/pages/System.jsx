@@ -46,6 +46,18 @@ function CircularGauge({ value, max, label, sublabel, unit, color = 'var(--terti
   )
 }
 
+function getUsagePercent(percent, used, total) {
+  if (percent !== null && percent !== undefined && percent !== '') {
+    const directValue = Number(percent)
+    if (Number.isFinite(directValue)) return Math.max(0, Math.min(directValue, 100))
+  }
+
+  const usedValue = Number(used)
+  const totalValue = Number(total)
+  if (!Number.isFinite(usedValue) || !Number.isFinite(totalValue) || totalValue <= 0) return 0
+  return Math.max(0, Math.min((usedValue / totalValue) * 100, 100))
+}
+
 export default function System() {
   const { t } = useTranslation()
   const metrics = useStore((s) => s.metrics)
@@ -84,6 +96,8 @@ export default function System() {
   const hasTemperature = systemTemp > 0
   const temperatureHint = [metrics.gpu_temperature_source, metrics.cpu_temperature_source].filter(Boolean).join(' • ')
   const gpuPalette = ['#7C3AED', '#22C55E', '#F97316', '#06B6D4', '#EF4444', '#EAB308']
+  const ramUsagePct = getUsagePercent(metrics.ram_percent, metrics.ram_used_gb, metrics.ram_total_gb)
+  const diskUsagePct = getUsagePercent(metrics.disk_percent, metrics.disk_used_gb, metrics.disk_total_gb)
 
   return (
     <div className="px-6 py-6 pb-12">
@@ -97,19 +111,19 @@ export default function System() {
       {/* Circular Gauges */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <CircularGauge
-          value={metrics.cpu_percent} max={100}
-          label={t('system.cpu')} sublabel={t('system.threads', { count: metrics.cpu_cores_logical || 0 })}
-          unit="%" color="var(--primary)"
-        />
-        <CircularGauge
           value={metrics.gpu_utilization} max={100}
           label={t('system.gpu')} sublabel={metrics.gpu_count > 0 ? t('system.devices', { count: metrics.gpu_count }) : t('system.noGpuTelemetry')}
           unit="%" color="var(--tertiary)"
         />
         <CircularGauge
-          value={metrics.ram_used_gb} max={metrics.ram_total_gb}
-          label={t('system.ram')} sublabel={t('system.ofGb', { value: metrics.ram_total_gb })}
-          unit="GB" color="var(--tertiary)"
+          value={ramUsagePct} max={100}
+          label={t('system.ram')} sublabel={`${metrics.ram_used_gb} / ${metrics.ram_total_gb} GB`}
+          unit="%" color="var(--primary)"
+        />
+        <CircularGauge
+          value={diskUsagePct} max={100}
+          label={t('system.diskUsage')} sublabel={`${metrics.disk_used_gb} / ${metrics.disk_total_gb} GB`}
+          unit="%" color={diskUsagePct > 85 ? 'var(--warning)' : 'var(--tertiary)'}
         />
         <CircularGauge
           value={systemTemp} max={100}

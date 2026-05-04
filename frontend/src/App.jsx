@@ -49,7 +49,6 @@ export default function App() {
     { id: 'catalog', icon: StorefrontIcon },
     { id: 'models', icon: ModelsIcon },
     { id: 'running', icon: PlayIcon },
-    { id: 'system', icon: GaugeIcon },
     { id: 'terminal', icon: TerminalIcon },
     { id: 'backup-restore', icon: ArchiveIcon },
     { id: 'updates', icon: RefreshIcon },
@@ -106,6 +105,42 @@ export default function App() {
   const runningCount = recipes.filter((r) => r.running || r.starting).length
   const updatesCount = recipes.filter((r) => r.registry_changed).length || registryStatus?.changed_recipe_slugs?.length || 0
   const brandMarkUrl = resolveStaticAssetUrl('/brand/spark-ai-hub-mark.svg')
+  const openSystemPage = () => { clearRecipe(); setTab('system') }
+  const ramUsagePct = getUsagePercent(metrics?.ram_used_gb, metrics?.ram_total_gb, metrics?.ram_percent)
+  const diskUsagePct = getUsagePercent(metrics?.disk_used_gb, metrics?.disk_total_gb, metrics?.disk_percent)
+  const systemTemp = Number(metrics?.gpu_temperature || metrics?.cpu_temperature || 0)
+  const tempGaugeValue = Number.isFinite(systemTemp) ? Math.max(0, Math.min(systemTemp, 100)) : 0
+  const tempGaugeLabel = systemTemp > 0 ? `${Math.round(systemTemp)}°` : '—'
+  const systemGaugeActive = activeTab === 'system' && !selectedRecipe
+  const openSystemLabel = t('system.openMonitor')
+  const systemGaugeItems = [
+    {
+      id: 'gpu',
+      value: clampPercent(metrics?.gpu_utilization ?? 0),
+      label: t('system.gpu'),
+      color: 'var(--tertiary)',
+    },
+    {
+      id: 'ram',
+      value: ramUsagePct,
+      label: t('system.ram'),
+      color: 'var(--primary)',
+    },
+    {
+      id: 'disk',
+      value: diskUsagePct,
+      label: t('system.diskUsage'),
+      color: diskUsagePct > 85 ? 'var(--warning)' : 'var(--tertiary)',
+    },
+    {
+      id: 'temp',
+      value: tempGaugeValue,
+      label: t('system.temp'),
+      color: systemTemp > 80 ? 'var(--error)' : '#FBBF24',
+      displayValue: tempGaugeLabel,
+      titleValue: systemTemp > 0 ? `${Math.round(systemTemp)}°C` : t('system.tempNotAvailable'),
+    },
+  ]
 
   return (
     <div className="bg-bg text-text flex h-screen overflow-hidden transition-colors duration-300">
@@ -152,12 +187,21 @@ export default function App() {
 
         {/* Bottom: System gauges + Theme toggle */}
         <div className="flex flex-col items-center gap-3 mt-auto">
-          {metrics && (
-            <div className="flex flex-col items-center gap-1.5">
-              <MiniGauge value={Math.round(metrics.cpu_percent ?? 0)} label={t('system.cpu')} color="var(--tertiary)" />
-              <MiniGauge value={metrics.ram_total_gb > 0 ? Math.round((metrics.ram_used_gb / metrics.ram_total_gb) * 100) : 0} label={t('system.ram')} color="var(--tertiary)" />
-            </div>
-          )}
+          <div className="flex flex-col items-center gap-1">
+            {systemGaugeItems.map((item) => (
+              <MiniGauge
+                key={item.id}
+                value={item.value}
+                label={item.label}
+                color={item.color}
+                displayValue={item.displayValue}
+                titleValue={item.titleValue}
+                active={systemGaugeActive}
+                openLabel={openSystemLabel}
+                onClick={openSystemPage}
+              />
+            ))}
+          </div>
           <ThemeToggle />
         </div>
       </aside>
@@ -443,15 +487,43 @@ function formatRegistryDate(value) {
   return date.toLocaleString()
 }
 
+function clampPercent(value) {
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue)) return 0
+  return Math.max(0, Math.min(numericValue, 100))
+}
+
+function getUsagePercent(used, total, fallback) {
+  if (fallback !== null && fallback !== undefined && fallback !== '') {
+    const fallbackValue = Number(fallback)
+    if (Number.isFinite(fallbackValue)) return clampPercent(fallbackValue)
+  }
+
+  const usedValue = Number(used)
+  const totalValue = Number(total)
+  if (!Number.isFinite(usedValue) || !Number.isFinite(totalValue) || totalValue <= 0) return 0
+  return clampPercent((usedValue / totalValue) * 100)
+}
+
 /* ─── Mini Gauge for sidebar ─── */
-function MiniGauge({ value, label, color }) {
+function MiniGauge({ value, label, color, displayValue, titleValue, active, openLabel, onClick }) {
   const radius = 14
   const stroke = 3
   const circ = 2 * Math.PI * radius
-  const offset = circ - (value / 100) * circ
+  const pct = clampPercent(value)
+  const offset = circ - (pct / 100) * circ
+  const shownValue = displayValue ?? `${Math.round(pct)}%`
+  const title = `${label}: ${titleValue ?? shownValue}`
+  const actionLabel = openLabel || 'Open System Monitor'
 
   return (
-    <div className="flex flex-col items-center" title={`${label}: ${value}%`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`sidebar-link flex w-14 flex-col items-center rounded-2xl border-none bg-transparent px-1 py-1 text-text-dim cursor-pointer ${active ? 'active' : ''}`}
+      title={`${actionLabel} — ${title}`}
+      aria-label={`${actionLabel} — ${title}`}
+    >
       <svg width="36" height="36" viewBox="0 0 36 36">
         <circle cx="18" cy="18" r={radius} fill="none" stroke="var(--outline-dim)" strokeWidth={stroke} />
         <circle
@@ -463,11 +535,11 @@ function MiniGauge({ value, label, color }) {
           className="gauge-ring"
         />
         <text x="18" y="19" textAnchor="middle" dominantBaseline="middle" fill="var(--text-muted)" fontSize="8" fontFamily="Space Grotesk" fontWeight="600">
-          {value}%
+          {shownValue}
         </text>
       </svg>
-      <span className="text-[9px] text-text-dim font-label mt-0.5">{label}</span>
-    </div>
+      <span className="text-[9px] text-current font-label mt-0.5 leading-none text-center">{label}</span>
+    </button>
   )
 }
 
@@ -508,15 +580,6 @@ function ModelsIcon({ className }) {
       <ellipse cx="12" cy="5" rx="7" ry="3" />
       <path d="M5 5v6c0 1.66 3.13 3 7 3s7-1.34 7-3V5" />
       <path d="M5 11v8c0 1.66 3.13 3 7 3s7-1.34 7-3v-8" />
-    </svg>
-  )
-}
-
-function GaugeIcon({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
-      <path d="M12 6v6l4 2" />
     </svg>
   )
 }
