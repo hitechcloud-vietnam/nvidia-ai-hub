@@ -12,7 +12,6 @@ import {
 } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
 import { formatTokensPerSecond } from '../utils/recipeSpeed'
-import { buildLlmSpeedTestSnippet } from '../utils/speedTestSnippet'
 
 const RecipeConfigTab = lazy(() => import('../components/recipe-detail/ConfigWorkspace'))
 const InlineConfigWorkspace = lazy(() => import('../components/recipe-detail/ConfigWorkspace').then((module) => ({ default: module.InlineConfigWorkspace })))
@@ -323,8 +322,6 @@ export default function RecipeDetail() {
     ? recipe.categories
     : [recipe.category]
   const speedLabel = formatTokensPerSecond(recipe.tokens_per_second)
-  const isLlmRecipe = recipe.category === 'llm' || recipeCategories.includes('llm') || recipe.tags?.includes('llm')
-  const llmSpeedTestSnippet = isLlmRecipe ? buildLlmSpeedTestSnippet(recipe.integration) : ''
   const detailTabs = getDetailTabs(recipe)
   const showDedicatedConfigTab = hasDedicatedConfigTab(recipe)
 
@@ -1005,6 +1002,7 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
   const isNotebook = isNotebookRecipe(recipe)
   const registryChanged = Boolean(recipe.registry_changed)
   const recentCommits = Array.isArray(recipe.registry_updates) ? recipe.registry_updates : []
+  const vllmMetricsSnippet = buildVllmMetricsSnippet(recipe, location.hostname)
   const relatedRecipes = (recipe.depends_on || [])
     .map((slug) => recipes.find((item) => item.slug === slug))
     .filter(Boolean)
@@ -1172,12 +1170,19 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                 <Field label={t('recipe.apiKey')} value={recipe.integration.api_key} />
                 {recipe.integration.max_context && <Field label={t('recipe.maxContext')} value={recipe.integration.max_context} />}
                 {recipe.integration.max_output_tokens && <Field label={t('recipe.maxOutput')} value={recipe.integration.max_output_tokens} />}
-                {llmSpeedTestSnippet && (
-                  <div className="pt-2 xl:col-span-2">
-                    <span className="text-[10px] text-text-dim font-label block mb-1">{t('recipe.speedTestSnippet')}</span>
-                    <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">
-                      {llmSpeedTestSnippet}
-                    </pre>
+                {(recipe.integration.curl_example || vllmMetricsSnippet) && (
+                  <div className="pt-2 xl:col-span-2 space-y-3">
+                    {recipe.integration.curl_example && (
+                      <CodeBlock label={t('recipe.curlExample')} value={recipe.integration.curl_example} copyTitle={t('recipe.copyCommand')} />
+                    )}
+                    {vllmMetricsSnippet && (
+                      <CodeBlock
+                        label={t('recipe.inferenceSpeedSnippet')}
+                        description={t('recipe.inferenceSpeedSnippetBody')}
+                        value={vllmMetricsSnippet}
+                        copyTitle={t('recipe.copyCommand')}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -1643,10 +1648,16 @@ function HostFitPanel({ fit }) {
 
 function CommandBlock({ item }) {
   const { t } = useTranslation()
+
+  return <CodeBlock label={item.label} description={item.description} value={item.command} copyTitle={t('recipe.copyCommand')} />
+}
+
+function CodeBlock({ label, description, value, copyTitle }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
+  const text = String(value || '')
 
   const copy = () => {
-    const text = String(item.command)
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1200) })
         .catch(() => fallbackCopy(text, setCopied))
@@ -1659,10 +1670,10 @@ function CommandBlock({ item }) {
     <div className="rounded-2xl border border-outline-dim bg-surface-high/40 p-4 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-text font-display">{item.label}</div>
-          {item.description && <p className="text-sm text-text-dim leading-6 m-0 mt-1">{item.description}</p>}
+          <div className="text-sm font-semibold text-text font-display">{label}</div>
+          {description && <p className="text-sm text-text-dim leading-6 m-0 mt-1">{description}</p>}
         </div>
-        <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={t('recipe.copyCommand')}>
+        <button onClick={copy} className="shrink-0 p-1.5 bg-surface border-none rounded-lg cursor-pointer text-text-dim hover:text-primary transition-colors" title={copyTitle || t('recipe.copy')}>
           {copied ? (
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           ) : (
@@ -1670,9 +1681,42 @@ function CommandBlock({ item }) {
           )}
         </button>
       </div>
-      <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">{item.command}</pre>
+      <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">{text}</pre>
     </div>
   )
+}
+
+function buildVllmMetricsSnippet(recipe, host) {
+  if (!recipe?.tags?.includes('vllm')) return ''
+
+  const metricsUrl = getMetricsUrl(recipe.integration?.api_url, host)
+  if (!metricsUrl) return ''
+
+  return [
+    `curl -s "${metricsUrl}" | awk '`,
+    '/^vllm:time_per_output_token_seconds_sum/ { decode_sum += $2 }',
+    '/^vllm:time_per_output_token_seconds_count/ { decode_count += $2 }',
+    '/^vllm:time_to_first_token_seconds_sum/ { ttft_sum += $2 }',
+    '/^vllm:time_to_first_token_seconds_count/ { ttft_count += $2 }',
+    'END {',
+    '  decode_tps = decode_sum > 0 ? decode_count / decode_sum : 0',
+    '  avg_ttft = ttft_count > 0 ? ttft_sum / ttft_count : 0',
+    '  printf "--- decode %.1f tok/s, avg TTFT %.3fs ---\\n", decode_tps, avg_ttft',
+    "}'",
+  ].join('\n')
+}
+
+function getMetricsUrl(apiUrl, host) {
+  const baseUrl = String(apiUrl || '')
+    .replace(/<NVIDIA_AI_HUB_IP>/g, host)
+    .replace(/<SPARK_IP>/g, host)
+    .trim()
+    .replace(/\/+$/, '')
+    .replace(/\/v1\/chat\/completions$/, '')
+    .replace(/\/chat\/completions$/, '')
+    .replace(/\/v1$/, '')
+
+  return baseUrl ? `${baseUrl}/metrics` : ''
 }
 
 function Field({ label, value }) {
