@@ -33,6 +33,6 @@ docker:
   build: false
   build_time_minutes: 8
   gpu: true
-status: experimental
+status: community-verified
 release_date: "2026-03"
 requires_hf_token: false

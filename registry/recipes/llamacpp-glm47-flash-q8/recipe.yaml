@@ -1,0 +1,41 @@
+name: "GLM-4.7 Flash (Q8_0)"
+slug: llamacpp-glm47-flash-q8
+version: "1.0.0"
+description: "Z.AI GLM-4.7-Flash 30B MoE (3B active), Q8_0 GGUF via llama.cpp. OpenAI-compatible API. 128K context."
+author: "Z.AI"
+source: "community"
+website: "https://huggingface.co/zai-org/GLM-4.7-Flash"
+upstream: "https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF"
+category: llm
+tags:
+  - llm
+  - moe
+  - gguf
+  - llama-cpp
+  - zhipu
+  - reasoning
+  - tool-use
+logo: "/logos/zai.svg"
+requirements:
+  min_memory_gb: 33
+  recommended_memory_gb: 40
+  disk_gb: 33
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 0
+  gpu: true
+status: community-verified
+release_date: "2026-01"
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-29"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "glm-4.7-flash"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"glm-4.7-flash\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"

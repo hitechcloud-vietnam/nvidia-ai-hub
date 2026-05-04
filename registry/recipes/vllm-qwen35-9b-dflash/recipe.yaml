@@ -30,8 +30,8 @@ docker:
   build: false
   build_time_minutes: 0
   gpu: true
-status: experimental
-release_date: "2026-04-30"
+status: community-verified
+release_date: "2026-04"
 integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "Qwen/Qwen3.5-9B"

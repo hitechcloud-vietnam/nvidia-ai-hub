@@ -1,20 +1,20 @@
 services:
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:full-cuda13-b8953
-    container_name: nvidia-ai-hub-llamacpp-minimax-m27-q3ks
+    container_name: nvidia-ai-hub-llamacpp-glm47-flash-q8
     entrypoint:
       - /bin/sh
       - -c
       - |
-        if [ ! -f /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00003-of-00003.gguf ]; then
-          echo "[nvidia-ai-hub] Downloading MiniMax-M2.7 UD-Q3_K_S (~94 GB)..."
-          hf download unsloth/MiniMax-M2.7-GGUF --include 'UD-Q3_K_S/*' --local-dir /models
+        if [ ! -f /models/GLM-4.7-Flash-Q8_0.gguf ]; then
+          echo "[nvidia-ai-hub] Downloading GLM-4.7-Flash Q8_0 (~31.8 GB)..."
+          hf download unsloth/GLM-4.7-Flash-GGUF GLM-4.7-Flash-Q8_0.gguf --local-dir /models
         fi
         exec /app/llama-server "$$@"
       - --
     command:
       - -m
-      - /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00001-of-00003.gguf
+      - /models/GLM-4.7-Flash-Q8_0.gguf
       - -ngl
       - "999"
       - -c
@@ -24,7 +24,7 @@ services:
       - --port
       - "8080"
       - --alias
-      - minimax-m2.7
+      - glm-4.7-flash
       - -fa
       - "on"
       - -ctk
@@ -32,16 +32,14 @@ services:
       - -ctv
       - q4_0
       - --jinja
-      - --chat-template-file
-      - /config/minimax-m2-chat-template.jinja
       - --temp
       - "1.0"
       - --top-p
       - "0.95"
-      - --top-k
-      - "40"
       - --min-p
       - "0.01"
+      - --repeat-penalty
+      - "1.0"
       - --no-mmap
       - --cont-batching
       - -np
@@ -53,8 +51,7 @@ services:
     ports:
       - "9001:8080"
     volumes:
-      - llamacpp-minimax-m27-models:/models
-      - ./minimax-m2-chat-template.jinja:/config/minimax-m2-chat-template.jinja:ro
+      - llamacpp-glm47-flash-models:/models
     environment:
       - GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
       - HF_TOKEN=${HF_TOKEN:-}
@@ -69,4 +66,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  llamacpp-minimax-m27-models:
+  llamacpp-glm47-flash-models:

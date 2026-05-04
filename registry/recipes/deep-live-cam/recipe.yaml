@@ -1,0 +1,33 @@
+name: "Deep-Live-Cam"
+slug: deep-live-cam
+version: "1.0.0"
+description: "Perform real-time face swaps on images, videos, and webcam streams with Deep-Live-Cam, using InsightFace and GFPGAN for high-quality single-image face replacement."
+author: "hacksider"
+source: "spark-ai-hub"
+website: "https://github.com/hacksider/Deep-Live-Cam"
+upstream: "https://github.com/hitechcloud-vietnam/deep-live-cam-spark-ai-hub"
+fork: "https://github.com/hacksider/Deep-Live-Cam"
+category: image-gen
+tags:
+  - face-swap
+  - deepfake
+  - webcam
+  - onnxruntime
+  - video
+icon: "\U0001F3AD"
+logo: "/logos/deep-live-cam.png"
+requirements:
+  min_memory_gb: 8
+  recommended_memory_gb: 16
+  disk_gb: 12
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7869
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: community-verified
+release_date: "2023-09"

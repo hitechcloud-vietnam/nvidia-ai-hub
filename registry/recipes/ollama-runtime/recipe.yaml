@@ -40,7 +40,7 @@ integration:
   max_context: "Depends on the Ollama model selected"
   max_output_tokens: "Depends on the Ollama model selected"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:11435/api/tags"
-status: experimental
+status: community-verified
 release_date: "2023-06"
 runtime_env_path: "registry/recipes/ollama-runtime/.env"
 requires_hf_token: false

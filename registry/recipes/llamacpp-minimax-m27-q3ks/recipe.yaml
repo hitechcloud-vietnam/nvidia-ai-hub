@@ -28,7 +28,7 @@ docker:
   build: false
   build_time_minutes: 0
   gpu: true
-status: experimental
+status: community-verified
 release_date: "2026-04"
 tested_on:
   dgx_os: "7.2"

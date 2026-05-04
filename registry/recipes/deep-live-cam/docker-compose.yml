@@ -1,0 +1,23 @@
+services:
+  deep-live-cam:
+    image: ghcr.io/hitechcloud-vietnam/deep-live-cam-spark-ai-hub:latest
+    container_name: nvidia-ai-hub-deep-live-cam
+    ports:
+      - "7869:7860"
+    environment:
+      PORT: "7860"
+    volumes:
+      - deep-live-cam-models:/app/deep-live-cam/models
+      - deep-live-cam-output:/app/deep-live-cam/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  deep-live-cam-models:
+  deep-live-cam-output:

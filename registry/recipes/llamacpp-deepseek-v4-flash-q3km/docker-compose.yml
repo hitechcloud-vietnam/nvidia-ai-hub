@@ -1,20 +1,20 @@
 services:
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:full-cuda13-b8953
-    container_name: nvidia-ai-hub-llamacpp-minimax-m27-q3ks
+    container_name: nvidia-ai-hub-llamacpp-deepseek-v4-flash-q3km
     entrypoint:
       - /bin/sh
       - -c
       - |
-        if [ ! -f /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00003-of-00003.gguf ]; then
-          echo "[nvidia-ai-hub] Downloading MiniMax-M2.7 UD-Q3_K_S (~94 GB)..."
-          hf download unsloth/MiniMax-M2.7-GGUF --include 'UD-Q3_K_S/*' --local-dir /models
+        if [ ! -f /models/DeepSeekV4-Flash-158B-Q3_K_M.gguf ]; then
+          echo "[nvidia-ai-hub] Downloading DeepSeek-V4-Flash Q3_K_M (~100 GB)..."
+          hf download tecaprovn/deepseek-v4-flash-gguf --include 'DeepSeekV4-Flash-158B-Q3_K_M.gguf' --local-dir /models
         fi
         exec /app/llama-server "$$@"
       - --
     command:
       - -m
-      - /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00001-of-00003.gguf
+      - /models/DeepSeekV4-Flash-158B-Q3_K_M.gguf
       - -ngl
       - "999"
       - -c
@@ -24,7 +24,7 @@ services:
       - --port
       - "8080"
       - --alias
-      - minimax-m2.7
+      - deepseek-v4-flash
       - -fa
       - "on"
       - -ctk
@@ -32,16 +32,10 @@ services:
       - -ctv
       - q4_0
       - --jinja
-      - --chat-template-file
-      - /config/minimax-m2-chat-template.jinja
       - --temp
       - "1.0"
       - --top-p
-      - "0.95"
-      - --top-k
-      - "40"
-      - --min-p
-      - "0.01"
+      - "1.0"
       - --no-mmap
       - --cont-batching
       - -np
@@ -53,12 +47,10 @@ services:
     ports:
       - "9001:8080"
     volumes:
-      - llamacpp-minimax-m27-models:/models
-      - ./minimax-m2-chat-template.jinja:/config/minimax-m2-chat-template.jinja:ro
+      - llamacpp-deepseek-v4-flash-models:/models
     environment:
       - GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
       - HF_TOKEN=${HF_TOKEN:-}
-      - PYTHONUNBUFFERED=1
     deploy:
       resources:
         reservations:
@@ -66,7 +58,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    restart: unless-stopped
+    restart: "no"
 
 volumes:
-  llamacpp-minimax-m27-models:
+  llamacpp-deepseek-v4-flash-models:

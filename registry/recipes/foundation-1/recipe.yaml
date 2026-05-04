@@ -29,5 +29,5 @@ docker:
   build: false
   build_time_minutes: 10
   gpu: true
-status: experimental
+status: community-verified
 release_date: "2026-03"
