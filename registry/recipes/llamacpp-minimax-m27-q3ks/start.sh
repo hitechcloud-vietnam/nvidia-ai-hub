@@ -9,7 +9,7 @@ shard_complete() {
 }
 
 if ! shard_complete; then
-    echo "[spark-ai-hub] Downloading MiniMax-M2.7 UD-Q3_K_S (~94 GB)..."
+    echo "[nvidia-ai-hub] Downloading MiniMax-M2.7 UD-Q3_K_S (~94 GB)..."
     huggingface-cli download unsloth/MiniMax-M2.7-GGUF \
         --include 'UD-Q3_K_S/*' \
         --local-dir /models

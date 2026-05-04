@@ -1,7 +1,7 @@
 services:
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:full-cuda13-b8953
-    container_name: spark-ai-hub-llamacpp-minimax-m27-q3ks
+    container_name: nvidia-ai-hub-llamacpp-minimax-m27-q3ks
     entrypoint: ["/bin/sh", "/scripts/start.sh"]
     command:
       - -m

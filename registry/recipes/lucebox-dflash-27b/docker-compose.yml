@@ -1,0 +1,123 @@
+services:
+  lucebox-dflash:
+    image: nvidia/cuda:12.9.0-devel-ubuntu22.04
+    container_name: nvidia-ai-hub-lucebox-dflash-27b
+    ports:
+      - "9001:8000"
+    volumes:
+      - lucebox-dflash-27b-app:/app
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+    ipc: host
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        set -e
+
+        # ── Ensure base tools present (ephemeral container fs) ──────────────────
+        # Note: dflash does NOT use NCCL (single-GPU, hardcoded for CUDA only;
+        # see dflash/CMakeLists.txt: "No libllama, no BLAS, no Metal, no Vulkan").
+        if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
+          echo "[lucebox] Installing base tools (fresh container)..."
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            curl python3 python3-venv ca-certificates
+        fi
+
+        # ── Phase 1: build (skipped if binary already in volume) ─────────────
+        if [ ! -f /app/bin/test_dflash ]; then
+          echo "[lucebox] Installing build dependencies..."
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            git cmake build-essential ca-certificates \
+            python3 python3-pip python3-venv
+
+          echo "[lucebox] Cloning lucebox-hub (with submodules)..."
+          git clone --recurse-submodules \
+            https://github.com/Luce-Org/lucebox-hub /tmp/lucebox-hub
+
+          echo "[lucebox] Building test_dflash for $(nvcc --version | grep release)..."
+          cd /tmp/lucebox-hub/dflash
+          # CRITICAL: explicit CUDA archs so ggml-cuda also compiles for Blackwell.
+          # Without this, ggml-cuda defaults to sm_52 and runs through PTX JIT — ~60x slower on GB10.
+          # 86=Ampere fallback, 120=Blackwell consumer, 121=GB10 (CUDA 12.9+).
+          # GGML_CUDA_NCCL=OFF: nvidia/cuda devel image ships libnccl 2.26.5 which has a
+          # Blackwell sm_121 shared-memory bug (requests 82240 bytes vs hw limit 79808).
+          # dflash is single-GPU; NCCL collective ops are not used.
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_ARCHITECTURES="86;120;121" \
+            -DGGML_CUDA_NCCL=OFF
+          cmake --build build --target test_dflash -j$(nproc)
+
+          echo "[lucebox] Copying artifacts to volume..."
+          mkdir -p /app/src /app/bin /app/models/target /app/models/draft
+          cp -r /tmp/lucebox-hub/dflash/. /app/src/
+          cp /tmp/lucebox-hub/dflash/build/test_dflash /app/bin/test_dflash
+          chmod +x /app/bin/test_dflash
+          echo "[lucebox] Build complete."
+        fi
+
+        # ── Phase 2: Python venv (skipped if already in volume and python works) ─
+        if [ ! -f /app/venv/bin/python ] || ! /app/venv/bin/python -c "import sys" 2>/dev/null; then
+          echo "[lucebox] Setting up Python venv..."
+          python3 -m venv /app/venv
+          /app/venv/bin/pip install --no-cache-dir \
+            fastapi uvicorn transformers jinja2 huggingface_hub
+        fi
+
+        # ── Phase 3: download models (skipped if already present) ────────────
+        if [ ! -f /app/models/target/Qwen3.5-27B-Q4_K_M.gguf ]; then
+          echo "[lucebox] Downloading target model (unsloth/Qwen3.5-27B Q4_K_M, ~16 GB)..."
+          mkdir -p /app/models/target
+          /app/venv/bin/python -c "
+        from huggingface_hub import hf_hub_download
+        import os
+        hf_hub_download(
+            repo_id='unsloth/Qwen3.5-27B-GGUF',
+            filename='Qwen3.5-27B-Q4_K_M.gguf',
+            local_dir='/app/models/target/',
+            token=os.environ.get('HF_TOKEN') or None,
+        )
+        print('[lucebox] Target model downloaded.')
+        "
+        fi
+
+        if [ ! -f /app/models/draft/model.safetensors ]; then
+          echo "[lucebox] Downloading draft model (z-lab/Qwen3.5-27B-DFlash, ~3.5 GB)..."
+          mkdir -p /app/models/draft
+          /app/venv/bin/python -c "
+        from huggingface_hub import snapshot_download
+        import os
+        snapshot_download(
+            repo_id='z-lab/Qwen3.5-27B-DFlash',
+            local_dir='/app/models/draft/',
+            token=os.environ.get('HF_TOKEN') or None,
+        )
+        print('[lucebox] Draft model downloaded.')
+        "
+        fi
+
+        # ── Launch ───────────────────────────────────────────────────────────
+        echo "[lucebox] Starting DFlash server (budget=22, max-ctx=16384)..."
+        cd /app/src
+        export LD_LIBRARY_PATH=/app/src/build/deps/llama.cpp/ggml/src:/app/src/build/deps/llama.cpp/ggml/src/ggml-cuda:/usr/local/lib:/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}
+        exec /app/venv/bin/python scripts/server.py \
+          --target /app/models/target/Qwen3.5-27B-Q4_K_M.gguf \
+          --draft  /app/models/draft/model.safetensors \
+          --bin    /app/bin/test_dflash \
+          --budget 32 \
+          --max-ctx 2048 \
+          --port 8000
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  lucebox-dflash-27b-app:

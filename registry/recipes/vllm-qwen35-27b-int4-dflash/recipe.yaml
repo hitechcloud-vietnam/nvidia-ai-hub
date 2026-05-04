@@ -1,0 +1,41 @@
+name: "Qwen3.5-27B Int4 DFlash"
+slug: vllm-qwen35-27b-int4-dflash
+version: "1.0.0"
+description: "Qwen3.5-27B GPTQ-Int4 with z-lab DFlash speculative decoding (chain k=15) on vLLM. Measured 49.9 tok/s on DGX Spark GB10 — 3.63× the production MTP-1 Int4 recipe (13.7 tok/s, same engine, same Int4 weights), and 6.4× faster than the BF16+MTP-1 production at much lower memory. Compose-only; runtime installs z-lab/dflash."
+author: "Alibaba Cloud + z-lab + vLLM"
+source: "community"
+website: "https://github.com/z-lab/dflash"
+upstream: "https://huggingface.co/z-lab/Qwen3.5-27B-DFlash"
+category: llm
+tags:
+  - llm
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - speculative-decoding
+  - dflash
+  - quantized
+  - gptq
+  - experimental
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 40
+  recommended_memory_gb: 56
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 0
+  gpu: true
+status: experimental
+release_date: "2026-05-01"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "Qwen/Qwen3.5-27B-GPTQ-Int4"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"Qwen/Qwen3.5-27B-GPTQ-Int4\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a quicksort in Python.\"}], \"max_tokens\": 512, \"temperature\": 0}'"

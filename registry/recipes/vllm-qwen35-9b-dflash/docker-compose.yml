@@ -1,0 +1,72 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.20.0-aarch64-cu130
+    container_name: nvidia-ai-hub-vllm-qwen35-9b-dflash
+    ports:
+      - "9001:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+      - PIP_DISABLE_PIP_VERSION_CHECK=1
+    ipc: host
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        set -e
+        # vLLM 0.20.0 ships the DFlash speculative method already
+        # (vllm.v1.spec_decode.dflash). Only need z-lab/dflash for the draft loader.
+        if ! command -v git >/dev/null 2>&1; then
+          apt-get update -qq && apt-get install -y --no-install-recommends git
+        fi
+        python3 - <<'PY'
+        import importlib.util
+        import subprocess
+        import sys
+
+        if importlib.util.find_spec("dflash") is None:
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install", "--no-cache-dir",
+                "git+https://github.com/z-lab/dflash.git",
+            ])
+        PY
+        exec python3 -m vllm.entrypoints.openai.api_server "$@"
+      - vllm-entrypoint
+    command:
+      - --model
+      - Qwen/Qwen3.5-9B
+      - --port
+      - "8000"
+      - --max-model-len
+      - "65536"
+      - --reasoning-parser
+      - qwen3
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - qwen3_coder
+      - --gpu-memory-utilization
+      - "0.55"
+      - --max-num-batched-tokens
+      - "32768"
+      - --attention-backend
+      - flash_attn
+      - --mm-processor-cache-type
+      - shm
+      - --mm-encoder-tp-mode
+      - data
+      - --speculative-config
+      - '{"method": "dflash", "model": "z-lab/Qwen3.5-9B-DFlash", "num_speculative_tokens": 15}'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  huggingface-cache:
