@@ -1,0 +1,62 @@
+services:
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:full-cuda13-b8953
+    container_name: spark-ai-hub-llamacpp-minimax-m27-q3ks
+    entrypoint: ["/bin/sh", "/scripts/start.sh"]
+    command:
+      - -m
+      - /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00001-of-00003.gguf
+      - -ngl
+      - "999"
+      - -c
+      - "131072"
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8080"
+      - --alias
+      - minimax-m2.7
+      - -fa
+      - "on"
+      - -ctk
+      - q4_0
+      - -ctv
+      - q4_0
+      - --jinja
+      - --chat-template-file
+      - /config/minimax-m2-chat-template.jinja
+      - --temp
+      - "1.0"
+      - --top-p
+      - "0.95"
+      - --top-k
+      - "40"
+      - --min-p
+      - "0.01"
+      - --no-mmap
+      - --cont-batching
+      - -np
+      - "1"
+      - -t
+      - "16"
+      - -tb
+      - "16"
+    ports:
+      - "9001:8080"
+    volumes:
+      - llamacpp-minimax-m27-models:/models
+      - ./start.sh:/scripts/start.sh:ro
+      - ./minimax-m2-chat-template.jinja:/config/minimax-m2-chat-template.jinja:ro
+    environment:
+      - GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  llamacpp-minimax-m27-models:

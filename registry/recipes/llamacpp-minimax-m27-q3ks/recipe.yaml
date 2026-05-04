@@ -1,0 +1,39 @@
+name: "MiniMax-M2.7 (UD-Q3_K_S)"
+slug: llamacpp-minimax-m27-q3ks
+version: "1.0.0"
+description: "MiniMax-M2.7 229B MoE (10B active), Q3_K_S GGUF via llama.cpp. OpenAI-compatible API. 21 tok/s on DGX Spark."
+author: "MiniMax AI"
+source: "community"
+website: "https://www.minimax.io"
+upstream: "https://huggingface.co/unsloth/MiniMax-M2.7-GGUF"
+category: llm
+tags:
+  - llm
+  - moe
+  - gguf
+  - llama-cpp
+  - minimax
+  - reasoning
+logo: "/logos/minimax.png"
+requirements:
+  min_memory_gb: 110
+  recommended_memory_gb: 120
+  disk_gb: 110
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 0
+  gpu: true
+status: experimental
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-29"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "minimax-m2.7"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"minimax-m2.7\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"
