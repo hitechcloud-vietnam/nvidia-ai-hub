@@ -30,5 +30,5 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: official
-release_date: "2025-06"
+release_date: "2025-11"
 requires_hf_token: true
