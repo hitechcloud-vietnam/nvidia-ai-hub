@@ -124,6 +124,7 @@ def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
         slug=recipe.slug,
         version=recipe.version,
         release_date=recipe.release_date,
+        tokens_per_second=recipe.tokens_per_second,
         description=recipe.description,
         author=recipe.author,
         category=recipe.category,

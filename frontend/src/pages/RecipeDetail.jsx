@@ -11,6 +11,7 @@ import {
   isNotebookRecipe,
 } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
+import { formatTokensPerSecond } from '../utils/recipeSpeed'
 
 const RecipeConfigTab = lazy(() => import('../components/recipe-detail/ConfigWorkspace'))
 const InlineConfigWorkspace = lazy(() => import('../components/recipe-detail/ConfigWorkspace').then((module) => ({ default: module.InlineConfigWorkspace })))
@@ -320,6 +321,7 @@ export default function RecipeDetail() {
   const recipeCategories = Array.isArray(recipe.categories) && recipe.categories.length > 0
     ? recipe.categories
     : [recipe.category]
+  const speedLabel = formatTokensPerSecond(recipe.tokens_per_second)
   const detailTabs = getDetailTabs(recipe)
   const showDedicatedConfigTab = hasDedicatedConfigTab(recipe)
 
@@ -367,6 +369,7 @@ export default function RecipeDetail() {
           </div>
 
           <div className="hidden lg:flex items-center gap-2 shrink-0">
+            {speedLabel && <SpecBadge label={t('recipe.speed')} value={speedLabel} tone="success" />}
             <SpecBadge label={t('recipe.memory')} value={`${recipe.requirements?.min_memory_gb ?? 8}–${recipe.requirements?.recommended_memory_gb ?? recipe.requirements?.min_memory_gb ?? 8} GB`} />
             <SpecBadge label={t('recipe.disk')} value={`${recipe.requirements?.disk_gb ?? 10} GB`} />
             <SpecBadge label={t('recipe.build')} value={`~${recipe.docker?.build_time_minutes ?? 5} min`} />
@@ -942,11 +945,15 @@ function StatusPill({ color, pulse, children }) {
   )
 }
 
-function SpecBadge({ label, value }) {
+function SpecBadge({ label, value, tone = 'default' }) {
+  const toneClass = tone === 'success'
+    ? 'border-success/30 bg-success/10 text-success'
+    : 'border-outline-dim bg-surface-high/65 text-text'
+
   return (
-    <div className="border border-outline-dim rounded-xl px-3.5 py-2.5 bg-surface-high/65 min-w-[112px]">
+    <div className={`border rounded-xl px-3.5 py-2.5 min-w-28 ${toneClass}`}>
       <div className="text-[10px] uppercase tracking-[0.16em] text-text-dim font-label">{label}</div>
-      <div className="mt-1 text-[12px] font-semibold text-text font-display">{value}</div>
+      <div className="mt-1 text-[12px] font-semibold font-display">{value}</div>
     </div>
   )
 }

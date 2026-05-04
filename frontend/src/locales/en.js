@@ -770,6 +770,7 @@ const en = {
       uninstall: 'Uninstall',
       registryChanged: 'Registry changed',
       memory: 'Memory',
+      speed: 'Speed',
       disk: 'Disk',
       build: 'Build',
       update: 'Update',

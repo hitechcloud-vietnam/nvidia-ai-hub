@@ -87,6 +87,7 @@ class Recipe(BaseModel):
     slug: str
     version: str = "1.0.0"
     release_date: str = ""
+    tokens_per_second: float | None = None
     description: str = ""
     author: str = ""
     website: str = ""
@@ -126,6 +127,7 @@ class RecipeSummary(BaseModel):
     slug: str
     version: str = "1.0.0"
     release_date: str = ""
+    tokens_per_second: float | None = None
     description: str = ""
     author: str = ""
     category: str = "llm"

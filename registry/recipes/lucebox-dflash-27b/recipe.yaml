@@ -31,6 +31,7 @@ docker:
   gpu: true
 status: community-verified
 release_date: "2026-04"
+tokens_per_second: 49.3
 integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "luce-dflash"

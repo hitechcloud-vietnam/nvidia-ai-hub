@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { useThemedLogo } from '../hooks/useThemedLogo'
 import { getRecipeOpenLabel, getRecipeSurfaceLabel, getRecipeUrl, isNotebookRecipe } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
+import { formatTokensPerSecond } from '../utils/recipeSpeed'
 
 export default function RecipeCard({ recipe }) {
   const { t } = useTranslation()
@@ -25,6 +26,7 @@ export default function RecipeCard({ recipe }) {
   const updateCount = Number(recipe.registry_update_count || 0)
   const community = recipe.community || {}
   const hasCommunitySignal = (community.verified_count || 0) > 0 || (community.rating_count || 0) > 0
+  const speedLabel = formatTokensPerSecond(recipe.tokens_per_second)
 
   const handleInstall = (e) => {
     e.stopPropagation()
@@ -80,6 +82,11 @@ export default function RecipeCard({ recipe }) {
               {getRecipeSurfaceLabel(recipe)}
             </span>
             <HardwareFitPill fit={hardwareFit} />
+            {speedLabel && (
+              <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-label text-success">
+                {speedLabel}
+              </span>
+            )}
             {recipeCategories.slice(0, 2).map((cat) => (
               <span key={cat} className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-label text-secondary">
                 {cat}

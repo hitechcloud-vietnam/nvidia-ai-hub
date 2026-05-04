@@ -34,6 +34,7 @@ docker:
   gpu: true
 status: community-verified
 release_date: "2026-05"
+tokens_per_second: 49.9
 integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "Qwen/Qwen3.5-27B-GPTQ-Int4"
