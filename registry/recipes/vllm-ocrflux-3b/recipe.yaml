@@ -38,6 +38,7 @@ docker:
   build_time_minutes: 6
   gpu: true
 status: experimental
+release_date: "2025-08"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "ChatDOC/OCRFlux-3B"

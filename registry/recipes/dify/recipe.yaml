@@ -35,6 +35,7 @@ docker:
   build_time_minutes: 5
   gpu: false
 status: experimental
+release_date: "2023-05"
 runtime_env_path: "registry/recipes/dify/.env"
 requires_hf_token: false
 commands:

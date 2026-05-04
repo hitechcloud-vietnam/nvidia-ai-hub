@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:1234/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <LM_STUDIO_API_KEY>' -d '{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
+release_date: "2023-07"
 runtime_env_path: "registry/recipes/lm-studio-bridge/.env"
 requires_hf_token: false
 commands:

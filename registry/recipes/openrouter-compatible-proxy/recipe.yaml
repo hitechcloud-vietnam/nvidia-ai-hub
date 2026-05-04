@@ -38,6 +38,7 @@ docker:
   build_time_minutes: 2
   gpu: false
 status: experimental
+release_date: "2023-06"
 runtime_env_path: "registry/recipes/openrouter-compatible-proxy/.env"
 requires_hf_token: false
 depends_on: []

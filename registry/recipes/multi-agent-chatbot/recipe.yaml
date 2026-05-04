@@ -45,6 +45,7 @@ docker:
   build_time_minutes: 30
   gpu: true
 status: experimental
+release_date: "2025-01"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:8000"
   model_id: "gpt-oss-120b"

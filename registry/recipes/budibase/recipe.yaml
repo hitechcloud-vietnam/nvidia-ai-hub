@@ -33,6 +33,7 @@ docker:
   build_time_minutes: 7
   gpu: false
 status: experimental
+release_date: "2019-07"
 runtime_env_path: "registry/recipes/budibase/.env"
 requires_hf_token: false
 commands:

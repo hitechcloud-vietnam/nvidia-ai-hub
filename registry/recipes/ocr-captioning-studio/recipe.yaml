@@ -36,6 +36,7 @@ docker:
   build_time_minutes: 12
   gpu: true
 status: experimental
+release_date: "2024-06"
 runtime_env_path: "registry/recipes/ocr-captioning-studio/.env"
 requires_hf_token: false
 commands:

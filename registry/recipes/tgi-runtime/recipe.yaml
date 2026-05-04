@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request and model limits"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3099/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
+release_date: "2023-05"
 runtime_env_path: "registry/recipes/tgi-runtime/.env"
 requires_hf_token: false
 commands:

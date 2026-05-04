@@ -43,13 +43,14 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import re
           import yaml
 
           recipe_files = sorted(Path('registry/recipes').glob('*/recipe.yaml'))
           if not recipe_files:
               raise SystemExit('No recipe.yaml files were found under registry/recipes')
 
-          required_fields = {'name', 'slug', 'description'}
+          required_fields = {'name', 'slug', 'description', 'release_date'}
           for recipe_file in recipe_files:
               data = yaml.safe_load(recipe_file.read_text(encoding='utf-8')) or {}
               missing = sorted(field for field in required_fields if not data.get(field))
@@ -57,6 +58,8 @@ jobs:
                   raise SystemExit(f'{recipe_file}: missing required fields: {", ".join(missing)}')
               if data['slug'] != recipe_file.parent.name:
                   raise SystemExit(f'{recipe_file}: slug must match parent directory name')
+              if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', str(data['release_date'])):
+                  raise SystemExit(f'{recipe_file}: release_date must use YYYY-MM format')
 
       - name: Validate recipe shell scripts
         run: |

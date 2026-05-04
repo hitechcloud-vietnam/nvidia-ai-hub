@@ -33,6 +33,7 @@ docker:
   build_time_minutes: 30
   gpu: true
 status: experimental
+release_date: "2025-02"
 runtime_env_path: "registry/recipes/wan-2.1-app/.env"
 requires_hf_token: false
 commands:

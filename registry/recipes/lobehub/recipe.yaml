@@ -33,6 +33,7 @@ docker:
   build_time_minutes: 8
   gpu: false
 status: experimental
+release_date: "2023-06"
 runtime_env_path: "registry/recipes/lobehub/.env"
 requires_hf_token: false
 commands:

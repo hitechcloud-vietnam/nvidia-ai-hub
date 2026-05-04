@@ -35,6 +35,7 @@ docker:
   build_time_minutes: 6
   gpu: false
 status: experimental
+release_date: "2019-10"
 runtime_env_path: "registry/recipes/milvus-assistant-stack/.env"
 requires_hf_token: false
 depends_on:

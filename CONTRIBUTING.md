@@ -223,7 +223,8 @@ Each recipe should include at minimum:
 Recipe guidelines:
 
 - Keep the `slug` stable and filesystem-safe.
-- Use accurate metadata for `name`, `author`, `website`, `upstream`, and `status`.
+- Use accurate metadata for `name`, `author`, `website`, `upstream`, `status`, and `release_date`.
+- Set `release_date` to the original public release month of the underlying model or tool in `YYYY-MM` format.
 - Match UI ports and paths to the actual container behavior.
 - Set realistic memory and disk requirements.
 - Use UTF-8 encoding for YAML files.

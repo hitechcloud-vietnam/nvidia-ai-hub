@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request or server defaults"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3096/v1/models -H 'Authorization: Bearer <LLAMA_API_KEY>'"
 status: experimental
+release_date: "2023-03"
 runtime_env_path: "registry/recipes/llamacpp-server/.env"
 requires_hf_token: false
 commands:

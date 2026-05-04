@@ -35,6 +35,7 @@ docker:
   build_time_minutes: 8
   gpu: true
 status: experimental
+release_date: "2023-08"
 runtime_env_path: "registry/recipes/fooocus/.env"
 requires_hf_token: false
 commands:

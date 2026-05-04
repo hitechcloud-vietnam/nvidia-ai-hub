@@ -35,6 +35,7 @@ docker:
   build_time_minutes: 4
   gpu: false
 status: experimental
+release_date: "2023-07"
 runtime_env_path: "registry/recipes/anythingllm-enterprise-preset/.env"
 requires_hf_token: false
 depends_on:

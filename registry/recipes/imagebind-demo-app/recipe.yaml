@@ -36,6 +36,7 @@ docker:
   build_time_minutes: 15
   gpu: true
 status: experimental
+release_date: "2023-05"
 runtime_env_path: "registry/recipes/imagebind-demo-app/.env"
 requires_hf_token: false
 commands:

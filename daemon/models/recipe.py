@@ -86,6 +86,7 @@ class Recipe(BaseModel):
     name: str
     slug: str
     version: str = "1.0.0"
+    release_date: str = ""
     description: str = ""
     author: str = ""
     website: str = ""
@@ -124,6 +125,7 @@ class RecipeSummary(BaseModel):
     name: str
     slug: str
     version: str = "1.0.0"
+    release_date: str = ""
     description: str = ""
     author: str = ""
     category: str = "llm"

@@ -28,5 +28,6 @@ docker:
   build_time_minutes: 3
   gpu: true
 status: official
+release_date: "2023-06"
 depends_on:
   - ollama-runtime

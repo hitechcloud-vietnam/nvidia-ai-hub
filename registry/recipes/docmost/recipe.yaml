@@ -32,6 +32,7 @@ docker:
   build_time_minutes: 5
   gpu: false
 status: experimental
+release_date: "2024-07"
 runtime_env_path: "registry/recipes/docmost/.env"
 requires_hf_token: false
 commands:

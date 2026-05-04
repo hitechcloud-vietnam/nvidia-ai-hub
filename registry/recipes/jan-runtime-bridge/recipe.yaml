@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:1337/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <JAN_API_KEY>' -d '{\"model\":\"janhq/Jan-v3-4B-base-instruct-gguf\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
 status: experimental
+release_date: "2023-12"
 runtime_env_path: "registry/recipes/jan-runtime-bridge/.env"
 requires_hf_token: false
 commands:

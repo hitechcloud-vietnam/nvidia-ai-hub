@@ -36,6 +36,7 @@ docker:
   build_time_minutes: 10
   gpu: false
 status: experimental
+release_date: "2023-05"
 runtime_env_path: "registry/recipes/jupyter-ai-lab/.env"
 requires_hf_token: false
 depends_on:

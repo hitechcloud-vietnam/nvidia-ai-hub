@@ -35,6 +35,7 @@ docker:
   build_time_minutes: 5
   gpu: false
 status: experimental
+release_date: "2021-04"
 runtime_env_path: "registry/recipes/qdrant-assistant-stack/.env"
 requires_hf_token: false
 depends_on:

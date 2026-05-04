@@ -30,3 +30,4 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: official
+release_date: "2025-06"

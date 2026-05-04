@@ -52,4 +52,5 @@ docker:
   build_time_minutes: 5
   gpu: false
 status: experimental
+release_date: "2025-03"
 runtime_env_path: ""

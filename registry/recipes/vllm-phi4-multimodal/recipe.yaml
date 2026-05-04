@@ -37,6 +37,7 @@ docker:
   build_time_minutes: 10
   gpu: true
 status: experimental
+release_date: "2025-02"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "microsoft/Phi-4-multimodal-instruct"

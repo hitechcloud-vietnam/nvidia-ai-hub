@@ -1,5 +1,5 @@
 name: "FaceFusion"
-slug: facefusion-nvidia-ai-hub
+slug: facefusion-spark
 version: "1.0.0"
 description: "Perform face swaps, lip-sync, and face enhancement across images and videos with FaceFusion, an industry-leading face manipulation platform built for practical restoration and editing workflows."
 author: "FaceFusion"
@@ -29,3 +29,4 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: official
+release_date: "2023-08"

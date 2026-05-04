@@ -44,6 +44,7 @@ docker:
   build_time_minutes: 3
   gpu: true
 status: experimental
+release_date: "2025-01"
 depends_on:
   - ollama-runtime
 integration:

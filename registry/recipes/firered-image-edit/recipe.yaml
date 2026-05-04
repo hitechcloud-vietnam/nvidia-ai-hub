@@ -34,4 +34,5 @@ docker:
   build_time_minutes: 8
   gpu: true
 status: experimental
+release_date: "2025-10"
 requires_hf_token: false

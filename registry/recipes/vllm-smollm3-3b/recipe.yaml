@@ -36,6 +36,7 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: experimental
+release_date: "2025-07"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "HuggingFaceTB/SmolLM3-3B"

@@ -1,5 +1,5 @@
 name: "Hunyuan3D 2.1"
-slug: hunyuan3d-spark
+slug: hunyuan3d-spark-3
 version: "1.0.0"
 description: "Image-to-3D textured mesh generation by Tencent. Converts images into GLB models with PBR textures. Pre-built for DGX Spark with Python 3.10, Blender bpy, and CUDA 13."
 author: "WaxacaBytes"
@@ -29,3 +29,4 @@ docker:
   build_time_minutes: 10
   gpu: true
 status: official
+release_date: "2025-01"

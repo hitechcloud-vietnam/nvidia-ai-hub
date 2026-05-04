@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3097/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <SGLANG_API_KEY>' -d '{\"model\":\"Qwen/Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
 status: experimental
+release_date: "2023-12"
 runtime_env_path: "registry/recipes/sglang-runtime/.env"
 requires_hf_token: false
 commands:

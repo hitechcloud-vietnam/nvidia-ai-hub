@@ -1,0 +1,90 @@
+<svg width="2400" height="1200" viewBox="0 0 2400 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="172" y1="88" x2="2214" y2="1130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#02050B"/>
+      <stop offset="0.45" stop-color="#09111B"/>
+      <stop offset="1" stop-color="#14294B"/>
+    </linearGradient>
+    <radialGradient id="ambient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1754 286) rotate(119.449) scale(1137.25 886.36)">
+      <stop stop-color="#5C95FF" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#5C95FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="1196" y1="160" x2="2016" y2="954" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6AA1FF"/>
+      <stop offset="1" stop-color="#1843C2"/>
+    </linearGradient>
+    <linearGradient id="panelEdge" x1="1265" y1="206" x2="1947" y2="876" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C7DAFF"/>
+      <stop offset="1" stop-color="#78A8FF"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="1283" y1="236" x2="1908" y2="845" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="1078" y="100" width="1040" height="948" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="32" stdDeviation="40" flood-color="#000613" flood-opacity="0.52"/>
+    </filter>
+    <filter id="blur" x="1036" y="42" width="1132" height="1008" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="80"/>
+    </filter>
+  </defs>
+
+  <rect width="2400" height="1200" fill="url(#bg)"/>
+  <rect width="2400" height="1200" fill="url(#ambient)"/>
+
+  <g opacity="0.5">
+    <circle cx="2058" cy="246" r="5" fill="#81ACFF"/>
+    <circle cx="1970" cy="929" r="5" fill="#81ACFF"/>
+    <circle cx="1799" cy="1002" r="4" fill="#6F9CFF"/>
+    <path d="M1707 997H2146" stroke="#1E3558" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#blur)">
+    <rect x="1200" y="176" width="804" height="696" rx="76" fill="#2F71FF" fill-opacity="0.52"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1198" y="170" width="800" height="692" rx="74" fill="url(#panel)"/>
+    <rect x="1201" y="173" width="794" height="686" rx="71" stroke="url(#panelEdge)" stroke-width="6"/>
+    <path d="M1198 244C1198 203.131 1231.13 170 1272 170H1924C1964.87 170 1998 203.131 1998 244V374H1198V244Z" fill="#8CB5FF" fill-opacity="0.22"/>
+    <rect x="1290" y="274" width="616" height="490" rx="46" fill="#0A1B49" fill-opacity="0.36"/>
+    <rect x="1290" y="274" width="616" height="490" rx="46" fill="url(#glass)"/>
+  </g>
+
+  <text x="232" y="266" fill="#E1EBFF" font-size="94" font-weight="700" font-family="Inter, Arial, sans-serif">Gemma 4</text>
+  <text x="232" y="346" fill="#83A9FF" font-size="32" font-weight="600" font-family="Inter, Arial, sans-serif" letter-spacing="0.24em">GOOGLE OPEN MODELS</text>
+  <text x="232" y="468" fill="#F7FAFF" font-size="126" font-weight="800" font-family="Inter, Arial, sans-serif">26B-A4B + 31B</text>
+  <text x="232" y="558" fill="#ABC2F7" font-size="44" font-weight="500" font-family="Inter, Arial, sans-serif">Large Gemma 4 variants for flagship reasoning, multimodal tasks, and agentic use.</text>
+  <text x="232" y="620" fill="#ABC2F7" font-size="44" font-weight="500" font-family="Inter, Arial, sans-serif">Built to feel like the official Gemma family instead of generic AI art.</text>
+
+  <g>
+    <rect x="232" y="716" width="214" height="66" rx="33" fill="#0E1B31"/>
+    <rect x="232.5" y="716.5" width="213" height="65" rx="32.5" stroke="#294978"/>
+    <text x="297" y="758" fill="#E8F0FF" font-size="28" font-weight="700" font-family="Inter, Arial, sans-serif">256K class</text>
+
+    <rect x="466" y="716" width="226" height="66" rx="33" fill="#0E1B31"/>
+    <rect x="466.5" y="716.5" width="225" height="65" rx="32.5" stroke="#294978"/>
+    <text x="529" y="758" fill="#E8F0FF" font-size="28" font-weight="700" font-family="Inter, Arial, sans-serif">Strong reasoning</text>
+
+    <rect x="712" y="716" width="226" height="66" rx="33" fill="#0E1B31"/>
+    <rect x="712.5" y="716.5" width="225" height="65" rx="32.5" stroke="#294978"/>
+    <text x="773" y="758" fill="#E8F0FF" font-size="28" font-weight="700" font-family="Inter, Arial, sans-serif">Vision + tools</text>
+  </g>
+
+  <g opacity="0.97">
+    <text x="1362" y="454" fill="#F4F8FF" font-size="124" font-weight="800" font-family="Inter, Arial, sans-serif">Gemma</text>
+    <text x="1367" y="536" fill="#DCE8FF" font-size="40" font-weight="600" font-family="Inter, Arial, sans-serif" letter-spacing="0.16em">LARGE MODEL TIER</text>
+    <path d="M1458 618H1761" stroke="#E2ECFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M1458 682H1711" stroke="#E2ECFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M1458 746H1652" stroke="#E2ECFF" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="1404" cy="618" r="16" fill="#E2ECFF"/>
+    <circle cx="1404" cy="618" r="7" fill="#2E66F3"/>
+    <circle cx="1404" cy="682" r="16" fill="#E2ECFF"/>
+    <circle cx="1404" cy="682" r="7" fill="#2E66F3"/>
+    <circle cx="1404" cy="746" r="16" fill="#E2ECFF"/>
+    <circle cx="1404" cy="746" r="7" fill="#2E66F3"/>
+  </g>
+
+  <text x="232" y="934" fill="#6D8BC0" font-size="28" font-weight="600" font-family="Inter, Arial, sans-serif" letter-spacing="0.22em">GEMMA 4 FAMILY</text>
+  <text x="232" y="984" fill="#8FAAD9" font-size="26" font-weight="500" font-family="Inter, Arial, sans-serif">Visually aligned to the official dark-and-blue Gemma brand direction.</text>
+</svg>

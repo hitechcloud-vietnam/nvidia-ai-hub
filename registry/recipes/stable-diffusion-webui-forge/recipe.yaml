@@ -37,6 +37,7 @@ docker:
   build_time_minutes: 20
   gpu: true
 status: experimental
+release_date: "2024-02"
 runtime_env_path: "registry/recipes/stable-diffusion-webui-forge/.env"
 requires_hf_token: false
 commands:

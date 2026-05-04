@@ -134,8 +134,15 @@ const CATALOG_PRIORITY = {
   nemoclaw: 49,
 }
 
+function getRecipeReleaseDateRank(recipe) {
+  const releaseDate = typeof recipe.release_date === 'string' ? recipe.release_date.trim() : ''
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(releaseDate) ? releaseDate : '0000-00'
+}
+
 function sortRecipesForCatalog(recipes) {
   return [...recipes].sort((a, b) => {
+    const releaseDiff = getRecipeReleaseDateRank(b).localeCompare(getRecipeReleaseDateRank(a))
+    if (releaseDiff !== 0) return releaseDiff
     const updateDiff = Number(Boolean(b.registry_changed)) - Number(Boolean(a.registry_changed))
     if (updateDiff !== 0) return updateDiff
     const priorityDiff = (CATALOG_PRIORITY[b.slug] || 0) - (CATALOG_PRIORITY[a.slug] || 0)

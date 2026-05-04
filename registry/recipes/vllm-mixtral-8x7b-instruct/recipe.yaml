@@ -31,6 +31,7 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: experimental
+release_date: "2023-12"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "mistralai/Mixtral-8x7B-Instruct-v0.1"

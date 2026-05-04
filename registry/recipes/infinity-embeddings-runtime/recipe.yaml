@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Not applicable for embedding and reranking workloads"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:7997/v1/embeddings -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <INFINITY_API_KEY>' -d '{\"input\":[\"What is Deep Learning?\"],\"model\":\"BAAI/bge-small-en-v1.5\"}'"
 status: experimental
+release_date: "2023-11"
 runtime_env_path: "registry/recipes/infinity-embeddings-runtime/.env"
 requires_hf_token: false
 depends_on: []

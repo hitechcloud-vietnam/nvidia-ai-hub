@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Not applicable for embedding workloads"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3101/embed -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer <TEI_API_KEY>' -d '{\"inputs\":\"What is Deep Learning?\"}'"
 status: experimental
+release_date: "2023-11"
 runtime_env_path: "registry/recipes/text-embeddings-inference/.env"
 requires_hf_token: false
 depends_on: []

@@ -30,6 +30,7 @@ docker:
   build_time_minutes: 15
   gpu: true
 status: community-verified
+release_date: "2025-08"
 tested_on:
   dgx_os: "7.2"
   date: "2026-03-31"

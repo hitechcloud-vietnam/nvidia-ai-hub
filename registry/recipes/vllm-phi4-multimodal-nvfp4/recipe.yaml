@@ -32,6 +32,7 @@ docker:
   build_time_minutes: 8
   gpu: true
 status: experimental
+release_date: "2025-04"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "nvidia/Phi-4-multimodal-instruct-NVFP4"

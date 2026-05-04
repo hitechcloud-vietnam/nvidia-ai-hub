@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"vicuna-7b-v1.5\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello from FastChat.\"}]}'"
 status: experimental
+release_date: "2023-03"
 runtime_env_path: "registry/recipes/fastchat-runtime/.env"
 requires_hf_token: false
 depends_on: []

@@ -44,6 +44,7 @@ integration:
   max_output_tokens: "Depends on the selected upstream provider and model alias"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:20129/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer sk_omniroute_change_me' -d '{\"model\":\"cc/claude-sonnet-4-20250514\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize the active fallback policy.\"}]}'"
 status: experimental
+release_date: "2024-09"
 runtime_env_path: "registry/recipes/omniroute/.env"
 requires_hf_token: false
 depends_on: []

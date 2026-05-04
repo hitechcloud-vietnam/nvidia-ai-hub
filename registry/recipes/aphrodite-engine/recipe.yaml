@@ -42,6 +42,7 @@ integration:
   max_output_tokens: "Configurable per request"
   curl_example: "curl http://<NVIDIA_AI_HUB_IP>:3100/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer <APHRODITE_API_KEY>' -d '{\"model\":\"Qwen/Qwen3-0.6B\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"max_tokens\":64}'"
 status: experimental
+release_date: "2023-09"
 runtime_env_path: "registry/recipes/aphrodite-engine/.env"
 requires_hf_token: false
 commands:

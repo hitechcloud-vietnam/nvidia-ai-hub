@@ -36,6 +36,7 @@ docker:
   build_time_minutes: 10
   gpu: false
 status: experimental
+release_date: "2024-02"
 runtime_env_path: "registry/recipes/audio-agent-console/.env"
 requires_hf_token: false
 commands:

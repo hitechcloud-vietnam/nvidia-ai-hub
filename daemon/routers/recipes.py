@@ -123,6 +123,7 @@ def _to_recipe_summary(recipe: Recipe) -> RecipeSummary:
         name=recipe.name,
         slug=recipe.slug,
         version=recipe.version,
+        release_date=recipe.release_date,
         description=recipe.description,
         author=recipe.author,
         category=recipe.category,

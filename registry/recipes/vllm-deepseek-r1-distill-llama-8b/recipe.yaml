@@ -30,6 +30,7 @@ docker:
   build_time_minutes: 5
   gpu: true
 status: experimental
+release_date: "2025-01"
 integration:
   api_url: "http://<NVIDIA_AI_HUB_IP>:9001/v1"
   model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"

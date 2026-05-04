@@ -34,6 +34,7 @@ docker:
   build_time_minutes: 35
   gpu: true
 status: experimental
+release_date: "2023-10"
 runtime_env_path: "registry/recipes/wonder3d/.env"
 requires_hf_token: false
 commands:
