@@ -1,6 +1,6 @@
 services:
   vllm:
-    image: vllm/vllm-openai:v0.17.1-aarch64-cu130
+    image: vllm/vllm-openai:v0.20.0-aarch64-cu130
     container_name: nvidia-ai-hub-vllm-qwen35-27b-int4
     ports:
       - "9001:8000"

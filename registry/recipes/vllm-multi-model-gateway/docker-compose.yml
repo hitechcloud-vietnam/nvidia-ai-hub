@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   vllm-model-a:
-    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.20.0-aarch64-cu130}
     container_name: nvidia-ai-hub-vllm-model-a
     ports:
       - "${VLLM_MODEL_A_HOST_PORT:-9011}:8000"
@@ -62,7 +62,7 @@ services:
     restart: unless-stopped
 
   vllm-model-b:
-    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.20.0-aarch64-cu130}
     container_name: nvidia-ai-hub-vllm-model-b
     ports:
       - "${VLLM_MODEL_B_HOST_PORT:-9012}:8000"

@@ -35,7 +35,7 @@ services:
       start_period: 30s
 
   vllm-model-a:
-    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.20.0-aarch64-cu130}
     container_name: litellm-vllm-model-a
     restart: unless-stopped
     ports:
@@ -71,7 +71,7 @@ services:
               capabilities: [gpu]
 
   vllm-model-b:
-    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.17.1-aarch64-cu130}
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.20.0-aarch64-cu130}
     container_name: litellm-vllm-model-b
     restart: unless-stopped
     ports:
