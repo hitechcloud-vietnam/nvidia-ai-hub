@@ -844,6 +844,7 @@ const en = {
       maxContext: 'Max Context',
       maxOutput: 'Max Output',
       curlExample: 'curl example',
+      speedTestSnippet: 'Python speed test',
       platformIntegrationExport: 'Platform Integration Export',
       platformIntegrationExportBody: 'Copy portable launch metadata, bootstrap snippets, and SSH-friendly commands for workstation, lab, server, or DGX deployment flows.',
       registryUpdatesAvailable: 'Registry updates available',

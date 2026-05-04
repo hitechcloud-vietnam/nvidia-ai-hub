@@ -12,6 +12,7 @@ import {
 } from '../utils/recipePresentation'
 import { getRecipeHardwareFit } from '../utils/hardwareFit'
 import { formatTokensPerSecond } from '../utils/recipeSpeed'
+import { buildLlmSpeedTestSnippet } from '../utils/speedTestSnippet'
 
 const RecipeConfigTab = lazy(() => import('../components/recipe-detail/ConfigWorkspace'))
 const InlineConfigWorkspace = lazy(() => import('../components/recipe-detail/ConfigWorkspace').then((module) => ({ default: module.InlineConfigWorkspace })))
@@ -322,6 +323,8 @@ export default function RecipeDetail() {
     ? recipe.categories
     : [recipe.category]
   const speedLabel = formatTokensPerSecond(recipe.tokens_per_second)
+  const isLlmRecipe = recipe.category === 'llm' || recipeCategories.includes('llm') || recipe.tags?.includes('llm')
+  const llmSpeedTestSnippet = isLlmRecipe ? buildLlmSpeedTestSnippet(recipe.integration) : ''
   const detailTabs = getDetailTabs(recipe)
   const showDedicatedConfigTab = hasDedicatedConfigTab(recipe)
 
@@ -1169,11 +1172,11 @@ function AboutTab({ recipe, hardwareFit, purging, purgeRecipe, isBuilding, deplo
                 <Field label={t('recipe.apiKey')} value={recipe.integration.api_key} />
                 {recipe.integration.max_context && <Field label={t('recipe.maxContext')} value={recipe.integration.max_context} />}
                 {recipe.integration.max_output_tokens && <Field label={t('recipe.maxOutput')} value={recipe.integration.max_output_tokens} />}
-                {recipe.integration.curl_example && (
+                {llmSpeedTestSnippet && (
                   <div className="pt-2 xl:col-span-2">
-                    <span className="text-[10px] text-text-dim font-label block mb-1">{t('recipe.curlExample')}</span>
+                    <span className="text-[10px] text-text-dim font-label block mb-1">{t('recipe.speedTestSnippet')}</span>
                     <pre className="bg-surface rounded-xl p-3 text-[11px] text-text-muted font-mono overflow-x-auto whitespace-pre-wrap break-all m-0 leading-relaxed border border-outline-dim">
-                      {recipe.integration.curl_example.replace(/<NVIDIA_AI_HUB_IP>/g, location.hostname)}
+                      {llmSpeedTestSnippet}
                     </pre>
                   </div>
                 )}
