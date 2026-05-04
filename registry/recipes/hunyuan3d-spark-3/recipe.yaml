@@ -1,0 +1,31 @@
+name: "Hunyuan3D 2.1"
+slug: hunyuan3d-spark
+version: "1.0.0"
+description: "Image-to-3D textured mesh generation by Tencent. Converts images into GLB models with PBR textures. Pre-built for DGX Spark with Python 3.10, Blender bpy, and CUDA 13."
+author: "WaxacaBytes"
+website: "https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1"
+upstream: "https://github.com/hitechcloud-vietnam/hunyuan3d-spark"
+fork: "https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1"
+category: image-gen
+tags:
+  - 3d
+  - mesh
+  - image-to-3d
+  - hunyuan
+  - texture
+icon: "\U0001F48E"
+logo: "/logos/hunyuan3d.png"
+requirements:
+  min_memory_gb: 29
+  recommended_memory_gb: 64
+  disk_gb: 30
+  cuda_compute: "12.1"
+ui:
+  type: web
+  port: 7861
+  path: "/"
+docker:
+  build: false
+  build_time_minutes: 10
+  gpu: true
+status: official
