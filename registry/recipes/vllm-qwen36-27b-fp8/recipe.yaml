@@ -1,0 +1,39 @@
+name: "Qwen3.6-27B FP8"
+slug: vllm-qwen36-27b-fp8
+version: "1.0.0"
+description: "Qwen3.6-27B FP8 with official vLLM reasoning parser and tool calling. Optimized for DGX Spark."
+author: "Alibaba Cloud"
+source: "official"
+website: "https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen3.6.html"
+upstream: "https://huggingface.co/Qwen/Qwen3.6-27B-FP8"
+category: llm
+tags:
+  - llm
+  - multimodal
+  - vision
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - nvidia-official
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 70
+  recommended_memory_gb: 80
+  disk_gb: 28
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: experimental
+release_date: "2026-04"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "Qwen/Qwen3.6-27B-FP8"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"Qwen/Qwen3.6-27B-FP8\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"
