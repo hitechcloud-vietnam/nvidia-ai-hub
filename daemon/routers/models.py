@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from daemon.config import settings
+from daemon.services import hf_token
 from daemon.services.docker_service import get_installed_slugs, get_pending, is_ready, is_recipe_running
 from daemon.services.models_state import build_model_backup_snapshot
 from daemon.services.registry_service import get_recipe, get_recipe_dir, get_recipes
@@ -31,7 +32,6 @@ PLACEHOLDER_MODEL_HINTS = (
     "provider/model alias",
     "after launch",
 )
-_HF_TOKEN_PATH = Path.home() / ".cache" / "huggingface" / "token"
 _HF_QUEUE_LOCK = asyncio.Lock()
 _HF_QUEUE_POLL_SECONDS = 5
 _hf_queue_worker_task: asyncio.Task | None = None
@@ -83,10 +83,7 @@ def _save_hf_queue(items: list[dict]) -> None:
 
 
 def _get_hf_token() -> str:
-    try:
-        return _HF_TOKEN_PATH.read_text(encoding="utf-8").strip() if _HF_TOKEN_PATH.is_file() else ""
-    except OSError:
-        return ""
+    return hf_token.read_token()
 
 
 def _hf_storage_root() -> Path:
@@ -517,6 +514,7 @@ async def models_overview():
         },
         "hugging_face": {
             "token_configured": bool(_get_hf_token()),
+            "token_path": str(hf_token.HUB_TOKEN_PATH),
             "queue_storage_path": str(_hf_storage_root()),
         },
         "notes": [
@@ -618,6 +616,7 @@ async def huggingface_inventory():
     queue = _load_hf_queue()
     return {
         "token_configured": bool(_get_hf_token()),
+        "token_path": str(hf_token.HUB_TOKEN_PATH),
         "storage_path": str(_hf_storage_root()),
         "summary": _build_hf_queue_summary(queue, snapshots),
         "snapshots": snapshots,

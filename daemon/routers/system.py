@@ -1,23 +1,21 @@
 import asyncio
-from pathlib import Path
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from daemon.models.container import DeploymentPlan, GpuTopologySnapshot, RecipeMetrics, SystemMetrics
 from daemon.services.backup_service import apply_backup_restore, build_backup_snapshot, get_backup_restore_job, preview_backup_restore, start_backup_restore
 from daemon.services.deployment_service import get_recipe_deployment_selection
+from daemon.services import hf_token
 from daemon.services.monitor_service import get_gpu_topology_snapshot, get_recipe_deployment_plan, get_recipe_metrics, get_system_metrics
 from daemon.services.registry_service import get_recipe
 
 router = APIRouter(tags=["system"])
 
-_HF_TOKEN_PATH = Path.home() / ".cache" / "huggingface" / "token"
-
 
 @router.get("/api/system/hf-token")
 async def get_hf_token():
     """Check if a HuggingFace token is configured."""
-    return {"has_token": _HF_TOKEN_PATH.is_file() and _HF_TOKEN_PATH.read_text().strip() != ""}
+    return {"has_token": hf_token.has_token(), "path": str(hf_token.HUB_TOKEN_PATH)}
 
 
 class HFTokenBody(BaseModel):
@@ -31,8 +29,10 @@ class BackupRestoreBody(BaseModel):
 @router.post("/api/system/hf-token")
 async def set_hf_token(body: HFTokenBody):
     """Save a HuggingFace token."""
-    _HF_TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _HF_TOKEN_PATH.write_text(body.token.strip())
+    token = body.token.strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+    hf_token.write_token(token)
     return {"status": "saved"}
 
 

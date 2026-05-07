@@ -1,0 +1,41 @@
+name: "Qwen3.6-27B FP8 DFlash"
+slug: vllm-qwen36-27b-fp8-dflash
+version: "1.0.0"
+description: "Qwen3.6-27B FP8 with z-lab DFlash speculative decoding (chain k=15) on vLLM. Measured wallclock on DGX Spark GB10 across 3 mixed prompts with warmup discarded: 23.2 tok/s. Compose-only; runtime installs z-lab/dflash."
+author: "Alibaba Cloud + z-lab + vLLM"
+source: "community"
+website: "https://github.com/z-lab/dflash"
+upstream: "https://huggingface.co/z-lab/Qwen3.6-27B-DFlash"
+category: llm
+tags:
+  - llm
+  - reasoning
+  - coding
+  - tool-use
+  - vllm
+  - speculative-decoding
+  - dflash
+  - experimental
+logo: "/logos/qwen.png"
+requirements:
+  min_memory_gb: 70
+  recommended_memory_gb: 80
+  disk_gb: 34
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 0
+  gpu: true
+status: community-verified
+release_date: "2026-05-04"
+requires_hf_token: true
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "Qwen/Qwen3.6-27B-FP8"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"Qwen/Qwen3.6-27B-FP8\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a quicksort in Python.\"}], \"max_tokens\": 512, \"temperature\": 0}'"
+tokens_per_second: 23.2

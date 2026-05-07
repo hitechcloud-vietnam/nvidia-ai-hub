@@ -17,6 +17,7 @@ import aiohttp
 from daemon.config import settings
 from daemon.db import get_db
 from daemon.models.container import ContainerInfo
+from daemon.services import hf_token
 from daemon.services.registry_service import get_recipe_dir, get_recipe
 
 
@@ -121,6 +122,21 @@ def _runtime_env_template_file(recipe_dir: Path) -> Path:
 _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 _ANSI_OSC_RE = re.compile(r"\x1B\].*?(?:\x07|\x1B\\)")
 _CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]")
+_HF_TOKEN_ASSIGNMENT_RE = re.compile(r"(?i)(HF_TOKEN\s*=\s*)([^\s'\";,]+)")
+_HF_TOKEN_VALUE_RE = re.compile(r"\bhf_[A-Za-z0-9][A-Za-z0-9_-]{8,}\b")
+
+
+def _redact_secret_text(text: str) -> str:
+    if not text:
+        return ""
+
+    secrets_to_redact = {os.environ.get("HF_TOKEN", "").strip(), hf_token.read_token().strip()}
+    for secret in sorted((item for item in secrets_to_redact if len(item) >= 8), key=len, reverse=True):
+        text = text.replace(secret, "[redacted]")
+
+    text = _HF_TOKEN_ASSIGNMENT_RE.sub(r"\1[redacted]", text)
+    text = _HF_TOKEN_VALUE_RE.sub("hf_[redacted]", text)
+    return text
 
 
 def _sanitize_command_text(text: str) -> str:
@@ -132,7 +148,7 @@ def _sanitize_command_text(text: str) -> str:
     text = _CONTROL_CHARS_RE.sub("", text)
     text = text.replace("\ufffd", "")
     text = re.sub(r"(^|\n)m(?=\d{4}-\d{2}-\d{2}T)", r"\1", text)
-    return text
+    return _redact_secret_text(text)
 
 
 def _decode_command_output(data: bytes) -> str:
@@ -507,13 +523,12 @@ async def install_recipe(slug: str) -> AsyncGenerator[str, None]:
             return
 
         env = _launch_env()
-        token = env.get("HF_TOKEN", "")
         run_cmd = _compose_cmd(slug, recipe_dir) + [
             "run",
             "--rm",
             "--no-deps",
             "-e",
-            f"HF_TOKEN={token}",
+            "HF_TOKEN",
             "-e",
             "HF_HUB_OFFLINE=0",
             "-e",
@@ -529,7 +544,7 @@ async def install_recipe(slug: str) -> AsyncGenerator[str, None]:
             ),
         ]
         yield f"[nvidia-ai-hub] Prefetching weights for {model_repo} (no port bind)..."
-        yield f"[nvidia-ai-hub] Running: {' '.join(run_cmd)}"
+        yield f"[nvidia-ai-hub] Running: {_redact_secret_text(' '.join(run_cmd))}"
 
         rc = None
         async for text, code in _stream_proc(run_cmd, str(recipe_dir), env=env):
@@ -548,7 +563,7 @@ async def install_recipe(slug: str) -> AsyncGenerator[str, None]:
         yield f"[nvidia-ai-hub] Running: {' '.join(cmd)}"
 
         rc = None
-        async for text, code in _stream_proc(cmd, str(recipe_dir)):
+        async for text, code in _stream_proc(cmd, str(recipe_dir), env=_launch_env()):
             if text:
                 yield text
             if code is not None:
@@ -605,7 +620,7 @@ async def update_recipe(slug: str) -> AsyncGenerator[str, None]:
         )
 
         async for line in proc.stdout:
-            text = line.decode(errors="replace").rstrip()
+            text = _decode_command_output(line).rstrip()
             if '\r' in text:
                 text = text.rsplit('\r', 1)[-1]
             if text:
@@ -632,7 +647,7 @@ async def update_recipe(slug: str) -> AsyncGenerator[str, None]:
     )
 
     async for line in proc.stdout:
-        text = line.decode(errors="replace").rstrip()
+        text = _decode_command_output(line).rstrip()
         if '\r' in text:
             text = text.rsplit('\r', 1)[-1]
         if text:
@@ -657,7 +672,7 @@ async def update_recipe(slug: str) -> AsyncGenerator[str, None]:
     )
 
     async for line in proc.stdout:
-        text = line.decode(errors="replace").rstrip()
+        text = _decode_command_output(line).rstrip()
         if '\r' in text:
             text = text.rsplit('\r', 1)[-1]
         if text:
@@ -676,9 +691,9 @@ def _launch_env() -> dict:
     env = {**os.environ}
     # Auto-detect HuggingFace token so gated models work out of the box
     if not env.get("HF_TOKEN"):
-        token_path = Path.home() / ".cache" / "huggingface" / "token"
-        if token_path.is_file():
-            env["HF_TOKEN"] = token_path.read_text().strip()
+        token = hf_token.read_token()
+        if token:
+            env["HF_TOKEN"] = token
     return env
 
 

@@ -232,14 +232,6 @@ function StoppedCard({ recipe, metrics, onSelect, onLaunch, onRemove, removing }
 
   const handleLaunch = async (e) => {
     e.stopPropagation()
-    if (recipe.requires_hf_token) {
-      const res = await fetch('/api/system/hf-token')
-      const { has_token } = await res.json()
-      if (!has_token) {
-        onSelect(recipe.slug)
-        return
-      }
-    }
     setLaunching(true)
     await onLaunch(recipe.slug)
     setLaunching(false)

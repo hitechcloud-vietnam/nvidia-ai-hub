@@ -1,7 +1,7 @@
 name: "Qwen3.5-27B LuceBox DFlash"
 slug: lucebox-dflash-27b
 version: "1.0.0"
-description: "Qwen3.5-27B Q4_K_M with LuceBox DFlash — a custom DDTree speculative decoding engine built on top of llama.cpp. ~48-56 tok/s on DGX Spark GB10 (Blackwell sm_121), ~4× the vLLM FP8 baseline of ~12 tok/s. Compiled from source on first install for sm_86;120;121, NCCL disabled (single-GPU), DDTree budget 32."
+description: "Qwen3.5-27B Q4_K_M with LuceBox DFlash — a custom DDTree speculative decoding engine built on top of llama.cpp. Measured ~32 tok/s avg on DGX Spark GB10 (Blackwell sm_121) across mixed prompts (code-heavy prompts reach ~48 tok/s; open-ended prose ~24 tok/s). Compiled from source on first install for sm_86;120;121, NCCL disabled (single-GPU), DDTree budget 32."
 author: "Luce-Org"
 source: "community"
 website: "https://github.com/Luce-Org/lucebox-hub"
@@ -30,10 +30,12 @@ docker:
   build_time_minutes: 20
   gpu: true
 status: community-verified
-release_date: "2026-04"
-tokens_per_second: 49.3
+release_date: "2026-04-30"
 integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "luce-dflash"
   api_key: "not-needed"
   curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"luce-dflash\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a quicksort in Python.\"}], \"max_tokens\": 512, \"temperature\": 0}'"
+tokens_per_second: 32.0
+
+requires_hf_token: true

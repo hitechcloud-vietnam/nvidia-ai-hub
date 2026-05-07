@@ -78,6 +78,8 @@ export const useStore = create((set, get) => ({
   restarting: null,
   removing: null,
   purging: null,
+  hfTokenRequest: null,
+  _hfTokenResolver: null,
   _inFlight: {},  // slug -> { starting, running, ready, installed } overrides during transitions
   _ws: null,
   _recipesPromise: null,
@@ -1196,6 +1198,62 @@ export const useStore = create((set, get) => ({
     }
   },
 
+
+  ensureHfToken: async (recipeOrSlug, action = 'launch') => {
+    const slug = typeof recipeOrSlug === 'string' ? recipeOrSlug : recipeOrSlug?.slug
+    if (!slug) return false
+
+    const recipe = typeof recipeOrSlug === 'object' && recipeOrSlug
+      ? recipeOrSlug
+      : get().recipeDetails[slug] || get().recipes.find((item) => item.slug === slug)
+
+    if (!recipe?.requires_hf_token) return true
+
+    try {
+      const res = await fetch('/api/system/hf-token')
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data?.has_token) return true
+    } catch (error) {
+      console.warn('Failed to check Hugging Face token:', error)
+    }
+
+    return new Promise((resolve) => {
+      const previousResolver = get()._hfTokenResolver
+      if (previousResolver) previousResolver(false)
+      set({
+        hfTokenRequest: { slug, action, requestedAt: Date.now() },
+        _hfTokenResolver: resolve,
+      })
+    })
+  },
+
+  resolveHfToken: async (token) => {
+    const trimmed = String(token || '').trim()
+    if (!trimmed) return { ok: false, error: tStore('errors.hfTokenRequired') }
+
+    try {
+      const res = await fetch('/api/system/hf-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: trimmed }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`)
+
+      const resolver = get()._hfTokenResolver
+      set({ hfTokenRequest: null, _hfTokenResolver: null })
+      if (resolver) resolver(true)
+      return { ok: true }
+    } catch (error) {
+      return { ok: false, error: error?.message || tStore('errors.saveHfToken') }
+    }
+  },
+
+  cancelHfToken: () => {
+    const resolver = get()._hfTokenResolver
+    set({ hfTokenRequest: null, _hfTokenResolver: null })
+    if (resolver) resolver(false)
+  },
   getRecipeForkDiffSummary: async (slug) => {
     try {
       const res = await fetch(`/api/recipes/${slug}/fork/diff`)
@@ -1237,6 +1295,9 @@ export const useStore = create((set, get) => ({
   getRecipeForkDownloadUrl: (slug) => `/api/recipes/${slug}/fork/download`,
 
   installRecipe: async (slug, selection = null) => {
+    const allowed = await get().ensureHfToken(slug, 'install')
+    if (!allowed) return
+
     set({
       installing: slug,
       buildLogs: { ...get().buildLogs, [slug]: [] },
@@ -1370,6 +1431,9 @@ export const useStore = create((set, get) => ({
   },
 
   launchRecipe: async (slug, selection = null) => {
+    const allowed = await get().ensureHfToken(slug, 'launch')
+    if (!allowed) return
+
     const override = { starting: true, running: false, ready: false }
     set({
       _inFlight: { ...get()._inFlight, [slug]: override },

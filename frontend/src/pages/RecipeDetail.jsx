@@ -84,11 +84,7 @@ export default function RecipeDetail() {
   const [restartingNow, setRestartingNow] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [activeTab, setActiveTab] = useState('details')
-  const [showHfModal, setShowHfModal] = useState(false)
   const [showUninstallModal, setShowUninstallModal] = useState(false)
-  const [hfToken, setHfToken] = useState('')
-  const [hfSaving, setHfSaving] = useState(false)
-  const [hfError, setHfError] = useState('')
   const [deploymentSelection, setDeploymentSelection] = useState(null)
   const [deploymentSaving, setDeploymentSaving] = useState(false)
   const [deploymentSaveInfo, setDeploymentSaveInfo] = useState(null)
@@ -137,15 +133,26 @@ export default function RecipeDetail() {
   const isUpdating = updating === recipe?.slug
   const isRestarting = restarting === recipe?.slug || restartingNow
   const isBusy = isBuilding || isUpdating || isRestarting
+  const recipeSlug = recipe?.slug
+  const cLogs = recipeSlug ? containerLogs[recipeSlug] || [] : []
+  const currentBuildLogs = recipeSlug ? buildLogs[recipeSlug] || [] : []
+  const progressState = recipeSlug ? buildProgress[recipeSlug] || null : null
+  const buildFailed = hasFailedBuildLog(currentBuildLogs) || progressState?.phase === t('build.failedPhase')
+  const showingBuildLogs = isBusy || (currentBuildLogs.length > 0 && buildFailed)
+  const logLines = showingBuildLogs ? currentBuildLogs : cLogs
+  const runtimeMetrics = recipeSlug ? recipeMetrics[recipeSlug] || null : null
+  const showAppMonitor = Boolean(isBusy || recipe?.running || recipe?.starting)
 
   useEffect(() => {
-    if (recipe?.running || recipe?.starting) {
-      connectLogs(recipe.slug)
+    if (!recipeSlug) return
+
+    if (!showingBuildLogs && (recipe?.running || recipe?.starting)) {
+      connectLogs(recipeSlug)
     } else {
-      disconnectLogs(recipe?.slug)
+      disconnectLogs(recipeSlug)
     }
-    return () => disconnectLogs(recipe?.slug)
-  }, [recipe?.running, recipe?.starting, recipe?.slug, connectLogs, disconnectLogs])
+    return () => disconnectLogs(recipeSlug)
+  }, [showingBuildLogs, recipe?.running, recipe?.starting, recipeSlug, connectLogs, disconnectLogs])
 
   useEffect(() => {
     if (!recipe) return
@@ -220,11 +227,6 @@ export default function RecipeDetail() {
   const isRemoving = removing === recipe.slug
   const isReady = recipe.ready
   const isNotebook = isNotebookRecipe(recipe)
-  const cLogs = containerLogs[recipe.slug] || []
-  const logLines = isBusy ? (buildLogs[recipe.slug] || []) : cLogs
-  const progressState = buildProgress[recipe.slug] || null
-  const runtimeMetrics = recipeMetrics[recipe.slug] || null
-  const showAppMonitor = Boolean(isBusy || recipe.running || recipe.starting)
   const registryChanged = Boolean(recipe.registry_changed)
 
   const handleRemove = () => {
@@ -237,40 +239,9 @@ export default function RecipeDetail() {
   }
 
   const handleLaunch = async () => {
-    if (recipe.requires_hf_token) {
-      const res = await fetch('/api/system/hf-token')
-      const { has_token } = await res.json()
-      if (!has_token) {
-        setShowHfModal(true)
-        return
-      }
-    }
     setLaunching(true)
     await launchRecipe(recipe.slug, deploymentSelection)
     setLaunching(false)
-  }
-
-  const handleHfSubmit = async () => {
-    if (!hfToken.trim()) return
-    setHfSaving(true)
-    setHfError('')
-    try {
-      const res = await fetch('/api/system/hf-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: hfToken.trim() }),
-      })
-      if (!res.ok) throw new Error(t('recipe.hfSaveFailed'))
-      setShowHfModal(false)
-      setHfToken('')
-      setLaunching(true)
-      await launchRecipe(recipe.slug, deploymentSelection)
-      setLaunching(false)
-    } catch {
-      setHfError(t('recipe.hfSaveFailed'))
-    } finally {
-      setHfSaving(false)
-    }
   }
 
   const handleStop = async () => {
@@ -558,11 +529,11 @@ export default function RecipeDetail() {
               <div className="h-full min-h-0">
                 <TerminalPanel
                   lines={logLines}
-                  isBuilding={isBusy}
+                  isBuilding={showingBuildLogs}
                   isUpdating={isUpdating}
                   isRunning={recipe.running || recipe.starting}
                   isReady={isReady}
-                  hasLogs={cLogs.length > 0}
+                  hasLogs={showingBuildLogs || cLogs.length > 0}
                   progressState={progressState}
                   scrollRef={scrollRef}
                   wide
@@ -590,45 +561,6 @@ export default function RecipeDetail() {
           </div>
         )}
       </div>
-
-      {showHfModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-surface-high rounded-2xl p-6 w-full max-w-md shadow-2xl border border-outline-dim">
-            <h3 className="text-lg font-bold text-text font-display m-0">{t('recipe.hfTokenRequired')}</h3>
-            <p className="text-sm text-text-dim mt-2 mb-4 leading-relaxed">
-              {t('recipe.hfTokenBody')}{' '}
-              <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                huggingface.co/settings/tokens
-              </a>.
-            </p>
-            <input
-              type="password"
-              placeholder={t('models.hf.tokenPlaceholder')}
-              value={hfToken}
-              onChange={(e) => setHfToken(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleHfSubmit()}
-              className="w-full px-4 py-2.5 rounded-xl bg-surface-low text-text border border-outline-dim text-sm font-mono focus:outline-none focus:border-primary"
-              autoFocus
-            />
-            {hfError && <p className="text-xs text-error mt-2 m-0">{hfError}</p>}
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={() => { setShowHfModal(false); setHfToken(''); setHfError('') }}
-                className="px-4 py-2 bg-transparent text-text-muted border border-outline-dim rounded-xl text-sm font-semibold cursor-pointer hover:text-text transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleHfSubmit}
-                disabled={!hfToken.trim() || hfSaving}
-                className="px-5 py-2 bg-primary text-white border-none rounded-xl text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-default"
-              >
-                {hfSaving ? t('recipe.saving') : t('recipe.saveAndLaunch')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showUninstallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -1340,7 +1272,7 @@ function DeploymentPlannerPanel({ plan, selection, onChange, onSave, saving, sys
             <textarea
               value={selection?.notes || ''}
               onChange={(event) => onChange({ ...selection, notes: event.target.value })}
-              className="min-h-[88px] rounded-2xl border border-outline-dim bg-surface px-3 py-3 text-sm text-text outline-none focus:border-primary resize-y"
+              className="min-h-22 rounded-2xl border border-outline-dim bg-surface px-3 py-3 text-sm text-text outline-none focus:border-primary resize-y"
               placeholder={t('recipe.plannerNotesPlaceholder')}
             />
           </label>
@@ -1689,34 +1621,105 @@ function CodeBlock({ label, description, value, copyTitle }) {
 function buildVllmMetricsSnippet(recipe, host) {
   if (!recipe?.tags?.includes('vllm')) return ''
 
+  const apiUrl = getApiBaseUrl(recipe.integration?.api_url, host)
   const metricsUrl = getMetricsUrl(recipe.integration?.api_url, host)
-  if (!metricsUrl) return ''
+  if (!apiUrl || !metricsUrl) return ''
+
+  const modelId = recipe.integration?.model_id || recipe.slug
 
   return [
-    `curl -s "${metricsUrl}" | awk '`,
-    '/^vllm:time_per_output_token_seconds_sum/ { decode_sum += $2 }',
-    '/^vllm:time_per_output_token_seconds_count/ { decode_count += $2 }',
-    '/^vllm:time_to_first_token_seconds_sum/ { ttft_sum += $2 }',
-    '/^vllm:time_to_first_token_seconds_count/ { ttft_count += $2 }',
-    'END {',
-    '  decode_tps = decode_sum > 0 ? decode_count / decode_sum : 0',
-    '  avg_ttft = ttft_count > 0 ? ttft_sum / ttft_count : 0',
-    '  printf "--- decode %.1f tok/s, avg TTFT %.3fs ---\\n", decode_tps, avg_ttft',
-    "}'",
+    'python3 - <<\'PY\'',
+    'import json, time, urllib.request',
+    '',
+    `API_URL = "${apiUrl}"`,
+    `METRICS_URL = "${metricsUrl}"`,
+    `MODEL = "${modelId}"`,
+    'MAX_TOKENS = 256',
+    'PROMPTS = [',
+    '    "Warmup: answer in one sentence, why do GPUs accelerate transformers?",',
+    '    "Write a Python function that deduplicates a list while preserving order.",',
+    '    "Summarize the tradeoffs between BF16 and FP8 inference for LLM serving.",',
+    '    "Draft a short troubleshooting checklist for a Docker container that exits immediately.",',
+    ']',
+    '',
+    'def post_chat(prompt):',
+    '    payload = json.dumps({',
+    '        "model": MODEL,',
+    '        "messages": [{"role": "user", "content": prompt}],',
+    '        "max_tokens": MAX_TOKENS,',
+    '        "temperature": 0,',
+    '    }).encode("utf-8")',
+    '    req = urllib.request.Request(',
+    '        f"{API_URL}/chat/completions",',
+    '        data=payload,',
+    '        headers={"Content-Type": "application/json"},',
+    '        method="POST",',
+    '    )',
+    '    with urllib.request.urlopen(req, timeout=600) as res:',
+    '        data = json.loads(res.read().decode("utf-8"))',
+    '    text = data.get("choices", [{}])[0].get("message", {}).get("content", "")',
+    '    usage = data.get("usage") or {}',
+    '    return text, int(usage.get("completion_tokens") or 0)',
+    '',
+    'def read_metrics():',
+    '    with urllib.request.urlopen(METRICS_URL, timeout=30) as res:',
+    '        return res.read().decode("utf-8", errors="replace")',
+    '',
+    'def metric_total(text, name):',
+    '    total = 0.0',
+    '    for line in text.splitlines():',
+    '        if not line or line.startswith("#"):',
+    '            continue',
+    '        head, _, value = line.partition(" ")',
+    '        metric = head.split("{", 1)[0]',
+    '        if metric == name:',
+    '            try:',
+    '                total += float(value)',
+    '            except ValueError:',
+    '                pass',
+    '    return total',
+    '',
+    'print("Warmup request (discarded)...")',
+    'post_chat(PROMPTS[0])',
+    'before = read_metrics()',
+    'wall_tokens = 0',
+    'started = time.perf_counter()',
+    'for prompt in PROMPTS[1:]:',
+    '    text, completion_tokens = post_chat(prompt)',
+    '    wall_tokens += completion_tokens or len(text.split())',
+    'elapsed = time.perf_counter() - started',
+    'after = read_metrics()',
+    '',
+    'metric_tokens = metric_total(after, "vllm:generation_tokens_total") - metric_total(before, "vllm:generation_tokens_total")',
+    'metric_decode_seconds = metric_total(after, "vllm:inter_token_latency_seconds_sum") - metric_total(before, "vllm:inter_token_latency_seconds_sum")',
+    'metric_tps = metric_tokens / metric_decode_seconds if metric_decode_seconds > 0 else 0.0',
+    'wall_tps = wall_tokens / elapsed if elapsed > 0 else 0.0',
+    '',
+    'print(f"Badge decode throughput: {metric_tps:.1f} tok/s ({metric_tokens:.0f} generation tokens / {metric_decode_seconds:.3f}s inter-token latency)")',
+    'print(f"Wallclock throughput: {wall_tps:.1f} tok/s ({wall_tokens} completion tokens / {elapsed:.2f}s, warmup discarded)")',
+    'PY',
   ].join('\n')
 }
 
-function getMetricsUrl(apiUrl, host) {
-  const baseUrl = String(apiUrl || '')
+function getApiBaseUrl(apiUrl, host) {
+  return String(apiUrl || '')
     .replace(/<NVIDIA_AI_HUB_IP>/g, host)
     .replace(/<SPARK_IP>/g, host)
     .trim()
     .replace(/\/+$/, '')
-    .replace(/\/v1\/chat\/completions$/, '')
     .replace(/\/chat\/completions$/, '')
+}
+
+function getMetricsUrl(apiUrl, host) {
+  const baseUrl = getApiBaseUrl(apiUrl, host)
+    .replace(/\/v1\/chat\/completions$/, '')
     .replace(/\/v1$/, '')
 
   return baseUrl ? `${baseUrl}/metrics` : ''
+}
+
+function hasFailedBuildLog(lines) {
+  return Array.isArray(lines) && lines.some((line) => /\[error\]|traceback|\bfailed\b/i.test(String(line || '')))
 }
 
 function Field({ label, value }) {
@@ -1902,7 +1905,7 @@ function RecipeMonitorPanel({ recipe, metrics }) {
           <tbody>
             {rows.map((row) => (
               <tr key={row.label} className="border-t border-outline-dim first:border-t-0">
-                <td className="px-4 py-3 align-top text-text-dim font-label uppercase text-[11px] tracking-[0.14em] w-[6.5rem]">{row.label}</td>
+                <td className="px-4 py-3 align-top text-text-dim font-label uppercase text-[11px] tracking-[0.14em] w-26">{row.label}</td>
                 <td className="px-4 py-3 align-top">
                   <div className="text-text font-semibold font-display">{row.value}</div>
                   <div className="text-xs text-text-dim mt-1 leading-5">{row.hint}</div>

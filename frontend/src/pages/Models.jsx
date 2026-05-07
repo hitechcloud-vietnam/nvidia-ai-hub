@@ -136,6 +136,7 @@ export default function Models() {
     () => recipeCoverage.filter((recipe) => recipe.hf_covered),
     [recipeCoverage],
   )
+  const hfTokenPath = modelOverview?.hugging_face?.token_path || hfInventory?.token_path || '/data/hf-token'
 
   const hfReadySuggestedModels = useMemo(
     () => visibleRecommendedModels.filter((item) => item.available_via_hf),
@@ -478,7 +479,7 @@ export default function Models() {
               <div className="mb-4 rounded-2xl border border-warning/20 bg-warning/10 p-4">
                 <div className="text-sm font-semibold text-text">{t('models.hf.tokenMissingTitle')}</div>
                 <div className="mt-1 text-sm leading-6 text-text-dim">
-                  {t('models.hf.tokenMissingBodyBefore')} <code className="rounded bg-surface px-1.5 py-0.5 text-xs">~/.cache/huggingface/token</code> {t('models.hf.tokenMissingBodyAfter')}
+                  {t('models.hf.tokenMissingBodyBefore')} <code className="rounded bg-surface px-1.5 py-0.5 text-xs">{hfTokenPath}</code> {t('models.hf.tokenMissingBodyAfter')}
                 </div>
                 <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
                   <input

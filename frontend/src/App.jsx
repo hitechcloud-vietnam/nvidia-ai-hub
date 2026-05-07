@@ -5,6 +5,7 @@ import { useMetrics } from './hooks/useMetrics'
 import { useRecipeMetrics } from './hooks/useRecipeMetrics'
 import { resolveStaticAssetUrl } from './desktopRuntime'
 import ThemeToggle from './components/ThemeToggle'
+import HfTokenModal from './components/HfTokenModal'
 import Catalog from './pages/Catalog'
 import { SUPPORTED_LANGUAGES } from './i18n'
 
@@ -145,11 +146,11 @@ export default function App() {
   return (
     <div className="bg-bg text-text flex h-screen overflow-hidden transition-colors duration-300">
       {/* ─── Sidebar ─── */}
-      <aside className="w-[72px] shrink-0 bg-sidebar-bg flex flex-col items-center py-4 border-r border-outline-dim">
+      <aside className="w-18 shrink-0 bg-sidebar-bg flex flex-col items-center py-4 border-r border-outline-dim">
         {/* Logo */}
         <button
           onClick={() => { clearRecipe(); setTab('catalog') }}
-          className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] flex items-center justify-center border-none cursor-pointer shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow mb-6 p-1.5"
+          className="w-11 h-11 rounded-2xl bg-linear-to-br from-[#152608] to-[#0A1404] flex items-center justify-center border-none cursor-pointer shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow mb-6 p-1.5"
           title={t('appName')}
         >
           <img src={brandMarkUrl} alt={t('appName')} className="w-full h-full" />
@@ -171,12 +172,12 @@ export default function App() {
               >
                 <Icon className="w-5 h-5" />
                 {item.id === 'running' && runningCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-primary text-primary-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 bg-primary text-primary-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
                     {runningCount}
                   </span>
                 )}
                 {item.id === 'updates' && updatesCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-warning text-warning-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 bg-warning text-warning-on text-[10px] font-bold font-label rounded-full flex items-center justify-center px-1">
                     {updatesCount}
                   </span>
                 )}
@@ -274,6 +275,7 @@ export default function App() {
           </Suspense>
         </main>
       </div>
+      <HfTokenModal />
     </div>
   )
 }
@@ -329,7 +331,7 @@ function About() {
   return (
     <div className="px-6 py-6 pb-12 animate-fadeIn">
       <div className="flex items-center gap-4 mb-8">
-        <img src={brandMarkUrl} alt={t('appName')} className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#152608] to-[#0A1404] p-2.5" />
+        <img src={brandMarkUrl} alt={t('appName')} className="w-16 h-16 rounded-2xl bg-linear-to-br from-[#152608] to-[#0A1404] p-2.5" />
         <div>
           <h1 className="text-2xl font-bold tracking-tight font-display m-0">{t('appName')}</h1>
           <p className="text-sm text-text-dim m-0 mt-1">{t('about.subtitle')}</p>
@@ -422,7 +424,7 @@ function About() {
               <button
                 type="button"
                 onClick={() => setFeatureFlag('modelManager', !(featureFlags?.modelManager === true))}
-                className={`inline-flex min-w-[96px] items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer ${featureFlags?.modelManager === true ? 'border-success/20 bg-success/10 text-success' : 'border-outline-dim bg-surface text-text-dim'}`}
+                className={`inline-flex min-w-24 items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer ${featureFlags?.modelManager === true ? 'border-success/20 bg-success/10 text-success' : 'border-outline-dim bg-surface text-text-dim'}`}
               >
                 {featureFlags?.modelManager === true ? t('about.enabled') : t('about.disabled')}
               </button>

@@ -25,6 +25,7 @@ from daemon.services.docker_service import (
     start_health_check,
     set_pending,
     clear_pending,
+    get_pending,
     ensure_runtime_env,
 )
 from daemon.models.container import DeploymentSelection
@@ -570,14 +571,24 @@ async def build_log_ws(websocket: WebSocket, slug: str):
 @router.websocket("/ws/logs/{slug}")
 async def container_log_ws(websocket: WebSocket, slug: str):
     await websocket.accept()
-    proc = None
     health_task = None
     try:
         container = None
-        for _ in range(20):
+        idle_misses = 0
+        for _ in range(240):
             container = await get_container_name(slug)
             if container:
                 break
+
+            pending = get_pending(slug)
+            if pending in {"launching", "installing"}:
+                idle_misses = 0
+                await websocket.send_text(f"[nvidia-ai-hub] Waiting for container during {pending}...")
+            else:
+                idle_misses += 1
+                if idle_misses >= 20:
+                    break
+
             await asyncio.sleep(0.5)
 
         if not container:

@@ -1,7 +1,7 @@
 name: "Qwen3.5-4B DFlash"
 slug: vllm-qwen35-4b-dflash
 version: "1.0.0"
-description: "Qwen3.5-4B with z-lab DFlash speculative decoding (chain k=15) on vLLM. Measured 132.5 tok/s on DGX Spark GB10 — 3.46× the production MTP-1 recipe (38.3 tok/s, same engine, same BF16 weights). Compose-only; runtime installs z-lab/dflash."
+description: "Qwen3.5-4B with z-lab DFlash speculative decoding (chain k=15) on vLLM. Measured ~71 tok/s avg on DGX Spark GB10 across mixed prompts (code-heavy prompts reach ~100 tok/s; open-ended prose ~55 tok/s). Compose-only; runtime installs z-lab/dflash."
 author: "Alibaba Cloud + z-lab + vLLM"
 source: "community"
 website: "https://github.com/z-lab/dflash"
@@ -31,10 +31,12 @@ docker:
   build_time_minutes: 0
   gpu: true
 status: community-verified
-release_date: "2026-04"
-tokens_per_second: 132.5
+release_date: "2026-04-30"
 integration:
   api_url: "http://<SPARK_IP>:9001/v1"
   model_id: "Qwen/Qwen3.5-4B"
   api_key: "not-needed"
   curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"Qwen/Qwen3.5-4B\", \"messages\": [{\"role\": \"user\", \"content\": \"Write a quicksort in Python.\"}], \"max_tokens\": 512, \"temperature\": 0}'"
+tokens_per_second: 71.0
+
+requires_hf_token: true
