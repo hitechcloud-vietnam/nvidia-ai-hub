@@ -99,17 +99,6 @@ services:
         "
         fi
 
-        # ── Patch: extend startup_sync timeout ──────────────────────────────
-        # prefix_cache.startup_sync() defaults to a 10 s wait for the daemon's
-        # "[snap] slots=" reply, but on a cold install the test_dflash daemon
-        # is still loading the 16 GB Q4_K_M GGUF into VRAM at that point and
-        # can't reply in time → FastAPI startup throws asyncio.TimeoutError
-        # and the API server crash-loops. Bump to 300 s. Idempotent.
-        if grep -q 'await self._await_reply("\[snap\] slots=")$' /app/src/scripts/prefix_cache.py 2>/dev/null; then
-          sed -i 's|await self._await_reply("\[snap\] slots=")|await self._await_reply("[snap] slots=", timeout=300)|' /app/src/scripts/prefix_cache.py
-          echo "[lucebox] Patched startup_sync timeout to 300 s."
-        fi
-
         # ── Launch ───────────────────────────────────────────────────────────
         echo "[lucebox] Starting DFlash server (budget=22, max-ctx=16384)..."
         cd /app/src

@@ -1,24 +1,27 @@
-name: "MiniMax-M2.7 (UD-Q3_K_S)"
+name: "MiniMax-M2.7 REAP AutoRound"
 slug: llamacpp-minimax-m27-q3ks
-version: "1.0.0"
-description: "MiniMax-M2.7 229B MoE (10B active), Q3_K_S GGUF via llama.cpp. OpenAI-compatible API. 21 tok/s on DGX Spark."
+version: "1.0.1"
+description: "MiniMax-M2.7 REAP-pruned 172B MoE (10B active), AutoRound W4A16 served with native vLLM MiniMax tool and reasoning parsers. Single-DGX Spark recipe without proxy or chat-template patches."
 author: "MiniMax AI"
 source: "community"
 website: "https://www.minimax.io"
-upstream: "https://huggingface.co/unsloth/MiniMax-M2.7-GGUF"
+upstream: "https://huggingface.co/MJPansa/MiniMax-M2.7-REAP-172B-A10B-AutoRound-W4A16"
 category: llm
 tags:
   - llm
   - moe
-  - gguf
-  - llama-cpp
+  - vllm
+  - autoround
+  - w4a16
+  - reap
   - minimax
   - reasoning
+  - tool-use
 logo: "/logos/minimax.png"
 requirements:
-  min_memory_gb: 110
+  min_memory_gb: 100
   recommended_memory_gb: 120
-  disk_gb: 110
+  disk_gb: 95
   cuda_compute: "12.1"
 ui:
   type: api-only
@@ -26,10 +29,10 @@ ui:
   path: "/v1/models"
 docker:
   build: false
-  build_time_minutes: 0
+  build_time_minutes: 5
   gpu: true
 status: community-verified
-release_date: "2026-04"
+release_date: "2026-04-11"
 tested_on:
   dgx_os: "7.2"
   date: "2026-04-29"
@@ -38,3 +41,4 @@ integration:
   model_id: "minimax-m2.7"
   api_key: "not-needed"
   curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"minimax-m2.7\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"
+tokens_per_second: 29

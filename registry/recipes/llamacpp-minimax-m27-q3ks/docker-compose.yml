@@ -1,72 +1,44 @@
-services:
-  llama-server:
-    image: ghcr.io/ggml-org/llama.cpp:full-cuda13-b8953
-    container_name: nvidia-ai-hub-llamacpp-minimax-m27-q3ks
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        if [ ! -f /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00003-of-00003.gguf ]; then
-          echo "[nvidia-ai-hub] Downloading MiniMax-M2.7 UD-Q3_K_S (~94 GB)..."
-          hf download unsloth/MiniMax-M2.7-GGUF --include 'UD-Q3_K_S/*' --local-dir /models
-        fi
-        exec /app/llama-server "$$@"
-      - --
-    command:
-      - -m
-      - /models/UD-Q3_K_S/MiniMax-M2.7-UD-Q3_K_S-00001-of-00003.gguf
-      - -ngl
-      - "999"
-      - -c
-      - "131072"
-      - --host
-      - "0.0.0.0"
-      - --port
-      - "8080"
-      - --alias
-      - minimax-m2.7
-      - -fa
-      - "on"
-      - -ctk
-      - q4_0
-      - -ctv
-      - q4_0
-      - --jinja
-      - --chat-template-file
-      - /config/minimax-m2-chat-template.jinja
-      - --temp
-      - "1.0"
-      - --top-p
-      - "0.95"
-      - --top-k
-      - "40"
-      - --min-p
-      - "0.01"
-      - --no-mmap
-      - --cont-batching
-      - -np
-      - "1"
-      - -t
-      - "16"
-      - -tb
-      - "16"
-    ports:
-      - "9001:8080"
-    volumes:
-      - llamacpp-minimax-m27-models:/models
-      - ./minimax-m2-chat-template.jinja:/config/minimax-m2-chat-template.jinja:ro
-    environment:
-      - GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
-      - HF_TOKEN=${HF_TOKEN:-}
-      - PYTHONUNBUFFERED=1
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    restart: unless-stopped
-
-volumes:
-  llamacpp-minimax-m27-models:
+name: "MiniMax-M2.7 REAP AutoRound"
+slug: llamacpp-minimax-m27-q3ks
+version: "1.0.1"
+description: "MiniMax-M2.7 REAP-pruned 172B MoE (10B active), AutoRound W4A16 served with native vLLM MiniMax tool and reasoning parsers. Single-DGX Spark recipe without proxy or chat-template patches."
+author: "MiniMax AI"
+source: "community"
+website: "https://www.minimax.io"
+upstream: "https://huggingface.co/MJPansa/MiniMax-M2.7-REAP-172B-A10B-AutoRound-W4A16"
+category: llm
+tags:
+  - llm
+  - moe
+  - vllm
+  - autoround
+  - w4a16
+  - reap
+  - minimax
+  - reasoning
+  - tool-use
+logo: "/logos/minimax.png"
+requirements:
+  min_memory_gb: 100
+  recommended_memory_gb: 120
+  disk_gb: 95
+  cuda_compute: "12.1"
+ui:
+  type: api-only
+  port: 9001
+  path: "/v1/models"
+docker:
+  build: false
+  build_time_minutes: 5
+  gpu: true
+status: community-verified
+release_date: "2026-04-11"
+tested_on:
+  dgx_os: "7.2"
+  date: "2026-04-29"
+integration:
+  api_url: "http://<SPARK_IP>:9001/v1"
+  model_id: "minimax-m2.7"
+  api_key: "not-needed"
+  curl_example: "curl http://<SPARK_IP>:9001/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"minimax-m2.7\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'"
+tokens_per_second: 29
