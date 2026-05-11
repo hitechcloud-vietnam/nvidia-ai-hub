@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Detect dependency change scope
         id: changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         with:
           filters: |
             python:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Setup Python
         if: ${{ steps.changes.outputs.python == 'true' || steps.changes.outputs.actions == 'true' || steps.changes.outputs.dependabot == 'true' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -59,7 +59,7 @@ jobs:
 
       - name: Setup Node.js
         if: ${{ steps.changes.outputs.frontend == 'true' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
